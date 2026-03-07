@@ -6,6 +6,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getAppUrl } from "@/lib/utils";
 import { leadSubmitSchema } from "@/lib/validations";
 
+export const runtime = "nodejs";
+
 function parseNumber(input: FormDataEntryValue | null): number | undefined {
   if (!input || typeof input !== "string" || input.length === 0) return undefined;
   const num = Number(input);
@@ -61,7 +63,7 @@ export async function POST(request: Request) {
     });
 
     const admin = createAdminClient();
-    const { data: contractor } = await admin
+    const { data: contractor, error: contractorError } = await admin
       .from("contractor_profile")
       .select(
         "org_id,business_name,public_slug,phone,email,notification_lead_sms,notification_lead_email"
@@ -69,14 +71,27 @@ export async function POST(request: Request) {
       .eq("public_slug", payload.contractorSlug)
       .single();
 
+    if (contractorError) {
+      throw contractorError;
+    }
+
     if (!contractor) {
       return NextResponse.json({ error: "Contractor slug not found." }, { status: 404 });
     }
 
+    console.log("lead-submit contractor profile:", {
+      orgId: contractor.org_id,
+      contractorSlug: contractor.public_slug,
+      hasPhone: Boolean(contractor.phone),
+      hasEmail: Boolean(contractor.email),
+      notificationLeadSms: contractor.notification_lead_sms,
+      notificationLeadEmail: contractor.notification_lead_email
+    });
+
     const orgId = contractor.org_id as string;
     const geocoded = await geocodeAddressIfNeeded(payload.addressFull, payload.lat, payload.lng);
 
-    const { data: customer } = await admin
+    const { data: customer, error: customerError } = await admin
       .from("customers")
       .insert({
         org_id: orgId,
@@ -86,6 +101,15 @@ export async function POST(request: Request) {
       })
       .select("id")
       .single();
+
+    if (customerError || !customer) {
+      throw customerError || new Error("Failed to create customer.");
+    }
+
+    console.log("lead-submit customer created:", {
+      customerId: customer.id,
+      orgId
+    });
 
     const { data: lead, error: leadError } = await admin
       .from("leads")
@@ -111,6 +135,7 @@ export async function POST(request: Request) {
     }
 
     const leadId = lead.id as string;
+    console.log("lead-submit lead created:", { leadId, orgId });
     const photos = formData.getAll("photos").filter((item): item is File => item instanceof File);
     const uploadedPaths: { path: string; url: string }[] = [];
 
@@ -167,6 +192,13 @@ export async function POST(request: Request) {
 
     const leadLink = `${getAppUrl()}/app/leads/${leadId}`;
     const serviceText = payload.services.join(", ");
+
+    if (!contractor.notification_lead_email && contractor.email) {
+      console.warn("lead-submit contractor email notification disabled:", {
+        contractorSlug: contractor.public_slug,
+        contractorEmail: contractor.email
+      });
+    }
 
     const contractorNotifications = await notifyContractor({
       smsEnabled: contractor.notification_lead_sms as boolean,

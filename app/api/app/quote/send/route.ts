@@ -7,6 +7,8 @@ import { getAppUrl } from "@/lib/utils";
 import { getMonthlyUsage, incrementUsageOnQuoteSend } from "@/lib/usage";
 import { sendQuoteSchema } from "@/lib/validations";
 
+export const runtime = "nodejs";
+
 function makePublicId(): string {
   return randomBytes(6).toString("base64url");
 }

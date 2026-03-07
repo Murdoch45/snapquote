@@ -60,20 +60,40 @@ export async function sendSms(to: string, body: string): Promise<boolean> {
 }
 
 export async function sendEmail(input: SendEmailInput): Promise<boolean> {
+  const fromEmail = process.env.RESEND_FROM_EMAIL;
+
   if (!resendConfigured) {
     console.warn("Resend sendEmail skipped: RESEND_API_KEY or RESEND_FROM_EMAIL missing.");
     return false;
   }
+
+  console.log("Resend sendEmail attempt:", {
+    hasApiKey: Boolean(process.env.RESEND_API_KEY),
+    from: fromEmail ?? null,
+    to: input.to,
+    subject: input.subject
+  });
+
+  if (fromEmail?.endsWith("@resend.dev")) {
+    console.warn(
+      "Resend sendEmail warning: using a resend.dev sender only allows testing to the account owner's email."
+    );
+  }
+
   try {
     const result = await getResendClient().emails.send({
-      from: process.env.RESEND_FROM_EMAIL as string,
+      from: fromEmail as string,
       to: input.to,
       subject: input.subject,
       text: input.text,
       html: input.html
     });
+    if (result.error) {
+      console.error("Resend sendEmail API error:", result.error);
+      return false;
+    }
     console.log("Resend sendEmail result:", result);
-    return true;
+    return Boolean(result.data?.id);
   } catch (error) {
     console.error("Resend sendEmail error:", error);
     return false;
@@ -156,7 +176,10 @@ export async function notifyContractor(opts: {
     });
     if (ok) sent.push("email");
   } else {
-    console.log("notifyContractor email skipped:", {
+    const log = opts.email
+      ? console.warn
+      : console.log;
+    log("notifyContractor email skipped:", {
       emailEnabled: opts.emailEnabled,
       hasEmail: Boolean(opts.email)
     });

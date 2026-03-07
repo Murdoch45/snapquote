@@ -70,7 +70,8 @@ export async function ensureUserHasOrganization(opts: {
     business_name: opts.businessName,
     public_slug: slug,
     phone: opts.phone,
-    email: opts.email
+    email: opts.email,
+    notification_lead_email: Boolean(opts.email)
   });
   if (profileError) throw profileError;
 

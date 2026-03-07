@@ -7,6 +7,8 @@ type Props = {
   params: Promise<{ publicId: string }>;
 };
 
+export const runtime = "nodejs";
+
 export async function POST(_request: Request, { params }: Props) {
   const { publicId } = await params;
   const admin = createAdminClient();
