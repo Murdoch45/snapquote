@@ -48,14 +48,20 @@ export async function sendSms(to: string, body: string): Promise<boolean> {
 
 export async function sendEmail(input: SendEmailInput): Promise<boolean> {
   if (!resendConfigured) return false;
-  await getResendClient().emails.send({
-    from: process.env.RESEND_FROM_EMAIL as string,
-    to: input.to,
-    subject: input.subject,
-    text: input.text,
-    html: input.html
-  });
-  return true;
+  try {
+    const result = await getResendClient().emails.send({
+      from: process.env.RESEND_FROM_EMAIL as string,
+      to: input.to,
+      subject: input.subject,
+      text: input.text,
+      html: input.html
+    });
+    console.log("Resend sendEmail result:", result);
+    return true;
+  } catch (error) {
+    console.error("Resend sendEmail error:", error);
+    return false;
+  }
 }
 
 export async function notifyCustomer(opts: {
