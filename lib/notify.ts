@@ -97,8 +97,12 @@ export async function notifyContractor(opts: {
 }): Promise<("sms" | "email")[]> {
   const sent: ("sms" | "email")[] = [];
   if (opts.smsEnabled && opts.phone) {
-    const ok = await sendSms(opts.phone, opts.smsBody);
-    if (ok) sent.push("sms");
+    if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN) {
+      console.warn("Twilio SMS skipped: missing TWILIO_ACCOUNT_SID or TWILIO_AUTH_TOKEN.");
+    } else {
+      const ok = await sendSms(opts.phone, opts.smsBody);
+      if (ok) sent.push("sms");
+    }
   }
   if (opts.emailEnabled && opts.email) {
     const ok = await sendEmail({
