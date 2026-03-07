@@ -52,6 +52,14 @@ export async function POST(request: Request) {
       description: String(formData.get("description") ?? "")
     });
 
+    console.log("lead-submit parsed payload:", {
+      contractorSlug: payload.contractorSlug,
+      hasCustomerPhone: Boolean(payload.customerPhone),
+      hasCustomerEmail: Boolean(payload.customerEmail),
+      customerEmail: payload.customerEmail ?? null,
+      servicesCount: payload.services.length
+    });
+
     const admin = createAdminClient();
     const { data: contractor } = await admin
       .from("contractor_profile")
@@ -160,7 +168,7 @@ export async function POST(request: Request) {
     const leadLink = `${getAppUrl()}/app/leads/${leadId}`;
     const serviceText = payload.services.join(", ");
 
-    await notifyContractor({
+    const contractorNotifications = await notifyContractor({
       smsEnabled: contractor.notification_lead_sms as boolean,
       emailEnabled: contractor.notification_lead_email as boolean,
       phone: contractor.phone as string | null,
@@ -169,17 +177,20 @@ export async function POST(request: Request) {
       emailSubject: "New SnapQuote lead",
       emailBody: `New quote request: ${serviceText} at ${payload.addressFull}. Open: ${leadLink}`
     });
+    console.log("lead-submit contractor notifications:", contractorNotifications);
 
-    await notifyCustomer({
+    const customerNotifications = await notifyCustomer({
       phone: payload.customerPhone,
       email: payload.customerEmail,
       smsBody: `We received your request. You will get your estimate shortly. - ${contractor.business_name}`,
       emailSubject: `${contractor.business_name} received your quote request`,
       emailBody: `We received your request and will send your estimate shortly. - ${contractor.business_name}`
     });
+    console.log("lead-submit customer notifications:", customerNotifications);
 
     return NextResponse.json({ leadId, received: true });
   } catch (error) {
+    console.error("lead-submit failed:", error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Lead submission failed." },
       { status: 400 }

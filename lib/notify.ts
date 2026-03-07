@@ -37,17 +37,33 @@ function getResendClient(): Resend {
 }
 
 export async function sendSms(to: string, body: string): Promise<boolean> {
-  if (!twilioConfigured) return false;
-  await getTwilioClient().messages.create({
-    to,
-    from: process.env.TWILIO_FROM_NUMBER as string,
-    body
-  });
-  return true;
+  if (!twilioConfigured) {
+    console.warn("Twilio sendSms skipped: Twilio is not fully configured.");
+    return false;
+  }
+  try {
+    const result = await getTwilioClient().messages.create({
+      to,
+      from: process.env.TWILIO_FROM_NUMBER as string,
+      body
+    });
+    console.log("Twilio sendSms result:", {
+      sid: result.sid,
+      status: result.status,
+      to
+    });
+    return true;
+  } catch (error) {
+    console.error("Twilio sendSms error:", error);
+    return false;
+  }
 }
 
 export async function sendEmail(input: SendEmailInput): Promise<boolean> {
-  if (!resendConfigured) return false;
+  if (!resendConfigured) {
+    console.warn("Resend sendEmail skipped: RESEND_API_KEY or RESEND_FROM_EMAIL missing.");
+    return false;
+  }
   try {
     const result = await getResendClient().emails.send({
       from: process.env.RESEND_FROM_EMAIL as string,
@@ -70,20 +86,34 @@ export async function notifyCustomer(opts: {
   smsBody: string;
   emailSubject: string;
   emailBody: string;
-}): Promise<"sms" | "email" | "none"> {
+}): Promise<("sms" | "email")[]> {
+  console.log("notifyCustomer called:", {
+    hasPhone: Boolean(opts.phone),
+    hasEmail: Boolean(opts.email),
+    email: opts.email ?? null,
+    subject: opts.emailSubject
+  });
+
+  const sent: ("sms" | "email")[] = [];
   if (opts.phone) {
-    const sent = await sendSms(opts.phone, opts.smsBody);
-    if (sent) return "sms";
+    const smsSent = await sendSms(opts.phone, opts.smsBody);
+    if (smsSent) sent.push("sms");
+  } else {
+    console.log("notifyCustomer SMS skipped: no phone provided.");
   }
   if (opts.email) {
-    const sent = await sendEmail({
+    const emailSent = await sendEmail({
       to: opts.email,
       subject: opts.emailSubject,
       text: opts.emailBody
     });
-    if (sent) return "email";
+    if (emailSent) sent.push("email");
+  } else {
+    console.log("notifyCustomer email skipped: no email provided.");
   }
-  return "none";
+
+  console.log("notifyCustomer completed:", { sent });
+  return sent;
 }
 
 export async function notifyContractor(opts: {
@@ -95,6 +125,15 @@ export async function notifyContractor(opts: {
   emailSubject: string;
   emailBody: string;
 }): Promise<("sms" | "email")[]> {
+  console.log("notifyContractor called:", {
+    smsEnabled: opts.smsEnabled,
+    emailEnabled: opts.emailEnabled,
+    hasPhone: Boolean(opts.phone),
+    hasEmail: Boolean(opts.email),
+    email: opts.email ?? null,
+    subject: opts.emailSubject
+  });
+
   const sent: ("sms" | "email")[] = [];
   if (opts.smsEnabled && opts.phone) {
     if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN) {
@@ -103,6 +142,11 @@ export async function notifyContractor(opts: {
       const ok = await sendSms(opts.phone, opts.smsBody);
       if (ok) sent.push("sms");
     }
+  } else {
+    console.log("notifyContractor SMS skipped:", {
+      smsEnabled: opts.smsEnabled,
+      hasPhone: Boolean(opts.phone)
+    });
   }
   if (opts.emailEnabled && opts.email) {
     const ok = await sendEmail({
@@ -111,6 +155,12 @@ export async function notifyContractor(opts: {
       text: opts.emailBody
     });
     if (ok) sent.push("email");
+  } else {
+    console.log("notifyContractor email skipped:", {
+      emailEnabled: opts.emailEnabled,
+      hasEmail: Boolean(opts.email)
+    });
   }
+  console.log("notifyContractor completed:", { sent });
   return sent;
 }
