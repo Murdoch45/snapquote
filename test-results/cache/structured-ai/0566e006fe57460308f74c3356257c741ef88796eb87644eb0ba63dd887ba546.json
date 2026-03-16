@@ -1,0 +1,133 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T19:46:18.394Z",
+  "promptHash": "7327be0ea5ce0dd14c0d6d2234f6de13075d847b30da7577b47ca00ef4b5c485",
+  "keyHash": "0566e006fe57460308f74c3356257c741ef88796eb87644eb0ba63dd887ba546",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Landscaping / Installation"
+    ],
+    "address": "2070 King College Rd, Bristol, TN 37620, USA",
+    "addressPlaceId": "ChIJ32Mu-bV2UIgR8C_BrBTmahI",
+    "lat": 36.5870892,
+    "lng": -82.1329154,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Landscaping / Installation",
+        "answers": {
+          "landscape_access": "Easy",
+          "landscape_area_size": "Most of front or backyard (~1,500-4,000 sq ft)",
+          "landscape_job_type": "Major redesign",
+          "landscape_materials": [
+            "Mixed materials",
+            "Mostly mulch or rock",
+            "Mostly plants",
+            "Sod or turf"
+          ],
+          "landscape_work_type": [
+            "Other",
+            "Rock or mulch installation",
+            "Sod or lawn installation",
+            "Yard makeover"
+          ],
+          "landscape_work_type_other_text": "premium material preference for landscape work type 17"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Major front/back yard redesign with mixed materials (sod, mulch/rock, plants) over a large portion of yard.",
+    "condition": "moderate",
+    "access": "easy",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": true,
+    "materialHint": "mixed (sod, mulch, rock, plants)",
+    "inferredScope": "yard_makeover_major",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "large_area removal and installation",
+      "mixed materials (sod, mulch, rock, plants)",
+      "major redesign complexity"
+    ],
+    "estimatorNotes": [
+      "Customer selected major redesign and indicated most of yard (1,500-4,000 sqft).",
+      "Satellite shows ample backyard/front yard space consistent with selection.",
+      "Access is reported easy; no obvious obstructions in imagery."
+    ],
+    "serviceSignals": {
+      "Landscaping / Installation": {
+        "serviceType": "Landscaping / Installation",
+        "jobSubtype": "yard_makeover",
+        "jobSubtypeLabel": "Yard Makeover / Major Redesign",
+        "workType": "install",
+        "fallbackFamily": "yard_area",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "landscape_area",
+        "sizeBucket": "large",
+        "estimatedQuantity": 3000,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "direct",
+        "materialClass": "mixed",
+        "materialSubtype": "sod_mulch_rock_plants",
+        "conditionClass": "overhaul_needed",
+        "severityClass": "major",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 70,
+        "aiConfidenceReasons": [
+          "Customer explicitly selected major redesign and provided area band.",
+          "Satellite and lot metrics support a large yard scope, but material mix and exact layout require manual review."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Estimate uses midpoint of provided area band (1,500-4,000 sqft) for quantity.",
+          "Customer indicated premium material preference in other-text; recommend manual review for cost drivers."
+        ],
+        "summary": "Major yard makeover across most of front/back yard (~3,000 sqft) with mixed materials (sod, mulch/rock, planting)."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about scope and materials.",
+      "Property context and imagery support a large yard makeover but details need manual confirmation."
+    ]
+  }
+}

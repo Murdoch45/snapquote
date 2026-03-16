@@ -1,0 +1,146 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T00:10:32.606Z",
+  "promptHash": "2b507d617e1322ac34d2faa60462d5b7b5d180e5859d1b2bef69edb419c0b979",
+  "keyHash": "f92913e868d945f45ec525784391d222fcc251f01675be99d4615c9dd5417747",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Other"
+    ],
+    "address": "1301 E 23rd St, Cheyenne, WY 82001, USA",
+    "addressPlaceId": "ChIJi8RhiOM6b4cRMw7GhSSaufo",
+    "lat": 41.1442781,
+    "lng": -104.8044048,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Other",
+        "answers": {
+          "other_access": "Difficult",
+          "other_property_type": "Large home",
+          "other_size": "Not sure",
+          "other_work_type": "Removal"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer selected Other (Removal) with difficult access; satellite and photo show typical suburban lot with concrete driveway and walkway. Recommend flat hardscape cleaning/removal scope focused on driveway.",
+    "condition": "light",
+    "access": "difficult",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "concrete",
+    "inferredScope": "driveway cleaning/removal",
+    "treeSize": "small",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 68,
+    "pricingDrivers": [
+      "access_difficulty",
+      "driveway_area",
+      "removal_requested"
+    ],
+    "estimatorNotes": [
+      "Customer chose 'Other' and indicated removal; interpret as junk/removal related to driveway/hardscape area.",
+      "Satellite shows a single concrete driveway and short walkway. Photo is a test image; satellite used for surface sizing."
+    ],
+    "serviceSignals": {
+      "Pressure Washing": {
+        "serviceType": "Pressure Washing",
+        "jobSubtype": "driveway",
+        "jobSubtypeLabel": "Driveway",
+        "workType": "clean",
+        "fallbackFamily": "flat_hardscape",
+        "surfaceFamily": "flat_hardscape",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "large",
+        "estimatedQuantity": 2100,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "concrete",
+        "materialSubtype": "standard",
+        "conditionClass": "light_soiling",
+        "severityClass": "minor",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": false,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 64,
+        "aiConfidenceReasons": [
+          "Questionnaire indicates 'Other' removal with uncertain size and difficult access.",
+          "Satellite imagery gives clear driveway area estimate but customer size not provided.",
+          "Only one user photo provided is a generic test image."
+        ],
+        "consistencyScore": 72,
+        "notes": [
+          "Treat as combined cleaning + removal job due to customer's 'Removal' selection.",
+          "Manual review recommended to confirm haul-away requirements and access constraints."
+        ],
+        "summary": "Inferred driveway cleaning with removal/haul-away on a single-story suburban lot; difficult access per customer.",
+        "quotedSurfaces": {
+          "driveway": 2100
+        },
+        "surfaceDetections": [
+          {
+            "surface_type": "driveway",
+            "surface_area_sqft": 2100,
+            "confidence": 0.84
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "quotedSurfaces": {
+      "driveway": 2100
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 60,
+    "scopeMatchConfidence": 78,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1,
+    "estateScore": 4200,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire provided 'Other' and 'Removal' but no explicit quantities.",
+      "Satellite imagery supports driveway area estimate; photo is non-diagnostic test image."
+    ]
+  }
+}

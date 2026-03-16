@@ -1,0 +1,135 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T06:16:28.939Z",
+  "promptHash": "25d7efec6a4050efbff38d9b3bee565df27fac7fac8bf76d2dfa86bfd69f331d",
+  "keyHash": "e6441f562b52ef5ffab4cbc7331a36089642cb82f55889938e7825b3ac91ca83",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Exterior Painting"
+    ],
+    "address": "935 Burnside Ave, Los Angeles, CA 90036, USA",
+    "addressPlaceId": "ChIJ_1o_zx65woAR28Q5Yc4qZdE",
+    "lat": 34.058076,
+    "lng": -118.3514135,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Exterior Painting",
+        "answers": {
+          "painting_access": "Not sure",
+          "painting_condition": "Not sure",
+          "painting_scope": "One side or small area",
+          "painting_surface_type": "Brick or masonry",
+          "painting_target": "Trim, doors, or garage only"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Small exterior painting request for trim/doors/garage on brick/masonry, one side or small area.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "brick/masonry",
+    "inferredScope": "Trim, doors, or garage area on one side",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "masonry_surface",
+      "small_scope",
+      "access_easy"
+    ],
+    "estimatorNotes": [
+      "Customer selected trim/doors/garage on brick and indicated small area; photos and satellite show a standard residential setting."
+    ],
+    "serviceSignals": {
+      "Exterior Painting": {
+        "serviceType": "Exterior Painting",
+        "jobSubtype": "trim_doors_garage",
+        "jobSubtypeLabel": "Trim/doors/garage",
+        "workType": "service",
+        "fallbackFamily": "exterior_finish_surface",
+        "surfaceFamily": "vertical_exterior_surface",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "small",
+        "estimatedQuantity": 1,
+        "quantityUnit": "count",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "masonry",
+        "materialSubtype": "brick",
+        "conditionClass": "unknown",
+        "severityClass": "minor",
+        "obstructionLevel": "low",
+        "heightClass": "single_story",
+        "stories": 1,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 70,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly requested trim/doors/garage on brick.",
+          "Scope described as one side/small area, supported by property photos and satellite."
+        ],
+        "consistencyScore": 80,
+        "notes": [
+          "Expect typical prep and minor patching on masonry trim/garage area."
+        ],
+        "summary": "Small exterior paint service focused on trim/doors/garage on brick/masonry."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 400,
+        "confidence": 0.8
+      },
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 150,
+        "confidence": 0.72
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 400,
+      "walkway": 150
+    },
+    "surfaceDetectionConfidence": 70,
+    "satelliteClarity": 85,
+    "imageQuality": 60,
+    "scopeMatchConfidence": 75,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about trim/doors/garage.",
+      "Imagery and property context support a small, single-side exterior painting scope."
+    ]
+  }
+}

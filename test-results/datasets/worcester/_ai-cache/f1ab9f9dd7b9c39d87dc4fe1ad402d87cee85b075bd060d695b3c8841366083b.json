@@ -1,0 +1,122 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T21:23:13.677Z",
+  "promptHash": "a750bad455c366548ddd181f1bb59ef7cb8b875efe47e72ac3aa364e6049195a",
+  "keyHash": "f1ab9f9dd7b9c39d87dc4fe1ad402d87cee85b075bd060d695b3c8841366083b",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Roofing"
+    ],
+    "address": "22 Bittersweet Blvd, Worcester, MA 01607, USA",
+    "addressPlaceId": "ChIJoc9sdbUF5IkRMHNxoI9HMCA",
+    "lat": 42.228719,
+    "lng": -71.8067966,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Roofing",
+        "answers": {
+          "roofing_access": "Easy",
+          "roofing_problem": "Storm or major damage",
+          "roofing_scope": "One area or slope",
+          "roofing_type": "Shingle",
+          "roofing_work_type": "Leak repair"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer selected shingle roof leak repair for one area/slope after storm damage; easy access.",
+    "condition": "moderate",
+    "access": "easy",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "shingle",
+    "inferredScope": "single_slope_repair",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "roofing_type_shingle",
+      "storm_damage",
+      "single_slope_repair"
+    ],
+    "estimatorNotes": [
+      "Customer explicitly selected leak repair on shingle roof with storm/major damage.",
+      "Satellite imagery confirms a two-story townhouse style roof with easy driveway access."
+    ],
+    "serviceSignals": {
+      "Roofing": {
+        "serviceType": "Roofing",
+        "jobSubtype": "leak_repair",
+        "jobSubtypeLabel": "Leak repair",
+        "workType": "repair",
+        "fallbackFamily": "roof_like_surface",
+        "surfaceFamily": "roof_like_surface",
+        "targetObjectFamily": "roof",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 1600,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "shingle",
+        "materialSubtype": "asphalt_shingle",
+        "conditionClass": "storm_damage",
+        "severityClass": "moderate",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "two_story",
+        "stories": 2,
+        "slopeClass": "some_slope",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": "gable",
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 76,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly requested leak repair and identified shingle roof.",
+          "Imagery supports residential shingle roof and single-area scope."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Estimate assumes localized repair to one slope/area - full reroof not requested.",
+          "Recommend on-site inspection to confirm extent of storm damage and decking rot."
+        ],
+        "summary": "Localized shingle roof leak repair on one slope after storm; accessible, moderate severity."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "asphalt",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Satellite imagery and property data support a medium residential shingle roof and easy access."
+    ]
+  }
+}

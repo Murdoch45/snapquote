@@ -8,12 +8,14 @@ type PhotoUploaderProps = {
   files: File[];
   setFiles: (files: File[]) => void;
   maxFiles?: number;
+  required?: boolean;
 };
 
 export function PhotoUploader({
   files,
   setFiles,
-  maxFiles = 5
+  maxFiles = 10,
+  required = false
 }: PhotoUploaderProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -38,7 +40,9 @@ export function PhotoUploader({
     <div className="space-y-3">
       <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4">
         <p className="mb-3 text-sm text-gray-600">
-          Add photos for more accurate estimate (up to {maxFiles}).
+          {required
+            ? `Upload at least 1 photo for a quote request (up to ${maxFiles}).`
+            : `Add photos for more accurate estimate (up to ${maxFiles}).`}
         </p>
         <input
           ref={inputRef}
@@ -76,6 +80,9 @@ export function PhotoUploader({
           ))}
         </div>
       )}
+      {required && files.length === 0 ? (
+        <p className="text-xs text-red-600">At least one photo is required before submission.</p>
+      ) : null}
     </div>
   );
 }

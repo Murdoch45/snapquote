@@ -1,0 +1,169 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T19:37:46.168Z",
+  "promptHash": "4c4283bea8661342b070537ddc248c3483718bc592c270e3c6a2b516926bc83f",
+  "keyHash": "688582e5c00eb5f6a03208ea36b2cd090abf4dccce56161eb14469662582f33b",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Pressure Washing"
+    ],
+    "address": "1216 Norway St, Bristol, VA 24201, USA",
+    "addressPlaceId": "ChIJSQAVgxN2UIgRc62c8VJioW0",
+    "lat": 36.5970084,
+    "lng": -82.1960856,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Pressure Washing",
+        "answers": {
+          "pressure_washing_access": "Some obstacles",
+          "pressure_washing_condition": "Not sure",
+          "pressure_washing_size": "Whole property / very large area (3,000+ sq ft)",
+          "pressure_washing_target": [
+            "Fence",
+            "House exterior",
+            "Other",
+            "Roof"
+          ],
+          "pressure_washing_target_other_text": "custom scope requested for pressure washing target 82"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requested whole-property pressure washing including house exterior, fence, and roof; custom scope requires review. Large flat paved areas and walkways visible from satellite.",
+    "condition": "moderate",
+    "access": "moderate",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": true,
+    "materialHint": "mixed (concrete/asphalt/vertical surfaces)",
+    "inferredScope": "whole_property_pressure_wash_including_house_roof_and_fence",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "whole property scope",
+      "roof cleaning",
+      "vertical house siding",
+      "large paved area cleaning",
+      "custom scope requested"
+    ],
+    "estimatorNotes": [
+      "Customer selected multiple targets including house exterior, roof, and fence and indicated whole-property size (3000+ sqft).",
+      "Satellite shows large paved area and walkways; photo provided is a test image.",
+      "Custom scope text present; recommend manual review for roof access and vertical surface prep."
+    ],
+    "serviceSignals": {
+      "Pressure Washing": {
+        "serviceType": "Pressure Washing",
+        "jobSubtype": "house_exterior_roof_fence_mixed",
+        "jobSubtypeLabel": "House exterior, roof, fence (custom)",
+        "workType": "clean",
+        "fallbackFamily": "mixed_custom",
+        "surfaceFamily": "mixed_custom",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "very_large",
+        "estimatedQuantity": 3000,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "mixed",
+        "materialSubtype": "mixed_vertical_and_flat",
+        "conditionClass": "unknown",
+        "severityClass": "moderate",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "moderate",
+        "heightClass": "mixed_height",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": true,
+        "deckPresent": false,
+        "roofType": "unknown",
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 64,
+        "aiConfidenceReasons": [
+          "Questionnaire indicates whole-property and multiple targets including roof and fence.",
+          "No explicit square footage provided beyond 3,000+; quantities inferred from property area and satellite.",
+          "Photo is a generic test image, reducing visual confidence."
+        ],
+        "consistencyScore": 68,
+        "notes": [
+          "Customer explicitly selected house exterior, roof, and fence and provided custom text.",
+          "Satellite indicates large paved area ~2100 sqft and additional walkways; include vertical surfaces for siding and fence.",
+          "Manual review advised for roof cleaning safety and exact vertical surface area."
+        ],
+        "summary": "Custom whole-property pressure washing including house exterior, roof, fence, and large paved areas; manual review recommended.",
+        "quotedSurfaces": {
+          "driveway": 2100,
+          "walkway": 250
+        },
+        "surfaceDetections": [
+          {
+            "surface_type": "driveway",
+            "surface_area_sqft": 2100,
+            "confidence": 0.84
+          },
+          {
+            "surface_type": "walkway",
+            "surface_area_sqft": 250,
+            "confidence": 0.7
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      },
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 250,
+        "confidence": 0.7
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "quotedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 60,
+    "scopeMatchConfidence": 78,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers indicate whole-property, multiple targets and custom text.",
+      "Satellite imagery clearly shows large paved areas consistent with inferred scope.",
+      "Provided photo is a placeholder/test image which lowers visual confirmation."
+    ]
+  }
+}

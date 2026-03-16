@@ -1,0 +1,120 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T00:05:21.215Z",
+  "promptHash": "7c40558a1993907a5dfc1d83a0de68106f2338a25a179fd0d76ea6f023e694fa",
+  "keyHash": "e3331548520264f8c064fd3f7e5b59b831f100eedeca94f8f0d8cd3df182e0ce",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Pool Service / Cleaning"
+    ],
+    "address": "1301 E 23rd St, Cheyenne, WY 82001, USA",
+    "addressPlaceId": "ChIJi8RhiOM6b4cRMw7GhSSaufo",
+    "lat": 41.1442781,
+    "lng": -104.8044048,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Pool Service / Cleaning",
+        "answers": {
+          "pool_access": "Not sure",
+          "pool_condition": "Needs normal cleaning",
+          "pool_size": "Not sure",
+          "pool_type": "Not sure",
+          "pool_work_type": "Opening or startup"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requested pool opening/startup and normal cleaning; pool details not provided so quantity set to one service event pending confirmation.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "unknown",
+    "inferredScope": "Pool opening / startup and routine cleaning",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "service_type:opening_startup",
+      "unknown_pool_size",
+      "accessible_location"
+    ],
+    "estimatorNotes": [
+      "Customer selected pool opening/startup in questionnaire.",
+      "No pool visible in available satellite image; assume residential pool present per request and require confirmation of size and access."
+    ],
+    "serviceSignals": {
+      "Pool Service / Cleaning": {
+        "serviceType": "Pool Service / Cleaning",
+        "jobSubtype": "opening_startup",
+        "jobSubtypeLabel": "Pool Opening / Startup",
+        "workType": "service",
+        "fallbackFamily": "pool_service_event",
+        "surfaceFamily": "pool_service_event",
+        "targetObjectFamily": "pool",
+        "sizeBucket": "small",
+        "estimatedQuantity": 1,
+        "quantityUnit": "service_event",
+        "quantityEvidence": "direct",
+        "materialClass": "pool_surface",
+        "materialSubtype": "unknown",
+        "conditionClass": "normal",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": true,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": true,
+        "aiConfidence": 68,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly requests opening/startup.",
+          "No pool dimensions provided and satellite doesn’t clearly show a pool, so size and access are uncertain."
+        ],
+        "consistencyScore": 72,
+        "notes": [
+          "Proceed with one service event for opening/startup; recommend manual review to confirm pool presence, size, and access before final quote."
+        ],
+        "summary": "Pool opening/startup service requested; unknown size — manual review recommended."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 76,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire indicates opening/startup.",
+      "Imagery does not clearly show a pool — requires confirmation."
+    ]
+  }
+}

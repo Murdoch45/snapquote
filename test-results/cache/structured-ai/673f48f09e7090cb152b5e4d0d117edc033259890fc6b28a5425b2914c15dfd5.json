@@ -1,0 +1,121 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T00:15:24.053Z",
+  "promptHash": "53255fd31323b543480eef90ae0110126404951adf3dcb9b9a09640a5307721a",
+  "keyHash": "673f48f09e7090cb152b5e4d0d117edc033259890fc6b28a5425b2914c15dfd5",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Deck Installation / Repair"
+    ],
+    "address": "5618 Dayton Dr, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJj7v2QZo7b4cRO_KLm-GvTKw",
+    "lat": 41.1707669,
+    "lng": -104.7678762,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Deck Installation / Repair",
+        "answers": {
+          "deck_area_type": "Ground level",
+          "deck_material": "PVC or premium material",
+          "deck_repair_condition": "Minor issues",
+          "deck_scope": "Multi-level or very large (700+ sq ft)",
+          "deck_work_type": "Replace existing deck"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests replacement of an existing large multi-level PVC/premium deck (700+ sqft).",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "PVC / premium composite",
+    "inferredScope": "Replace existing deck, multi-level, large footprint ~700+ sqft",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "Large deck area",
+      "Premium material (PVC/composite)",
+      "Removal and haul-away required"
+    ],
+    "estimatorNotes": [
+      "Questionnaire explicitly states replace existing deck, multi-level / 700+ sqft and PVC material preference.",
+      "Satellite and single photo do not contradict; exact footprint not provided so quantity uses customer-provided band."
+    ],
+    "serviceSignals": {
+      "Deck Installation / Repair": {
+        "serviceType": "Deck Installation / Repair",
+        "jobSubtype": "deck",
+        "jobSubtypeLabel": "Deck",
+        "workType": "replace",
+        "fallbackFamily": "install_area",
+        "surfaceFamily": "deck",
+        "targetObjectFamily": "deck",
+        "sizeBucket": "very_large",
+        "estimatedQuantity": 700,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "direct",
+        "materialClass": "plastic_composite",
+        "materialSubtype": "PVC",
+        "conditionClass": "minor_repair_needed",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": true,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": true,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": true,
+        "aiConfidence": 68,
+        "aiConfidenceReasons": [
+          "Customer explicitly selected replace and provided size band (700+ sqft).",
+          "Material preference (PVC/premium) provided in questionnaire."
+        ],
+        "consistencyScore": 70,
+        "notes": [
+          "Confirm exact deck footprint and multi-level configuration on site visit.",
+          "Verify extent of underlying structural repairs once removed."
+        ],
+        "summary": "Replace large PVC/composite deck (customer indicated 700+ sqft, multi-level)."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 78,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1.1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about deck replacement and material.",
+      "Imagery does not provide exact deck footprint; quantity uses customer-provided band."
+    ]
+  }
+}

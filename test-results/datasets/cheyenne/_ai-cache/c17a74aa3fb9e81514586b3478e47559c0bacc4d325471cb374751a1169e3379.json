@@ -1,0 +1,148 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T02:22:45.710Z",
+  "promptHash": "7de9f104f8773ee0cf78f155c79c344351761aff2963f252dfbce13da38f2cc8",
+  "keyHash": "c17a74aa3fb9e81514586b3478e47559c0bacc4d325471cb374751a1169e3379",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Concrete"
+    ],
+    "address": "5618 Dayton Dr, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJj7v2QZo7b4cRO_KLm-GvTKw",
+    "lat": 41.1707669,
+    "lng": -104.7678762,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Concrete",
+        "answers": {
+          "concrete_material": "Stamped or decorative concrete",
+          "concrete_project_type": [
+            "Driveway",
+            "Patio",
+            "Slab or pad",
+            "Walkway"
+          ],
+          "concrete_scope": "Not sure",
+          "concrete_site_condition": "Existing concrete needs removal",
+          "concrete_work_type": "Replacement"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requested concrete replacement for multiple components (driveway, slab/pad, walkway, patio) but scope unclear; primary visible washable surface is driveway and small walkways; recommend review to confirm full replacement areas.",
+    "condition": "moderate",
+    "access": "easy",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": true,
+    "materialHint": "stamped or decorative concrete selected by customer",
+    "inferredScope": "driveway primary, possible slab/pad and walkway, patio uncertain",
+    "treeSize": "small",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "multiple concrete components requested",
+      "replacement (demo + new)",
+      "stamped/decorative material option"
+    ],
+    "estimatorNotes": [
+      "Customer selected multiple concrete project types but answered 'Not sure' for scope — needs confirmation of which components to replace.",
+      "Satellite shows a full-width concrete driveway and small walkways; photo is a test image and provides limited detail."
+    ],
+    "serviceSignals": {
+      "Concrete": {
+        "serviceType": "Concrete",
+        "jobSubtype": "patio",
+        "jobSubtypeLabel": "Patio",
+        "workType": "replace",
+        "fallbackFamily": "flat_hardscape",
+        "surfaceFamily": "flat_hardscape",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "small",
+        "estimatedQuantity": 200,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "weak_inference",
+        "materialClass": "concrete",
+        "materialSubtype": "stamped_or_decorative",
+        "conditionClass": "unknown",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": true,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": true,
+        "aiConfidence": 55,
+        "aiConfidenceReasons": [
+          "Customer selected patio in questionnaire but site patio not clearly visible in imagery.",
+          "Stamped/decorative material selection increases complexity."
+        ],
+        "consistencyScore": 58,
+        "notes": [
+          "Confirm presence and size of patio and whether replacement desired."
+        ],
+        "summary": "Patio replacement requested by customer but not observable with confidence.",
+        "quotedSurfaces": {
+          "patio": 200
+        }
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      },
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 250,
+        "confidence": 0.62
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "quotedSurfaces": {
+      "driveway": 2100
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about replacement and material choices.",
+      "Satellite imagery supports driveway replacement but customer scope is ambiguous."
+    ]
+  }
+}

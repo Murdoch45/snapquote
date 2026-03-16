@@ -1,0 +1,121 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T00:03:10.459Z",
+  "promptHash": "4bf5c33e60d18e61b1630253a7cadaeca177cf9697c0b59c180e51559808929f",
+  "keyHash": "0586d74f3f1bc55eccdfde314fdbf93088c5fc7bee30a6256b0a0c2a184862e5",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Tree Service / Removal"
+    ],
+    "address": "8260 Oakwood Ave, Los Angeles, CA 90048, USA",
+    "addressPlaceId": "ChIJoyhFqMq-woAR_VBTx51HS3c",
+    "lat": 34.0779676,
+    "lng": -118.3694635,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Tree Service / Removal",
+        "answers": {
+          "tree_access": "Easy",
+          "tree_haul_away": "Not sure",
+          "tree_location": "Near fence or structure",
+          "tree_size": "Large",
+          "tree_work_type": "Stump grinding"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requested stump grinding for a large tree near a fence; access is easy and scope likely a single stump.",
+    "condition": "moderate",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "wood",
+    "inferredScope": "single_stump_grind",
+    "treeSize": "large",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 78,
+    "pricingDrivers": [
+      "stump_grinding",
+      "large_tree_size",
+      "proximity_to_structure"
+    ],
+    "estimatorNotes": [
+      "Questionnaire explicitly requested stump grinding and indicated large tree near fence.",
+      "No explicit stump count provided; assume single-stump scope unless customer specifies otherwise."
+    ],
+    "serviceSignals": {
+      "Tree Service / Removal": {
+        "serviceType": "Tree Service / Removal",
+        "jobSubtype": "stump_grinding",
+        "jobSubtypeLabel": "Stump Grinding",
+        "workType": "remove",
+        "fallbackFamily": "tree_work",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "tree_work",
+        "sizeBucket": "large",
+        "estimatedQuantity": 1,
+        "quantityUnit": "stump_count",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "wood",
+        "materialSubtype": "tree_stump",
+        "conditionClass": "unknown",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": true,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 82,
+        "aiConfidenceReasons": [
+          "Customer selected 'Stump grinding' and specified large tree.",
+          "Location near fence indicated in questionnaire aligns with typical stump grinding considerations."
+        ],
+        "consistencyScore": 90,
+        "notes": [
+          "Confirm stump count and whether root removal beyond grinding is desired.",
+          "Customer unsure about haul away; clarify if grindings should be hauled."
+        ],
+        "summary": "Single large stump grinding near fence with easy access; haul-away unclear."
+      }
+    },
+    "surfaceDetectionConfidence": 40,
+    "satelliteClarity": 85,
+    "imageQuality": 60,
+    "scopeMatchConfidence": 86,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1,
+    "estateScore": 5000,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific to stump grinding.",
+      "Property context (lot size and imagery) supports single-stump assumption but requires confirmation for additional stumps."
+    ]
+  }
+}

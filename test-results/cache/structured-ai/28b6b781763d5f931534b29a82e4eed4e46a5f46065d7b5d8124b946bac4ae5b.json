@@ -1,0 +1,136 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T19:42:36.191Z",
+  "promptHash": "13a71be65b90fd4ef9bbebb84ad1c753b15c63996960207a6055bac00c38d714",
+  "keyHash": "28b6b781763d5f931534b29a82e4eed4e46a5f46065d7b5d8124b946bac4ae5b",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Roofing"
+    ],
+    "address": "1216 Norway St, Bristol, VA 24201, USA",
+    "addressPlaceId": "ChIJSQAVgxN2UIgRc62c8VJioW0",
+    "lat": 36.5970084,
+    "lng": -82.1960856,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Roofing",
+        "answers": {
+          "roofing_access": "Not sure",
+          "roofing_problem": "Old roof needing replacement",
+          "roofing_scope": "Large portion",
+          "roofing_type": "Other",
+          "roofing_type_other_text": "premium material preference for roofing type 89",
+          "roofing_work_type": "Leak repair"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer reports leak repair with large portion of roof affected and mentions premium material preference; satellite imagery shows an older roof likely needing extensive work.",
+    "condition": "heavy",
+    "access": "moderate",
+    "severity": "major",
+    "debris": "moderate",
+    "multipleAreas": false,
+    "materialHint": "premium material preference for roofing type 89",
+    "inferredScope": "large portion roof replacement/repair",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 62,
+    "pricingDrivers": [
+      "old roof replacement likely",
+      "large roof area",
+      "premium material preference"
+    ],
+    "estimatorNotes": [
+      "Customer explicitly selected leak repair and noted old roof needing replacement.",
+      "No direct roof area or pitch provided; scope inferred from questionnaire and satellite.",
+      "Premium material requested in free text; confirm material choice during follow-up."
+    ],
+    "serviceSignals": {
+      "Roofing": {
+        "serviceType": "Roofing",
+        "jobSubtype": "Leak repair",
+        "jobSubtypeLabel": "Leak repair",
+        "workType": "repair",
+        "fallbackFamily": "roof_like_surface",
+        "surfaceFamily": "roof_like_surface",
+        "targetObjectFamily": "roof",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 1,
+        "quantityUnit": "roof_square",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "other",
+        "materialSubtype": "premium_material_89",
+        "conditionClass": "old_roof",
+        "severityClass": "major",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "single_story",
+        "stories": 1,
+        "slopeClass": "some_slope",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": "Other",
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 58,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly requests leak repair and notes old roof replacement.",
+          "No direct roof dimensions provided; inference relies on satellite and property size.",
+          "Customer specified non-standard premium material in free-text."
+        ],
+        "consistencyScore": 72,
+        "notes": [
+          "Follow-up required to capture roof pitch, exact square footage, and material selection.",
+          "Confirm access and presence of skylights or chimneys that may affect scope."
+        ],
+        "summary": "Large-area roof leak repair with probable replacement of aged roofing; premium material requested."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about leak and replacement need.",
+      "Satellite imagery shows an older roof consistent with customer's description.",
+      "No direct roof measurements provided; follow-up required for accurate sizing."
+    ]
+  }
+}

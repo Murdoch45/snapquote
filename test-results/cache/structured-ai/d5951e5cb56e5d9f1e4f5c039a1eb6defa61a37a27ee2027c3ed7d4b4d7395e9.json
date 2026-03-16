@@ -1,0 +1,146 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T08:21:29.397Z",
+  "promptHash": "cef61dfae165e4b281debd0264181e6dcec2bce124265568e97fefcc683124ea",
+  "keyHash": "d5951e5cb56e5d9f1e4f5c039a1eb6defa61a37a27ee2027c3ed7d4b4d7395e9",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Pool Service / Cleaning"
+    ],
+    "address": "1202 Larchmont Ln, Nichols Hills, OK 73116, USA",
+    "addressPlaceId": "ChIJySjKutIbsocRj8CEoxAlaik",
+    "lat": 35.5497582,
+    "lng": -97.5348305,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Pool Service / Cleaning",
+        "answers": {
+          "pool_access": "Not sure",
+          "pool_condition": "Mostly clean",
+          "pool_size": "Extra large / resort-style",
+          "pool_type": "Above-ground pool",
+          "pool_work_type": "Other",
+          "pool_work_type_other_text": "premium material preference for pool work type 79"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests pool service/cleaning for an above-ground, resort-style pool. Imagery and answers indicate a large pool; scope likely routine cleaning/service.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "above_ground_pool",
+    "inferredScope": "regular_pool_service_and_cleaning",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": 900,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "pool size",
+      "above-ground pool",
+      "premium material preference"
+    ],
+    "estimatorNotes": [
+      "Customer selected Pool Service and indicated above-ground, extra large/resort-style.",
+      "No direct dimensions provided; pool area inferred from satellite and questionnaire descriptors."
+    ],
+    "serviceSignals": {
+      "Pool Service / Cleaning": {
+        "serviceType": "Pool Service / Cleaning",
+        "jobSubtype": "above_ground_pool_service",
+        "jobSubtypeLabel": "Above-ground Pool Service",
+        "workType": "service",
+        "fallbackFamily": "pool_service_event",
+        "surfaceFamily": "pool_structure",
+        "targetObjectFamily": "pool",
+        "sizeBucket": "very_large",
+        "estimatedQuantity": 900,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "above_ground",
+        "materialSubtype": "vinyl_or_premium_liner",
+        "conditionClass": "mostly_clean",
+        "severityClass": "minor",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": true,
+        "fencePresent": false,
+        "deckPresent": true,
+        "roofType": null,
+        "premiumPropertySignal": true,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 76,
+        "aiConfidenceReasons": [
+          "Customer explicitly selected Pool Service and specified above-ground and extra large.",
+          "Satellite imagery shows a sizable pool in the backyard consistent with a resort-style pool."
+        ],
+        "consistencyScore": 82,
+        "notes": [
+          "Recommend confirming pool access and exact dimensions during scheduling.",
+          "Customer mentioned premium material preference in other-text."
+        ],
+        "summary": "Above-ground resort-style pool cleaning/service, large footprint inferred from imagery and description.",
+        "quotedSurfaces": {
+          "driveway": 950
+        },
+        "surfaceDetections": [
+          {
+            "surface_type": "driveway",
+            "surface_area_sqft": 950,
+            "confidence": 0.86
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "quotedSurfaces": {
+      "driveway": 2100
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Property context and imagery support the inferred scope."
+    ]
+  }
+}

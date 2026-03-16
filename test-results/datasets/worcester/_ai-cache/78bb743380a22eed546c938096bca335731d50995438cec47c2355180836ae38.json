@@ -1,0 +1,120 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T21:35:35.707Z",
+  "promptHash": "50d3c6dbdbf6b7345251f7b5997ebd37e5c44738e59c21e8158e4652e31176bc",
+  "keyHash": "78bb743380a22eed546c938096bca335731d50995438cec47c2355180836ae38",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Tree Service / Removal"
+    ],
+    "address": "31 Lenox St, Worcester, MA 01602, USA",
+    "addressPlaceId": "ChIJD1cICMIG5IkRYY1iKGn1gck",
+    "lat": 42.2777158,
+    "lng": -71.8334735,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Tree Service / Removal",
+        "answers": {
+          "tree_access": "Easy",
+          "tree_haul_away": "Yes",
+          "tree_location": "Multiple areas",
+          "tree_size": "Medium",
+          "tree_work_type": "Remove multiple trees"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests removal of multiple medium trees with haul-away.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "moderate",
+    "multipleAreas": true,
+    "materialHint": "wood",
+    "inferredScope": "Remove multiple medium trees from property, haul away debris.",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "multiple_trees",
+      "haul_away",
+      "easy_access"
+    ],
+    "estimatorNotes": [
+      "Questionnaire specifies removal of multiple medium trees and haul-away.",
+      "Satellite and photo show canopy and yard space consistent with medium trees."
+    ],
+    "serviceSignals": {
+      "Tree Service / Removal": {
+        "serviceType": "Tree Service / Removal",
+        "jobSubtype": "remove_multiple_trees",
+        "jobSubtypeLabel": "Remove multiple trees",
+        "workType": "remove",
+        "fallbackFamily": "tree_work",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "tree_work",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 3,
+        "quantityUnit": "tree_count",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "wood",
+        "materialSubtype": "deciduous",
+        "conditionClass": "unknown",
+        "severityClass": "moderate",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "moderate",
+        "heightClass": "two_story",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": false,
+        "haulAwayNeeded": true,
+        "poolPresent": true,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 78,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly requests removal of multiple trees with haul-away.",
+          "Satellite imagery shows multiple tree canopies on lot consistent with medium trees."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Recommend confirmation of exact tree count and any utility conflicts on site visit."
+        ],
+        "summary": "Removal of multiple medium trees with haul-away; easy access noted."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 86,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Imagery supports presence of multiple medium trees but exact count not provided."
+    ]
+  }
+}

@@ -1,0 +1,135 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T02:13:24.905Z",
+  "promptHash": "7c40558a1993907a5dfc1d83a0de68106f2338a25a179fd0d76ea6f023e694fa",
+  "keyHash": "e3331548520264f8c064fd3f7e5b59b831f100eedeca94f8f0d8cd3df182e0ce",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Pool Service / Cleaning"
+    ],
+    "address": "1301 E 23rd St, Cheyenne, WY 82001, USA",
+    "addressPlaceId": "ChIJi8RhiOM6b4cRMw7GhSSaufo",
+    "lat": 41.1442781,
+    "lng": -104.8044048,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Pool Service / Cleaning",
+        "answers": {
+          "pool_access": "Not sure",
+          "pool_condition": "Needs normal cleaning",
+          "pool_size": "Not sure",
+          "pool_type": "Not sure",
+          "pool_work_type": "Opening or startup"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requested pool opening/startup service; pool details unknown, likely a standard residential pool requiring normal cleaning and startup.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": null,
+    "inferredScope": "Pool opening / startup and normal cleaning",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "service_event",
+      "pool_opening_uncertain_size"
+    ],
+    "estimatorNotes": [
+      "Questionnaire indicates pool opening/startup and normal cleaning but customer is unsure of pool type and size.",
+      "No explicit dimensions provided; scope inferred as a single residential pool service event."
+    ],
+    "serviceSignals": {
+      "Pool Service / Cleaning": {
+        "serviceType": "Pool Service / Cleaning",
+        "jobSubtype": "pool_opening",
+        "jobSubtypeLabel": "Pool Opening",
+        "workType": "service",
+        "fallbackFamily": "pool_service_event",
+        "surfaceFamily": null,
+        "targetObjectFamily": "pool",
+        "sizeBucket": "small",
+        "estimatedQuantity": 1,
+        "quantityUnit": "service_event",
+        "quantityEvidence": "weak_inference",
+        "materialClass": "unknown",
+        "materialSubtype": "unknown",
+        "conditionClass": "normal",
+        "severityClass": "minor",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": true,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 60,
+        "aiConfidenceReasons": [
+          "Customer explicitly selected 'Opening or startup' in the questionnaire.",
+          "No size or type provided, so quantity is inferred as one residential service event."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Recommend follow-up question to confirm pool type (in-ground vs above-ground) and approximate dimensions for accurate pricing."
+        ],
+        "summary": "Pool opening/startup requested; assume single residential pool requiring normal cleaning and startup procedures."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 400,
+        "confidence": 0.8
+      },
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 120,
+        "confidence": 0.7
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 400,
+      "walkway": 120
+    },
+    "surfaceDetectionConfidence": 74,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 78,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire specified pool opening service.",
+      "No direct dimensions provided; inference kept conservative."
+    ]
+  }
+}

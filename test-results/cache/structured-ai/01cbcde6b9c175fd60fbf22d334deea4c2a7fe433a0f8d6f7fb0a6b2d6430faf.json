@@ -1,0 +1,124 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T06:16:59.448Z",
+  "promptHash": "59ad52a18cf16730497dda9afaf1bbcc3e1481a36c531205c5560e5ad4baf88f",
+  "keyHash": "01cbcde6b9c175fd60fbf22d334deea4c2a7fe433a0f8d6f7fb0a6b2d6430faf",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Deck Installation / Repair"
+    ],
+    "address": "935 Burnside Ave, Los Angeles, CA 90036, USA",
+    "addressPlaceId": "ChIJ_1o_zx65woAR28Q5Yc4qZdE",
+    "lat": 34.058076,
+    "lng": -118.3514135,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Deck Installation / Repair",
+        "answers": {
+          "deck_area_type": "Rooftop or specialty area",
+          "deck_material": "PVC or premium material",
+          "deck_repair_condition": "Minor issues",
+          "deck_scope": "Medium (~150-350 sq ft)",
+          "deck_work_type": "Other",
+          "deck_work_type_other_text": "site-specific details for deck work type 55"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests medium rooftop/specialty deck work (repair/installation) in PVC/premium material; likely ~200 sqft.",
+    "condition": "light",
+    "access": "moderate",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "PVC or premium material",
+    "inferredScope": "Medium deck, rooftop/specialty area",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "Rooftop or specialty access",
+      "PVC / premium deck material",
+      "Medium deck area (~150-350 sqft)"
+    ],
+    "estimatorNotes": [
+      "Questionnaire indicates deck work type 'Other' with site-specific details.",
+      "Customer selected medium area; no explicit square footage provided.",
+      "Satellite shows limited yard and rooftop/specialty patio area consistent with medium deck."
+    ],
+    "serviceSignals": {
+      "Deck Installation / Repair": {
+        "serviceType": "Deck Installation / Repair",
+        "jobSubtype": "rooftop_specialty_deck",
+        "jobSubtypeLabel": "Rooftop / Specialty Deck",
+        "workType": "repair",
+        "fallbackFamily": "install_area",
+        "surfaceFamily": "deck_area",
+        "targetObjectFamily": "deck",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 200,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "composite_or_pvc",
+        "materialSubtype": "PVC",
+        "conditionClass": "minor_repair",
+        "severityClass": "minor",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "roof_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": true,
+        "roofType": null,
+        "premiumPropertySignal": true,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 70,
+        "aiConfidenceReasons": [
+          "Customer selected 'Medium (~150-350 sq ft)' for deck scope.",
+          "Customer specified PVC/premium material.",
+          "Photos and satellite show rooftop/specialty area consistent with a medium deck but no explicit dimensions provided."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Customer other-text: 'site-specific details for deck work type 55' suggests custom scope that may require on-site review.",
+          "Assumed medium deck ~200 sqft for estimating; confirm dimensions and structural access."
+        ],
+        "summary": "Medium rooftop/premium material deck repair/installation, estimated ~200 sqft; site-specific/custom details, manual review recommended."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 78,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.15,
+    "materialMultiplier": 1.2,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": true,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers indicate medium rooftop deck and PVC material.",
+      "Imagery supports rooftop/specialty deck presence but lacks explicit dimensions."
+    ]
+  }
+}

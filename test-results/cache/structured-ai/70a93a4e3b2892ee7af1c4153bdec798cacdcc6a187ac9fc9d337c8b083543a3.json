@@ -1,0 +1,135 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T08:17:11.381Z",
+  "promptHash": "c58a1339bdf3515742c2a2fd0a978f7179fec04e34bcefe2913ad8b1378b1b5e",
+  "keyHash": "70a93a4e3b2892ee7af1c4153bdec798cacdcc6a187ac9fc9d337c8b083543a3",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Deck Installation / Repair"
+    ],
+    "address": "12924 Cedar Springs Rd, Oklahoma City, OK 73120, USA",
+    "addressPlaceId": "ChIJ_z0yrGIcsocRtUEXpwmzF7E",
+    "lat": 35.6016417,
+    "lng": -97.5676136,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Deck Installation / Repair",
+        "answers": {
+          "deck_area_type": "Multi-level",
+          "deck_material": "Other",
+          "deck_material_other_text": "custom scope requested for deck material 81",
+          "deck_repair_condition": "Minor issues",
+          "deck_scope": "Multi-level or very large (700+ sq ft)",
+          "deck_work_type": "Repair existing deck"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requested multi-level deck repair (custom material). Scope indicated as 700+ sq ft; minor issues reported.",
+    "condition": "light",
+    "access": "moderate",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "custom material 81",
+    "inferredScope": "multi-level deck repair approximately 700-900 sqft",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "multi-level deck (700+ sqft)",
+      "custom material requested",
+      "repair (minor issues)"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Multi-level or very large (700+ sq ft)' explicitly in questionnaire.",
+      "Material specified as 'Other' with custom text 'custom scope requested for deck material 81' — requires manual review for material pricing.",
+      "Photos and satellite show typical suburban lot with existing attached deck; access from rear yard appears moderate."
+    ],
+    "serviceSignals": {
+      "Deck Installation / Repair": {
+        "serviceType": "Deck Installation / Repair",
+        "jobSubtype": "deck_repair",
+        "jobSubtypeLabel": "Multi-level deck repair",
+        "workType": "repair",
+        "fallbackFamily": "repair_section",
+        "surfaceFamily": "deck",
+        "targetObjectFamily": "deck",
+        "sizeBucket": "very_large",
+        "estimatedQuantity": 800,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "direct",
+        "materialClass": "custom",
+        "materialSubtype": "custom_81",
+        "conditionClass": "minor_issues",
+        "severityClass": "minor",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "moderate",
+        "heightClass": "mixed_height",
+        "stories": 2,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": true,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 68,
+        "aiConfidenceReasons": [
+          "Customer explicitly requested multi-level 700+ sq ft deck repair.",
+          "Custom material text provided requiring specification.",
+          "No exact dimensions provided beyond the 700+ band, so quantity set conservatively within band."
+        ],
+        "consistencyScore": 72,
+        "notes": [
+          "Manual review recommended to confirm exact sqft, material specs, and extent of repairs.",
+          "Allow for potential haul-away of removed decking components."
+        ],
+        "summary": "Large multi-level deck repair using custom material; minor issues reported."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about deck scope and material being custom.",
+      "Property context and imagery support an attached multi-level deck but lack exact measurements."
+    ]
+  }
+}

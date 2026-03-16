@@ -1,0 +1,136 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T08:24:45.605Z",
+  "promptHash": "be7d28c4edbede6e7fbafcf65a125089904f67dbc1f196f0120b208f8e32c892",
+  "keyHash": "59015f02eaabec88abcbb87bcf3a1b67e13a041021739649d5a25170f429f70d",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Exterior Painting"
+    ],
+    "address": "1202 Larchmont Ln, Nichols Hills, OK 73116, USA",
+    "addressPlaceId": "ChIJySjKutIbsocRj8CEoxAlaik",
+    "lat": 35.5497582,
+    "lng": -97.5348305,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Exterior Painting",
+        "answers": {
+          "painting_access": "Two-story areas",
+          "painting_condition": "Good condition",
+          "painting_scope": "Small touch-up",
+          "painting_surface_type": "Siding",
+          "painting_target": "Partial exterior"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests small partial exterior siding touch-up on two-story areas; property is a mid-large single-family home.",
+    "condition": "light",
+    "access": "moderate",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "vinyl/wood siding",
+    "inferredScope": "partial_siding_touchup",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": 400,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "two_story_access",
+      "partial_siding_scope",
+      "small_touch_up"
+    ],
+    "estimatorNotes": [
+      "Questionnaire specifies partial exterior siding touch-up in good condition; likely a small area on two-story elevation.",
+      "Satellite imagery confirms two-story house with sizable driveway and pool; painting scope appears limited."
+    ],
+    "serviceSignals": {
+      "Exterior Painting": {
+        "serviceType": "Exterior Painting",
+        "jobSubtype": "siding_touch_up",
+        "jobSubtypeLabel": "Siding touch-up",
+        "workType": "repair",
+        "fallbackFamily": "exterior_finish_surface",
+        "surfaceFamily": "vertical_exterior_surface",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "small",
+        "estimatedQuantity": 250,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "vinyl",
+        "materialSubtype": "standard",
+        "conditionClass": "good",
+        "severityClass": "minor",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "two_story",
+        "stories": 2,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": true,
+        "fencePresent": false,
+        "deckPresent": true,
+        "roofType": "comp_shingle",
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 74,
+        "aiConfidenceReasons": [
+          "Customer selected partial exterior and small touch-up in questionnaire.",
+          "Satellite and photos show two-story residence and siding surfaces consistent with touch-up scale."
+        ],
+        "consistencyScore": 86,
+        "notes": [
+          "Estimate assumes localized touch-up rather than full repaint of elevations.",
+          "Prep likely includes light sanding and spot priming; access to two-story areas may require lift or ladder."
+        ],
+        "summary": "Small partial siding touch-up on two-story areas (approx 250 sqft)."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "quotedSurfaces": {
+      "driveway": 2100
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Property context and imagery support the inferred scope."
+    ]
+  }
+}

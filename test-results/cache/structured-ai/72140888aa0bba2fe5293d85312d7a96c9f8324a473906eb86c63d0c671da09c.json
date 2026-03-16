@@ -1,0 +1,161 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T19:32:08.282Z",
+  "promptHash": "275cbc316461b7405d74984dc033aceb82dc637b419df3049bc380f3b2c84515",
+  "keyHash": "72140888aa0bba2fe5293d85312d7a96c9f8324a473906eb86c63d0c671da09c",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Pressure Washing"
+    ],
+    "address": "1120 Barber Rd, Bristol, TN 37620, USA",
+    "addressPlaceId": "ChIJJ5fNoHydWogRR3gpT3OQN7M",
+    "lat": 36.5614452,
+    "lng": -82.220179,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Pressure Washing",
+        "answers": {
+          "pressure_washing_access": "Some obstacles",
+          "pressure_washing_condition": "Heavy staining or moss",
+          "pressure_washing_size": "Medium area (~500-1,500 sq ft)",
+          "pressure_washing_target": [
+            "Driveway",
+            "Fence",
+            "Patio or porch",
+            "Roof"
+          ]
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requested pressure washing for driveway, fence, roof, and patio; driveway is primary inferred scope.",
+    "condition": "moderate",
+    "access": "moderate",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": true,
+    "materialHint": "concrete/standard",
+    "inferredScope": "driveway primary; fence and patio likely light cleaning; roof soft wash possible",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "multiple surface types",
+      "roof soft wash",
+      "access obstacles"
+    ],
+    "estimatorNotes": [
+      "Questionnaire lists multiple targets; driveway area estimated from satellite and lot context.",
+      "Photo is a test image; satellite used for surface detection."
+    ],
+    "serviceSignals": {
+      "Pressure Washing": {
+        "serviceType": "Pressure Washing",
+        "jobSubtype": "driveway",
+        "jobSubtypeLabel": "Driveway",
+        "workType": "clean",
+        "fallbackFamily": "flat_hardscape",
+        "surfaceFamily": "flat_hardscape",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 950,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "concrete",
+        "materialSubtype": "standard",
+        "conditionClass": "heavy_soiling",
+        "severityClass": "moderate",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "moderate",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": true,
+        "deckPresent": false,
+        "roofType": "shingle",
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 76,
+        "aiConfidenceReasons": [
+          "Driveway and other targets explicitly selected by customer.",
+          "Satellite imagery supports presence of a driveway of medium size."
+        ],
+        "consistencyScore": 80,
+        "notes": [
+          "Include light fence and patio cleaning and optional roof soft wash in scope review.",
+          "Customer indicated heavy staining/moss which increases effort."
+        ],
+        "summary": "Medium driveway cleaning with additional fence and patio cleaning; roof soft wash optional.",
+        "quotedSurfaces": {
+          "driveway": 950,
+          "patio": 150
+        },
+        "surfaceDetections": [
+          {
+            "surface_type": "driveway",
+            "surface_area_sqft": 950,
+            "confidence": 0.86
+          },
+          {
+            "surface_type": "patio",
+            "surface_area_sqft": 150,
+            "confidence": 0.62
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      },
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 250,
+        "confidence": 0.6
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "quotedSurfaces": {
+      "driveway": 2100
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Property context and imagery support the inferred scope."
+    ]
+  }
+}

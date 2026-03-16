@@ -1,0 +1,124 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T21:29:44.065Z",
+  "promptHash": "fff668c995d6243cc78c25d0b6a69c3b38a32e44644f2a426f272aa9ad9d5ca7",
+  "keyHash": "ca92a5c25de302d236208238bbf7a2aea9b872735b201dbab10d14434ab5e220",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Exterior Painting"
+    ],
+    "address": "577 Grove St, Worcester, MA 01605, USA",
+    "addressPlaceId": "ChIJCeltdQQH5IkRUt0eMJ6IxbA",
+    "lat": 42.2936121,
+    "lng": -71.8172553,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Exterior Painting",
+        "answers": {
+          "painting_access": "Steep or hard-to-reach areas",
+          "painting_condition": "Minor peeling or wear",
+          "painting_scope": "Full exterior",
+          "painting_surface_type": "Brick or masonry",
+          "painting_target": "Full house exterior"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Full exterior painting of brick/masonry house with minor peeling; difficult access reported.",
+    "condition": "light",
+    "access": "difficult",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "brick_or_masonry",
+    "inferredScope": "full_house_exterior",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "full exterior",
+      "brick/masonry surface",
+      "steep or hard-to-reach areas",
+      "minor peeling"
+    ],
+    "estimatorNotes": [
+      "Customer selected full house exterior painting; surface specified as brick or masonry.",
+      "Questionnaire notes minor peeling; prep will be required prior to painting.",
+      "Access flagged as steep or hard-to-reach which increases complexity."
+    ],
+    "serviceSignals": {
+      "Exterior Painting": {
+        "serviceType": "Exterior Painting",
+        "jobSubtype": "full_house_exterior",
+        "jobSubtypeLabel": "Full house exterior",
+        "workType": "resurface",
+        "fallbackFamily": "exterior_finish_surface",
+        "surfaceFamily": "vertical_exterior_surface",
+        "targetObjectFamily": "house",
+        "sizeBucket": "large",
+        "estimatedQuantity": 3000,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "masonry",
+        "materialSubtype": "brick_or_masonry",
+        "conditionClass": "minor_peeling",
+        "severityClass": "minor",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "moderate",
+        "heightClass": "two_story",
+        "stories": 2,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": true,
+        "aiConfidence": 70,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly requests full house exterior and specifies brick/masonry and access difficulty.",
+          "House square footage available from property data used to infer painting area."
+        ],
+        "consistencyScore": 80,
+        "notes": [
+          "Estimate based on house ground area and typical wall area multiplier for two-story masonry.",
+          "Prep (scraping, priming) expected due to minor peeling; access issues may require lifts or special equipment."
+        ],
+        "summary": "Full exterior painting of a brick/masonry two-story house with minor peeling and difficult access; prep required."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "materialType": "brick",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.2,
+    "materialMultiplier": 1.05,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about scope, surface type, and access difficulty.",
+      "Property context (house sqft) supports inferred painting area but exact wall area not provided."
+    ]
+  }
+}

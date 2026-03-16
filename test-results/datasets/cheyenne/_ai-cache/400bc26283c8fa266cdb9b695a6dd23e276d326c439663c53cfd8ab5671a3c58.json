@@ -1,0 +1,136 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T02:27:13.488Z",
+  "promptHash": "4282b7df303a760037f17e86bbaf7d95363afebd1eef756b552d7786c6331ccf",
+  "keyHash": "400bc26283c8fa266cdb9b695a6dd23e276d326c439663c53cfd8ab5671a3c58",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Landscaping / Installation"
+    ],
+    "address": "1696 North Pass Trl, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJfeI3GdQ4b4cRiz4wRGjyh-I",
+    "lat": 41.2460767,
+    "lng": -104.7575577,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Landscaping / Installation",
+        "answers": {
+          "landscape_access": "Somewhat difficult",
+          "landscape_area_size": "Small section (up to ~500 sq ft)",
+          "landscape_job_type": "New installation on bare area",
+          "landscape_materials": [
+            "Mostly mulch or rock"
+          ],
+          "landscape_work_type": [
+            "Other",
+            "Yard makeover"
+          ],
+          "landscape_work_type_other_text": "custom scope requested for landscape work type 2"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Small backyard yard makeover installation of mulch/rock in a bare area (~up to 500 sqft) with somewhat difficult access.",
+    "condition": "light",
+    "access": "moderate",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "mulch/rock",
+    "inferredScope": "install mulch/rock in a small bare yard section",
+    "treeSize": "small",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "access_difficulty",
+      "material_choice",
+      "small_custom_scope"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Yard makeover' and specified 'Small section (up to ~500 sq ft)'.",
+      "Photo and satellite show a backyard bare area consistent with a small installation.",
+      "Access described as somewhat difficult; may impact crew time."
+    ],
+    "serviceSignals": {
+      "Landscaping / Installation": {
+        "serviceType": "Landscaping / Installation",
+        "jobSubtype": "yard_makeover",
+        "jobSubtypeLabel": "Yard makeover",
+        "workType": "install",
+        "fallbackFamily": "yard_area",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "install_area",
+        "sizeBucket": "small",
+        "estimatedQuantity": 400,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "direct",
+        "materialClass": "mulch_rock",
+        "materialSubtype": "mostly_mulch_or_rock",
+        "conditionClass": "bare_area",
+        "severityClass": "minor",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": true,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": false,
+        "aiConfidence": 76,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly selected yard makeover and small size.",
+          "Satellite imagery shows a defined backyard bare area consistent with installation.",
+          "Single photo provided is a generic test image; reliance on questionnaire and satellite."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Use customer 'landscape_work_type_other_text' for custom scope details.",
+          "Plan for minor prep (grading/weed removal) before material install."
+        ],
+        "summary": "Install mulch/rock in a small bare backyard section (~400 sqft)."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 0,
+        "confidence": 0
+      }
+    ],
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 84,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1,
+    "luxuryMultiplier": 1,
+    "estateScore": 0,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about scope and size.",
+      "Satellite imagery supports presence of a small bare backyard suitable for installation."
+    ]
+  }
+}

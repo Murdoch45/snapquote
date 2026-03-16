@@ -1,0 +1,141 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T02:20:26.296Z",
+  "promptHash": "a24c7c1e7103fb55cf7d480a62ff3fca6f90dd6b97b3a13f9332a7b7c2dc1cb1",
+  "keyHash": "eef615d445d42cabe5737ffd3c0a4718ec8a6c1c915d180e7c7be666e60472f6",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Pool Service / Cleaning"
+    ],
+    "address": "5618 Dayton Dr, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJj7v2QZo7b4cRO_KLm-GvTKw",
+    "lat": 41.1707669,
+    "lng": -104.7678762,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Pool Service / Cleaning",
+        "answers": {
+          "pool_access": "Yes",
+          "pool_condition": "Needs normal cleaning",
+          "pool_size": "Extra large / resort-style",
+          "pool_type": "Above-ground pool",
+          "pool_work_type": "Green or dirty pool cleanup"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Above-ground pool green/dirty cleanup; owner requested normal cleaning for large pool.",
+    "condition": "moderate",
+    "access": "easy",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "vinyl/above-ground",
+    "inferredScope": "green pool cleanup and standard balancing/filtration service",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": 400,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "pool_size",
+      "green_cleanup",
+      "above-ground_access"
+    ],
+    "estimatorNotes": [
+      "Customer indicated above-ground, green/dirty pool needing normal cleaning.",
+      "No explicit sqft provided; sqft inferred from 'extra large' selection and typical above-ground sizing.",
+      "Satellite and one photo show pool presence at rear but limited detail; manual review not strictly required."
+    ],
+    "serviceSignals": {
+      "Pool Service / Cleaning": {
+        "serviceType": "Pool Service / Cleaning",
+        "jobSubtype": "green_pool_cleanup",
+        "jobSubtypeLabel": "Green pool cleanup",
+        "workType": "clean",
+        "fallbackFamily": "pool_service_event",
+        "surfaceFamily": "pool_water_surface",
+        "targetObjectFamily": "pool",
+        "sizeBucket": "large",
+        "estimatedQuantity": 400,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "above_ground",
+        "materialSubtype": "vinyl",
+        "conditionClass": "heavy_soiling",
+        "severityClass": "moderate",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": true,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 72,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly selected green/dirty cleanup and above-ground pool.",
+          "Size descriptor provided as 'Extra large' but no direct sqft, so sqft inferred conservatively."
+        ],
+        "consistencyScore": 82,
+        "notes": [
+          "Recommend standard green-to-clear process: vacuuming, filtration run, chemical treatment, and balancing.",
+          "Access is available per answer."
+        ],
+        "summary": "Above-ground pool green cleanup; standard cleaning and chemical balancing inferred for a large above-ground pool.",
+        "surfaceDetections": [
+          {
+            "surface_type": "driveway",
+            "surface_area_sqft": 2100,
+            "confidence": 0.84
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Property context and imagery support pool presence and driveway hardscape estimates."
+    ]
+  }
+}

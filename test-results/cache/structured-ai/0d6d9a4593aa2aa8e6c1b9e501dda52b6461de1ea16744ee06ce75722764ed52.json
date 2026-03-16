@@ -1,0 +1,160 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T08:10:08.702Z",
+  "promptHash": "d8b8d19b9aeef55788a4f2ca38a426e877fcda8fdc7f5c2b0ac09cc55bd95781",
+  "keyHash": "0d6d9a4593aa2aa8e6c1b9e501dda52b6461de1ea16744ee06ce75722764ed52",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Concrete"
+    ],
+    "address": "424 NW 29th St, Oklahoma City, OK 73103, USA",
+    "addressPlaceId": "ChIJQ7Rvw1MXsocRLG8Dbk3Y5Yw",
+    "lat": 35.4992706,
+    "lng": -97.5201175,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Concrete",
+        "answers": {
+          "concrete_material": "Standard concrete",
+          "concrete_project_type": [
+            "Driveway",
+            "Walkway"
+          ],
+          "concrete_scope": "Not sure",
+          "concrete_site_condition": "Open and ready",
+          "concrete_work_type": "Replacement"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requested concrete replacement for driveway and walkway; likely standard concrete, moderate scope.",
+    "condition": "moderate",
+    "access": "easy",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": true,
+    "materialHint": "standard concrete",
+    "inferredScope": "replace sections of driveway and walkway; customer indicated 'Not sure' on scope",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "replacement of concrete surfaces",
+      "driveway and walkway access and demolition",
+      "standard concrete material"
+    ],
+    "estimatorNotes": [
+      "Customer selected Driveway and Walkway replacement but supplied no dimensions.",
+      "Satellite and photo imagery confirm presence of driveway and walkway; quantities inferred."
+    ],
+    "serviceSignals": {
+      "Concrete": {
+        "serviceType": "Concrete",
+        "jobSubtype": "driveway,walkway",
+        "jobSubtypeLabel": "Driveway, Walkway",
+        "workType": "replace",
+        "fallbackFamily": "flat_hardscape",
+        "surfaceFamily": "flat_hardscape",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 600,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "concrete",
+        "materialSubtype": "standard",
+        "conditionClass": "moderate_damage",
+        "severityClass": "moderate",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 74,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly selected driveway and walkway replacement.",
+          "No direct dimensions provided; quantities inferred from satellite and typical parcel."
+        ],
+        "consistencyScore": 80,
+        "notes": [
+          "Recommend on-site measurement to confirm square footage prior to final pricing."
+        ],
+        "summary": "Replacement of driveway and walkway (standard concrete), estimated medium-sized scope.",
+        "quotedSurfaces": {
+          "driveway": 500,
+          "walkway": 100
+        },
+        "surfaceDetections": [
+          {
+            "surface_type": "driveway",
+            "surface_area_sqft": 800,
+            "confidence": 0.8
+          },
+          {
+            "surface_type": "walkway",
+            "surface_area_sqft": 200,
+            "confidence": 0.7
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 800,
+        "confidence": 0.8
+      },
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 200,
+        "confidence": 0.7
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 800,
+      "walkway": 200
+    },
+    "quotedSurfaces": {
+      "driveway": 500,
+      "walkway": 100
+    },
+    "surfaceDetectionConfidence": 78,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 82,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific to driveway and walkway replacement.",
+      "Imagery supports presence of concrete surfaces but lacks detailed dimensions."
+    ]
+  }
+}

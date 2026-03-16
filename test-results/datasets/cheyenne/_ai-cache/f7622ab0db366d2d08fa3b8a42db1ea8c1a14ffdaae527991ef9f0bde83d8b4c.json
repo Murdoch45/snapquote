@@ -1,0 +1,133 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T02:20:03.158Z",
+  "promptHash": "229501f72361688a37ea93f9dc1e0da35a4df85ee74d2192fd92fd53d3603fa0",
+  "keyHash": "f7622ab0db366d2d08fa3b8a42db1ea8c1a14ffdaae527991ef9f0bde83d8b4c",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Window Cleaning"
+    ],
+    "address": "5618 Dayton Dr, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJj7v2QZo7b4cRO_KLm-GvTKw",
+    "lat": 41.1707669,
+    "lng": -104.7678762,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Window Cleaning",
+        "answers": {
+          "window_access": "Some ladders needed",
+          "window_count": "50+",
+          "window_property_type": "Three-story or taller",
+          "window_target_type": "Second-story or hard-to-reach windows"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests window cleaning for a taller property; multiple second-story/hard-to-reach windows indicated (50+).",
+    "condition": "light",
+    "access": "moderate",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "glass",
+    "inferredScope": "full-house window cleaning including second-story and hard-to-reach windows",
+    "treeSize": "medium",
+    "estimatedWindowCount": 60,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 78,
+    "pricingDrivers": [
+      "second-story windows",
+      "high window count",
+      "ladder access required"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Second-story or hard-to-reach windows' and '50+' windows.",
+      "Property listed as three-story or taller; ladder access noted in answers.",
+      "No pool or other exterior services requested."
+    ],
+    "serviceSignals": {
+      "Window Cleaning": {
+        "serviceType": "Window Cleaning",
+        "jobSubtype": "second_story_and_hard_to_reach",
+        "jobSubtypeLabel": "Second-story / Hard-to-reach Windows",
+        "workType": "clean",
+        "fallbackFamily": "window_group",
+        "surfaceFamily": "window_group",
+        "targetObjectFamily": "window_group",
+        "sizeBucket": "large",
+        "estimatedQuantity": 60,
+        "quantityUnit": "count",
+        "quantityEvidence": "direct",
+        "materialClass": "glass",
+        "materialSubtype": "residential_window",
+        "conditionClass": "typical",
+        "severityClass": "minor",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "three_plus",
+        "stories": 3,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 80,
+        "aiConfidenceReasons": [
+          "Customer explicitly provided window count as 50+ and flagged second-story windows.",
+          "Customer indicated ladders needed and house listed as three-story or taller."
+        ],
+        "consistencyScore": 92,
+        "notes": [
+          "Treat as whole-house window clean including hard-to-reach units; confirm exact count on-site.",
+          "No additional exterior cleaning services requested."
+        ],
+        "summary": "Large residential window cleaning job with second-story and hard-to-reach windows; ladders required."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 420,
+        "confidence": 0.8
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 420,
+      "walkway": 120
+    },
+    "surfaceDetectionConfidence": 78,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Property context and imagery support the inferred scope."
+    ]
+  }
+}

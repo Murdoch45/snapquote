@@ -1,0 +1,141 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T08:18:31.177Z",
+  "promptHash": "27de1a74f6bdd409062bb8d1640373e3619c73f9e24a79569d48b5b479eed566",
+  "keyHash": "d11f2727b004f6012b15426c86541dbb43bb3d004a0fcdbf07f6e5534f7c55c2",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Junk Removal"
+    ],
+    "address": "12924 Cedar Springs Rd, Oklahoma City, OK 73120, USA",
+    "addressPlaceId": "ChIJ_z0yrGIcsocRtUEXpwmzF7E",
+    "lat": 35.6016417,
+    "lng": -97.5676136,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Junk Removal",
+        "answers": {
+          "junk_amount": "A few items (fits in part of a pickup bed)",
+          "junk_heavy_items": "Yes, many",
+          "junk_location": "Garage or driveway",
+          "junk_type": "Other",
+          "junk_type_other_text": "special access needs for junk type 70"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests junk removal of a few heavy items from garage/driveway; special access noted.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "mixed household/garage debris, heavy items",
+    "inferredScope": "single pickup-bed partial load from garage/driveway",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": 0.5,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "haul_away",
+      "heavy_items",
+      "special_access"
+    ],
+    "estimatorNotes": [
+      "Customer indicated a few items that fit part of a pickup bed and many heavy items.",
+      "Location specified as garage or driveway; satellite shows driveway access.",
+      "Special access requirement noted in other_text; manual review recommended for access details."
+    ],
+    "serviceSignals": {
+      "Junk Removal": {
+        "serviceType": "Junk Removal",
+        "jobSubtype": "debris_load",
+        "jobSubtypeLabel": "Junk Removal - Partial Load",
+        "workType": "remove",
+        "fallbackFamily": "debris_load",
+        "surfaceFamily": "mixed_custom",
+        "targetObjectFamily": "debris_load",
+        "sizeBucket": "small",
+        "estimatedQuantity": 0.5,
+        "quantityUnit": "load",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "mixed",
+        "materialSubtype": "household_garage",
+        "conditionClass": "mixed_condition",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": false,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": true,
+        "aiConfidence": 68,
+        "aiConfidenceReasons": [
+          "Customer explicitly selected 'A few items' and 'many heavy items'.",
+          "Other-text mentions 'special access needs for junk type 70' requiring clarification."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Estimate assumes items will be loaded from garage or driveway and hauled away in a partial pickup load.",
+          "Confirm access constraints and exact heavy-item counts on scheduling."
+        ],
+        "summary": "Small junk removal (partial pickup load) with heavy items and special access notes.",
+        "surfaceDetections": [
+          {
+            "surface_type": "driveway",
+            "surface_area_sqft": 2100,
+            "confidence": 0.84
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers specified amount and heavy-item presence.",
+      "Other-text mentions special access; confirms need for manual review."
+    ]
+  }
+}

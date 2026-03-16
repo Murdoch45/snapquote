@@ -1,0 +1,150 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T06:11:57.891Z",
+  "promptHash": "7c759c8173bd2ef315fabe05b4cafbf79609f5a35b7db6a3c1c26c6f77bdec6f",
+  "keyHash": "243c988c046f57f5e340b1ffbb0f52e3fad4dcf7d82175278c72e1ac8f3954e4",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Concrete"
+    ],
+    "address": "8260 Oakwood Ave, Los Angeles, CA 90048, USA",
+    "addressPlaceId": "ChIJoyhFqMq-woAR_VBTx51HS3c",
+    "lat": 34.0779676,
+    "lng": -118.3694635,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Concrete",
+        "answers": {
+          "concrete_material": "Brick / stone",
+          "concrete_project_type": [
+            "Driveway",
+            "Other",
+            "Patio",
+            "Walkway"
+          ],
+          "concrete_project_type_other_text": "premium material preference for concrete project type 73",
+          "concrete_scope": "Small (up to ~200 sq ft)",
+          "concrete_site_condition": "Existing concrete needs removal",
+          "concrete_work_type": "New installation"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Small new concrete installation for walkway/driveway/patio with existing concrete removal requested.",
+    "condition": "moderate",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": true,
+    "materialHint": "brick/stone",
+    "inferredScope": "small_site_install_with_demo",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "site_demo",
+      "material_upgrade",
+      "small_job"
+    ],
+    "estimatorNotes": [
+      "Customer selected multiple project types (walkway, driveway, patio) but scope specified as Small (up to ~200 sq ft).",
+      "Existing concrete removal noted in site condition; include demo and haul-away."
+    ],
+    "serviceSignals": {
+      "Concrete": {
+        "serviceType": "Concrete",
+        "jobSubtype": "walkway",
+        "jobSubtypeLabel": "Walkway",
+        "workType": "install",
+        "fallbackFamily": "flat_hardscape",
+        "surfaceFamily": "flat_hardscape",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "small",
+        "estimatedQuantity": 150,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "stone",
+        "materialSubtype": "brick/stone",
+        "conditionClass": "existing_needs_removal",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": true,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 74,
+        "aiConfidenceReasons": [
+          "Questionnaire indicates new installation and small scope.",
+          "Customer explicitly listed brick/stone material preference."
+        ],
+        "consistencyScore": 86,
+        "notes": [
+          "Treat as small concrete install requiring demo and haul-away; material upgrade to brick/stone increases complexity."
+        ],
+        "summary": "Small brick/stone walkway installation with existing concrete removal.",
+        "quotedSurfaces": {
+          "walkway": 150
+        },
+        "surfaceDetections": [
+          {
+            "surface_type": "walkway",
+            "surface_area_sqft": 200,
+            "confidence": 0.8
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 200,
+        "confidence": 0.8
+      }
+    ],
+    "detectedSurfaces": {
+      "walkway": 200
+    },
+    "quotedSurfaces": {
+      "walkway": 150
+    },
+    "surfaceDetectionConfidence": 80,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "brick",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1.15,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about work type and material.",
+      "Small scope designation constrains quantity inference."
+    ]
+  }
+}

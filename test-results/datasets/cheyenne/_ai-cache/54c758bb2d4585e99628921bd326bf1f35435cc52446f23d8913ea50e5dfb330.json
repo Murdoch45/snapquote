@@ -1,0 +1,122 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T02:21:43.093Z",
+  "promptHash": "b45705f39636b4a2c663824648d7430717ffdbf04b955a80d8a5c2ee3e0f7854",
+  "keyHash": "54c758bb2d4585e99628921bd326bf1f35435cc52446f23d8913ea50e5dfb330",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Tree Service / Removal"
+    ],
+    "address": "5618 Dayton Dr, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJj7v2QZo7b4cRO_KLm-GvTKw",
+    "lat": 41.1707669,
+    "lng": -104.7678762,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Tree Service / Removal",
+        "answers": {
+          "tree_access": "Difficult",
+          "tree_haul_away": "Yes",
+          "tree_location": "Other",
+          "tree_location_other_text": "custom scope requested for tree location 92",
+          "tree_size": "Medium",
+          "tree_work_type": "Trim or cut back branches"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Trim/cut back one medium tree with haul-away; difficult access noted.",
+    "condition": "moderate",
+    "access": "difficult",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "wood",
+    "inferredScope": "trim_back_branches",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "tree size",
+      "difficult access",
+      "haul away required"
+    ],
+    "estimatorNotes": [
+      "Customer requested trimming/cutting back branches for a medium tree.",
+      "Questionnaire indicates difficult access and haul-away required."
+    ],
+    "serviceSignals": {
+      "Tree Service / Removal": {
+        "serviceType": "Tree Service / Removal",
+        "jobSubtype": "trim_or_prune",
+        "jobSubtypeLabel": "Trim or Prune",
+        "workType": "remove",
+        "fallbackFamily": "tree_work",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "tree",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 1,
+        "quantityUnit": "tree_count",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "wood",
+        "materialSubtype": "deciduous",
+        "conditionClass": "fair",
+        "severityClass": "minor",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "moderate",
+        "heightClass": "mixed_height",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": false,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": false,
+        "aiConfidence": 70,
+        "aiConfidenceReasons": [
+          "Customer provided explicit tree work selections in questionnaire.",
+          "Photo count and property context support a single-medium-tree scope but exact count not explicitly given."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Location specified as 'Other' with custom location text; crew may need site-specific directions.",
+          "Difficult access may increase labor/time; haul-away requested."
+        ],
+        "summary": "Single medium tree trim/cut back branches with haul-away; access is difficult."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 82,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.15,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about tree work and access.",
+      "No explicit tree count provided; inference assumes single tree based on typical residential lot."
+    ]
+  }
+}

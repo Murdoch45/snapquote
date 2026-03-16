@@ -1,0 +1,121 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T08:14:57.938Z",
+  "promptHash": "5091a3eaefd7aa36f7ffbd2305d240ffa7aa06da88c0029bddb0c4b3d1795fcc",
+  "keyHash": "f2d941fd00292136a3096053a2df0e3ae7090cc9b0317f1a0bf3dcf93b3a8707",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Lawn Care / Maintenance"
+    ],
+    "address": "12924 Cedar Springs Rd, Oklahoma City, OK 73120, USA",
+    "addressPlaceId": "ChIJ_z0yrGIcsocRtUEXpwmzF7E",
+    "lat": 35.6016417,
+    "lng": -97.5676136,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Lawn Care / Maintenance",
+        "answers": {
+          "lawn_area_size": "Small yard (up to ~2,000 sq ft)",
+          "lawn_condition": "Thick weeds or neglected",
+          "lawn_property_type": "Multi-area property",
+          "lawn_work_type": "Overgrown cleanup"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Overgrown lawn cleanup for a small multi-area yard with thick weeds and neglected turf; standard access.",
+    "condition": "moderate",
+    "access": "easy",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": true,
+    "materialHint": "grass/weed",
+    "inferredScope": "full-lawn overgrown cleanup with edging and debris removal in multiple zones",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": 3,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "Overgrown vegetation",
+      "Multiple lawn zones",
+      "Debris haul-away"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Overgrown cleanup' and 'Thick weeds or neglected'.",
+      "Lot and backyard area indicate small-to-medium yard consistent with questionnaire.",
+      "Expect mowing, edging, weed removal, and light haul-away."
+    ],
+    "serviceSignals": {
+      "Lawn Care / Maintenance": {
+        "serviceType": "Lawn Care / Maintenance",
+        "jobSubtype": "overgrown_cleanup",
+        "jobSubtypeLabel": "Overgrown cleanup",
+        "workType": "clean",
+        "fallbackFamily": "yard_area",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "landscape",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 2000,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "direct",
+        "materialClass": "organic",
+        "materialSubtype": "grass_weeds",
+        "conditionClass": "neglected_overgrown",
+        "severityClass": "moderate",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": true,
+        "fencePresent": true,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 78,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly states overgrown cleanup and small yard up to ~2,000 sq ft.",
+          "Property lot and satellite imagery support a residential yard of that size."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Plan for mowing, edging, basic weed removal, and light debris haul-away (~3 cu yd).",
+          "Customer indicates multi-area property—expect both front and back yard work."
+        ],
+        "summary": "Small-to-medium overgrown lawn cleanup across multiple yard areas with light debris haul-away."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1,
+    "luxuryMultiplier": 1,
+    "estateScore": 0,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about overgrown cleanup and yard size.",
+      "Satellite and property data align with a small residential lot and backyard area."
+    ]
+  }
+}

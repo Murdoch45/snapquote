@@ -1,0 +1,135 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T19:48:56.065Z",
+  "promptHash": "4861564dea61ca65c4fd7915fcb6e3115a71e8b6d51237cf02c58516122f8aa5",
+  "keyHash": "b2735e26ebc95ffb84f392406b002a5081fe545089a2a6d80f1d19f8d939f855",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Roofing"
+    ],
+    "address": "2070 King College Rd, Bristol, TN 37620, USA",
+    "addressPlaceId": "ChIJ32Mu-bV2UIgR8C_BrBTmahI",
+    "lat": 36.5870892,
+    "lng": -82.1329154,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Roofing",
+        "answers": {
+          "roofing_access": "Not sure",
+          "roofing_problem": "Leak or water issue",
+          "roofing_scope": "Entire roof",
+          "roofing_type": "Flat roof",
+          "roofing_work_type": "Full roof replacement"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests full replacement of an entire flat roof due to leak/water issue. Property-level imagery and questionnaire indicate single-story large residential roof; access unknown.",
+    "condition": "moderate",
+    "access": "moderate",
+    "severity": "major",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "flat_roof_membrane_possible",
+    "inferredScope": "full_roof_replacement",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "full_roof_replacement",
+      "flat_roof",
+      "leak_repair_required",
+      "large_roof_area"
+    ],
+    "estimatorNotes": [
+      "Customer selected full roof replacement for a flat roof citing leak/water issue.",
+      "No explicit roof square footage provided; roof area inferred from building footprint."
+    ],
+    "serviceSignals": {
+      "Roofing": {
+        "serviceType": "Roofing",
+        "jobSubtype": "flat_roof_replacement",
+        "jobSubtypeLabel": "Flat roof replacement",
+        "workType": "replace",
+        "fallbackFamily": "roof_like_surface",
+        "surfaceFamily": "roof_like_surface",
+        "targetObjectFamily": "roof",
+        "sizeBucket": "large",
+        "estimatedQuantity": 4200,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "membrane_roofing",
+        "materialSubtype": "unknown_membrane",
+        "conditionClass": "water_damage",
+        "severityClass": "major",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "single_story",
+        "stories": 1,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": "flat",
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": true,
+        "aiConfidence": 72,
+        "aiConfidenceReasons": [
+          "Customer explicitly requested full roof replacement for entire roof.",
+          "Roof type provided as flat in questionnaire.",
+          "No direct roof area provided; area inferred from building footprint."
+        ],
+        "consistencyScore": 86,
+        "notes": [
+          "Confirm roof penetrations, insulation, and exact membrane type on site.",
+          "Access and staging details unknown — recommend manual review prior to quote."
+        ],
+        "summary": "Full flat roof replacement for entire roof due to leaking."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about full roof replacement and roof type.",
+      "Roof area estimated from building footprint and house square footage."
+    ]
+  }
+}

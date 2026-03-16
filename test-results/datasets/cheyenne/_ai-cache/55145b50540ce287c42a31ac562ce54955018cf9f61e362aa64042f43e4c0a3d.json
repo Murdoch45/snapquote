@@ -1,0 +1,121 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T02:26:55.006Z",
+  "promptHash": "eef5524584d57623d7de34d19284045b792f92e17d2928df5789fccc419ec43f",
+  "keyHash": "55145b50540ce287c42a31ac562ce54955018cf9f61e362aa64042f43e4c0a3d",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Lawn Care / Maintenance"
+    ],
+    "address": "1696 North Pass Trl, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJfeI3GdQ4b4cRiz4wRGjyh-I",
+    "lat": 41.2460767,
+    "lng": -104.7575577,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Lawn Care / Maintenance",
+        "answers": {
+          "lawn_area_size": "Medium yard (~2,000-5,000 sq ft)",
+          "lawn_condition": "Very overgrown",
+          "lawn_property_type": "Other",
+          "lawn_property_type_other_text": "custom scope requested for lawn property type 52",
+          "lawn_work_type": "Overgrown cleanup"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Overgrown lawn cleanup requested for medium-sized yard; general debris and mowing/cleanup expected.",
+    "condition": "moderate",
+    "access": "easy",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "turf/dirt",
+    "inferredScope": "full backyard lawn cleanup including mowing, edging, and debris removal",
+    "treeSize": "small",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "overgrown_vegetation",
+      "yard_size",
+      "debris_removal"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Overgrown cleanup' and specified medium yard (2,000-5,000 sq ft).",
+      "Satellite/backyard estimate suggests ~5,700 sqft backyard; use customer-provided band for sizing."
+    ],
+    "serviceSignals": {
+      "Lawn Care / Maintenance": {
+        "serviceType": "Lawn Care / Maintenance",
+        "jobSubtype": "overgrown_cleanup",
+        "jobSubtypeLabel": "Overgrown cleanup",
+        "workType": "remove",
+        "fallbackFamily": "yard_area",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "turf",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 4000,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "direct",
+        "materialClass": "turf",
+        "materialSubtype": "mixed_grass_dirt",
+        "conditionClass": "very_overgrown",
+        "severityClass": "moderate",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": false,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": true,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": false,
+        "aiConfidence": 78,
+        "aiConfidenceReasons": [
+          "Customer explicitly selected overgrown cleanup and provided medium yard size band.",
+          "Satellite imagery and property data support backyard lawn presence and scale."
+        ],
+        "consistencyScore": 90,
+        "notes": [
+          "Use customer yard size band for quantity (2k-5k sqft); backend backyard estimate is larger but follow questionnaire for scope.",
+          "Expect mowing, trimming, light debris removal, and haul-away."
+        ],
+        "summary": "Medium-sized overgrown lawn cleanup covering main backyard area (~4,000 sqft estimated)."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about work type and yard size.",
+      "Property context and imagery support a single backyard lawn area."
+    ]
+  }
+}

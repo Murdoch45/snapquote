@@ -1,0 +1,128 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T06:12:26.762Z",
+  "promptHash": "7f451a791b8aca5816fad9840094eb2a4b0ae0402ce03c67bad63ee605f751ad",
+  "keyHash": "cbf8367a2107742be84b66e8390f0e11f1a98ab90645afc12f526f5cdc634198",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Roofing"
+    ],
+    "address": "8260 Oakwood Ave, Los Angeles, CA 90048, USA",
+    "addressPlaceId": "ChIJoyhFqMq-woAR_VBTx51HS3c",
+    "lat": 34.0779676,
+    "lng": -118.3694635,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Roofing",
+        "answers": {
+          "roofing_access": "Steep or difficult",
+          "roofing_problem": "Missing or damaged area",
+          "roofing_scope": "One area or slope",
+          "roofing_type": "Metal",
+          "roofing_work_type": "Leak repair"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Metal roof leak repair on one slope/area; steep access.",
+    "condition": "moderate",
+    "access": "difficult",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "metal",
+    "inferredScope": "single localized repair on one slope/area",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "steep_access",
+      "metal_roof_repair",
+      "localized_damage"
+    ],
+    "estimatorNotes": [
+      "Customer selected leak repair on a metal roof, scope limited to one area/slope.",
+      "Steep/difficult roof access increases complexity and safety requirements."
+    ],
+    "serviceSignals": {
+      "Roofing": {
+        "serviceType": "Roofing",
+        "jobSubtype": "leak_repair",
+        "jobSubtypeLabel": "Leak repair",
+        "workType": "repair",
+        "fallbackFamily": "roof_like_surface",
+        "surfaceFamily": "roof_like_surface",
+        "targetObjectFamily": "roof",
+        "sizeBucket": "small",
+        "estimatedQuantity": 1,
+        "quantityUnit": "count",
+        "quantityEvidence": "direct",
+        "materialClass": "metal",
+        "materialSubtype": "metal_panel",
+        "conditionClass": "localized_damage",
+        "severityClass": "moderate",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "low",
+        "heightClass": "single_story",
+        "stories": 1,
+        "slopeClass": "steep",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": "metal",
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 80,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly states leak repair on metal roof and scope 'one area or slope'.",
+          "Satellite and photo confirm residential single-story property with metal roof present."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Scope limited to one localized repair; further inspection recommended to confirm extent.",
+          "Steep access may require fall protection and ladder/rigging."
+        ],
+        "summary": "Small metal roof leak repair on a single steep slope/area."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 0,
+        "confidence": 0
+      }
+    ],
+    "surfaceDetectionConfidence": 30,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 90,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.2,
+    "materialMultiplier": 1.1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1,
+    "estateScore": 10000,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about roof material and leak scope.",
+      "Imagery and property data support a small residential roof repair."
+    ]
+  }
+}

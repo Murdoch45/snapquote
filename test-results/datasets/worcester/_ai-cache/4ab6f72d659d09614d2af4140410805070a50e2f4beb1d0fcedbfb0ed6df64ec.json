@@ -1,0 +1,121 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T21:34:40.363Z",
+  "promptHash": "5b0e325a3110d40c91c93cfd55f8b2c60eb7a739b3f2e024ab10ba9ec3638c30",
+  "keyHash": "4ab6f72d659d09614d2af4140410805070a50e2f4beb1d0fcedbfb0ed6df64ec",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Lawn Care / Maintenance"
+    ],
+    "address": "31 Lenox St, Worcester, MA 01602, USA",
+    "addressPlaceId": "ChIJD1cICMIG5IkRYY1iKGn1gck",
+    "lat": 42.2777158,
+    "lng": -71.8334735,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Lawn Care / Maintenance",
+        "answers": {
+          "lawn_area_size": "Small yard (up to ~2,000 sq ft)",
+          "lawn_condition": "Very overgrown",
+          "lawn_property_type": "Front and backyard",
+          "lawn_work_type": "Mowing only"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests mowing of front and backyard; very overgrown conditions reported.",
+    "condition": "heavy",
+    "access": "easy",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": true,
+    "materialHint": "grass",
+    "inferredScope": "Mow front and back yard, likely bag/trim edges as needed",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": 0,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 78,
+    "pricingDrivers": [
+      "overgrown_lawn",
+      "front_and_backyard",
+      "yard_size_uncertainty"
+    ],
+    "estimatorNotes": [
+      "Questionnaire explicitly selected 'Mowing only' and 'Small yard (up to ~2,000 sq ft)'.",
+      "Property data suggests larger backyard but questionnaire is primary — using customer's stated size for scope.",
+      "Satellite imagery shows a pool on property; care to avoid pool area during mowing."
+    ],
+    "serviceSignals": {
+      "Lawn Care / Maintenance": {
+        "serviceType": "Lawn Care / Maintenance",
+        "jobSubtype": "mowing",
+        "jobSubtypeLabel": "Mowing",
+        "workType": "maintain",
+        "fallbackFamily": "yard_area",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 2000,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "direct",
+        "materialClass": "grass",
+        "materialSubtype": "turf_lawn",
+        "conditionClass": "very_overgrown",
+        "severityClass": "moderate",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": true,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 76,
+        "aiConfidenceReasons": [
+          "Customer explicitly selected mowing and provided yard size band.",
+          "Satellite shows residential yard and pool consistent with mowing scope."
+        ],
+        "consistencyScore": 80,
+        "notes": [
+          "Use customer's 'Small yard' selection (up to ~2,000 sqft) as primary quantity despite larger backyard estimate in property data.",
+          "Confirm whether bagging or basic edge trimming is desired during scheduling."
+        ],
+        "summary": "Mowing service for front and backyard (customer-stated small yard up to ~2,000 sqft), very overgrown."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 86,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about service type and yard size band.",
+      "Satellite confirms residential yard and presence of pool; no conflicting signals in photos."
+    ]
+  }
+}

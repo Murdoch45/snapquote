@@ -1,3 +1,4 @@
+import "server-only";
 import { startOfDay, subDays } from "date-fns";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -46,6 +47,7 @@ export async function getAnalytics(orgId: string) {
       .from("leads")
       .select("id,submitted_at,services,status")
       .eq("org_id", orgId)
+      .eq("ai_status", "ready")
       .gte("submitted_at", since),
     supabase
       .from("quotes")

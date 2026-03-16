@@ -1,0 +1,145 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T08:11:29.063Z",
+  "promptHash": "06bfec6fb34d740251b939bb8574f9232e0d07fe734a2fa25cc850f93609afb3",
+  "keyHash": "06dc3c690d9c51653f6a10bb5f201301e1a97b89de13d79b9d99cc118954adae",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Roofing"
+    ],
+    "address": "424 NW 29th St, Oklahoma City, OK 73103, USA",
+    "addressPlaceId": "ChIJQ7Rvw1MXsocRLG8Dbk3Y5Yw",
+    "lat": 35.4992706,
+    "lng": -97.5201175,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Roofing",
+        "answers": {
+          "roofing_access": "Easy",
+          "roofing_problem": "Leak or water issue",
+          "roofing_scope": "Small section",
+          "roofing_type": "Metal",
+          "roofing_work_type": "Leak repair"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Small metal roof leak repair on a localized section. Easy access reported.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "metal",
+    "inferredScope": "small section repair for leak",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "roof material: metal",
+      "localized leak repair",
+      "easy access"
+    ],
+    "estimatorNotes": [
+      "Customer selected leak repair on metal roof (small section).",
+      "No dimensions provided; scope inferred as a small localized repair."
+    ],
+    "serviceSignals": {
+      "Roofing": {
+        "serviceType": "Roofing",
+        "jobSubtype": "leak_repair",
+        "jobSubtypeLabel": "Leak repair",
+        "workType": "repair",
+        "fallbackFamily": "roof_like_surface",
+        "surfaceFamily": "roof_like_surface",
+        "targetObjectFamily": "roof",
+        "sizeBucket": "small",
+        "estimatedQuantity": 0.2,
+        "quantityUnit": "roof_square",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "metal",
+        "materialSubtype": "standing_seam_or_sheet_metal",
+        "conditionClass": "leak_present",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "single_story",
+        "stories": 1,
+        "slopeClass": "some_slope",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": "metal",
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 72,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly lists leak repair and metal roof.",
+          "Scope described as small section, supporting small size bucket."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "No dimensions provided; recommend confirming exact damaged area before pricing."
+        ],
+        "summary": "Small metal roof leak repair, easy access, single-story.",
+        "quotedSurfaces": {
+          "driveway": 2100
+        },
+        "surfaceDetections": [
+          {
+            "surface_type": "driveway",
+            "surface_area_sqft": 2100,
+            "confidence": 0.84
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "quotedSurfaces": {
+      "driveway": 2100
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Property context and imagery support the inferred scope."
+    ]
+  }
+}

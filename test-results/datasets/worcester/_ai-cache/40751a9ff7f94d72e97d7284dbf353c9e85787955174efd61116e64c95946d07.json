@@ -1,0 +1,137 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T21:36:05.983Z",
+  "promptHash": "71993a881b0a26c5407a30d2dd6b2a6cb6d93e5667ee86f61cea54ad631f63e0",
+  "keyHash": "40751a9ff7f94d72e97d7284dbf353c9e85787955174efd61116e64c95946d07",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Fence Installation / Repair"
+    ],
+    "address": "31 Lenox St, Worcester, MA 01602, USA",
+    "addressPlaceId": "ChIJD1cICMIG5IkRYY1iKGn1gck",
+    "lat": 42.2777158,
+    "lng": -71.8334735,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Fence Installation / Repair",
+        "answers": {
+          "fence_material": "Vinyl",
+          "fence_repair_condition": "Fence is falling or missing sections",
+          "fence_scope": "One side (~25-75 linear ft)",
+          "fence_site": "Flat and clear",
+          "fence_work_type": "New fence installation"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests new vinyl fence installation on one side of property (approx 25-75 lf); some existing fence sections are missing or failing.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "vinyl",
+    "inferredScope": "One side of yard, approximately 25-75 linear feet",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 68,
+    "pricingDrivers": [
+      "material:vinyl",
+      "linear_ft",
+      "removal_and_haul_away_possible"
+    ],
+    "estimatorNotes": [
+      "Customer selected new vinyl fence, scope given as one side ~25-75 lf.",
+      "Photos and property context show a typical residential lot with easy access and flat terrain."
+    ],
+    "serviceSignals": {
+      "Fence Installation / Repair": {
+        "serviceType": "Fence Installation / Repair",
+        "jobSubtype": "fence_installation",
+        "jobSubtypeLabel": "New vinyl fence - one side (~25-75 lf)",
+        "workType": "install",
+        "fallbackFamily": "linear_boundary",
+        "surfaceFamily": "linear_boundary",
+        "targetObjectFamily": "fence",
+        "sizeBucket": "small",
+        "estimatedQuantity": 50,
+        "quantityUnit": "linear_ft",
+        "quantityEvidence": "direct",
+        "materialClass": "vinyl",
+        "materialSubtype": "standard_vinyl",
+        "conditionClass": "missing_or_falling_sections",
+        "severityClass": "moderate",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 78,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly requests new vinyl fence and gives linear foot range.",
+          "Property imagery and lot size support single-side installation and easy access."
+        ],
+        "consistencyScore": 90,
+        "notes": [
+          "Use vinyl material per selection.",
+          "Prepare to remove failing sections and haul away debris if present."
+        ],
+        "summary": "Install approx 50 lf of new vinyl fence on one side; removal of existing damaged sections likely needed."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 350,
+        "confidence": 0.68
+      },
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 120,
+        "confidence": 0.6
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 350,
+      "walkway": 120
+    },
+    "surfaceDetectionConfidence": 70,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1.2,
+    "regionMultiplier": 1,
+    "luxuryMultiplier": 1,
+    "estateScore": 8200,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about new vinyl fence and linear footage range.",
+      "Satellite and photo evidence indicate flat, accessible residential lot consistent with requested scope."
+    ]
+  }
+}

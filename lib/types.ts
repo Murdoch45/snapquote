@@ -1,12 +1,7 @@
-export const SERVICE_OPTIONS = [
-  "Landscaping",
-  "Lawn Care",
-  "Fence",
-  "Roofing",
-  "Pressure Washing"
-] as const;
+import type { ServiceType } from "@/lib/services";
 
-export type ServiceType = (typeof SERVICE_OPTIONS)[number];
+export { SERVICE_OPTIONS } from "@/lib/services";
+export type { ServiceType } from "@/lib/services";
 
 export const ORG_PLANS = ["SOLO", "TEAM", "BUSINESS"] as const;
 export type OrgPlan = (typeof ORG_PLANS)[number];
@@ -20,12 +15,53 @@ export type LeadStatus = (typeof LEAD_STATUS)[number];
 export const QUOTE_STATUS = ["SENT", "VIEWED", "ACCEPTED", "EXPIRED"] as const;
 export type QuoteStatus = (typeof QUOTE_STATUS)[number];
 
+export const SERVICE_CATEGORIES = [
+  "hardscape",
+  "softscape",
+  "fencing",
+  "cleaning",
+  "demolition",
+  "grading",
+  "pool",
+  "deck",
+  "irrigation",
+  "other"
+] as const;
+export type ServiceCategory = (typeof SERVICE_CATEGORIES)[number];
+
+export const LEAD_CONFIDENCE = ["low", "medium", "high"] as const;
+export type LeadConfidence = (typeof LEAD_CONFIDENCE)[number];
+
+export type LeadAiCostBreakdown = {
+  retaining_wall: number;
+  walkway: number;
+  patio: number;
+  grading: number;
+  landscaping: number;
+  irrigation: number;
+  fire_pit: number;
+  fence: number;
+  deck: number;
+  cleaning: number;
+  demo_removal: number;
+  outdoor_living: number;
+  regional_adjustment: number;
+  travel_adjustment: number;
+  terrain_adjustment: number;
+  access_adjustment: number;
+  material_tier_adjustment: number;
+  minimum_job_adjustment: number;
+};
+
 export type LeadAiOutput = {
-  jobSummary: string;
-  estimateLow: number;
-  estimateHigh: number;
-  suggestedPrice: number;
-  draftMessage: string;
+  snapQuote: number;
+  message: string;
+  summary: string;
+  confidence?: LeadConfidence;
+  confidenceScore?: number;
+  serviceCategory?: ServiceCategory;
+  jobType?: string;
+  costBreakdown?: LeadAiCostBreakdown;
 };
 
 export type LeadFormPayload = {

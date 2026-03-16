@@ -1,0 +1,161 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T23:52:15.498Z",
+  "promptHash": "78c4fe1e95f1f1e418f4bea93290b5a4f8971a2307bdf7eac735d67b31bf29a4",
+  "keyHash": "43d4d760ac46b5d609b28e580450e543225602546809ddaafd37f153d7ef6073",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Outdoor Lighting Installation"
+    ],
+    "address": "1696 North Pass Trl, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJfeI3GdQ4b4cRiz4wRGjyh-I",
+    "lat": 41.2460767,
+    "lng": -104.7575577,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Outdoor Lighting Installation",
+        "answers": {
+          "lighting_install_difficulty": "Complex or large-property installation",
+          "lighting_power": "No",
+          "lighting_scope": "Not sure",
+          "lighting_type": [
+            "Other",
+            "Pathway lights",
+            "Patio or string lights"
+          ],
+          "lighting_type_other_text": "premium material preference for lighting type 83",
+          "lighting_work_type": "Install a basic new lighting setup"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requested new outdoor lighting installation (pathway and patio/string lights) but scope unspecified; recommend site visit to finalize fixture count and layout.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": true,
+    "materialHint": "landscape lighting / low-voltage",
+    "inferredScope": "pathway and patio/entertainment area lighting with premium material preference",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": 15,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "fixture_count",
+      "complex_installation",
+      "premium_materials"
+    ],
+    "estimatorNotes": [
+      "Customer selected pathway and patio/string lights and indicated premium material preference.",
+      "Customer unsure of exact scope; satellite imagery shows modest driveway and walkways, yard area suitable for pathway lighting.",
+      "Manual site visit recommended to confirm power runs and final fixture count."
+    ],
+    "serviceSignals": {
+      "Outdoor Lighting Installation": {
+        "serviceType": "Outdoor Lighting Installation",
+        "jobSubtype": "landscape_lighting",
+        "jobSubtypeLabel": "Landscape / Pathway / Patio Lighting",
+        "workType": "install",
+        "fallbackFamily": "lighting_system",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "fixture_group",
+        "sizeBucket": "small",
+        "estimatedQuantity": 15,
+        "quantityUnit": "fixture_count",
+        "quantityEvidence": "weak_inference",
+        "materialClass": "low_voltage",
+        "materialSubtype": "premium_preference",
+        "conditionClass": "new_install",
+        "severityClass": "minor",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": true,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 68,
+        "aiConfidenceReasons": [
+          "Questionnaire indicates multiple lighting types but scope is 'Not sure'.",
+          "Satellite imagery shows yard and walkways suitable for pathway lighting but no explicit fixture counts."
+        ],
+        "consistencyScore": 72,
+        "notes": [
+          "Customer prefers premium material (other_text provided).",
+          "Power availability unknown (customer answered No to lighting_power). Manual review required to assess transformer/line runs."
+        ],
+        "summary": "Install small landscape lighting system (~15 fixtures) for pathways and patio/string lights; site visit needed to confirm layout and power.",
+        "surfaceDetections": [
+          {
+            "surface_type": "walkway",
+            "surface_area_sqft": 150,
+            "confidence": 0.78
+          },
+          {
+            "surface_type": "driveway",
+            "surface_area_sqft": 400,
+            "confidence": 0.8
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 400,
+        "confidence": 0.8
+      },
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 150,
+        "confidence": 0.78
+      },
+      {
+        "surface_type": "patio",
+        "surface_area_sqft": 0,
+        "confidence": 0.4
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 400,
+      "walkway": 150
+    },
+    "surfaceDetectionConfidence": 76,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 70,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 7200,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire indicates new install but scope uncertain.",
+      "Satellite imagery provides general layout but not fixture-level detail."
+    ]
+  }
+}

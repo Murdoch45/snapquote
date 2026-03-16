@@ -1,0 +1,121 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T00:02:26.920Z",
+  "promptHash": "06fe68f88980a09d3cb3cc97737e5db75e168f3585fe68d2fb3b959185bd8251",
+  "keyHash": "fd012f918896a1adceba7cfc280a1d3df94b1f3ad33b96eab9267529734007c3",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Lawn Care / Maintenance"
+    ],
+    "address": "8260 Oakwood Ave, Los Angeles, CA 90048, USA",
+    "addressPlaceId": "ChIJoyhFqMq-woAR_VBTx51HS3c",
+    "lat": 34.0779676,
+    "lng": -118.3694635,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Lawn Care / Maintenance",
+        "answers": {
+          "lawn_area_size": "Not sure",
+          "lawn_condition": "Slightly overgrown",
+          "lawn_property_type": "Other",
+          "lawn_property_type_other_text": "custom scope requested for lawn property type 13",
+          "lawn_work_type": "Mowing and edging"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests mowing and edging for slightly overgrown lawn (custom property type). Scope likely includes primary yard areas (front and back).",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "turf/grass",
+    "inferredScope": "mowing and edging of primary lawn areas (front and backyard)",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "lawn_area_size",
+      "overgrowth_level",
+      "access"
+    ],
+    "estimatorNotes": [
+      "Customer selected mowing and edging and reported 'slightly overgrown'.",
+      "No explicit area dimensions provided; backyard area available from property data used to infer lawn size."
+    ],
+    "serviceSignals": {
+      "Lawn Care / Maintenance": {
+        "serviceType": "Lawn Care / Maintenance",
+        "jobSubtype": "mowing",
+        "jobSubtypeLabel": "Mowing & Edging",
+        "workType": "maintain",
+        "fallbackFamily": "yard_area",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "grass_lawn",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 3500,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "grass",
+        "materialSubtype": "turf",
+        "conditionClass": "slightly_overgrown",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": false,
+        "aiConfidence": 70,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly requested mowing and edging.",
+          "Property data provides backyard area enabling a reasonable area inference."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Use estimatedBackyardSqft as primary area evidence; front yard assumed small additional area within medium bucket.",
+          "Customer flagged 'Other' property type with custom scope text; treat as standard residential lawn with custom note."
+        ],
+        "summary": "Mowing and edging of residential lawn estimated at medium size (~3500 sqft) with light overgrowth."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about mowing and edging.",
+      "Property context and imagery support a residential lawn scope and medium size estimate."
+    ]
+  }
+}

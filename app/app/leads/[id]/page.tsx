@@ -1,10 +1,14 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { format } from "date-fns";
+import { LeadPropertyPreview } from "@/components/LeadPropertyPreview";
+import { ConfidenceMeter } from "@/components/ConfidenceMeter";
 import { QuoteComposer } from "@/components/QuoteComposer";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireAuth } from "@/lib/auth/requireAuth";
+import { DEFAULT_QUOTE_SMS_TEMPLATE, sanitizeQuoteTemplate } from "@/lib/quote-template";
+import { formatServiceQuestionAnswers, parseServiceQuestionBundles } from "@/lib/serviceQuestions";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getMonthlyUsage } from "@/lib/usage";
 import { toCurrency, toRelativeMinutes } from "@/lib/utils";
@@ -19,7 +23,7 @@ export default async function LeadDetailPage({ params }: Props) {
   const supabase = await createServerSupabaseClient();
   const usage = await getMonthlyUsage(auth.orgId);
 
-  const [{ data: lead }, { data: photos }, { data: existingQuote }] = await Promise.all([
+  const [{ data: lead }, { data: photos }, { data: existingQuote }, { data: profile }] = await Promise.all([
     supabase
       .from("leads")
       .select("*")
@@ -31,16 +35,32 @@ export default async function LeadDetailPage({ params }: Props) {
       .select("id,storage_path,public_url")
       .eq("lead_id", id)
       .eq("org_id", auth.orgId),
-    supabase.from("quotes").select("*").eq("lead_id", id).maybeSingle()
+    supabase.from("quotes").select("*").eq("lead_id", id).maybeSingle(),
+    supabase
+      .from("contractor_profile")
+      .select("business_name,phone,email,quote_sms_template")
+      .eq("org_id", auth.orgId)
+      .single()
   ]);
 
   if (!lead) notFound();
 
-  const mapKey = process.env.GOOGLE_MAPS_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-  const mapUrl =
-    lead.lat && lead.lng && mapKey
-      ? `https://maps.googleapis.com/maps/api/staticmap?center=${lead.lat},${lead.lng}&zoom=16&size=1200x300&markers=color:blue%7C${lead.lat},${lead.lng}&key=${mapKey}`
+  const requestedService = ((lead.services as string[] | null) ?? [])[0] ?? "unknown";
+  const aiServiceEstimates = Array.isArray(lead.ai_service_estimates)
+    ? (lead.ai_service_estimates as Array<{ scopeSummary?: unknown }>)
+    : [];
+  const fallbackScopeSummary =
+    typeof aiServiceEstimates[0]?.scopeSummary === "string"
+      ? `${requestedService}: ${aiServiceEstimates[0].scopeSummary}`
       : null;
+  const surfaceAreaSummary = lead.ai_job_summary || fallbackScopeSummary || "Pending estimate...";
+  const serviceQuestionBundles = parseServiceQuestionBundles(lead.service_question_answers);
+  const customerAnswerGroups = serviceQuestionBundles
+    .map((bundle) => ({
+      service: bundle.service,
+      answers: formatServiceQuestionAnswers(bundle.service, bundle.answers)
+    }))
+    .filter((bundle) => bundle.answers.length > 0);
 
   return (
     <div className="space-y-4">
@@ -82,16 +102,42 @@ export default async function LeadDetailPage({ params }: Props) {
             </section>
 
             <section>
-              <h3 className="text-sm font-semibold text-gray-800">Property</h3>
-              <p className="text-sm text-gray-700">{lead.address_full}</p>
-              {mapUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={mapUrl} alt="Map preview" className="mt-2 h-44 w-full rounded-md object-cover" />
+              <h3 className="text-sm font-semibold text-gray-800">Customer Answers</h3>
+              {customerAnswerGroups.length === 0 ? (
+                <p className="text-sm text-gray-500">No questionnaire answers available.</p>
               ) : (
-                <p className="text-xs text-gray-500">
-                  Map preview unavailable. Set Google Maps API key for static maps.
-                </p>
+                <div className="mt-2 space-y-3">
+                  {customerAnswerGroups.map((group) => (
+                    <div key={group.service} className="rounded-lg border border-gray-200 bg-gray-50 p-3">
+                      <p className="text-sm font-medium text-gray-900">{group.service}</p>
+                      <dl className="mt-3 space-y-3">
+                        {group.answers.map((answer) => (
+                          <div key={answer.key}>
+                            <dt className="text-sm font-medium text-gray-600">
+                              {answer.label}:
+                            </dt>
+                            <dd className="mt-1 text-sm text-gray-700">{answer.value}</dd>
+                          </div>
+                        ))}
+                      </dl>
+                    </div>
+                  ))}
+                </div>
               )}
+            </section>
+
+            <section>
+              <h3 className="text-sm font-semibold text-gray-800">Property</h3>
+              <p className="mt-2 text-sm text-gray-600">
+                {lead.travel_distance_miles != null
+                  ? `Approx. travel distance from business: ${Number(lead.travel_distance_miles).toFixed(1)} miles`
+                  : "Travel distance not included for this lead."}
+              </p>
+              <LeadPropertyPreview
+                address={lead.address_full as string}
+                lat={lead.lat as number | null}
+                lng={lead.lng as number | null}
+              />
             </section>
 
             <section>
@@ -122,15 +168,28 @@ export default async function LeadDetailPage({ params }: Props) {
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
               <p className="text-gray-700">
-                Range: {toCurrency(Number(lead.ai_estimate_low ?? 0))} -{" "}
-                {toCurrency(Number(lead.ai_estimate_high ?? 0))}
+                SnapQuote price: {toCurrency(Number(lead.ai_suggested_price ?? 0))}
               </p>
               <p className="text-gray-700">
-                Suggested: {toCurrency(Number(lead.ai_suggested_price ?? 0))}
+                Range:{" "}
+                {lead.ai_estimate_low != null && lead.ai_estimate_high != null
+                  ? `${toCurrency(Number(lead.ai_estimate_low))} - ${toCurrency(Number(lead.ai_estimate_high))}`
+                  : "Pending estimate..."}
               </p>
-              <p className="text-gray-700">{lead.ai_job_summary || "Pending estimate..."}</p>
+              <p className="text-gray-700">Surface area: {surfaceAreaSummary}</p>
             </CardContent>
           </Card>
+          <ConfidenceMeter
+            confidence={
+              lead.ai_confidence_score != null
+                ? Number(lead.ai_confidence_score)
+                : lead.ai_confidence === "high"
+                  ? 0.85
+                  : lead.ai_confidence === "medium"
+                    ? 0.65
+                    : 0.4
+            }
+          />
           <Card>
             <CardHeader>
               <CardTitle>Send Quote</CardTitle>
@@ -149,13 +208,10 @@ export default async function LeadDetailPage({ params }: Props) {
               ) : (
                 <QuoteComposer
                   leadId={lead.id as string}
-                  estimateLow={Number(lead.ai_estimate_low ?? 250)}
-                  estimateHigh={Number(lead.ai_estimate_high ?? 2500)}
-                  suggestedPrice={Number(lead.ai_suggested_price ?? 900)}
-                  draftMessage={
-                    (lead.ai_draft_message as string) ||
-                    "Thanks for the request. Here is your estimate."
-                  }
+                  snapQuote={Number(lead.ai_suggested_price ?? 900)}
+                  initialMessage={sanitizeQuoteTemplate((profile?.quote_sms_template as string | null) ?? DEFAULT_QUOTE_SMS_TEMPLATE)}
+                  customerPhone={(lead.customer_phone as string | null) ?? null}
+                  customerEmail={(lead.customer_email as string | null) ?? null}
                   canSend={usage.canSend}
                 />
               )}

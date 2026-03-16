@@ -1,0 +1,123 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T00:01:13.977Z",
+  "promptHash": "aa8782f163c168dc6ca2eb918cc4228893ab575f4ad4ee7ca71f0f6dba635bfd",
+  "keyHash": "5b5c9ff6c917e4bfea0553ba792c9460ada77f695b2a3e9e1f9670dd8782dc4c",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Gutter Cleaning"
+    ],
+    "address": "8260 Oakwood Ave, Los Angeles, CA 90048, USA",
+    "addressPlaceId": "ChIJoyhFqMq-woAR_VBTx51HS3c",
+    "lat": 34.0779676,
+    "lng": -118.3694635,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Gutter Cleaning",
+        "answers": {
+          "gutter_access": "Yes, landscaping or obstacles",
+          "gutter_building_type": "Three-story or taller",
+          "gutter_fill_level": "Very full or overflowing",
+          "gutter_work_type": "Clean gutters only"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests gutter cleaning for a three-plus story building; gutters reported very full/overflowing and landscaping obstacles present.",
+    "condition": "moderate",
+    "access": "difficult",
+    "severity": "major",
+    "debris": "moderate",
+    "multipleAreas": false,
+    "materialHint": "metal gutters (likely aluminum)",
+    "inferredScope": "Full-house gutter cleaning including downspouts; debris haul-away likely",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "three_plus_story_access",
+      "gutters_overflowing",
+      "landscaping_obstacles",
+      "debris_haul_away"
+    ],
+    "estimatorNotes": [
+      "Questionnaire explicitly states three-story or taller and gutters very full/overflowing.",
+      "Landscaping/obstacles noted for access; expect ladders/hoses routed through planting.",
+      "No direct linear footage provided; linear footage inferred from typical lot/house footprint."
+    ],
+    "serviceSignals": {
+      "Gutter Cleaning": {
+        "serviceType": "Gutter Cleaning",
+        "jobSubtype": "gutter_cleaning",
+        "jobSubtypeLabel": "Gutter Cleaning",
+        "workType": "clean",
+        "fallbackFamily": "vertical_exterior_surface",
+        "surfaceFamily": "vertical_exterior_surface",
+        "targetObjectFamily": "gutter_system",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 200,
+        "quantityUnit": "linear_ft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "metal",
+        "materialSubtype": "aluminum",
+        "conditionClass": "very_full",
+        "severityClass": "major",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "moderate",
+        "heightClass": "three_plus",
+        "stories": 3,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": true,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": true,
+        "aiConfidence": 72,
+        "aiConfidenceReasons": [
+          "Customer explicitly indicated three-story building and very full gutters.",
+          "Landscaping/obstacles flagged which increases access difficulty.",
+          "No explicit linear footage provided; estimate inferred from property footprint."
+        ],
+        "consistencyScore": 80,
+        "notes": [
+          "Recommend confirmation of gutter linear footage and downspout count on manual review.",
+          "Expect additional charge for three-story access and debris haul-away."
+        ],
+        "summary": "Full-house gutter cleaning for a three-plus story residence; gutters reported overflowing with moderate debris and access obstacles."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.2,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": true,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about building height and gutter condition.",
+      "Imagery and property context support residential multi-story access complexity."
+    ]
+  }
+}

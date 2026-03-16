@@ -1,0 +1,151 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T21:36:41.121Z",
+  "promptHash": "5aca59010df50c4cf04a5edb5744fcf5f966c224e4d2adb9f03e867a9df25916",
+  "keyHash": "425b70e8f5f0b6c080cb8209ccb38cb9ce3f74ae2debbcfd9c1950f8e9d73cdd",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Concrete"
+    ],
+    "address": "31 Lenox St, Worcester, MA 01602, USA",
+    "addressPlaceId": "ChIJD1cICMIG5IkRYY1iKGn1gck",
+    "lat": 42.2777158,
+    "lng": -71.8334735,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Concrete",
+        "answers": {
+          "concrete_material": "Stamped or decorative concrete",
+          "concrete_project_type": [
+            "Driveway"
+          ],
+          "concrete_scope": "Large (~600-1,500 sq ft)",
+          "concrete_site_condition": "Tight or difficult access",
+          "concrete_work_type": "Replacement"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests stamped/decorative concrete driveway replacement, large single-area scope inferred from questionnaire and property context.",
+    "condition": "moderate",
+    "access": "difficult",
+    "severity": "major",
+    "debris": "moderate",
+    "multipleAreas": false,
+    "materialHint": "stamped or decorative concrete",
+    "inferredScope": "driveway replacement approximately 600-1,500 sqft (customer indicated large)",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "replacement",
+      "stamped_decorative",
+      "tight_access",
+      "haul_off_debris"
+    ],
+    "estimatorNotes": [
+      "Questionnaire explicitly requests driveway replacement and lists stamped/decorative material.",
+      "Customer selected large scope (~600-1,500 sqft); use conservative mid-range estimate for quoting.",
+      "Satellite imagery shows larger paved areas; quoted scope follows customer-provided range."
+    ],
+    "serviceSignals": {
+      "Concrete": {
+        "serviceType": "Concrete",
+        "jobSubtype": "driveway",
+        "jobSubtypeLabel": "Driveway",
+        "workType": "replace",
+        "fallbackFamily": "flat_hardscape",
+        "surfaceFamily": "flat_hardscape",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 950,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "concrete",
+        "materialSubtype": "stamped_decorative",
+        "conditionClass": "failed",
+        "severityClass": "major",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": true,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": true,
+        "aiConfidence": 70,
+        "aiConfidenceReasons": [
+          "Customer explicitly selected driveway replacement and stamped/decorative material in questionnaire.",
+          "Scope provided as a range (~600-1,500 sqft) so quantity is inferred rather than directly measured.",
+          "Satellite imagery confirms significant paved area but not exact footprint for replacement."
+        ],
+        "consistencyScore": 80,
+        "notes": [
+          "Use mid-range estimate from customer-provided scope for initial quoting.",
+          "Tight access may increase labor and equipment costs; recommend site visit for final measurement."
+        ],
+        "summary": "Stamped decorative concrete driveway replacement, medium-sized (~950 sqft) with difficult access; removal and haul-away required.",
+        "quotedSurfaces": {
+          "driveway": 950
+        },
+        "surfaceDetections": [
+          {
+            "surface_type": "driveway",
+            "surface_area_sqft": 2100,
+            "confidence": 0.84
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "quotedSurfaces": {
+      "driveway": 950
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.15,
+    "materialMultiplier": 1.2,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about replacement and material.",
+      "Satellite and photo evidence support presence of a driveway but not exact replacement footprint; follow-up recommended."
+    ]
+  }
+}

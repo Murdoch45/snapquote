@@ -18,6 +18,9 @@ export default async function HomePage() {
         <div className="flex gap-3">
           <GetStartedFlow />
           <Button asChild variant="outline" size="lg">
+            <Link href="/pricing">Pricing</Link>
+          </Button>
+          <Button asChild variant="outline" size="lg">
             <Link href="/login">Sign in</Link>
           </Button>
         </div>

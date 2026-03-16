@@ -1,0 +1,134 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T19:38:41.503Z",
+  "promptHash": "16ff30c089bfc339d4b14e14dc7da971061a074452215314ad711230a4edc270",
+  "keyHash": "ddbbdce78544b791684b0e4eb85513eddc46d9e7965ca1fd93e7557b157a006a",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Window Cleaning"
+    ],
+    "address": "1216 Norway St, Bristol, VA 24201, USA",
+    "addressPlaceId": "ChIJSQAVgxN2UIgRc62c8VJioW0",
+    "lat": 36.5970084,
+    "lng": -82.1960856,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Window Cleaning",
+        "answers": {
+          "window_access": "Hard-to-reach areas",
+          "window_count": "11-25",
+          "window_property_type": "Two-story home",
+          "window_target_type": "Other",
+          "window_target_type_other_text": "premium material preference for window target type 59"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests window cleaning for a two-story home with hard-to-reach areas; estimated mid-range window count within provided 11-25 range.",
+    "condition": "light",
+    "access": "moderate",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "glass",
+    "inferredScope": "exterior windows, two-story access required, possible specialty/exterior fixtures",
+    "treeSize": "medium",
+    "estimatedWindowCount": 18,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "two_story_access",
+      "hard_to_reach_windows",
+      "window_count_11-25"
+    ],
+    "estimatorNotes": [
+      "Customer selected Window Cleaning and reported 11-25 windows.",
+      "Two-story property and hard-to-reach access increase time and safety requirements.",
+      "No pools or major debris indicated in description or photos."
+    ],
+    "serviceSignals": {
+      "Window Cleaning": {
+        "serviceType": "Window Cleaning",
+        "jobSubtype": "other",
+        "jobSubtypeLabel": "Other / Premium windows",
+        "workType": "clean",
+        "fallbackFamily": "window_group",
+        "surfaceFamily": "window_group",
+        "targetObjectFamily": "window_group",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 18,
+        "quantityUnit": "count",
+        "quantityEvidence": "direct",
+        "materialClass": "glass",
+        "materialSubtype": "standard",
+        "conditionClass": "cleaning_required",
+        "severityClass": "minor",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "low",
+        "heightClass": "two_story",
+        "stories": 2,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 76,
+        "aiConfidenceReasons": [
+          "Customer provided window count range and access notes.",
+          "Property imagery shows residential two-story building consistent with questionnaire."
+        ],
+        "consistencyScore": 90,
+        "notes": [
+          "Use extension ladders or water-fed pole for hard-to-reach windows.",
+          "Confirm exact window types and any screens or tracks that need service during scheduling call."
+        ],
+        "summary": "Medium-sized exterior window cleaning for a two-story home with hard-to-reach windows."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Property context and imagery support the inferred scope."
+    ]
+  }
+}

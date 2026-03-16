@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang='en'>
+<head>
+<meta charset='utf-8' />
+<meta name='viewport' content='width=device-width, initial-scale=1' />
+<title>Worcester Estimator Dashboard</title>
+<style>
+body{font-family:Segoe UI,Arial,sans-serif;margin:20px;background:#f7f8fa;color:#111}
+h1{margin:0 0 12px}
+section{background:#fff;border:1px solid #d9dde3;border-radius:10px;padding:14px;margin:14px 0}
+h2{margin:0 0 10px;font-size:18px}
+.table-wrap{overflow:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{border:1px solid #d9dde3;padding:8px;vertical-align:top}
+th{background:#eff2f6;cursor:pointer;position:sticky;top:0}
+.delta-pos{color:#0a7a2f;font-weight:700}
+.delta-neg{color:#b42318;font-weight:700}
+.delta-zero{color:#6b7280;font-weight:700}
+pre{margin:0;white-space:pre-wrap;word-break:break-word;max-width:680px}
+</style>
+<script>
+function parseVal(v,t){if(t==='num'){const n=parseFloat(String(v).replace(/[$,+]/g,''));return isNaN(n)?0:n;}return String(v).toLowerCase();}
+function sortTable(id,col,type){const table=document.getElementById(id);const body=table.tBodies[0];const rows=[...body.rows];const dir=table.dataset.dir==='asc'?'desc':'asc';rows.sort((a,b)=>{const x=parseVal(a.cells[col].innerText,type),y=parseVal(b.cells[col].innerText,type);if(x<y)return dir==='asc'?-1:1;if(x>y)return dir==='asc'?1:-1;return 0;});rows.forEach(r=>body.appendChild(r));table.dataset.dir=dir;}
+</script>
+</head>
+<body>
+<h1>Worcester Dataset Dashboard</h1>
+
+<section>
+<h2>Section 1 - Property Overview</h2>
+<div class='table-wrap'>
+<table id='prop'>
+<thead><tr>
+<th onclick="sortTable('prop',0,'text')">address</th>
+<th onclick="sortTable('prop',1,'num')">google_building_sqft</th>
+<th onclick="sortTable('prop',2,'num')">google_lot_sqft</th>
+</tr></thead>
+<tbody><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>1533</td><td>4945</td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>2878</td><td>8280</td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>2586</td><td>8280</td></tr></tbody>
+</table>
+</div>
+</section>
+
+<section>
+<h2>Section 2 - Service Price Comparison</h2>
+<div class='table-wrap'>
+<table id='cmp'>
+<thead><tr>
+<th onclick="sortTable('cmp',0,'text')">property</th>
+<th onclick="sortTable('cmp',1,'text')">service</th>
+<th onclick="sortTable('cmp',2,'num')">baseline_price</th>
+<th onclick="sortTable('cmp',3,'num')">ai_price</th>
+<th onclick="sortTable('cmp',4,'num')">difference</th>
+</tr></thead>
+<tbody><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>Concrete</td><td>$13,750.00</td><td>$13,750.00</td><td class='delta-zero'>$0.00</td></tr><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>Deck Installation / Repair</td><td>$17,025.00</td><td>$17,025.00</td><td class='delta-zero'>$0.00</td></tr><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>Exterior Painting</td><td>$8,725.00</td><td>$8,725.00</td><td class='delta-zero'>$0.00</td></tr><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>Fence Installation / Repair</td><td>$9,450.00</td><td>$9,450.00</td><td class='delta-zero'>$0.00</td></tr><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>Gutter Cleaning</td><td>$150.00</td><td>$150.00</td><td class='delta-zero'>$0.00</td></tr><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>Junk Removal</td><td>$275.00</td><td>$275.00</td><td class='delta-zero'>$0.00</td></tr><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>Landscaping / Installation</td><td>$5,125.00</td><td>$5,125.00</td><td class='delta-zero'>$0.00</td></tr><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>Lawn Care / Maintenance</td><td>$0.00</td><td>$0.00</td><td class='delta-zero'>$0.00</td></tr><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>Other</td><td>$1,150.00</td><td>$1,050.00</td><td class='delta-neg'>$-100.00</td></tr><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>Outdoor Lighting Installation</td><td>$775.00</td><td>$775.00</td><td class='delta-zero'>$0.00</td></tr><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>Pool Service / Cleaning</td><td>$175.00</td><td>$175.00</td><td class='delta-zero'>$0.00</td></tr><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>Pressure Washing</td><td>$1,025.00</td><td>$1,025.00</td><td class='delta-zero'>$0.00</td></tr><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>Roofing</td><td>$5,675.00</td><td>$5,475.00</td><td class='delta-neg'>$-200.00</td></tr><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>Tree Service / Removal</td><td>$3,375.00</td><td>$3,375.00</td><td class='delta-zero'>$0.00</td></tr><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>Window Cleaning</td><td>$225.00</td><td>$275.00</td><td class='delta-pos'>+$50.00</td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>Concrete</td><td>$17,125.00</td><td>$17,125.00</td><td class='delta-zero'>$0.00</td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>Deck Installation / Repair</td><td>$23,900.00</td><td>$23,900.00</td><td class='delta-zero'>$0.00</td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>Exterior Painting</td><td>$3,375.00</td><td>$3,400.00</td><td class='delta-pos'>+$25.00</td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>Fence Installation / Repair</td><td>$5,525.00</td><td>$5,525.00</td><td class='delta-zero'>$0.00</td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>Gutter Cleaning</td><td>$150.00</td><td>$150.00</td><td class='delta-zero'>$0.00</td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>Junk Removal</td><td>$475.00</td><td>$400.00</td><td class='delta-neg'>$-75.00</td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>Landscaping / Installation</td><td>$19,325.00</td><td>$20,250.00</td><td class='delta-pos'>+$925.00</td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>Lawn Care / Maintenance</td><td>$0.00</td><td>$0.00</td><td class='delta-zero'>$0.00</td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>Other</td><td>$2,475.00</td><td>$2,475.00</td><td class='delta-zero'>$0.00</td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>Outdoor Lighting Installation</td><td>$850.00</td><td>$850.00</td><td class='delta-zero'>$0.00</td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>Pool Service / Cleaning</td><td>$200.00</td><td>$175.00</td><td class='delta-neg'>$-25.00</td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>Pressure Washing</td><td>$4,200.00</td><td>$5,050.00</td><td class='delta-pos'>+$850.00</td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>Roofing</td><td>$11,200.00</td><td>$11,550.00</td><td class='delta-pos'>+$350.00</td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>Tree Service / Removal</td><td>$1,700.00</td><td>$1,700.00</td><td class='delta-zero'>$0.00</td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>Window Cleaning</td><td>$550.00</td><td>$575.00</td><td class='delta-pos'>+$25.00</td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>Concrete</td><td>$8,950.00</td><td>$8,950.00</td><td class='delta-zero'>$0.00</td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>Deck Installation / Repair</td><td>$24,500.00</td><td>$24,500.00</td><td class='delta-zero'>$0.00</td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>Exterior Painting</td><td>$13,350.00</td><td>$12,300.00</td><td class='delta-neg'>$-1,050.00</td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>Fence Installation / Repair</td><td>$10,625.00</td><td>$10,625.00</td><td class='delta-zero'>$0.00</td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>Gutter Cleaning</td><td>$325.00</td><td>$325.00</td><td class='delta-zero'>$0.00</td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>Junk Removal</td><td>$175.00</td><td>$175.00</td><td class='delta-zero'>$0.00</td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>Landscaping / Installation</td><td>$13,875.00</td><td>$13,875.00</td><td class='delta-zero'>$0.00</td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>Lawn Care / Maintenance</td><td>$0.00</td><td>$0.00</td><td class='delta-zero'>$0.00</td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>Other</td><td>$7,950.00</td><td>$7,950.00</td><td class='delta-zero'>$0.00</td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>Outdoor Lighting Installation</td><td>$1,275.00</td><td>$1,275.00</td><td class='delta-zero'>$0.00</td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>Pool Service / Cleaning</td><td>$325.00</td><td>$325.00</td><td class='delta-zero'>$0.00</td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>Pressure Washing</td><td>$1,300.00</td><td>$1,075.00</td><td class='delta-neg'>$-225.00</td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>Roofing</td><td>$700.00</td><td>$700.00</td><td class='delta-zero'>$0.00</td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>Tree Service / Removal</td><td>$1,025.00</td><td>$1,025.00</td><td class='delta-zero'>$0.00</td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>Window Cleaning</td><td>$650.00</td><td>$650.00</td><td class='delta-zero'>$0.00</td></tr></tbody>
+</table>
+</div>
+</section>
+
+<section>
+<h2>Section 3 - Questionnaire Context</h2>
+<div class='table-wrap'>
+<table id='qctx'>
+<thead><tr>
+<th onclick="sortTable('qctx',0,'text')">property</th>
+<th onclick="sortTable('qctx',1,'text')">service</th>
+<th>selected questionnaire answers</th>
+</tr></thead>
+<tbody><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>Concrete</td><td><pre>{
+    &quot;concrete_project_type&quot;:  [
+                                  &quot;Slab or pad&quot;,
+                                  &quot;Driveway&quot;,
+                                  &quot;Patio&quot;,
+                                  &quot;Other&quot;,
+                                  &quot;Walkway&quot;
+                              ],
+    &quot;concrete_project_type_other_text&quot;:  &quot;site-specific details for concrete project type 43&quot;,
+    &quot;concrete_work_type&quot;:  &quot;Replacement&quot;,
+    &quot;concrete_material&quot;:  &quot;Not sure&quot;,
+    &quot;concrete_scope&quot;:  &quot;Medium (~200-600 sq ft)&quot;,
+    &quot;concrete_site_condition&quot;:  &quot;Open and ready&quot;
+}</pre></td></tr><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>Deck Installation / Repair</td><td><pre>{
+    &quot;deck_work_type&quot;:  &quot;Replace existing deck&quot;,
+    &quot;deck_material&quot;:  &quot;Other&quot;,
+    &quot;deck_material_other_text&quot;:  &quot;premium material preference for deck material 57&quot;,
+    &quot;deck_scope&quot;:  &quot;Medium (~150-350 sq ft)&quot;,
+    &quot;deck_area_type&quot;:  &quot;Multi-level&quot;,
+    &quot;deck_repair_condition&quot;:  &quot;Minor issues&quot;
+}</pre></td></tr><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>Exterior Painting</td><td><pre>{
+    &quot;painting_target&quot;:  &quot;Other&quot;,
+    &quot;painting_target_other_text&quot;:  &quot;premium material preference for painting target 81&quot;,
+    &quot;painting_surface_type&quot;:  &quot;Stucco&quot;,
+    &quot;painting_condition&quot;:  &quot;Good condition&quot;,
+    &quot;painting_scope&quot;:  &quot;Most of exterior&quot;,
+    &quot;painting_access&quot;:  &quot;Not sure&quot;
+}</pre></td></tr><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>Fence Installation / Repair</td><td><pre>{
+    &quot;fence_work_type&quot;:  &quot;Fence replacement&quot;,
+    &quot;fence_material&quot;:  &quot;Other&quot;,
+    &quot;fence_material_other_text&quot;:  &quot;special access needs for fence material 68&quot;,
+    &quot;fence_scope&quot;:  &quot;Full yard (200+ linear ft)&quot;,
+    &quot;fence_site&quot;:  &quot;Flat and clear&quot;,
+    &quot;fence_repair_condition&quot;:  &quot;Minor&quot;
+}</pre></td></tr><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>Gutter Cleaning</td><td><pre>{
+    &quot;gutter_building_type&quot;:  &quot;Detached garage or shed&quot;,
+    &quot;gutter_work_type&quot;:  &quot;Clean gutters only&quot;,
+    &quot;gutter_fill_level&quot;:  &quot;Very full or overflowing&quot;,
+    &quot;gutter_access&quot;:  &quot;Yes, landscaping or obstacles&quot;
+}</pre></td></tr><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>Junk Removal</td><td><pre>{
+    &quot;junk_type&quot;:  &quot;Household junk&quot;,
+    &quot;junk_amount&quot;:  &quot;Small load (about a pickup load)&quot;,
+    &quot;junk_location&quot;:  &quot;Backyard or hard-to-reach area&quot;,
+    &quot;junk_heavy_items&quot;:  &quot;Not sure&quot;
+}</pre></td></tr><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>Landscaping / Installation</td><td><pre>{
+    &quot;landscape_work_type&quot;:  [
+                                &quot;Sod or lawn installation&quot;
+                            ],
+    &quot;landscape_area_size&quot;:  &quot;Small section (up to ~500 sq ft)&quot;,
+    &quot;landscape_job_type&quot;:  &quot;Refresh existing landscaping&quot;,
+    &quot;landscape_materials&quot;:  [
+                                &quot;Sod or turf&quot;,
+                                &quot;Mostly mulch or rock&quot;,
+                                &quot;Mostly plants&quot;
+                            ],
+    &quot;landscape_access&quot;:  &quot;Difficult&quot;
+}</pre></td></tr><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>Lawn Care / Maintenance</td><td><pre>{
+    &quot;lawn_work_type&quot;:  &quot;Mowing and edging&quot;,
+    &quot;lawn_area_size&quot;:  &quot;Not sure&quot;,
+    &quot;lawn_condition&quot;:  &quot;Slightly overgrown&quot;,
+    &quot;lawn_property_type&quot;:  &quot;Other&quot;,
+    &quot;lawn_property_type_other_text&quot;:  &quot;custom scope requested for lawn property type 95&quot;
+}</pre></td></tr><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>Other</td><td><pre>{
+    &quot;other_work_type&quot;:  &quot;Repair&quot;,
+    &quot;other_size&quot;:  &quot;Small&quot;,
+    &quot;other_property_type&quot;:  &quot;Standard home&quot;,
+    &quot;other_access&quot;:  &quot;Difficult&quot;
+}</pre></td></tr><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>Outdoor Lighting Installation</td><td><pre>{
+    &quot;lighting_work_type&quot;:  &quot;Install a basic new lighting setup&quot;,
+    &quot;lighting_type&quot;:  [
+                          &quot;Pathway lights&quot;
+                      ],
+    &quot;lighting_scope&quot;:  &quot;One small area&quot;,
+    &quot;lighting_power&quot;:  &quot;Partly&quot;,
+    &quot;lighting_install_difficulty&quot;:  &quot;New wiring or trenching likely needed&quot;
+}</pre></td></tr><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>Pool Service / Cleaning</td><td><pre>{
+    &quot;pool_work_type&quot;:  &quot;Green or dirty pool cleanup&quot;,
+    &quot;pool_type&quot;:  &quot;Pool and spa&quot;,
+    &quot;pool_condition&quot;:  &quot;Not sure&quot;,
+    &quot;pool_size&quot;:  &quot;Not sure&quot;,
+    &quot;pool_access&quot;:  &quot;Yes&quot;
+}</pre></td></tr><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>Pressure Washing</td><td><pre>{
+    &quot;pressure_washing_target&quot;:  [
+                                    &quot;Roof&quot;,
+                                    &quot;Other&quot;
+                                ],
+    &quot;pressure_washing_target_other_text&quot;:  &quot;custom scope requested for pressure washing target 96&quot;,
+    &quot;pressure_washing_size&quot;:  &quot;Not sure&quot;,
+    &quot;pressure_washing_condition&quot;:  &quot;Light dirt or dust&quot;,
+    &quot;pressure_washing_access&quot;:  &quot;Not sure&quot;
+}</pre></td></tr><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>Roofing</td><td><pre>{
+    &quot;roofing_work_type&quot;:  &quot;Other&quot;,
+    &quot;roofing_work_type_other_text&quot;:  &quot;premium material preference for roofing work type 30&quot;,
+    &quot;roofing_type&quot;:  &quot;Other&quot;,
+    &quot;roofing_type_other_text&quot;:  &quot;special access needs for roofing type 5&quot;,
+    &quot;roofing_problem&quot;:  &quot;Storm or major damage&quot;,
+    &quot;roofing_scope&quot;:  &quot;One area or slope&quot;,
+    &quot;roofing_access&quot;:  &quot;Easy&quot;
+}</pre></td></tr><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>Tree Service / Removal</td><td><pre>{
+    &quot;tree_work_type&quot;:  &quot;Remove multiple trees&quot;,
+    &quot;tree_size&quot;:  &quot;Medium&quot;,
+    &quot;tree_location&quot;:  &quot;Near power lines&quot;,
+    &quot;tree_access&quot;:  &quot;Easy&quot;,
+    &quot;tree_haul_away&quot;:  &quot;Not sure&quot;
+}</pre></td></tr><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>Window Cleaning</td><td><pre>{
+    &quot;window_target_type&quot;:  &quot;Standard exterior house windows&quot;,
+    &quot;window_count&quot;:  &quot;1-10&quot;,
+    &quot;window_property_type&quot;:  &quot;Small commercial building&quot;,
+    &quot;window_access&quot;:  &quot;Some ladders needed&quot;
+}</pre></td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>Concrete</td><td><pre>{
+    &quot;concrete_project_type&quot;:  [
+                                  &quot;Other&quot;
+                              ],
+    &quot;concrete_project_type_other_text&quot;:  &quot;site-specific details for concrete project type 34&quot;,
+    &quot;concrete_work_type&quot;:  &quot;Replacement&quot;,
+    &quot;concrete_material&quot;:  &quot;Stamped or decorative concrete&quot;,
+    &quot;concrete_scope&quot;:  &quot;Large (~600-1,500 sq ft)&quot;,
+    &quot;concrete_site_condition&quot;:  &quot;Tight or difficult access&quot;
+}</pre></td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>Deck Installation / Repair</td><td><pre>{
+    &quot;deck_work_type&quot;:  &quot;Stairs or railing work&quot;,
+    &quot;deck_material&quot;:  &quot;Composite&quot;,
+    &quot;deck_scope&quot;:  &quot;Medium (~150-350 sq ft)&quot;,
+    &quot;deck_area_type&quot;:  &quot;Rooftop or specialty area&quot;,
+    &quot;deck_repair_condition&quot;:  &quot;Minor issues&quot;
+}</pre></td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>Exterior Painting</td><td><pre>{
+    &quot;painting_target&quot;:  &quot;Fence or detached structure&quot;,
+    &quot;painting_surface_type&quot;:  &quot;Brick or masonry&quot;,
+    &quot;painting_condition&quot;:  &quot;Needs prep and repairs&quot;,
+    &quot;painting_scope&quot;:  &quot;Full exterior&quot;,
+    &quot;painting_access&quot;:  &quot;Easy&quot;
+}</pre></td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>Fence Installation / Repair</td><td><pre>{
+    &quot;fence_work_type&quot;:  &quot;New fence installation&quot;,
+    &quot;fence_material&quot;:  &quot;Vinyl&quot;,
+    &quot;fence_scope&quot;:  &quot;Other&quot;,
+    &quot;fence_scope_other_text&quot;:  &quot;site-specific details for fence scope 35&quot;,
+    &quot;fence_site&quot;:  &quot;Flat and clear&quot;,
+    &quot;fence_repair_condition&quot;:  &quot;Fence is falling or missing sections&quot;
+}</pre></td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>Gutter Cleaning</td><td><pre>{
+    &quot;gutter_building_type&quot;:  &quot;Detached garage or shed&quot;,
+    &quot;gutter_work_type&quot;:  &quot;Clean gutters only&quot;,
+    &quot;gutter_fill_level&quot;:  &quot;Moderate debris&quot;,
+    &quot;gutter_access&quot;:  &quot;Yes, landscaping or obstacles&quot;
+}</pre></td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>Junk Removal</td><td><pre>{
+    &quot;junk_type&quot;:  &quot;Other&quot;,
+    &quot;junk_type_other_text&quot;:  &quot;special access needs for junk type 73&quot;,
+    &quot;junk_amount&quot;:  &quot;Not sure&quot;,
+    &quot;junk_location&quot;:  &quot;Other&quot;,
+    &quot;junk_location_other_text&quot;:  &quot;special access needs for junk location 31&quot;,
+    &quot;junk_heavy_items&quot;:  &quot;Yes, many&quot;
+}</pre></td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>Landscaping / Installation</td><td><pre>{
+    &quot;landscape_work_type&quot;:  [
+                                &quot;Yard makeover&quot;
+                            ],
+    &quot;landscape_area_size&quot;:  &quot;Not sure&quot;,
+    &quot;landscape_job_type&quot;:  &quot;Replace old landscaping&quot;,
+    &quot;landscape_materials&quot;:  [
+                                &quot;Mostly mulch or rock&quot;,
+                                &quot;Mostly plants&quot;,
+                                &quot;Mixed materials&quot;
+                            ],
+    &quot;landscape_access&quot;:  &quot;Easy&quot;
+}</pre></td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>Lawn Care / Maintenance</td><td><pre>{
+    &quot;lawn_work_type&quot;:  &quot;Mowing only&quot;,
+    &quot;lawn_area_size&quot;:  &quot;Small yard (up to ~2,000 sq ft)&quot;,
+    &quot;lawn_condition&quot;:  &quot;Very overgrown&quot;,
+    &quot;lawn_property_type&quot;:  &quot;Front and backyard&quot;
+}</pre></td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>Other</td><td><pre>{
+    &quot;other_work_type&quot;:  &quot;Removal&quot;,
+    &quot;other_size&quot;:  &quot;Medium&quot;,
+    &quot;other_property_type&quot;:  &quot;Not sure&quot;,
+    &quot;other_access&quot;:  &quot;Very difficult&quot;
+}</pre></td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>Outdoor Lighting Installation</td><td><pre>{
+    &quot;lighting_work_type&quot;:  &quot;Install a basic new lighting setup&quot;,
+    &quot;lighting_type&quot;:  [
+                          &quot;Driveway lights&quot;,
+                          &quot;Security or flood lights&quot;
+                      ],
+    &quot;lighting_scope&quot;:  &quot;One small area&quot;,
+    &quot;lighting_power&quot;:  &quot;Not sure&quot;,
+    &quot;lighting_install_difficulty&quot;:  &quot;Not sure&quot;
+}</pre></td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>Pool Service / Cleaning</td><td><pre>{
+    &quot;pool_work_type&quot;:  &quot;Other&quot;,
+    &quot;pool_work_type_other_text&quot;:  &quot;premium material preference for pool work type 95&quot;,
+    &quot;pool_type&quot;:  &quot;Not sure&quot;,
+    &quot;pool_condition&quot;:  &quot;Mostly clean&quot;,
+    &quot;pool_size&quot;:  &quot;Large&quot;,
+    &quot;pool_access&quot;:  &quot;Somewhat&quot;
+}</pre></td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>Pressure Washing</td><td><pre>{
+    &quot;pressure_washing_target&quot;:  [
+                                    &quot;Driveway&quot;,
+                                    &quot;Other&quot;,
+                                    &quot;Roof&quot;,
+                                    &quot;House exterior&quot;,
+                                    &quot;Patio or porch&quot;
+                                ],
+    &quot;pressure_washing_target_other_text&quot;:  &quot;site-specific details for pressure washing target 21&quot;,
+    &quot;pressure_washing_size&quot;:  &quot;Whole property / very large area (3,000+ sq ft)&quot;,
+    &quot;pressure_washing_condition&quot;:  &quot;Heavy staining or moss&quot;,
+    &quot;pressure_washing_access&quot;:  &quot;Tight or difficult access&quot;
+}</pre></td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>Roofing</td><td><pre>{
+    &quot;roofing_work_type&quot;:  &quot;Partial replacement&quot;,
+    &quot;roofing_type&quot;:  &quot;Metal&quot;,
+    &quot;roofing_problem&quot;:  &quot;Missing or damaged area&quot;,
+    &quot;roofing_scope&quot;:  &quot;Entire roof&quot;,
+    &quot;roofing_access&quot;:  &quot;Moderate&quot;
+}</pre></td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>Tree Service / Removal</td><td><pre>{
+    &quot;tree_work_type&quot;:  &quot;Remove multiple trees&quot;,
+    &quot;tree_size&quot;:  &quot;Not sure&quot;,
+    &quot;tree_location&quot;:  &quot;Multiple areas&quot;,
+    &quot;tree_access&quot;:  &quot;Easy&quot;,
+    &quot;tree_haul_away&quot;:  &quot;Not sure&quot;
+}</pre></td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>Window Cleaning</td><td><pre>{
+    &quot;window_target_type&quot;:  &quot;Second-story or hard-to-reach windows&quot;,
+    &quot;window_count&quot;:  &quot;50+&quot;,
+    &quot;window_property_type&quot;:  &quot;Single-story home&quot;,
+    &quot;window_access&quot;:  &quot;Easy&quot;
+}</pre></td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>Concrete</td><td><pre>{
+    &quot;concrete_project_type&quot;:  [
+                                  &quot;Walkway&quot;
+                              ],
+    &quot;concrete_work_type&quot;:  &quot;Replacement&quot;,
+    &quot;concrete_material&quot;:  &quot;Not sure&quot;,
+    &quot;concrete_scope&quot;:  &quot;Medium (~200-600 sq ft)&quot;,
+    &quot;concrete_site_condition&quot;:  &quot;Open and ready&quot;
+}</pre></td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>Deck Installation / Repair</td><td><pre>{
+    &quot;deck_work_type&quot;:  &quot;Other&quot;,
+    &quot;deck_work_type_other_text&quot;:  &quot;site-specific details for deck work type 35&quot;,
+    &quot;deck_material&quot;:  &quot;PVC or premium material&quot;,
+    &quot;deck_scope&quot;:  &quot;Large (~350-700 sq ft)&quot;,
+    &quot;deck_area_type&quot;:  &quot;Not sure&quot;,
+    &quot;deck_repair_condition&quot;:  &quot;Not applicable / not a repair&quot;
+}</pre></td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>Exterior Painting</td><td><pre>{
+    &quot;painting_target&quot;:  &quot;Full house exterior&quot;,
+    &quot;painting_surface_type&quot;:  &quot;Brick or masonry&quot;,
+    &quot;painting_condition&quot;:  &quot;Not sure&quot;,
+    &quot;painting_scope&quot;:  &quot;Full exterior&quot;,
+    &quot;painting_access&quot;:  &quot;Steep or hard-to-reach areas&quot;
+}</pre></td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>Fence Installation / Repair</td><td><pre>{
+    &quot;fence_work_type&quot;:  &quot;Other&quot;,
+    &quot;fence_work_type_other_text&quot;:  &quot;site-specific details for fence work type 31&quot;,
+    &quot;fence_material&quot;:  &quot;Other&quot;,
+    &quot;fence_material_other_text&quot;:  &quot;custom scope requested for fence material 12&quot;,
+    &quot;fence_scope&quot;:  &quot;Full yard (200+ linear ft)&quot;,
+    &quot;fence_site&quot;:  &quot;Heavy slope or obstacles&quot;,
+    &quot;fence_repair_condition&quot;:  &quot;Moderate&quot;
+}</pre></td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>Gutter Cleaning</td><td><pre>{
+    &quot;gutter_building_type&quot;:  &quot;Single-story home&quot;,
+    &quot;gutter_work_type&quot;:  &quot;Minor gutter repair&quot;,
+    &quot;gutter_fill_level&quot;:  &quot;Light debris&quot;,
+    &quot;gutter_access&quot;:  &quot;Not sure&quot;
+}</pre></td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>Junk Removal</td><td><pre>{
+    &quot;junk_type&quot;:  &quot;Furniture&quot;,
+    &quot;junk_amount&quot;:  &quot;A few items (fits in part of a pickup bed)&quot;,
+    &quot;junk_location&quot;:  &quot;Backyard or hard-to-reach area&quot;,
+    &quot;junk_heavy_items&quot;:  &quot;Not sure&quot;
+}</pre></td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>Landscaping / Installation</td><td><pre>{
+    &quot;landscape_work_type&quot;:  [
+                                &quot;New plants or garden beds&quot;,
+                                &quot;Yard makeover&quot;,
+                                &quot;Other&quot;
+                            ],
+    &quot;landscape_work_type_other_text&quot;:  &quot;special access needs for landscape work type 12&quot;,
+    &quot;landscape_area_size&quot;:  &quot;One side of yard (~500-1,500 sq ft)&quot;,
+    &quot;landscape_job_type&quot;:  &quot;Refresh existing landscaping&quot;,
+    &quot;landscape_materials&quot;:  [
+                                &quot;Mostly plants&quot;,
+                                &quot;Sod or turf&quot;,
+                                &quot;Mixed materials&quot;
+                            ],
+    &quot;landscape_access&quot;:  &quot;Difficult&quot;
+}</pre></td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>Lawn Care / Maintenance</td><td><pre>{
+    &quot;lawn_work_type&quot;:  &quot;Mowing and edging&quot;,
+    &quot;lawn_area_size&quot;:  &quot;Large yard (~5,000-10,000 sq ft)&quot;,
+    &quot;lawn_condition&quot;:  &quot;Not sure&quot;,
+    &quot;lawn_property_type&quot;:  &quot;Other&quot;,
+    &quot;lawn_property_type_other_text&quot;:  &quot;site-specific details for lawn property type 69&quot;
+}</pre></td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>Other</td><td><pre>{
+    &quot;other_work_type&quot;:  &quot;Repair&quot;,
+    &quot;other_size&quot;:  &quot;Very large&quot;,
+    &quot;other_property_type&quot;:  &quot;Not sure&quot;,
+    &quot;other_access&quot;:  &quot;Not sure&quot;
+}</pre></td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>Outdoor Lighting Installation</td><td><pre>{
+    &quot;lighting_work_type&quot;:  &quot;Install lights I already have&quot;,
+    &quot;lighting_type&quot;:  [
+                          &quot;Pathway lights&quot;,
+                          &quot;Other&quot;,
+                          &quot;Accent or landscape lights&quot;,
+                          &quot;Driveway lights&quot;,
+                          &quot;Patio or string lights&quot;,
+                          &quot;Security or flood lights&quot;
+                      ],
+    &quot;lighting_type_other_text&quot;:  &quot;special access needs for lighting type 76&quot;,
+    &quot;lighting_scope&quot;:  &quot;One large area&quot;,
+    &quot;lighting_power&quot;:  &quot;No&quot;,
+    &quot;lighting_install_difficulty&quot;:  &quot;Some wiring or layout work needed&quot;
+}</pre></td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>Pool Service / Cleaning</td><td><pre>{
+    &quot;pool_work_type&quot;:  &quot;Opening or startup&quot;,
+    &quot;pool_type&quot;:  &quot;Above-ground pool&quot;,
+    &quot;pool_condition&quot;:  &quot;Green or neglected&quot;,
+    &quot;pool_size&quot;:  &quot;Small&quot;,
+    &quot;pool_access&quot;:  &quot;Not sure&quot;
+}</pre></td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>Pressure Washing</td><td><pre>{
+    &quot;pressure_washing_target&quot;:  [
+                                    &quot;Patio or porch&quot;,
+                                    &quot;Fence&quot;,
+                                    &quot;Roof&quot;,
+                                    &quot;Driveway&quot;
+                                ],
+    &quot;pressure_washing_size&quot;:  &quot;Not sure&quot;,
+    &quot;pressure_washing_condition&quot;:  &quot;Not sure&quot;,
+    &quot;pressure_washing_access&quot;:  &quot;Easy access&quot;
+}</pre></td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>Roofing</td><td><pre>{
+    &quot;roofing_work_type&quot;:  &quot;Leak repair&quot;,
+    &quot;roofing_type&quot;:  &quot;Tile&quot;,
+    &quot;roofing_problem&quot;:  &quot;Leak or water issue&quot;,
+    &quot;roofing_scope&quot;:  &quot;Small section&quot;,
+    &quot;roofing_access&quot;:  &quot;Steep or difficult&quot;
+}</pre></td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>Tree Service / Removal</td><td><pre>{
+    &quot;tree_work_type&quot;:  &quot;Other&quot;,
+    &quot;tree_work_type_other_text&quot;:  &quot;premium material preference for tree work type 21&quot;,
+    &quot;tree_size&quot;:  &quot;Not sure&quot;,
+    &quot;tree_location&quot;:  &quot;Front yard&quot;,
+    &quot;tree_access&quot;:  &quot;Moderate&quot;,
+    &quot;tree_haul_away&quot;:  &quot;No&quot;
+}</pre></td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>Window Cleaning</td><td><pre>{
+    &quot;window_target_type&quot;:  &quot;Second-story or hard-to-reach windows&quot;,
+    &quot;window_count&quot;:  &quot;26-50&quot;,
+    &quot;window_property_type&quot;:  &quot;Three-story or taller&quot;,
+    &quot;window_access&quot;:  &quot;Hard-to-reach areas&quot;
+}</pre></td></tr></tbody>
+</table>
+</div>
+</section>
+
+<section>
+<h2>Section 4 - AI Pricing Breakdown</h2>
+<div class='table-wrap'>
+<table id='aib'>
+<thead><tr>
+<th onclick="sortTable('aib',0,'text')">property</th>
+<th onclick="sortTable('aib',1,'text')">service</th>
+<th onclick="sortTable('aib',2,'num')">estimatedQuantity</th>
+<th onclick="sortTable('aib',3,'text')">jobSubtype</th>
+<th onclick="sortTable('aib',4,'num')">baseRateUsed</th>
+<th onclick="sortTable('aib',5,'num')">accessModifier</th>
+<th onclick="sortTable('aib',6,'num')">conditionModifier</th>
+<th onclick="sortTable('aib',7,'num')">materialModifier</th>
+</tr></thead>
+<tbody><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>Concrete</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>Deck Installation / Repair</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>Exterior Painting</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>Fence Installation / Repair</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>Gutter Cleaning</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>Junk Removal</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>Landscaping / Installation</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>Lawn Care / Maintenance</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>Other</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>Outdoor Lighting Installation</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>Pool Service / Cleaning</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>Pressure Washing</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>Roofing</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>Tree Service / Removal</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>22 Bittersweet Blvd, Worcester, MA 01607, USA</td><td>Window Cleaning</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>Concrete</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>Deck Installation / Repair</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>Exterior Painting</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>Fence Installation / Repair</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>Gutter Cleaning</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>Junk Removal</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>Landscaping / Installation</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>Lawn Care / Maintenance</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>Other</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>Outdoor Lighting Installation</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>Pool Service / Cleaning</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>Pressure Washing</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>Roofing</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>Tree Service / Removal</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>31 Lenox St, Worcester, MA 01602, USA</td><td>Window Cleaning</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>Concrete</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>Deck Installation / Repair</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>Exterior Painting</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>Fence Installation / Repair</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>Gutter Cleaning</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>Junk Removal</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>Landscaping / Installation</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>Lawn Care / Maintenance</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>Other</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>Outdoor Lighting Installation</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>Pool Service / Cleaning</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>Pressure Washing</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>Roofing</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>Tree Service / Removal</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>577 Grove St, Worcester, MA 01605, USA</td><td>Window Cleaning</td><td></td><td></td><td></td><td></td><td></td><td></td></tr></tbody>
+</table>
+</div>
+</section>
+
+</body>
+</html>

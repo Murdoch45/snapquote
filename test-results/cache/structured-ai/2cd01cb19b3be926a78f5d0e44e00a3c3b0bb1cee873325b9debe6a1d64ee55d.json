@@ -1,0 +1,129 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T19:45:53.161Z",
+  "promptHash": "8f26f74eeb493aef9905f6db3d1835c73b7673fce56409ec2c04ac84d244102c",
+  "keyHash": "2cd01cb19b3be926a78f5d0e44e00a3c3b0bb1cee873325b9debe6a1d64ee55d",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Lawn Care / Maintenance"
+    ],
+    "address": "2070 King College Rd, Bristol, TN 37620, USA",
+    "addressPlaceId": "ChIJ32Mu-bV2UIgR8C_BrBTmahI",
+    "lat": 36.5870892,
+    "lng": -82.1329154,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Lawn Care / Maintenance",
+        "answers": {
+          "lawn_area_size": "Small yard (up to ~2,000 sq ft)",
+          "lawn_condition": "Slightly overgrown",
+          "lawn_property_type": "Other",
+          "lawn_property_type_other_text": "special access needs for lawn property type 58",
+          "lawn_work_type": "Overgrown cleanup"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Overgrown lawn cleanup for a small residential yard with special access needs.",
+    "condition": "light",
+    "access": "moderate",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "grass",
+    "inferredScope": "front and back yard overgrown cleanup",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "overgrown grass",
+      "special access requirements",
+      "small yard size"
+    ],
+    "estimatorNotes": [
+      "Customer selected overgrown cleanup for a small yard.",
+      "Property satellite imagery confirms a single-family lot with lawns front and back.",
+      "Special access note in questionnaire requires moderate access difficulty."
+    ],
+    "serviceSignals": {
+      "Lawn Care / Maintenance": {
+        "serviceType": "Lawn Care / Maintenance",
+        "jobSubtype": "overgrown_cleanup",
+        "jobSubtypeLabel": "Overgrown cleanup",
+        "workType": "maintain",
+        "fallbackFamily": "yard_area",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "grass_lawn",
+        "sizeBucket": "small",
+        "estimatedQuantity": 1500,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "grass",
+        "materialSubtype": "cool_season",
+        "conditionClass": "slightly_overgrown",
+        "severityClass": "minor",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": false,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 78,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly selected overgrown cleanup and small yard size.",
+          "Satellite imagery shows significant lawn area consistent with small yard band."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Plan includes mowing, edging, and hauling small green waste load due to overgrowth.",
+          "Special access note may require scheduling or equipment adjustment."
+        ],
+        "summary": "Small-yard overgrown lawn cleanup (front and back)."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 0,
+        "confidence": 0
+      }
+    ],
+    "surfaceDetectionConfidence": 40,
+    "satelliteClarity": 85,
+    "imageQuality": 60,
+    "scopeMatchConfidence": 82,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1,
+    "luxuryMultiplier": 1,
+    "estateScore": 11261,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about service type and yard size.",
+      "Satellite and single photo support lawn-focused work but do not provide exact dimensions."
+    ]
+  }
+}

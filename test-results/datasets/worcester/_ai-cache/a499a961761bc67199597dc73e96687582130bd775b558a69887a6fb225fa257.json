@@ -1,0 +1,156 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T21:34:07.196Z",
+  "promptHash": "78493f8c255f075a3e2597107a316c6aa220cb246afd356601a4493d6d027a3a",
+  "keyHash": "a499a961761bc67199597dc73e96687582130bd775b558a69887a6fb225fa257",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Pool Service / Cleaning"
+    ],
+    "address": "31 Lenox St, Worcester, MA 01602, USA",
+    "addressPlaceId": "ChIJD1cICMIG5IkRYY1iKGn1gck",
+    "lat": 42.2777158,
+    "lng": -71.8334735,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Pool Service / Cleaning",
+        "answers": {
+          "pool_access": "Somewhat",
+          "pool_condition": "Mostly clean",
+          "pool_size": "Large",
+          "pool_type": "In-ground pool",
+          "pool_work_type": "Routine cleaning"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Routine in-ground pool cleaning requested; pool appears large and accessible from backyard.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "vinyl or plaster",
+    "inferredScope": "routine_cleaning_visit",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": 800,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "pool_size",
+      "accessibility",
+      "routine_service"
+    ],
+    "estimatorNotes": [
+      "Customer selected routine cleaning for a large in-ground pool.",
+      "Satellite confirms an in-ground pool in the rear yard with clear access."
+    ],
+    "serviceSignals": {
+      "Pool Service / Cleaning": {
+        "serviceType": "Pool Service / Cleaning",
+        "jobSubtype": "routine_cleaning",
+        "jobSubtypeLabel": "Routine Pool Cleaning",
+        "workType": "service",
+        "fallbackFamily": "pool_service_event",
+        "surfaceFamily": "pool_service_event",
+        "targetObjectFamily": "pool",
+        "sizeBucket": "large",
+        "estimatedQuantity": 1,
+        "quantityUnit": "service_event",
+        "quantityEvidence": "direct",
+        "materialClass": "in_ground_pool",
+        "materialSubtype": "unknown_finish",
+        "conditionClass": "mostly_clean",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": true,
+        "fencePresent": false,
+        "deckPresent": true,
+        "roofType": null,
+        "premiumPropertySignal": true,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 78,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly requests routine pool cleaning.",
+          "Satellite imagery clearly shows an in-ground pool and backyard access."
+        ],
+        "consistencyScore": 90,
+        "notes": [
+          "Presume standard routine cleaning (skim, vacuum, chemical check) for one visit.",
+          "Finish type not specified; assume common plaster/aggregate or vinyl."
+        ],
+        "summary": "One routine service visit for a large in-ground pool; accessible from backyard.",
+        "quotedSurfaces": {
+          "patio": 120
+        },
+        "surfaceDetections": [
+          {
+            "surface_type": "patio",
+            "surface_area_sqft": 120,
+            "confidence": 0.7
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 400,
+        "confidence": 0.7
+      },
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 150,
+        "confidence": 0.6
+      },
+      {
+        "surface_type": "patio",
+        "surface_area_sqft": 120,
+        "confidence": 0.7
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 400,
+      "walkway": 150,
+      "patio": 120
+    },
+    "quotedSurfaces": {
+      "patio": 120
+    },
+    "surfaceDetectionConfidence": 72,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": true,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Satellite imagery supports pool presence and access."
+    ]
+  }
+}

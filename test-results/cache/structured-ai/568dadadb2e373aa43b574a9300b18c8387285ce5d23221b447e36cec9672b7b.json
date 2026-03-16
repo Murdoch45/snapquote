@@ -1,0 +1,122 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T08:07:52.942Z",
+  "promptHash": "589b1de1b974ea77f3d685c627330522b7733cef7baf33bded17496a79d7b3c1",
+  "keyHash": "568dadadb2e373aa43b574a9300b18c8387285ce5d23221b447e36cec9672b7b",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Pool Service / Cleaning"
+    ],
+    "address": "424 NW 29th St, Oklahoma City, OK 73103, USA",
+    "addressPlaceId": "ChIJQ7Rvw1MXsocRLG8Dbk3Y5Yw",
+    "lat": 35.4992706,
+    "lng": -97.5201175,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Pool Service / Cleaning",
+        "answers": {
+          "pool_access": "Somewhat",
+          "pool_condition": "Green or neglected",
+          "pool_size": "Medium",
+          "pool_type": "In-ground pool",
+          "pool_work_type": "Opening or startup"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requested a medium in-ground pool opening/cleaning for a green/neglected pool with somewhat limited access.",
+    "condition": "moderate",
+    "access": "moderate",
+    "severity": "moderate",
+    "debris": "moderate",
+    "multipleAreas": false,
+    "materialHint": "pool_finish",
+    "inferredScope": "pool_opening_and_initial_clean",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": 400,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "green_pool_startup",
+      "medium_pool_size",
+      "limited_access"
+    ],
+    "estimatorNotes": [
+      "Customer selected pool opening/startup and reported green/neglected condition.",
+      "No exact pool dimensions provided; medium size inferred from questionnaire.",
+      "Photo and satellite do not show clear pool; rely on questionnaire answers."
+    ],
+    "serviceSignals": {
+      "Pool Service / Cleaning": {
+        "serviceType": "Pool Service / Cleaning",
+        "jobSubtype": "opening_startup",
+        "jobSubtypeLabel": "Pool Opening / Startup",
+        "workType": "service",
+        "fallbackFamily": "pool_service_event",
+        "surfaceFamily": "pool_service_event",
+        "targetObjectFamily": "pool",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 400,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "pool_finish",
+        "materialSubtype": "unknown",
+        "conditionClass": "neglected",
+        "severityClass": "major",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": true,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 68,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly requests pool opening and reports green condition.",
+          "No photos show the pool so size is inferred from 'medium' selection."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Recommend confirming pool dimensions and access details prior to scheduling.",
+          "Expect heavy chemical treatment, vacuuming, filter servicing as part of startup."
+        ],
+        "summary": "Medium in-ground pool opening for green/neglected pool; moderate access."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 82,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.05,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about pool opening and condition.",
+      "Imagery does not show the pool clearly; inference used for size."
+    ]
+  }
+}

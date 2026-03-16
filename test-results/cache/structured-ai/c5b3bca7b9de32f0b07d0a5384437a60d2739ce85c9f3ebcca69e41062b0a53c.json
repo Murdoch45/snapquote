@@ -1,0 +1,128 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T19:45:33.841Z",
+  "promptHash": "165f101c9f65159fe62077733fc4c53fd3d7d68bc3b2bd23c67f0a9f6abfc632",
+  "keyHash": "c5b3bca7b9de32f0b07d0a5384437a60d2739ce85c9f3ebcca69e41062b0a53c",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Pool Service / Cleaning"
+    ],
+    "address": "2070 King College Rd, Bristol, TN 37620, USA",
+    "addressPlaceId": "ChIJ32Mu-bV2UIgR8C_BrBTmahI",
+    "lat": 36.5870892,
+    "lng": -82.1329154,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Pool Service / Cleaning",
+        "answers": {
+          "pool_access": "Not sure",
+          "pool_condition": "Green or neglected",
+          "pool_size": "Medium",
+          "pool_type": "Not sure",
+          "pool_work_type": "Closing or winterizing"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests pool closing/winterizing; pool described as green/neglected and medium-sized. Recommend winterization service and cleanup of algae/debris prior to closing.",
+    "condition": "moderate",
+    "access": "moderate",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "pool_water",
+    "inferredScope": "closing_and_cleaning",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": 400,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "green_pool",
+      "closing_service",
+      "medium_pool_size"
+    ],
+    "estimatorNotes": [
+      "Customer selected closing/winterizing in questionnaire.",
+      "Pool condition reported as green/neglected — algae and cleanup expected prior to winterization.",
+      "No pool dimensions provided; area estimated from 'medium' size answer."
+    ],
+    "serviceSignals": {
+      "Pool Service / Cleaning": {
+        "serviceType": "Pool Service / Cleaning",
+        "jobSubtype": "pool_closing",
+        "jobSubtypeLabel": "Pool closing / winterizing",
+        "workType": "service",
+        "fallbackFamily": "pool_service_event",
+        "surfaceFamily": "pool_service_event",
+        "targetObjectFamily": "pool",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 1,
+        "quantityUnit": "service_event",
+        "quantityEvidence": "direct",
+        "materialClass": "water",
+        "materialSubtype": "unknown",
+        "conditionClass": "green_neglected",
+        "severityClass": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": true,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 70,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly requests closing/winterizing.",
+          "Pool condition described as green/neglected; no dimensions provided so size inferred from 'Medium' selection."
+        ],
+        "consistencyScore": 82,
+        "notes": [
+          "Plan for cleaning/algae treatment prior to winterization.",
+          "Confirm pool type and access during scheduling."
+        ],
+        "summary": "Pool closing with cleaning required due to green/neglected condition."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 0,
+        "confidence": 0
+      }
+    ],
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about service type.",
+      "No pool dimensions provided so area and scope are inferred conservatively."
+    ]
+  }
+}

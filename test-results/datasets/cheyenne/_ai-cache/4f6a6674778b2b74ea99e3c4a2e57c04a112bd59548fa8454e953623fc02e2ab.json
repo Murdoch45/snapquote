@@ -1,0 +1,137 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T02:20:47.955Z",
+  "promptHash": "89b10f1c78af7a5ba909f60b9293ba189cc5c726ae0e87461b9550d2b380d194",
+  "keyHash": "4f6a6674778b2b74ea99e3c4a2e57c04a112bd59548fa8454e953623fc02e2ab",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Lawn Care / Maintenance"
+    ],
+    "address": "5618 Dayton Dr, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJj7v2QZo7b4cRO_KLm-GvTKw",
+    "lat": 41.1707669,
+    "lng": -104.7678762,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Lawn Care / Maintenance",
+        "answers": {
+          "lawn_area_size": "Large yard (~5,000-10,000 sq ft)",
+          "lawn_condition": "Not sure",
+          "lawn_property_type": "Backyard only",
+          "lawn_work_type": "Mowing and edging"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests mowing and edging for a large backyard (~5,000-10,000 sq ft). Property imagery and lot data support a substantial turf area primarily in the rear yard.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "turf/grass",
+    "inferredScope": "backyard mowing and edging only",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "yard_size",
+      "mowing_and_edging",
+      "accessibility"
+    ],
+    "estimatorNotes": [
+      "Customer explicitly selected mowing and edging and provided a yard size band.",
+      "Satellite and lot data confirm a large backyard area available for service."
+    ],
+    "serviceSignals": {
+      "Lawn Care / Maintenance": {
+        "serviceType": "Lawn Care / Maintenance",
+        "jobSubtype": "mowing_and_edging",
+        "jobSubtypeLabel": "Mowing and Edging",
+        "workType": "maintain",
+        "fallbackFamily": "yard_area",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "large",
+        "estimatedQuantity": 5538,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "direct",
+        "materialClass": "turf",
+        "materialSubtype": "grass_lawn",
+        "conditionClass": "unknown",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": true,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 78,
+        "aiConfidenceReasons": [
+          "Customer provided a yard size band matching parcel and backyard estimate.",
+          "Satellite imagery shows contiguous turf area in the backyard consistent with scope."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Quote based on backyard area only as specified by customer.",
+          "No debris or special prep indicated."
+        ],
+        "summary": "Backyard mowing and edging for a large residential lawn (~5,500 sqft).",
+        "surfaceDetections": [
+          {
+            "surface_type": "walkway",
+            "surface_area_sqft": 200,
+            "confidence": 0.65
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 200,
+        "confidence": 0.65
+      }
+    ],
+    "detectedSurfaces": {
+      "walkway": 200
+    },
+    "surfaceDetectionConfidence": 72,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 90,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about service type and yard size band.",
+      "Property context and imagery support the inferred backyard-only mowing scope."
+    ]
+  }
+}

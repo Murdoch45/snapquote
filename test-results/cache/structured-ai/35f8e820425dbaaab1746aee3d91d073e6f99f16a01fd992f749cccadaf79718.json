@@ -1,0 +1,121 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T00:14:04.180Z",
+  "promptHash": "bd4c35c70da00dfdc3ad1d15b2465e40da4108c3f79c4ce1b71c31f232dd6aa9",
+  "keyHash": "35f8e820425dbaaab1746aee3d91d073e6f99f16a01fd992f749cccadaf79718",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Pool Service / Cleaning"
+    ],
+    "address": "2481 Summitridge Dr, Beverly Hills, CA 90210, USA",
+    "addressPlaceId": "ChIJw5RbRLm9woARPFqNmJANwtg",
+    "lat": 34.1199802,
+    "lng": -118.4212831,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Pool Service / Cleaning",
+        "answers": {
+          "pool_access": "No",
+          "pool_condition": "Needs normal cleaning",
+          "pool_size": "Extra large / resort-style",
+          "pool_type": "Not sure",
+          "pool_work_type": "Opening or startup"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Pool opening / startup for an extra-large resort-style pool; includes normal cleaning and startup service.",
+    "condition": "light",
+    "access": "moderate",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "plaster/fiberglass/finished pool surface",
+    "inferredScope": "pool opening, initial cleaning, chemical balancing, filter startup",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": 1200,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "pool_size",
+      "opening_service",
+      "resort_style_pool"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Opening or startup' and marked pool as extra large / resort-style.",
+      "Satellite imagery shows a large resort-style pool adjacent to pool deck; quantity inferred from imagery and questionnaire."
+    ],
+    "serviceSignals": {
+      "Pool Service / Cleaning": {
+        "serviceType": "Pool Service / Cleaning",
+        "jobSubtype": "opening_startup",
+        "jobSubtypeLabel": "Pool Opening / Startup",
+        "workType": "service",
+        "fallbackFamily": "pool_service_event",
+        "surfaceFamily": "pool_service_event",
+        "targetObjectFamily": "pool",
+        "sizeBucket": "very_large",
+        "estimatedQuantity": 1200,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "water_containment",
+        "materialSubtype": "finished_pool",
+        "conditionClass": "light_soiling",
+        "severityClass": "minor",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": true,
+        "fencePresent": false,
+        "deckPresent": true,
+        "roofType": null,
+        "premiumPropertySignal": true,
+        "luxuryHardscapeSignal": true,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 76,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly requests an opening/startup.",
+          "Customer described pool as extra large / resort-style and satellite confirms large pool footprint."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Perform standard opening procedures: filter startup, chemical balance, skimming and vacuuming as needed.",
+          "Large deck and resort layout may require additional labor time."
+        ],
+        "summary": "Opening/startup and initial cleaning for a very large resort-style pool (~1200 sqft)."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 86,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": true,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about service type.",
+      "Satellite imagery and property size support the 'extra large / resort-style' pool classification."
+    ]
+  }
+}

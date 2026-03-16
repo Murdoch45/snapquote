@@ -1,0 +1,134 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T21:28:04.258Z",
+  "promptHash": "8d4db19053934f3591ddb13e47f48e041e2e9030e2a106ffc1db6ea8c8cf911d",
+  "keyHash": "7c15b22cd9a6f736e315a0489409dac89ffc2a69b8731779b9b57eed76e79dca",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Fence Installation / Repair"
+    ],
+    "address": "577 Grove St, Worcester, MA 01605, USA",
+    "addressPlaceId": "ChIJCeltdQQH5IkRUt0eMJ6IxbA",
+    "lat": 42.2936121,
+    "lng": -71.8172553,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Fence Installation / Repair",
+        "answers": {
+          "fence_material": "Wood",
+          "fence_repair_condition": "Moderate",
+          "fence_scope": "Full yard (200+ linear ft)",
+          "fence_site": "Heavy slope or obstacles",
+          "fence_work_type": "Fence repair"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests wood fence repair for full yard (200+ linear ft). Property on sloped terrain may require removal and haul-away of damaged sections.",
+    "condition": "moderate",
+    "access": "difficult",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "wood",
+    "inferredScope": "full_yard_fence_repair_200_plus_lf",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 78,
+    "pricingDrivers": [
+      "linear footage",
+      "wood material",
+      "sloped site access",
+      "removal and haul-away"
+    ],
+    "estimatorNotes": [
+      "Questionnaire explicitly states 'Full yard (200+ linear ft)' and 'Wood' material.",
+      "Site described as heavy slope; satellite imagery shows tree cover and sloped yard on one side.",
+      "Recommend manual review for final access assessment and exact linear footage measurement."
+    ],
+    "serviceSignals": {
+      "Fence Installation / Repair": {
+        "serviceType": "Fence Installation / Repair",
+        "jobSubtype": "fence_repair",
+        "jobSubtypeLabel": "Fence repair",
+        "workType": "repair",
+        "fallbackFamily": "linear_boundary",
+        "surfaceFamily": "linear_boundary",
+        "targetObjectFamily": "fence",
+        "sizeBucket": "large",
+        "estimatedQuantity": 220,
+        "quantityUnit": "linear_ft",
+        "quantityEvidence": "direct",
+        "materialClass": "wood",
+        "materialSubtype": "standard_wood",
+        "conditionClass": "moderate_damage",
+        "severityClass": "moderate",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "moderate",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "some_slope",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": true,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": true,
+        "aiConfidence": 82,
+        "aiConfidenceReasons": [
+          "Customer explicitly provided fence scope (200+ linear ft) and material (wood).",
+          "Satellite image and lot context support full-yard fence inference and slope access challenges."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Use direct linear footage from questionnaire as primary quantity.",
+          "Confirm on-site for exact replacement vs repair split and gate/component counts."
+        ],
+        "summary": "Repair wood fence around full yard, approx 200+ linear ft; sloped site increases access difficulty and likely requires removal and haul-away of damaged sections."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 420,
+        "confidence": 0.78
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 420,
+      "walkway": 120
+    },
+    "surfaceDetectionConfidence": 74,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 90,
+    "terrainType": "moderate_slope",
+    "accessType": "tight_access",
+    "terrainMultiplier": 1.15,
+    "accessTypeMultiplier": 1.2,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1,
+    "estateScore": 8200,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about scope and material.",
+      "Imagery shows tree cover and sloped yard consistent with reported access difficulty."
+    ]
+  }
+}

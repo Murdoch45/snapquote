@@ -1,0 +1,124 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T00:09:09.244Z",
+  "promptHash": "2fd3b6ebf05769777a06be34dd7fbd4a1146a4567eb1d496ca2339518d857803",
+  "keyHash": "db330a8101a26447808a0d68afe5920e2f33e4832af65a91d19dcaec35eee65d",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Tree Service / Removal"
+    ],
+    "address": "935 Burnside Ave, Los Angeles, CA 90036, USA",
+    "addressPlaceId": "ChIJ_1o_zx65woAR28Q5Yc4qZdE",
+    "lat": 34.058076,
+    "lng": -118.3514135,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Tree Service / Removal",
+        "answers": {
+          "tree_access": "Easy",
+          "tree_haul_away": "Yes",
+          "tree_location": "Front yard",
+          "tree_size": "Medium",
+          "tree_work_type": "Other",
+          "tree_work_type_other_text": "special access needs for tree work type 95"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests medium tree work in front yard with haul-away. Special access note provided.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "wood",
+    "inferredScope": "Remove or service one medium tree in front yard; haul away included. Special access considerations noted.",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "tree_size",
+      "haul_away",
+      "special_access"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Other' for tree work and provided special access note.",
+      "Single medium tree inferred in front yard; photo/satellite show typical suburban lot with front yard tree presence."
+    ],
+    "serviceSignals": {
+      "Tree Service / Removal": {
+        "serviceType": "Tree Service / Removal",
+        "jobSubtype": "remove_tree",
+        "jobSubtypeLabel": "Tree Removal",
+        "workType": "remove",
+        "fallbackFamily": "tree_work",
+        "surfaceFamily": "tree_work",
+        "targetObjectFamily": "tree",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 1,
+        "quantityUnit": "tree_count",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "wood",
+        "materialSubtype": "unknown",
+        "conditionClass": "unknown",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "single_story",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": false,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": false,
+        "aiConfidence": 78,
+        "aiConfidenceReasons": [
+          "Customer questionnaire explicitly indicated medium tree and haul-away.",
+          "Other-text mentions special access which increases job complexity slightly.",
+          "Satellite and photo context support front-yard tree presence."
+        ],
+        "consistencyScore": 90,
+        "notes": [
+          "Verify tree count and exact scope on site due to 'Other' work type.",
+          "Plan for haul-away disposal as requested."
+        ],
+        "summary": "Removal of one medium front-yard tree with haul-away; special access noted."
+      }
+    },
+    "surfaceDetectionConfidence": 40,
+    "satelliteClarity": 85,
+    "imageQuality": 60,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about tree size, location, and haul-away.",
+      "Other-text referenced special access which is noted but not contradictory.",
+      "Imagery supports a residential front yard setting consistent with request."
+    ]
+  }
+}

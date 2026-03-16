@@ -1,0 +1,137 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T08:25:19.303Z",
+  "promptHash": "b841c3076b2317bddc3b4c94175c09f9d1b2e56691ba476a4c1a4d9b3ecdbc15",
+  "keyHash": "47e5ded6963d94114442a86efde9a5f01ad696fe84135e434a3d819b1a0858cc",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Roofing"
+    ],
+    "address": "1202 Larchmont Ln, Nichols Hills, OK 73116, USA",
+    "addressPlaceId": "ChIJySjKutIbsocRj8CEoxAlaik",
+    "lat": 35.5497582,
+    "lng": -97.5348305,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Roofing",
+        "answers": {
+          "roofing_access": "Easy",
+          "roofing_problem": "Storm or major damage",
+          "roofing_scope": "Large portion",
+          "roofing_type": "Tile",
+          "roofing_work_type": "Partial replacement"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Partial tile roof replacement over a large portion of the roof due to storm/major damage reported by customer.",
+    "condition": "heavy",
+    "access": "easy",
+    "severity": "major",
+    "debris": "moderate",
+    "multipleAreas": false,
+    "materialHint": "tile",
+    "inferredScope": "partial_roof_replacement",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": 400,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "tile roofing",
+      "storm or major damage",
+      "large portion replacement",
+      "easy access but two-story height"
+    ],
+    "estimatorNotes": [
+      "Customer selected partial replacement and indicated storm/major damage.",
+      "Satellite imagery confirms a pool on property and a large roof area consistent with a two-story home.",
+      "Tile roof material will increase complexity for removal and replacement compared with shingles."
+    ],
+    "serviceSignals": {
+      "Roofing": {
+        "serviceType": "Roofing",
+        "jobSubtype": "partial_replacement",
+        "jobSubtypeLabel": "Partial Roof Replacement",
+        "workType": "replace",
+        "fallbackFamily": "roof_like_surface",
+        "surfaceFamily": "roof_like_surface",
+        "targetObjectFamily": "roof",
+        "sizeBucket": "large",
+        "estimatedQuantity": 18,
+        "quantityUnit": "roof_square",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "tile",
+        "materialSubtype": "tile",
+        "conditionClass": "storm_damage",
+        "severityClass": "major",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "moderate",
+        "heightClass": "two_story",
+        "stories": 2,
+        "slopeClass": "some_slope",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": true,
+        "fencePresent": true,
+        "deckPresent": true,
+        "roofType": "tile",
+        "premiumPropertySignal": true,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": true,
+        "aiConfidence": 68,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly states partial replacement and storm/major damage.",
+          "Satellite imagery confirms large roof footprint and two-story structure supporting large scope.",
+          "No direct footage counts provided; quantity inferred from building area and typical roof slopes."
+        ],
+        "consistencyScore": 75,
+        "notes": [
+          "Recommend manual review for tile tear-off logistics, underlayment inspection, and disposal planning.",
+          "Confirm number of roof facets and any underlying structural damage during on-site assessment."
+        ],
+        "summary": "Partial tile roof replacement across a large portion of a two-story roof due to storm damage; removal and haul-away required."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 1200,
+        "confidence": 0.8
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 1200,
+      "walkway": 250,
+      "patio": 400
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": true,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific to roofing partial replacement and tile material.",
+      "Satellite imagery and property size support a large roof area and presence of pool/amenities affecting logistics.",
+      "No explicit square footage of roof provided; estimate relies on building footprint inference."
+    ]
+  }
+}

@@ -1,0 +1,127 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T19:37:07.006Z",
+  "promptHash": "cc173fa0008db2246723bb7f79a17848b64f7731b21a9c3ce5676144f51f1c16",
+  "keyHash": "545a87355bd2e320f18c58c1a3ca714d3948f34148ff4b350f03d8c360a02c5b",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Outdoor Lighting Installation"
+    ],
+    "address": "1120 Barber Rd, Bristol, TN 37620, USA",
+    "addressPlaceId": "ChIJJ5fNoHydWogRR3gpT3OQN7M",
+    "lat": 36.5614452,
+    "lng": -82.220179,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Outdoor Lighting Installation",
+        "answers": {
+          "lighting_install_difficulty": "Not sure",
+          "lighting_power": "Yes",
+          "lighting_scope": "One small area",
+          "lighting_type": [
+            "Other",
+            "Patio or string lights"
+          ],
+          "lighting_type_other_text": "custom scope requested for lighting type 39",
+          "lighting_work_type": "Add to an existing system"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests adding patio/string lighting to one small area; power available. Small exterior lighting add-on job.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "low-voltage landscape lighting, string/patio lights",
+    "inferredScope": "Add fixtures for one small patio or outdoor seating area (customer selected 'One small area').",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": 6,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 74,
+    "pricingDrivers": [
+      "existing power available",
+      "small area lighting",
+      "custom fixture/type requested"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Add to an existing system' and 'Patio or string lights'.",
+      "Customer provided custom text 'lighting type 39' indicating non-standard fixture preference.",
+      "Satellite and single photo show modest single-family property with small rear yard; access appears straightforward."
+    ],
+    "serviceSignals": {
+      "Outdoor Lighting Installation": {
+        "serviceType": "Outdoor Lighting Installation",
+        "jobSubtype": "patio_string_lights",
+        "jobSubtypeLabel": "Patio / String Lights",
+        "workType": "install",
+        "fallbackFamily": "lighting_system",
+        "surfaceFamily": "lighting_system",
+        "targetObjectFamily": "lighting_system",
+        "sizeBucket": "small",
+        "estimatedQuantity": 1,
+        "quantityUnit": "zone_count",
+        "quantityEvidence": "direct",
+        "materialClass": "low_voltage",
+        "materialSubtype": "string/patio",
+        "conditionClass": "new_install",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": false,
+        "aiConfidence": 72,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly indicates add-to-existing and one small area.",
+          "Custom 'other' lighting type text implies specialized fixtures which increases scope uncertainty.",
+          "Satellite imagery and photo confirm single-family property with small backyard and easy access."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Power available which simplifies installation.",
+          "Recommend contractor confirm fixture type and exact fixture count during manual estimate or call."
+        ],
+        "summary": "Add/augment small-area patio or string lighting (one zone)."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 86,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1,
+    "luxuryMultiplier": 1,
+    "estateScore": 1432,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about scope and power availability.",
+      "Imagery supports single small-area installation and easy access; custom fixture text adds some uncertainty."
+    ]
+  }
+}

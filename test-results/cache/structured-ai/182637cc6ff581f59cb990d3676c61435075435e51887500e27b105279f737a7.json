@@ -1,0 +1,124 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T23:50:49.031Z",
+  "promptHash": "ae206239690d43cbde3511c75dd50e7f62ecd3bf408f40c5d89b3070823dda78",
+  "keyHash": "182637cc6ff581f59cb990d3676c61435075435e51887500e27b105279f737a7",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Exterior Painting"
+    ],
+    "address": "1696 North Pass Trl, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJfeI3GdQ4b4cRiz4wRGjyh-I",
+    "lat": 41.2460767,
+    "lng": -104.7575577,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Exterior Painting",
+        "answers": {
+          "painting_access": "Not sure",
+          "painting_condition": "Needs prep and repairs",
+          "painting_scope": "Full exterior",
+          "painting_surface_type": "Siding",
+          "painting_target": "Partial exterior"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requested exterior painting; questionnaire indicates siding work with prep and repairs needed. Scope ambiguous between partial and full exterior; recommend manual review.",
+    "condition": "moderate",
+    "access": "moderate",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "siding",
+    "inferredScope": "partial_exterior_with_repairs",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 68,
+    "pricingDrivers": [
+      "siding_prep_and_repair",
+      "two_story_access",
+      "full_exposure_to_elements"
+    ],
+    "estimatorNotes": [
+      "Questionnaire lists both 'Partial exterior' and 'Full exterior' — scope conflict.",
+      "Customer indicated 'Needs prep and repairs' which increases labor and prep scope.",
+      "No direct area or window counts provided; quantity inferred from building size."
+    ],
+    "serviceSignals": {
+      "Exterior Painting": {
+        "serviceType": "Exterior Painting",
+        "jobSubtype": "siding",
+        "jobSubtypeLabel": "Siding - exterior",
+        "workType": "repair",
+        "fallbackFamily": "exterior_finish_surface",
+        "surfaceFamily": "vertical_exterior_surface",
+        "targetObjectFamily": "siding",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 1800,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "siding",
+        "materialSubtype": "unknown",
+        "conditionClass": "needs_prep",
+        "severityClass": "moderate",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "two_story",
+        "stories": 2,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": true,
+        "aiConfidence": 60,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly selected exterior painting and noted prep/repairs.",
+          "House square footage and satellite imagery used to infer wall area.",
+          "Conflicting scope answers (partial vs full) reduce confidence."
+        ],
+        "consistencyScore": 70,
+        "notes": [
+          "Confirm whether customer wants full exterior or only sections.",
+          "Recommend on-site verification of siding material and exact square footage.",
+          "Prep and repair line items likely required (caulking, patching, priming)."
+        ],
+        "summary": "Siding repair and painting on vertical exterior surfaces; estimated medium-sized job with prep required."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 72,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 0,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers indicate painting with prep/repairs but contain conflicting scope selections.",
+      "No direct square footage or window counts were provided; exterior area inferred from house sqft and imagery."
+    ]
+  }
+}

@@ -1,0 +1,1923 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SnapQuote Estimator Report</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f6f4ef;
+        --card: #ffffff;
+        --ink: #1f2937;
+        --muted: #6b7280;
+        --line: #d1d5db;
+        --accent: #14532d;
+        --accent-soft: #ecfdf5;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: Georgia, "Times New Roman", serif;
+        background: linear-gradient(180deg, #f8f7f2 0%, #eef3f7 100%);
+        color: var(--ink);
+      }
+      main {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 40px 20px 64px;
+      }
+      h1 {
+        margin: 0 0 12px;
+        font-size: 2.4rem;
+      }
+      .intro {
+        margin: 0 0 32px;
+        color: var(--muted);
+        font-size: 1rem;
+      }
+      .property-card {
+        background: var(--card);
+        border: 1px solid rgba(20, 83, 45, 0.12);
+        border-radius: 18px;
+        padding: 24px;
+        margin-bottom: 28px;
+        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.06);
+      }
+      .property-card h2 {
+        margin: 0 0 18px;
+        font-size: 1.5rem;
+      }
+      .property-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 12px;
+        margin-bottom: 24px;
+      }
+      .property-grid div {
+        background: var(--accent-soft);
+        border-radius: 12px;
+        padding: 12px 14px;
+      }
+      .property-grid strong {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 0.85rem;
+      }
+      .service-card {
+        border-top: 1px solid var(--line);
+        padding-top: 20px;
+        margin-top: 20px;
+      }
+      .service-card h3 {
+        margin: 0 0 6px;
+        font-size: 1.2rem;
+      }
+      .service-meta {
+        margin: 0 0 14px;
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fff;
+      }
+      th, td {
+        padding: 10px 12px;
+        border: 1px solid var(--line);
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        background: #f3f4f6;
+        font-size: 0.95rem;
+      }
+      .estimate {
+        margin: 14px 0 0;
+        font-size: 1rem;
+      }
+      @media (max-width: 720px) {
+        main {
+          padding: 24px 14px 48px;
+        }
+        h1 {
+          font-size: 1.9rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>SnapQuote Estimator Report</h1>
+      <p class="intro">
+        Run 2 Smoke / AI image fix / Seed: seed-a.
+        Grouped by property and service. The CSV backup remains available at snapquote-test-results.csv.
+      </p>
+      
+        <section class="property-card">
+          <h2>8260 Oakwood Ave, Los Angeles, CA 90048, USA</h2>
+          <div class="property-grid">
+            <div><strong>City</strong><span>Los Angeles</span></div>
+            <div><strong>Google Lot Size</strong><span>5113</span></div>
+            <div><strong>Google House Size</strong><span>1585</span></div>
+            <div><strong>Travel Distance</strong><span>5</span></div>
+          </div>
+          
+            <section class="service-card">
+              <h3>Pressure Washing</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-14T21:36:48.168Z
+                <br />
+                AI mode: require | Signal source: structured_ai | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;pressure_washing_target&quot;:[&quot;Roof&quot;,&quot;House exterior&quot;,&quot;Other&quot;,&quot;Driveway&quot;,&quot;Fence&quot;,&quot;Patio or porch&quot;],&quot;pressure_washing_target_other_text&quot;:&quot;special access needs for pressure washing target 47&quot;,&quot;pressure_washing_size&quot;:&quot;Large area (~1,500-3,000 sq ft)&quot;,&quot;pressure_washing_condition&quot;:&quot;Oil, rust, or deep stains&quot;,&quot;pressure_washing_access&quot;:&quot;Not sure&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What do you want cleaned?</td>
+                      <td>Roof | House exterior | Other | Driveway | Fence | Patio or porch</td>
+                    </tr>
+                    <tr>
+                      <td>About how much needs to be cleaned?</td>
+                      <td>Large area (~1,500-3,000 sq ft)</td>
+                    </tr>
+                    <tr>
+                      <td>How dirty is it?</td>
+                      <td>Oil, rust, or deep stains</td>
+                    </tr>
+                    <tr>
+                      <td>Is the area easy to access?</td>
+                      <td>Not sure</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 2325.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Gutter Cleaning</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-14T21:37:26.659Z
+                <br />
+                AI mode: require | Signal source: structured_ai | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;gutter_building_type&quot;:&quot;Three-story or taller&quot;,&quot;gutter_work_type&quot;:&quot;Clean gutters only&quot;,&quot;gutter_fill_level&quot;:&quot;Very full or overflowing&quot;,&quot;gutter_access&quot;:&quot;Yes, landscaping or obstacles&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What type of building is this for?</td>
+                      <td>Three-story or taller</td>
+                    </tr>
+                    <tr>
+                      <td>What do you need done?</td>
+                      <td>Clean gutters only</td>
+                    </tr>
+                    <tr>
+                      <td>About how full are the gutters?</td>
+                      <td>Very full or overflowing</td>
+                    </tr>
+                    <tr>
+                      <td>Are there any access challenges?</td>
+                      <td>Yes, landscaping or obstacles</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 900.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Window Cleaning</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-14T21:37:48.367Z
+                <br />
+                AI mode: require | Signal source: structured_ai | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;window_target_type&quot;:&quot;Other&quot;,&quot;window_target_type_other_text&quot;:&quot;site-specific details for window target type 79&quot;,&quot;window_count&quot;:&quot;50+&quot;,&quot;window_property_type&quot;:&quot;Single-story home&quot;,&quot;window_access&quot;:&quot;Not sure&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What kind of windows need cleaning?</td>
+                      <td>Other</td>
+                    </tr>
+                    <tr>
+                      <td>About how many windows need cleaning?</td>
+                      <td>50+</td>
+                    </tr>
+                    <tr>
+                      <td>What type of property is this?</td>
+                      <td>Single-story home</td>
+                    </tr>
+                    <tr>
+                      <td>How easy is access to the windows?</td>
+                      <td>Not sure</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 600.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Pool Service / Cleaning</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-14T21:38:20.748Z
+                <br />
+                AI mode: require | Signal source: structured_ai | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;pool_work_type&quot;:&quot;Green or dirty pool cleanup&quot;,&quot;pool_type&quot;:&quot;In-ground pool&quot;,&quot;pool_condition&quot;:&quot;Needs normal cleaning&quot;,&quot;pool_size&quot;:&quot;Small&quot;,&quot;pool_access&quot;:&quot;Not sure&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What do you need help with?</td>
+                      <td>Green or dirty pool cleanup</td>
+                    </tr>
+                    <tr>
+                      <td>What type of pool is it?</td>
+                      <td>In-ground pool</td>
+                    </tr>
+                    <tr>
+                      <td>What condition is the pool in right now?</td>
+                      <td>Needs normal cleaning</td>
+                    </tr>
+                    <tr>
+                      <td>About how large is the pool?</td>
+                      <td>Small</td>
+                    </tr>
+                    <tr>
+                      <td>Is there easy access to the pool equipment and pool area?</td>
+                      <td>Not sure</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 150.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Lawn Care / Maintenance</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-14T21:38:48.190Z
+                <br />
+                AI mode: require | Signal source: structured_ai | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;lawn_work_type&quot;:&quot;Mowing and edging&quot;,&quot;lawn_area_size&quot;:&quot;Not sure&quot;,&quot;lawn_condition&quot;:&quot;Slightly overgrown&quot;,&quot;lawn_property_type&quot;:&quot;Other&quot;,&quot;lawn_property_type_other_text&quot;:&quot;custom scope requested for lawn property type 13&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What do you need done?</td>
+                      <td>Mowing and edging</td>
+                    </tr>
+                    <tr>
+                      <td>How big is the area that needs service?</td>
+                      <td>Not sure</td>
+                    </tr>
+                    <tr>
+                      <td>What is the current condition of the yard?</td>
+                      <td>Slightly overgrown</td>
+                    </tr>
+                    <tr>
+                      <td>What type of property is this?</td>
+                      <td>Other</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 400.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Landscaping / Installation</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-14T21:39:10.035Z
+                <br />
+                AI mode: require | Signal source: structured_ai | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;landscape_work_type&quot;:[&quot;Other&quot;],&quot;landscape_work_type_other_text&quot;:&quot;site-specific details for landscape work type 22&quot;,&quot;landscape_area_size&quot;:&quot;Full property (4,000+ sq ft)&quot;,&quot;landscape_job_type&quot;:&quot;Not sure&quot;,&quot;landscape_materials&quot;:[&quot;Sod or turf&quot;,&quot;Mostly mulch or rock&quot;],&quot;landscape_access&quot;:&quot;Difficult&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What kind of landscaping work do you want?</td>
+                      <td>Other</td>
+                    </tr>
+                    <tr>
+                      <td>How much of the yard is involved?</td>
+                      <td>Full property (4,000+ sq ft)</td>
+                    </tr>
+                    <tr>
+                      <td>What best describes the job?</td>
+                      <td>Not sure</td>
+                    </tr>
+                    <tr>
+                      <td>What materials are involved?</td>
+                      <td>Sod or turf | Mostly mulch or rock</td>
+                    </tr>
+                    <tr>
+                      <td>Is the area easy to access with materials and tools?</td>
+                      <td>Difficult</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 11825.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Tree Service / Removal</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-14T21:39:37.013Z
+                <br />
+                AI mode: require | Signal source: structured_ai | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;tree_work_type&quot;:&quot;Stump grinding&quot;,&quot;tree_size&quot;:&quot;Large&quot;,&quot;tree_location&quot;:&quot;Near fence or structure&quot;,&quot;tree_access&quot;:&quot;Easy&quot;,&quot;tree_haul_away&quot;:&quot;Not sure&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What do you need done?</td>
+                      <td>Stump grinding</td>
+                    </tr>
+                    <tr>
+                      <td>How large is the tree or trees?</td>
+                      <td>Large</td>
+                    </tr>
+                    <tr>
+                      <td>Where is the tree located?</td>
+                      <td>Near fence or structure</td>
+                    </tr>
+                    <tr>
+                      <td>How easy is access for the crew and equipment?</td>
+                      <td>Easy</td>
+                    </tr>
+                    <tr>
+                      <td>Do you want haul-away included?</td>
+                      <td>Not sure</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 1225.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Fence Installation / Repair</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-14T21:40:03.931Z
+                <br />
+                AI mode: require | Signal source: structured_ai | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;fence_work_type&quot;:&quot;Fence replacement&quot;,&quot;fence_material&quot;:&quot;Metal or aluminum&quot;,&quot;fence_scope&quot;:&quot;Other&quot;,&quot;fence_scope_other_text&quot;:&quot;custom scope requested for fence scope 22&quot;,&quot;fence_site&quot;:&quot;Flat and clear&quot;,&quot;fence_repair_condition&quot;:&quot;Minor&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What do you need?</td>
+                      <td>Fence replacement</td>
+                    </tr>
+                    <tr>
+                      <td>What fence material do you want?</td>
+                      <td>Metal or aluminum</td>
+                    </tr>
+                    <tr>
+                      <td>About how much fence work is needed?</td>
+                      <td>Other</td>
+                    </tr>
+                    <tr>
+                      <td>What is the site like?</td>
+                      <td>Flat and clear</td>
+                    </tr>
+                    <tr>
+                      <td>If this is a repair, how bad is the damage?</td>
+                      <td>Minor</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 6925.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Concrete</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-14T21:40:31.021Z
+                <br />
+                AI mode: require | Signal source: structured_ai | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;concrete_project_type&quot;:[&quot;Walkway&quot;,&quot;Other&quot;,&quot;Driveway&quot;,&quot;Patio&quot;],&quot;concrete_project_type_other_text&quot;:&quot;premium material preference for concrete project type 73&quot;,&quot;concrete_work_type&quot;:&quot;New installation&quot;,&quot;concrete_material&quot;:&quot;Brick / stone&quot;,&quot;concrete_scope&quot;:&quot;Small (up to ~200 sq ft)&quot;,&quot;concrete_site_condition&quot;:&quot;Existing concrete needs removal&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What type of concrete project is this?</td>
+                      <td>Walkway | Other | Driveway | Patio</td>
+                    </tr>
+                    <tr>
+                      <td>What do you need done?</td>
+                      <td>New installation</td>
+                    </tr>
+                    <tr>
+                      <td>What material or finish do you want?</td>
+                      <td>Brick / stone</td>
+                    </tr>
+                    <tr>
+                      <td>About how big is the job?</td>
+                      <td>Small (up to ~200 sq ft)</td>
+                    </tr>
+                    <tr>
+                      <td>What is the site like right now?</td>
+                      <td>Existing concrete needs removal</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 9475.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Deck Installation / Repair</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-14T21:41:03.100Z
+                <br />
+                AI mode: require | Signal source: structured_ai | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;deck_work_type&quot;:&quot;Other&quot;,&quot;deck_work_type_other_text&quot;:&quot;premium material preference for deck work type 80&quot;,&quot;deck_material&quot;:&quot;Wood&quot;,&quot;deck_scope&quot;:&quot;Large (~350-700 sq ft)&quot;,&quot;deck_area_type&quot;:&quot;Ground level&quot;,&quot;deck_repair_condition&quot;:&quot;Not sure&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What do you need done?</td>
+                      <td>Other</td>
+                    </tr>
+                    <tr>
+                      <td>What deck material do you want?</td>
+                      <td>Wood</td>
+                    </tr>
+                    <tr>
+                      <td>About how large is the deck project?</td>
+                      <td>Large (~350-700 sq ft)</td>
+                    </tr>
+                    <tr>
+                      <td>What type of work area is it?</td>
+                      <td>Ground level</td>
+                    </tr>
+                    <tr>
+                      <td>If this is a repair, what condition is the deck in?</td>
+                      <td>Not sure</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 20600.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Exterior Painting</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-14T21:41:25.137Z
+                <br />
+                AI mode: require | Signal source: structured_ai | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;painting_target&quot;:&quot;Full house exterior&quot;,&quot;painting_surface_type&quot;:&quot;Siding&quot;,&quot;painting_condition&quot;:&quot;Not sure&quot;,&quot;painting_scope&quot;:&quot;Small touch-up&quot;,&quot;painting_access&quot;:&quot;Two-story areas&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What needs to be painted?</td>
+                      <td>Full house exterior</td>
+                    </tr>
+                    <tr>
+                      <td>What type of surface is being painted?</td>
+                      <td>Siding</td>
+                    </tr>
+                    <tr>
+                      <td>What is the current condition of the surface?</td>
+                      <td>Not sure</td>
+                    </tr>
+                    <tr>
+                      <td>How large is the job?</td>
+                      <td>Small touch-up</td>
+                    </tr>
+                    <tr>
+                      <td>How difficult is access?</td>
+                      <td>Two-story areas</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 1725.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Roofing</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-14T21:41:46.988Z
+                <br />
+                AI mode: require | Signal source: structured_ai | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;roofing_work_type&quot;:&quot;Leak repair&quot;,&quot;roofing_type&quot;:&quot;Metal&quot;,&quot;roofing_problem&quot;:&quot;Missing or damaged area&quot;,&quot;roofing_scope&quot;:&quot;One area or slope&quot;,&quot;roofing_access&quot;:&quot;Steep or difficult&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What type of roofing work do you need?</td>
+                      <td>Leak repair</td>
+                    </tr>
+                    <tr>
+                      <td>What type of roof is it?</td>
+                      <td>Metal</td>
+                    </tr>
+                    <tr>
+                      <td>What best describes the problem?</td>
+                      <td>Missing or damaged area</td>
+                    </tr>
+                    <tr>
+                      <td>About how much of the roof is involved?</td>
+                      <td>One area or slope</td>
+                    </tr>
+                    <tr>
+                      <td>How easy is roof access?</td>
+                      <td>Steep or difficult</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 1625.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Junk Removal</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-14T21:42:14.089Z
+                <br />
+                AI mode: require | Signal source: structured_ai | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;junk_type&quot;:&quot;Yard debris&quot;,&quot;junk_amount&quot;:&quot;Large load (about a full trailer or truck load+)&quot;,&quot;junk_location&quot;:&quot;Garage or driveway&quot;,&quot;junk_heavy_items&quot;:&quot;Not sure&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What needs to be removed?</td>
+                      <td>Yard debris</td>
+                    </tr>
+                    <tr>
+                      <td>How much junk is there?</td>
+                      <td>Large load (about a full trailer or truck load+)</td>
+                    </tr>
+                    <tr>
+                      <td>Where is the junk located?</td>
+                      <td>Garage or driveway</td>
+                    </tr>
+                    <tr>
+                      <td>Are there any heavy or difficult items?</td>
+                      <td>Not sure</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 825.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Outdoor Lighting Installation</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-14T21:42:35.809Z
+                <br />
+                AI mode: require | Signal source: structured_ai | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;lighting_work_type&quot;:&quot;Install lights I already have&quot;,&quot;lighting_type&quot;:[&quot;Driveway lights&quot;,&quot;Other&quot;,&quot;Patio or string lights&quot;,&quot;Pathway lights&quot;,&quot;Accent or landscape lights&quot;,&quot;Security or flood lights&quot;],&quot;lighting_type_other_text&quot;:&quot;special access needs for lighting type 51&quot;,&quot;lighting_scope&quot;:&quot;One large area&quot;,&quot;lighting_power&quot;:&quot;No&quot;,&quot;lighting_install_difficulty&quot;:&quot;Some wiring or layout work needed&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What do you need help with?</td>
+                      <td>Install lights I already have</td>
+                    </tr>
+                    <tr>
+                      <td>What kind of lighting is this for?</td>
+                      <td>Driveway lights | Other | Patio or string lights | Pathway lights | Accent or landscape lights | Security or flood lights</td>
+                    </tr>
+                    <tr>
+                      <td>How much of the property needs lighting work?</td>
+                      <td>One large area</td>
+                    </tr>
+                    <tr>
+                      <td>Is power already available where the lighting is needed?</td>
+                      <td>No</td>
+                    </tr>
+                    <tr>
+                      <td>What best describes the installation difficulty?</td>
+                      <td>Some wiring or layout work needed</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 1525.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Other</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-14T21:43:02.701Z
+                <br />
+                AI mode: require | Signal source: structured_ai | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;other_work_type&quot;:&quot;Cleaning&quot;,&quot;other_size&quot;:&quot;Large&quot;,&quot;other_property_type&quot;:&quot;Not sure&quot;,&quot;other_access&quot;:&quot;Very difficult&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What kind of project do you need help with?</td>
+                      <td>Cleaning</td>
+                    </tr>
+                    <tr>
+                      <td>What size is the project?</td>
+                      <td>Large</td>
+                    </tr>
+                    <tr>
+                      <td>What type of property is this for?</td>
+                      <td>Not sure</td>
+                    </tr>
+                    <tr>
+                      <td>How easy is access to the work area?</td>
+                      <td>Very difficult</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 1100.00</p>
+            </section>
+        </section>
+        <section class="property-card">
+          <h2>935 Burnside Ave, Los Angeles, CA 90036, USA</h2>
+          <div class="property-grid">
+            <div><strong>City</strong><span>Los Angeles</span></div>
+            <div><strong>Google Lot Size</strong><span>8168</span></div>
+            <div><strong>Google House Size</strong><span>2532</span></div>
+            <div><strong>Travel Distance</strong><span>5.2</span></div>
+          </div>
+          
+            <section class="service-card">
+              <h3>Pressure Washing</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-14T21:43:19.692Z
+                <br />
+                AI mode: require | Signal source: structured_ai | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;pressure_washing_target&quot;:[&quot;House exterior&quot;,&quot;Driveway&quot;,&quot;Roof&quot;,&quot;Patio or porch&quot;,&quot;Fence&quot;,&quot;Other&quot;],&quot;pressure_washing_target_other_text&quot;:&quot;site-specific details for pressure washing target 29&quot;,&quot;pressure_washing_size&quot;:&quot;Large area (~1,500-3,000 sq ft)&quot;,&quot;pressure_washing_condition&quot;:&quot;Light dirt or dust&quot;,&quot;pressure_washing_access&quot;:&quot;Not sure&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What do you want cleaned?</td>
+                      <td>House exterior | Driveway | Roof | Patio or porch | Fence | Other</td>
+                    </tr>
+                    <tr>
+                      <td>About how much needs to be cleaned?</td>
+                      <td>Large area (~1,500-3,000 sq ft)</td>
+                    </tr>
+                    <tr>
+                      <td>How dirty is it?</td>
+                      <td>Light dirt or dust</td>
+                    </tr>
+                    <tr>
+                      <td>Is the area easy to access?</td>
+                      <td>Not sure</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 2325.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Gutter Cleaning</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-14T21:43:46.896Z
+                <br />
+                AI mode: require | Signal source: structured_ai | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;gutter_building_type&quot;:&quot;Three-story or taller&quot;,&quot;gutter_work_type&quot;:&quot;Other&quot;,&quot;gutter_work_type_other_text&quot;:&quot;custom scope requested for gutter work type 63&quot;,&quot;gutter_fill_level&quot;:&quot;Very full or overflowing&quot;,&quot;gutter_access&quot;:&quot;Yes, landscaping or obstacles&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What type of building is this for?</td>
+                      <td>Three-story or taller</td>
+                    </tr>
+                    <tr>
+                      <td>What do you need done?</td>
+                      <td>Other</td>
+                    </tr>
+                    <tr>
+                      <td>About how full are the gutters?</td>
+                      <td>Very full or overflowing</td>
+                    </tr>
+                    <tr>
+                      <td>Are there any access challenges?</td>
+                      <td>Yes, landscaping or obstacles</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 950.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Window Cleaning</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-14T21:44:14.559Z
+                <br />
+                AI mode: require | Signal source: structured_ai | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;window_target_type&quot;:&quot;Other&quot;,&quot;window_target_type_other_text&quot;:&quot;site-specific details for window target type 36&quot;,&quot;window_count&quot;:&quot;50+&quot;,&quot;window_property_type&quot;:&quot;Small commercial building&quot;,&quot;window_access&quot;:&quot;Some ladders needed&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What kind of windows need cleaning?</td>
+                      <td>Other</td>
+                    </tr>
+                    <tr>
+                      <td>About how many windows need cleaning?</td>
+                      <td>50+</td>
+                    </tr>
+                    <tr>
+                      <td>What type of property is this?</td>
+                      <td>Small commercial building</td>
+                    </tr>
+                    <tr>
+                      <td>How easy is access to the windows?</td>
+                      <td>Some ladders needed</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 825.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Pool Service / Cleaning</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-14T21:44:46.869Z
+                <br />
+                AI mode: require | Signal source: structured_ai | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;pool_work_type&quot;:&quot;Other&quot;,&quot;pool_work_type_other_text&quot;:&quot;special access needs for pool work type 88&quot;,&quot;pool_type&quot;:&quot;Not sure&quot;,&quot;pool_condition&quot;:&quot;Not sure&quot;,&quot;pool_size&quot;:&quot;Large&quot;,&quot;pool_access&quot;:&quot;No&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What do you need help with?</td>
+                      <td>Other</td>
+                    </tr>
+                    <tr>
+                      <td>What type of pool is it?</td>
+                      <td>Not sure</td>
+                    </tr>
+                    <tr>
+                      <td>What condition is the pool in right now?</td>
+                      <td>Not sure</td>
+                    </tr>
+                    <tr>
+                      <td>About how large is the pool?</td>
+                      <td>Large</td>
+                    </tr>
+                    <tr>
+                      <td>Is there easy access to the pool equipment and pool area?</td>
+                      <td>No</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 250.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Lawn Care / Maintenance</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-14T21:45:13.882Z
+                <br />
+                AI mode: require | Signal source: structured_ai | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;lawn_work_type&quot;:&quot;Mowing only&quot;,&quot;lawn_area_size&quot;:&quot;Medium yard (~2,000-5,000 sq ft)&quot;,&quot;lawn_condition&quot;:&quot;Not sure&quot;,&quot;lawn_property_type&quot;:&quot;Front yard only&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What do you need done?</td>
+                      <td>Mowing only</td>
+                    </tr>
+                    <tr>
+                      <td>How big is the area that needs service?</td>
+                      <td>Medium yard (~2,000-5,000 sq ft)</td>
+                    </tr>
+                    <tr>
+                      <td>What is the current condition of the yard?</td>
+                      <td>Not sure</td>
+                    </tr>
+                    <tr>
+                      <td>What type of property is this?</td>
+                      <td>Front yard only</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 75.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Landscaping / Installation</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-14T21:45:35.745Z
+                <br />
+                AI mode: require | Signal source: structured_ai | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;landscape_work_type&quot;:[&quot;Sod or lawn installation&quot;,&quot;New plants or garden beds&quot;,&quot;Yard makeover&quot;],&quot;landscape_area_size&quot;:&quot;Not sure&quot;,&quot;landscape_job_type&quot;:&quot;Replace old landscaping&quot;,&quot;landscape_materials&quot;:[&quot;Sod or turf&quot;,&quot;Mostly plants&quot;,&quot;Mixed materials&quot;],&quot;landscape_access&quot;:&quot;Easy&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What kind of landscaping work do you want?</td>
+                      <td>Sod or lawn installation | New plants or garden beds | Yard makeover</td>
+                    </tr>
+                    <tr>
+                      <td>How much of the yard is involved?</td>
+                      <td>Not sure</td>
+                    </tr>
+                    <tr>
+                      <td>What best describes the job?</td>
+                      <td>Replace old landscaping</td>
+                    </tr>
+                    <tr>
+                      <td>What materials are involved?</td>
+                      <td>Sod or turf | Mostly plants | Mixed materials</td>
+                    </tr>
+                    <tr>
+                      <td>Is the area easy to access with materials and tools?</td>
+                      <td>Easy</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 25925.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Tree Service / Removal</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-14T21:46:07.911Z
+                <br />
+                AI mode: require | Signal source: structured_ai | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;tree_work_type&quot;:&quot;Other&quot;,&quot;tree_work_type_other_text&quot;:&quot;special access needs for tree work type 95&quot;,&quot;tree_size&quot;:&quot;Medium&quot;,&quot;tree_location&quot;:&quot;Front yard&quot;,&quot;tree_access&quot;:&quot;Easy&quot;,&quot;tree_haul_away&quot;:&quot;Yes&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What do you need done?</td>
+                      <td>Other</td>
+                    </tr>
+                    <tr>
+                      <td>How large is the tree or trees?</td>
+                      <td>Medium</td>
+                    </tr>
+                    <tr>
+                      <td>Where is the tree located?</td>
+                      <td>Front yard</td>
+                    </tr>
+                    <tr>
+                      <td>How easy is access for the crew and equipment?</td>
+                      <td>Easy</td>
+                    </tr>
+                    <tr>
+                      <td>Do you want haul-away included?</td>
+                      <td>Yes</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 1500.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Fence Installation / Repair</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-14T21:46:40.036Z
+                <br />
+                AI mode: require | Signal source: structured_ai | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;fence_work_type&quot;:&quot;New fence installation&quot;,&quot;fence_material&quot;:&quot;Vinyl&quot;,&quot;fence_scope&quot;:&quot;Full yard (200+ linear ft)&quot;,&quot;fence_site&quot;:&quot;Flat and clear&quot;,&quot;fence_repair_condition&quot;:&quot;Not applicable / not a repair&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What do you need?</td>
+                      <td>New fence installation</td>
+                    </tr>
+                    <tr>
+                      <td>What fence material do you want?</td>
+                      <td>Vinyl</td>
+                    </tr>
+                    <tr>
+                      <td>About how much fence work is needed?</td>
+                      <td>Full yard (200+ linear ft)</td>
+                    </tr>
+                    <tr>
+                      <td>What is the site like?</td>
+                      <td>Flat and clear</td>
+                    </tr>
+                    <tr>
+                      <td>If this is a repair, how bad is the damage?</td>
+                      <td>Not applicable / not a repair</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 11625.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Concrete</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-14T21:47:07.012Z
+                <br />
+                AI mode: require | Signal source: structured_ai | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;concrete_project_type&quot;:[&quot;Driveway&quot;,&quot;Walkway&quot;,&quot;Other&quot;],&quot;concrete_project_type_other_text&quot;:&quot;premium material preference for concrete project type 89&quot;,&quot;concrete_work_type&quot;:&quot;Not sure&quot;,&quot;concrete_material&quot;:&quot;Standard concrete&quot;,&quot;concrete_scope&quot;:&quot;Not sure&quot;,&quot;concrete_site_condition&quot;:&quot;Dirt or grading needed&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What type of concrete project is this?</td>
+                      <td>Driveway | Walkway | Other</td>
+                    </tr>
+                    <tr>
+                      <td>What do you need done?</td>
+                      <td>Not sure</td>
+                    </tr>
+                    <tr>
+                      <td>What material or finish do you want?</td>
+                      <td>Standard concrete</td>
+                    </tr>
+                    <tr>
+                      <td>About how big is the job?</td>
+                      <td>Not sure</td>
+                    </tr>
+                    <tr>
+                      <td>What is the site like right now?</td>
+                      <td>Dirt or grading needed</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 11900.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Deck Installation / Repair</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-14T21:47:39.151Z
+                <br />
+                AI mode: require | Signal source: structured_ai | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;deck_work_type&quot;:&quot;Other&quot;,&quot;deck_work_type_other_text&quot;:&quot;site-specific details for deck work type 55&quot;,&quot;deck_material&quot;:&quot;PVC or premium material&quot;,&quot;deck_scope&quot;:&quot;Medium (~150-350 sq ft)&quot;,&quot;deck_area_type&quot;:&quot;Rooftop or specialty area&quot;,&quot;deck_repair_condition&quot;:&quot;Minor issues&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What do you need done?</td>
+                      <td>Other</td>
+                    </tr>
+                    <tr>
+                      <td>What deck material do you want?</td>
+                      <td>PVC or premium material</td>
+                    </tr>
+                    <tr>
+                      <td>About how large is the deck project?</td>
+                      <td>Medium (~150-350 sq ft)</td>
+                    </tr>
+                    <tr>
+                      <td>What type of work area is it?</td>
+                      <td>Rooftop or specialty area</td>
+                    </tr>
+                    <tr>
+                      <td>If this is a repair, what condition is the deck in?</td>
+                      <td>Minor issues</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 25325.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Exterior Painting</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-14T21:48:06.153Z
+                <br />
+                AI mode: require | Signal source: structured_ai | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;painting_target&quot;:&quot;Trim, doors, or garage only&quot;,&quot;painting_surface_type&quot;:&quot;Brick or masonry&quot;,&quot;painting_condition&quot;:&quot;Not sure&quot;,&quot;painting_scope&quot;:&quot;One side or small area&quot;,&quot;painting_access&quot;:&quot;Not sure&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What needs to be painted?</td>
+                      <td>Trim, doors, or garage only</td>
+                    </tr>
+                    <tr>
+                      <td>What type of surface is being painted?</td>
+                      <td>Brick or masonry</td>
+                    </tr>
+                    <tr>
+                      <td>What is the current condition of the surface?</td>
+                      <td>Not sure</td>
+                    </tr>
+                    <tr>
+                      <td>How large is the job?</td>
+                      <td>One side or small area</td>
+                    </tr>
+                    <tr>
+                      <td>How difficult is access?</td>
+                      <td>Not sure</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 2200.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Roofing</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-14T21:48:33.178Z
+                <br />
+                AI mode: require | Signal source: structured_ai | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;roofing_work_type&quot;:&quot;Full roof replacement&quot;,&quot;roofing_type&quot;:&quot;Other&quot;,&quot;roofing_type_other_text&quot;:&quot;site-specific details for roofing type 4&quot;,&quot;roofing_problem&quot;:&quot;Storm or major damage&quot;,&quot;roofing_scope&quot;:&quot;Not sure&quot;,&quot;roofing_access&quot;:&quot;Moderate&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What type of roofing work do you need?</td>
+                      <td>Full roof replacement</td>
+                    </tr>
+                    <tr>
+                      <td>What type of roof is it?</td>
+                      <td>Other</td>
+                    </tr>
+                    <tr>
+                      <td>What best describes the problem?</td>
+                      <td>Storm or major damage</td>
+                    </tr>
+                    <tr>
+                      <td>About how much of the roof is involved?</td>
+                      <td>Not sure</td>
+                    </tr>
+                    <tr>
+                      <td>How easy is roof access?</td>
+                      <td>Moderate</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 10225.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Junk Removal</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-14T21:49:00.391Z
+                <br />
+                AI mode: require | Signal source: structured_ai | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;junk_type&quot;:&quot;Furniture&quot;,&quot;junk_amount&quot;:&quot;Medium load (about half a trailer or small truck)&quot;,&quot;junk_location&quot;:&quot;Garage or driveway&quot;,&quot;junk_heavy_items&quot;:&quot;Yes, a few&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What needs to be removed?</td>
+                      <td>Furniture</td>
+                    </tr>
+                    <tr>
+                      <td>How much junk is there?</td>
+                      <td>Medium load (about half a trailer or small truck)</td>
+                    </tr>
+                    <tr>
+                      <td>Where is the junk located?</td>
+                      <td>Garage or driveway</td>
+                    </tr>
+                    <tr>
+                      <td>Are there any heavy or difficult items?</td>
+                      <td>Yes, a few</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 575.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Outdoor Lighting Installation</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-14T21:49:27.555Z
+                <br />
+                AI mode: require | Signal source: structured_ai | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;lighting_work_type&quot;:&quot;Install a basic new lighting setup&quot;,&quot;lighting_type&quot;:[&quot;Patio or string lights&quot;,&quot;Security or flood lights&quot;,&quot;Accent or landscape lights&quot;,&quot;Other&quot;,&quot;Driveway lights&quot;,&quot;Pathway lights&quot;],&quot;lighting_type_other_text&quot;:&quot;custom scope requested for lighting type 63&quot;,&quot;lighting_scope&quot;:&quot;Multiple areas&quot;,&quot;lighting_power&quot;:&quot;Not sure&quot;,&quot;lighting_install_difficulty&quot;:&quot;Complex or large-property installation&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What do you need help with?</td>
+                      <td>Install a basic new lighting setup</td>
+                    </tr>
+                    <tr>
+                      <td>What kind of lighting is this for?</td>
+                      <td>Patio or string lights | Security or flood lights | Accent or landscape lights | Other | Driveway lights | Pathway lights</td>
+                    </tr>
+                    <tr>
+                      <td>How much of the property needs lighting work?</td>
+                      <td>Multiple areas</td>
+                    </tr>
+                    <tr>
+                      <td>Is power already available where the lighting is needed?</td>
+                      <td>Not sure</td>
+                    </tr>
+                    <tr>
+                      <td>What best describes the installation difficulty?</td>
+                      <td>Complex or large-property installation</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 3125.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Other</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-14T21:49:59.598Z
+                <br />
+                AI mode: require | Signal source: structured_ai | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;other_work_type&quot;:&quot;Cleaning&quot;,&quot;other_size&quot;:&quot;Small&quot;,&quot;other_property_type&quot;:&quot;Commercial property&quot;,&quot;other_access&quot;:&quot;Moderate&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What kind of project do you need help with?</td>
+                      <td>Cleaning</td>
+                    </tr>
+                    <tr>
+                      <td>What size is the project?</td>
+                      <td>Small</td>
+                    </tr>
+                    <tr>
+                      <td>What type of property is this for?</td>
+                      <td>Commercial property</td>
+                    </tr>
+                    <tr>
+                      <td>How easy is access to the work area?</td>
+                      <td>Moderate</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 300.00</p>
+            </section>
+        </section>
+        <section class="property-card">
+          <h2>2481 Summitridge Dr, Beverly Hills, CA 90210, USA</h2>
+          <div class="property-grid">
+            <div><strong>City</strong><span>Beverly Hills</span></div>
+            <div><strong>Google Lot Size</strong><span>25742</span></div>
+            <div><strong>Google House Size</strong><span>9525</span></div>
+            <div><strong>Travel Distance</strong><span>6</span></div>
+          </div>
+          
+            <section class="service-card">
+              <h3>Pressure Washing</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-14T21:50:26.830Z
+                <br />
+                AI mode: require | Signal source: structured_ai | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;pressure_washing_target&quot;:[&quot;Patio or porch&quot;,&quot;Fence&quot;,&quot;Roof&quot;],&quot;pressure_washing_size&quot;:&quot;Small area (up to ~500 sq ft)&quot;,&quot;pressure_washing_condition&quot;:&quot;Heavy staining or moss&quot;,&quot;pressure_washing_access&quot;:&quot;Tight or difficult access&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What do you want cleaned?</td>
+                      <td>Patio or porch | Fence | Roof</td>
+                    </tr>
+                    <tr>
+                      <td>About how much needs to be cleaned?</td>
+                      <td>Small area (up to ~500 sq ft)</td>
+                    </tr>
+                    <tr>
+                      <td>How dirty is it?</td>
+                      <td>Heavy staining or moss</td>
+                    </tr>
+                    <tr>
+                      <td>Is the area easy to access?</td>
+                      <td>Tight or difficult access</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 1625.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Gutter Cleaning</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-14T21:50:53.827Z
+                <br />
+                AI mode: require | Signal source: structured_ai | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;gutter_building_type&quot;:&quot;Single-story home&quot;,&quot;gutter_work_type&quot;:&quot;Clean gutters only&quot;,&quot;gutter_fill_level&quot;:&quot;Light debris&quot;,&quot;gutter_access&quot;:&quot;Yes, steep roof or hard access&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What type of building is this for?</td>
+                      <td>Single-story home</td>
+                    </tr>
+                    <tr>
+                      <td>What do you need done?</td>
+                      <td>Clean gutters only</td>
+                    </tr>
+                    <tr>
+                      <td>About how full are the gutters?</td>
+                      <td>Light debris</td>
+                    </tr>
+                    <tr>
+                      <td>Are there any access challenges?</td>
+                      <td>Yes, steep roof or hard access</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 850.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Window Cleaning</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-14T21:51:20.943Z
+                <br />
+                AI mode: require | Signal source: structured_ai | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;window_target_type&quot;:&quot;Large exterior windows or glass doors&quot;,&quot;window_count&quot;:&quot;26-50&quot;,&quot;window_property_type&quot;:&quot;Three-story or taller&quot;,&quot;window_access&quot;:&quot;Some ladders needed&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What kind of windows need cleaning?</td>
+                      <td>Large exterior windows or glass doors</td>
+                    </tr>
+                    <tr>
+                      <td>About how many windows need cleaning?</td>
+                      <td>26-50</td>
+                    </tr>
+                    <tr>
+                      <td>What type of property is this?</td>
+                      <td>Three-story or taller</td>
+                    </tr>
+                    <tr>
+                      <td>How easy is access to the windows?</td>
+                      <td>Some ladders needed</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 1275.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Pool Service / Cleaning</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-14T21:51:42.741Z
+                <br />
+                AI mode: require | Signal source: structured_ai | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;pool_work_type&quot;:&quot;Opening or startup&quot;,&quot;pool_type&quot;:&quot;Not sure&quot;,&quot;pool_condition&quot;:&quot;Needs normal cleaning&quot;,&quot;pool_size&quot;:&quot;Extra large / resort-style&quot;,&quot;pool_access&quot;:&quot;No&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What do you need help with?</td>
+                      <td>Opening or startup</td>
+                    </tr>
+                    <tr>
+                      <td>What type of pool is it?</td>
+                      <td>Not sure</td>
+                    </tr>
+                    <tr>
+                      <td>What condition is the pool in right now?</td>
+                      <td>Needs normal cleaning</td>
+                    </tr>
+                    <tr>
+                      <td>About how large is the pool?</td>
+                      <td>Extra large / resort-style</td>
+                    </tr>
+                    <tr>
+                      <td>Is there easy access to the pool equipment and pool area?</td>
+                      <td>No</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 950.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Lawn Care / Maintenance</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-14T21:52:09.782Z
+                <br />
+                AI mode: require | Signal source: structured_ai | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;lawn_work_type&quot;:&quot;Other&quot;,&quot;lawn_work_type_other_text&quot;:&quot;site-specific details for lawn work type 18&quot;,&quot;lawn_area_size&quot;:&quot;Not sure&quot;,&quot;lawn_condition&quot;:&quot;Not sure&quot;,&quot;lawn_property_type&quot;:&quot;Multi-area property&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What do you need done?</td>
+                      <td>Other</td>
+                    </tr>
+                    <tr>
+                      <td>How big is the area that needs service?</td>
+                      <td>Not sure</td>
+                    </tr>
+                    <tr>
+                      <td>What is the current condition of the yard?</td>
+                      <td>Not sure</td>
+                    </tr>
+                    <tr>
+                      <td>What type of property is this?</td>
+                      <td>Multi-area property</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 1050.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Landscaping / Installation</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-14T21:52:31.668Z
+                <br />
+                AI mode: require | Signal source: structured_ai | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;landscape_work_type&quot;:[&quot;New plants or garden beds&quot;,&quot;Sod or lawn installation&quot;],&quot;landscape_area_size&quot;:&quot;Most of front or backyard (~1,500-4,000 sq ft)&quot;,&quot;landscape_job_type&quot;:&quot;New installation on bare area&quot;,&quot;landscape_materials&quot;:[&quot;Not sure&quot;],&quot;landscape_access&quot;:&quot;Easy&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What kind of landscaping work do you want?</td>
+                      <td>New plants or garden beds | Sod or lawn installation</td>
+                    </tr>
+                    <tr>
+                      <td>How much of the yard is involved?</td>
+                      <td>Most of front or backyard (~1,500-4,000 sq ft)</td>
+                    </tr>
+                    <tr>
+                      <td>What best describes the job?</td>
+                      <td>New installation on bare area</td>
+                    </tr>
+                    <tr>
+                      <td>What materials are involved?</td>
+                      <td>Not sure</td>
+                    </tr>
+                    <tr>
+                      <td>Is the area easy to access with materials and tools?</td>
+                      <td>Easy</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 38200.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Tree Service / Removal</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-14T21:52:58.882Z
+                <br />
+                AI mode: require | Signal source: structured_ai | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;tree_work_type&quot;:&quot;Remove multiple trees&quot;,&quot;tree_size&quot;:&quot;Small&quot;,&quot;tree_location&quot;:&quot;Front yard&quot;,&quot;tree_access&quot;:&quot;Moderate&quot;,&quot;tree_haul_away&quot;:&quot;No&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What do you need done?</td>
+                      <td>Remove multiple trees</td>
+                    </tr>
+                    <tr>
+                      <td>How large is the tree or trees?</td>
+                      <td>Small</td>
+                    </tr>
+                    <tr>
+                      <td>Where is the tree located?</td>
+                      <td>Front yard</td>
+                    </tr>
+                    <tr>
+                      <td>How easy is access for the crew and equipment?</td>
+                      <td>Moderate</td>
+                    </tr>
+                    <tr>
+                      <td>Do you want haul-away included?</td>
+                      <td>No</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 3150.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Fence Installation / Repair</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-14T21:53:20.985Z
+                <br />
+                AI mode: require | Signal source: structured_ai | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;fence_work_type&quot;:&quot;Other&quot;,&quot;fence_work_type_other_text&quot;:&quot;special access needs for fence work type 90&quot;,&quot;fence_material&quot;:&quot;Wood&quot;,&quot;fence_scope&quot;:&quot;Small section (up to ~25 linear ft)&quot;,&quot;fence_site&quot;:&quot;Heavy slope or obstacles&quot;,&quot;fence_repair_condition&quot;:&quot;Not applicable / not a repair&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What do you need?</td>
+                      <td>Other</td>
+                    </tr>
+                    <tr>
+                      <td>What fence material do you want?</td>
+                      <td>Wood</td>
+                    </tr>
+                    <tr>
+                      <td>About how much fence work is needed?</td>
+                      <td>Small section (up to ~25 linear ft)</td>
+                    </tr>
+                    <tr>
+                      <td>What is the site like?</td>
+                      <td>Heavy slope or obstacles</td>
+                    </tr>
+                    <tr>
+                      <td>If this is a repair, how bad is the damage?</td>
+                      <td>Not applicable / not a repair</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 2475.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Concrete</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-14T21:53:47.913Z
+                <br />
+                AI mode: require | Signal source: structured_ai | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;concrete_project_type&quot;:[&quot;Slab or pad&quot;,&quot;Driveway&quot;],&quot;concrete_work_type&quot;:&quot;New installation&quot;,&quot;concrete_material&quot;:&quot;Exposed aggregate or specialty finish&quot;,&quot;concrete_scope&quot;:&quot;Small (up to ~200 sq ft)&quot;,&quot;concrete_site_condition&quot;:&quot;Dirt or grading needed&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What type of concrete project is this?</td>
+                      <td>Slab or pad | Driveway</td>
+                    </tr>
+                    <tr>
+                      <td>What do you need done?</td>
+                      <td>New installation</td>
+                    </tr>
+                    <tr>
+                      <td>What material or finish do you want?</td>
+                      <td>Exposed aggregate or specialty finish</td>
+                    </tr>
+                    <tr>
+                      <td>About how big is the job?</td>
+                      <td>Small (up to ~200 sq ft)</td>
+                    </tr>
+                    <tr>
+                      <td>What is the site like right now?</td>
+                      <td>Dirt or grading needed</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 12775.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Deck Installation / Repair</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-14T21:54:14.848Z
+                <br />
+                AI mode: require | Signal source: structured_ai | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;deck_work_type&quot;:&quot;Stairs or railing work&quot;,&quot;deck_material&quot;:&quot;Other&quot;,&quot;deck_material_other_text&quot;:&quot;special access needs for deck material 34&quot;,&quot;deck_scope&quot;:&quot;Medium (~150-350 sq ft)&quot;,&quot;deck_area_type&quot;:&quot;Multi-level&quot;,&quot;deck_repair_condition&quot;:&quot;Some damaged boards&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What do you need done?</td>
+                      <td>Stairs or railing work</td>
+                    </tr>
+                    <tr>
+                      <td>What deck material do you want?</td>
+                      <td>Other</td>
+                    </tr>
+                    <tr>
+                      <td>About how large is the deck project?</td>
+                      <td>Medium (~150-350 sq ft)</td>
+                    </tr>
+                    <tr>
+                      <td>What type of work area is it?</td>
+                      <td>Multi-level</td>
+                    </tr>
+                    <tr>
+                      <td>If this is a repair, what condition is the deck in?</td>
+                      <td>Some damaged boards</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 30725.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Exterior Painting</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-14T21:54:36.844Z
+                <br />
+                AI mode: require | Signal source: structured_ai | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;painting_target&quot;:&quot;Fence or detached structure&quot;,&quot;painting_surface_type&quot;:&quot;Stucco&quot;,&quot;painting_condition&quot;:&quot;Needs prep and repairs&quot;,&quot;painting_scope&quot;:&quot;Most of exterior&quot;,&quot;painting_access&quot;:&quot;Easy&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What needs to be painted?</td>
+                      <td>Fence or detached structure</td>
+                    </tr>
+                    <tr>
+                      <td>What type of surface is being painted?</td>
+                      <td>Stucco</td>
+                    </tr>
+                    <tr>
+                      <td>What is the current condition of the surface?</td>
+                      <td>Needs prep and repairs</td>
+                    </tr>
+                    <tr>
+                      <td>How large is the job?</td>
+                      <td>Most of exterior</td>
+                    </tr>
+                    <tr>
+                      <td>How difficult is access?</td>
+                      <td>Easy</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 6725.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Roofing</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-14T21:55:03.902Z
+                <br />
+                AI mode: require | Signal source: structured_ai | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;roofing_work_type&quot;:&quot;Leak repair&quot;,&quot;roofing_type&quot;:&quot;Tile&quot;,&quot;roofing_problem&quot;:&quot;Old roof needing replacement&quot;,&quot;roofing_scope&quot;:&quot;Entire roof&quot;,&quot;roofing_access&quot;:&quot;Not sure&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What type of roofing work do you need?</td>
+                      <td>Leak repair</td>
+                    </tr>
+                    <tr>
+                      <td>What type of roof is it?</td>
+                      <td>Tile</td>
+                    </tr>
+                    <tr>
+                      <td>What best describes the problem?</td>
+                      <td>Old roof needing replacement</td>
+                    </tr>
+                    <tr>
+                      <td>About how much of the roof is involved?</td>
+                      <td>Entire roof</td>
+                    </tr>
+                    <tr>
+                      <td>How easy is roof access?</td>
+                      <td>Not sure</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 70200.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Junk Removal</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-14T21:55:31.327Z
+                <br />
+                AI mode: require | Signal source: structured_ai | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;junk_type&quot;:&quot;Other&quot;,&quot;junk_type_other_text&quot;:&quot;special access needs for junk type 88&quot;,&quot;junk_amount&quot;:&quot;Small load (about a pickup load)&quot;,&quot;junk_location&quot;:&quot;Garage or driveway&quot;,&quot;junk_heavy_items&quot;:&quot;Yes, a few&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What needs to be removed?</td>
+                      <td>Other</td>
+                    </tr>
+                    <tr>
+                      <td>How much junk is there?</td>
+                      <td>Small load (about a pickup load)</td>
+                    </tr>
+                    <tr>
+                      <td>Where is the junk located?</td>
+                      <td>Garage or driveway</td>
+                    </tr>
+                    <tr>
+                      <td>Are there any heavy or difficult items?</td>
+                      <td>Yes, a few</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 475.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Outdoor Lighting Installation</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-14T21:55:53.218Z
+                <br />
+                AI mode: require | Signal source: structured_ai | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;lighting_work_type&quot;:&quot;Add to an existing system&quot;,&quot;lighting_type&quot;:[&quot;Pathway lights&quot;,&quot;Driveway lights&quot;,&quot;Patio or string lights&quot;,&quot;Accent or landscape lights&quot;,&quot;Other&quot;,&quot;Security or flood lights&quot;],&quot;lighting_type_other_text&quot;:&quot;site-specific details for lighting type 91&quot;,&quot;lighting_scope&quot;:&quot;Multiple areas&quot;,&quot;lighting_power&quot;:&quot;Not sure&quot;,&quot;lighting_install_difficulty&quot;:&quot;Easy access, simple install&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What do you need help with?</td>
+                      <td>Add to an existing system</td>
+                    </tr>
+                    <tr>
+                      <td>What kind of lighting is this for?</td>
+                      <td>Pathway lights | Driveway lights | Patio or string lights | Accent or landscape lights | Other | Security or flood lights</td>
+                    </tr>
+                    <tr>
+                      <td>How much of the property needs lighting work?</td>
+                      <td>Multiple areas</td>
+                    </tr>
+                    <tr>
+                      <td>Is power already available where the lighting is needed?</td>
+                      <td>Not sure</td>
+                    </tr>
+                    <tr>
+                      <td>What best describes the installation difficulty?</td>
+                      <td>Easy access, simple install</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 3650.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Other</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-14T21:56:20.242Z
+                <br />
+                AI mode: require | Signal source: structured_ai | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;other_work_type&quot;:&quot;Other&quot;,&quot;other_work_type_other_text&quot;:&quot;premium material preference for other work type 47&quot;,&quot;other_size&quot;:&quot;Very large&quot;,&quot;other_property_type&quot;:&quot;Commercial property&quot;,&quot;other_access&quot;:&quot;Very difficult&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What kind of project do you need help with?</td>
+                      <td>Other</td>
+                    </tr>
+                    <tr>
+                      <td>What size is the project?</td>
+                      <td>Very large</td>
+                    </tr>
+                    <tr>
+                      <td>What type of property is this for?</td>
+                      <td>Commercial property</td>
+                    </tr>
+                    <tr>
+                      <td>How easy is access to the work area?</td>
+                      <td>Very difficult</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 22225.00</p>
+            </section>
+        </section>
+    </main>
+  </body>
+</html>

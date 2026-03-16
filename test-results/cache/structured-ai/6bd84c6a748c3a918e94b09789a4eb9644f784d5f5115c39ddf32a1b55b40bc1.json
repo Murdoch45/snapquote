@@ -1,0 +1,141 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T06:13:20.169Z",
+  "promptHash": "d448ccc261ce45823210dd0363769385e0f4f879ea107ecca67282155bc9d4b2",
+  "keyHash": "6bd84c6a748c3a918e94b09789a4eb9644f784d5f5115c39ddf32a1b55b40bc1",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Outdoor Lighting Installation"
+    ],
+    "address": "8260 Oakwood Ave, Los Angeles, CA 90048, USA",
+    "addressPlaceId": "ChIJoyhFqMq-woAR_VBTx51HS3c",
+    "lat": 34.0779676,
+    "lng": -118.3694635,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Outdoor Lighting Installation",
+        "answers": {
+          "lighting_install_difficulty": "Some wiring or layout work needed",
+          "lighting_power": "No",
+          "lighting_scope": "One large area",
+          "lighting_type": [
+            "Accent or landscape lights",
+            "Driveway lights",
+            "Other",
+            "Pathway lights",
+            "Patio or string lights",
+            "Security or flood lights"
+          ],
+          "lighting_type_other_text": "special access needs for lighting type 51",
+          "lighting_work_type": "Install lights I already have"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Install customer-supplied outdoor lighting across one large area (driveway, pathways, patio, accent, and security fixtures). Some wiring/layout work needed.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": null,
+    "inferredScope": "one_large_area",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "multiple fixture types",
+      "some wiring/layout work required",
+      "customer-supplied fixtures"
+    ],
+    "estimatorNotes": [
+      "Customer selected install of existing lights and indicated multiple fixture types including driveway, pathway, patio, accent, and security.",
+      "Questionnaire notes 'special access needs for lighting type 51'—may require manual review for access specifics."
+    ],
+    "serviceSignals": {
+      "Outdoor Lighting Installation": {
+        "serviceType": "Outdoor Lighting Installation",
+        "jobSubtype": "driveway_pathway_patio_security",
+        "jobSubtypeLabel": "Driveway/Pathway/Patio/Security Lighting",
+        "workType": "install",
+        "fallbackFamily": "lighting_system",
+        "surfaceFamily": "linear_boundary",
+        "targetObjectFamily": "fixture",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 8,
+        "quantityUnit": "fixture_count",
+        "quantityEvidence": "weak_inference",
+        "materialClass": "low_voltage",
+        "materialSubtype": "LED",
+        "conditionClass": "unknown",
+        "severityClass": "minor",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": true,
+        "aiConfidence": 64,
+        "aiConfidenceReasons": [
+          "Customer explicitly selected 'Install lights I already have' and multiple lighting types.",
+          "Questionnaire mentions 'special access needs' which adds uncertainty to access/time estimates."
+        ],
+        "consistencyScore": 72,
+        "notes": [
+          "Assumed moderate fixture count based on multi-type selection and single large area scope.",
+          "Electrical/wiring complexity flagged by customer increases labor uncertainty."
+        ],
+        "summary": "Install customer-supplied outdoor lighting (approx. 8 fixtures) across driveway, pathways, patio and accent/security locations; moderate wiring work expected."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about installing customer-supplied lights and listed multiple fixture types.",
+      "Special access note increases uncertainty; imagery and property context support a medium-sized residential scope."
+    ]
+  }
+}

@@ -1,0 +1,137 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T08:22:27.259Z",
+  "promptHash": "3337732d6f76aefc7c543bf3ceed15c12f06bd7f28e57a35ee2a943aec9dbfc2",
+  "keyHash": "30953e8c49351eb9a7a7bac0bdb02b9f3614a8344731b2261d5f071bcce157fc",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Landscaping / Installation"
+    ],
+    "address": "1202 Larchmont Ln, Nichols Hills, OK 73116, USA",
+    "addressPlaceId": "ChIJySjKutIbsocRj8CEoxAlaik",
+    "lat": 35.5497582,
+    "lng": -97.5348305,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Landscaping / Installation",
+        "answers": {
+          "landscape_access": "Difficult",
+          "landscape_area_size": "Full property (4,000+ sq ft)",
+          "landscape_job_type": "Replace old landscaping",
+          "landscape_materials": [
+            "Mostly mulch or rock",
+            "Mostly plants",
+            "Sod or turf"
+          ],
+          "landscape_work_type": [
+            "New plants or garden beds",
+            "Rock or mulch installation",
+            "Sod or lawn installation"
+          ]
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Full-property landscape replacement including new sod, mulch/rock, and plants; access reported difficult.",
+    "condition": "moderate",
+    "access": "difficult",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": true,
+    "materialHint": "sod, mulch/rock, plants",
+    "inferredScope": "front and back yard full-property replacement (major beds, turf, and mulched areas)",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": 600,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "full_property_scope",
+      "difficult_access",
+      "sod_installation",
+      "planting_and_mulch"
+    ],
+    "estimatorNotes": [
+      "Customer selected full property (4,000+ sq ft) landscape replacement and materials including sod, mulch/rock, and plants.",
+      "Satellite and lot size confirm large backyard and multiple planting beds; pools present may constrain access."
+    ],
+    "serviceSignals": {
+      "Landscaping / Installation": {
+        "serviceType": "Landscaping / Installation",
+        "jobSubtype": "landscape_installation",
+        "jobSubtypeLabel": "Landscape Installation / Replacement",
+        "workType": "install",
+        "fallbackFamily": "install_area",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "planting_area",
+        "sizeBucket": "very_large",
+        "estimatedQuantity": 5600,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "mixed_hard_soft",
+        "materialSubtype": "sod_mulch_plants",
+        "conditionClass": "established_old_landscape",
+        "severityClass": "moderate",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "moderate",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "some_slope",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": true,
+        "fencePresent": false,
+        "deckPresent": true,
+        "roofType": null,
+        "premiumPropertySignal": true,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 72,
+        "aiConfidenceReasons": [
+          "Customer explicitly requested full-property replacement and listed materials.",
+          "Lot and backyard sqft from property data support large-scale scope; satellite shows pools and beds impacting access."
+        ],
+        "consistencyScore": 80,
+        "notes": [
+          "Quote should account for sod installation, bed excavation, mulch/rock delivery and planting labor.",
+          "Difficult access increases crew time and potential equipment needs."
+        ],
+        "summary": "Replace existing landscaping across front and back yards with new sod, plants, and mulch/rock; allow for removal and haul-away."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 0,
+        "confidence": 0
+      }
+    ],
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.2,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": true,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Property context and imagery support the inferred full-property landscape replacement scope."
+    ]
+  }
+}

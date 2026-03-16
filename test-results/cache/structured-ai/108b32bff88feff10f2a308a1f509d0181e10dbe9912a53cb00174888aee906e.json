@@ -1,0 +1,159 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T19:43:29.308Z",
+  "promptHash": "8c87faa58aa26f5b5ddce264813edbcb3a3542dbfa9edeffd2bc582839682daa",
+  "keyHash": "108b32bff88feff10f2a308a1f509d0181e10dbe9912a53cb00174888aee906e",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Outdoor Lighting Installation"
+    ],
+    "address": "1216 Norway St, Bristol, VA 24201, USA",
+    "addressPlaceId": "ChIJSQAVgxN2UIgRc62c8VJioW0",
+    "lat": 36.5970084,
+    "lng": -82.1960856,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Outdoor Lighting Installation",
+        "answers": {
+          "lighting_install_difficulty": "Easy access, simple install",
+          "lighting_power": "Partly",
+          "lighting_scope": "Not sure",
+          "lighting_type": [
+            "Other",
+            "Pathway lights"
+          ],
+          "lighting_type_other_text": "custom scope requested for lighting type 90",
+          "lighting_work_type": "Install a basic new lighting setup"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requested a basic new outdoor lighting installation focused on pathway-style fixtures with a custom type mentioned; scope unknown pending clarification.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "landscape/softscape and walkways",
+    "inferredScope": "pathway lighting around front entry and short walkways, partial existing power availability",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": 6,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "fixture_count",
+      "wire_run_length",
+      "existing_power_availability",
+      "accessibility"
+    ],
+    "estimatorNotes": [
+      "Customer selected pathway lights and provided free-text 'custom scope requested for lighting type 90' which indicates non-standard fixture may be desired.",
+      "Customer indicated 'Partly' for lighting_power suggesting some existing power on site.",
+      "Access described as easy; likely single-story property with ground-level work."
+    ],
+    "serviceSignals": {
+      "Outdoor Lighting Installation": {
+        "serviceType": "Outdoor Lighting Installation",
+        "jobSubtype": "landscape_pathway",
+        "jobSubtypeLabel": "Pathway Lighting Installation",
+        "workType": "install",
+        "fallbackFamily": "lighting_system",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "lighting_system",
+        "sizeBucket": "small",
+        "estimatedQuantity": 6,
+        "quantityUnit": "fixture_count",
+        "quantityEvidence": "direct",
+        "materialClass": "landscape_lighting",
+        "materialSubtype": "pathway",
+        "conditionClass": "new_install",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 68,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly requests installation and pathway lights.",
+          "Customer free-text requested a custom lighting type which may require manual review.",
+          "Power availability was indicated as 'Partly' which affects scope and routing."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Confirm exact fixture style and count (customer selected 'Other' with custom text).",
+          "Verify existing transformer or power source and planned wire routing.",
+          "Onsite visit recommended due to custom fixture request and partial power availability."
+        ],
+        "summary": "Install approximately six pathway landscape fixtures; custom fixture requested and partial power present — manual review recommended.",
+        "quotedSurfaces": {
+          "walkway": 120
+        },
+        "surfaceDetections": [
+          {
+            "surface_type": "walkway",
+            "surface_area_sqft": 120,
+            "confidence": 0.72
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 1800,
+        "confidence": 0.82
+      },
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 120,
+        "confidence": 0.72
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 1800,
+      "walkway": 120
+    },
+    "quotedSurfaces": {
+      "walkway": 120
+    },
+    "surfaceDetectionConfidence": 78,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 80,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers specified installation of pathway lights and custom fixture text.",
+      "Satellite imagery shows clear flat access and walkways consistent with pathway lighting scope.",
+      "Partial power availability requires confirmation on-site."
+    ]
+  }
+}

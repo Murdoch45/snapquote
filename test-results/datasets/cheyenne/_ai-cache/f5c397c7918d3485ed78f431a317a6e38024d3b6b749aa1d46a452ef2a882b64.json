@@ -1,0 +1,120 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T02:26:17.818Z",
+  "promptHash": "168f4d7ec5358f84643d3ffb1d62fbff85078485a60816637384dcb1c09e7e66",
+  "keyHash": "f5c397c7918d3485ed78f431a317a6e38024d3b6b749aa1d46a452ef2a882b64",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Window Cleaning"
+    ],
+    "address": "1696 North Pass Trl, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJfeI3GdQ4b4cRiz4wRGjyh-I",
+    "lat": 41.2460767,
+    "lng": -104.7575577,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Window Cleaning",
+        "answers": {
+          "window_access": "Easy",
+          "window_count": "50+",
+          "window_property_type": "Other",
+          "window_property_type_other_text": "custom scope requested for window property type 19",
+          "window_target_type": "Second-story or hard-to-reach windows"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests professional cleaning of second-story and hard-to-reach windows. Customer selected 50+ windows and indicated easy access.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": null,
+    "inferredScope": "second-story and hard-to-reach window cleaning across residence",
+    "treeSize": "medium",
+    "estimatedWindowCount": 55,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 82,
+    "pricingDrivers": [
+      "window_count",
+      "second_story_access",
+      "easy_access"
+    ],
+    "estimatorNotes": [
+      "Customer explicitly indicated 50+ windows (treated as direct quantity).",
+      "Property is a two-story residential with straightforward access per questionnaire."
+    ],
+    "serviceSignals": {
+      "Window Cleaning": {
+        "serviceType": "Window Cleaning",
+        "jobSubtype": "second_story",
+        "jobSubtypeLabel": "Second-story or hard-to-reach windows",
+        "workType": "clean",
+        "fallbackFamily": "window_group",
+        "surfaceFamily": "window_group",
+        "targetObjectFamily": "window_group",
+        "sizeBucket": "large",
+        "estimatedQuantity": 55,
+        "quantityUnit": "count",
+        "quantityEvidence": "direct",
+        "materialClass": "glass",
+        "materialSubtype": "standard",
+        "conditionClass": "light_soiling",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "two_story",
+        "stories": 2,
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": false,
+        "aiConfidence": 88,
+        "aiConfidenceReasons": [
+          "Customer provided a clear window count (50+).",
+          "Questionnaire specifies second-story/hard-to-reach windows and easy access."
+        ],
+        "consistencyScore": 92,
+        "notes": [
+          "Treating 50+ as 55 for estimator quantity; confirm on-site if exact count required.",
+          "No pool or additional exterior cleaning services were requested."
+        ],
+        "summary": "Large residential window cleaning focusing on second-story / hard-to-reach windows."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 92,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1,
+    "estateScore": 5000,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific (50+ windows, second-story).",
+      "Property context (two-story house) supports second-story window cleaning scope."
+    ]
+  }
+}

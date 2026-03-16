@@ -1,0 +1,123 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T21:38:20.788Z",
+  "promptHash": "e3713aff9c31ef9318675c2621d599eaec3a0ef3730f2004a6020220d3be3309",
+  "keyHash": "26ce840f2c098ba8469f9ec0ad755550e52f8ceeb44eed6e4dcd88649347f477",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Roofing"
+    ],
+    "address": "31 Lenox St, Worcester, MA 01602, USA",
+    "addressPlaceId": "ChIJD1cICMIG5IkRYY1iKGn1gck",
+    "lat": 42.2777158,
+    "lng": -71.8334735,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Roofing",
+        "answers": {
+          "roofing_access": "Moderate",
+          "roofing_problem": "Missing or damaged area",
+          "roofing_scope": "Entire roof",
+          "roofing_type": "Metal",
+          "roofing_work_type": "Partial replacement"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Partial metal roof replacement requested for entire roof due to missing/damaged areas.",
+    "condition": "moderate",
+    "access": "moderate",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "metal",
+    "inferredScope": "entire roof with localized missing/damaged sections",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": 850,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "roof area",
+      "metal roofing material",
+      "partial replacement",
+      "access difficulty"
+    ],
+    "estimatorNotes": [
+      "Customer selected partial replacement and indicated metal roofing with missing/damaged areas.",
+      "Satellite imagery confirms pool and multi-level roof; roof area estimated from building footprint."
+    ],
+    "serviceSignals": {
+      "Roofing": {
+        "serviceType": "Roofing",
+        "jobSubtype": "metal_partial_replacement",
+        "jobSubtypeLabel": "Metal Roof Partial Replacement",
+        "workType": "replace",
+        "fallbackFamily": "roof_like_surface",
+        "surfaceFamily": "roof_like_surface",
+        "targetObjectFamily": "roof",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 3450,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "metal",
+        "materialSubtype": "metal_panel",
+        "conditionClass": "damaged",
+        "severityClass": "moderate",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "moderate",
+        "heightClass": "two_story",
+        "stories": 2,
+        "slopeClass": "some_slope",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": true,
+        "fencePresent": false,
+        "deckPresent": true,
+        "roofType": "metal",
+        "premiumPropertySignal": true,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": true,
+        "aiConfidence": 68,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly specified metal and partial replacement.",
+          "No direct roof area provided; building area used to infer roof area.",
+          "Satellite imagery shows multi-faceted roof shape which increases complexity."
+        ],
+        "consistencyScore": 72,
+        "notes": [
+          "Estimate based on building footprint (houseSqft) scaled to roof area.",
+          "Recommend manual review for exact roof pitch, dormers, and flashings."
+        ],
+        "summary": "Partial replacement of metal roof across the whole structure with localized damaged sections."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 86,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1.1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": true,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about roofing type and scope.",
+      "Satellite image and building data support inferred roof area and pool presence."
+    ]
+  }
+}

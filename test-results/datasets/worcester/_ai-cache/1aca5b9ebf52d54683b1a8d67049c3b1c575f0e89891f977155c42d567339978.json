@@ -1,0 +1,148 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T21:28:37.016Z",
+  "promptHash": "36f51530847e1faa1afc69be6299cc43136d6b6f4edda7d5f4cf119eb6d9412c",
+  "keyHash": "1aca5b9ebf52d54683b1a8d67049c3b1c575f0e89891f977155c42d567339978",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Concrete"
+    ],
+    "address": "577 Grove St, Worcester, MA 01605, USA",
+    "addressPlaceId": "ChIJCeltdQQH5IkRUt0eMJ6IxbA",
+    "lat": 42.2936121,
+    "lng": -71.8172553,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Concrete",
+        "answers": {
+          "concrete_material": "Standard concrete",
+          "concrete_project_type": [
+            "Walkway"
+          ],
+          "concrete_scope": "Medium (~200-600 sq ft)",
+          "concrete_site_condition": "Open and ready",
+          "concrete_work_type": "Replacement"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests replacement of a walkway (medium scope).",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "standard concrete",
+    "inferredScope": "medium (~200-600 sq ft)",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 78,
+    "pricingDrivers": [
+      "replacement",
+      "walkway size",
+      "concrete material"
+    ],
+    "estimatorNotes": [
+      "Questionnaire explicitly requests concrete walkway replacement, medium scope.",
+      "No exact dimensions provided; quantity inferred from scope selection and imagery.",
+      "Assume removal and haul-away required for existing concrete."
+    ],
+    "serviceSignals": {
+      "Concrete": {
+        "serviceType": "Concrete",
+        "jobSubtype": "walkway",
+        "jobSubtypeLabel": "Walkway",
+        "workType": "replace",
+        "fallbackFamily": "flat_hardscape",
+        "surfaceFamily": "flat_hardscape",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 350,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "concrete",
+        "materialSubtype": "standard",
+        "conditionClass": "fair",
+        "severityClass": "moderate",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 72,
+        "aiConfidenceReasons": [
+          "Customer selected concrete walkway replacement and medium scope in questionnaire.",
+          "Satellite imagery shows a front walkway consistent with medium size."
+        ],
+        "consistencyScore": 86,
+        "notes": [
+          "Use medium band (200-600 sqft) for pricing and labor assumptions.",
+          "Confirm exact dimensions on visit for final quote."
+        ],
+        "summary": "Replace medium-sized concrete walkway (~350 sqft estimated).",
+        "quotedSurfaces": {
+          "walkway": 350
+        },
+        "surfaceDetections": [
+          {
+            "surface_type": "walkway",
+            "surface_area_sqft": 300,
+            "confidence": 0.8
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 300,
+        "confidence": 0.8
+      }
+    ],
+    "detectedSurfaces": {
+      "walkway": 300
+    },
+    "quotedSurfaces": {
+      "walkway": 350
+    },
+    "surfaceDetectionConfidence": 78,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about walkway replacement and scope.",
+      "Imagery and property context support a medium walkway area estimate."
+    ]
+  }
+}

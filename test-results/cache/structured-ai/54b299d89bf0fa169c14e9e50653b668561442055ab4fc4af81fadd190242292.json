@@ -1,0 +1,149 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T23:50:20.547Z",
+  "promptHash": "9cb7fa1519020ffcc55282e47574839332771e80e0298ac8d392cf075888314e",
+  "keyHash": "54b299d89bf0fa169c14e9e50653b668561442055ab4fc4af81fadd190242292",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Deck Installation / Repair"
+    ],
+    "address": "1696 North Pass Trl, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJfeI3GdQ4b4cRiz4wRGjyh-I",
+    "lat": 41.2460767,
+    "lng": -104.7575577,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Deck Installation / Repair",
+        "answers": {
+          "deck_area_type": "Rooftop or specialty area",
+          "deck_material": "Other",
+          "deck_material_other_text": "site-specific details for deck material 38",
+          "deck_repair_condition": "Minor issues",
+          "deck_scope": "Not sure",
+          "deck_work_type": "New deck"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requested new rooftop/specialty deck; scope unclear, site visit recommended.",
+    "condition": "light",
+    "access": "moderate",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "site-specific (customer selected Other)",
+    "inferredScope": "new rooftop or specialty deck installation with minor site prep",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 62,
+    "pricingDrivers": [
+      "Rooftop/specialty deck installation",
+      "Unknown material - custom site details",
+      "Access and structural considerations"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'New deck' and 'Rooftop or specialty area' with material set to Other.",
+      "No dimensions provided; quantity inferred from house footprint and satellite imagery.",
+      "Structural, permit, and access review likely required for rooftop/specialty deck."
+    ],
+    "serviceSignals": {
+      "Deck Installation / Repair": {
+        "serviceType": "Deck Installation / Repair",
+        "jobSubtype": "rooftop_deck",
+        "jobSubtypeLabel": "Rooftop / Specialty Deck",
+        "workType": "install",
+        "fallbackFamily": "install_area",
+        "surfaceFamily": "install_area",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "small",
+        "estimatedQuantity": 160,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "other",
+        "materialSubtype": "site_specific",
+        "conditionClass": "new_install",
+        "severityClass": "minor",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "moderate",
+        "heightClass": "roof_level",
+        "stories": 1,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": "flat_rooftop",
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 64,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly indicates rooftop/specialty deck and unknown material.",
+          "No dimensions provided; satellite imagery used to infer a small rooftop area.",
+          "Rooftop work typically requires manual review for structural/permitting."
+        ],
+        "consistencyScore": 72,
+        "notes": [
+          "Recommend site visit to confirm dimensions, structural support, material selection, and permits.",
+          "Customer-provided other-text: 'site-specific details for deck material 38'."
+        ],
+        "summary": "Probable small rooftop deck installation; material unspecified — manual review required.",
+        "quotedSurfaces": {
+          "patio": 160
+        },
+        "surfaceDetections": [
+          {
+            "surface_type": "patio",
+            "surface_area_sqft": 160,
+            "confidence": 0.66
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 200,
+        "confidence": 0.5
+      }
+    ],
+    "detectedSurfaces": {
+      "walkway": 200,
+      "patio": 160
+    },
+    "quotedSurfaces": {
+      "patio": 160
+    },
+    "surfaceDetectionConfidence": 58,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 68,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.2,
+    "materialMultiplier": 1.1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about deck being new and rooftop/specialty area.",
+      "No direct measurements provided; satellite and property context used for inference.",
+      "Rooftop specialty work increases complexity and need for manual review."
+    ]
+  }
+}

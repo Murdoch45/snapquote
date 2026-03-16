@@ -1,0 +1,122 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T21:30:12.487Z",
+  "promptHash": "57e7f1214c7b2c1ca75e6af566efda350c0e0ee09fbdccb24d08e3cf1f88589b",
+  "keyHash": "86de05f9a92ebef61d6b451b7cac44c03f2e8bfe32f5f10a0e876263cc43692d",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Roofing"
+    ],
+    "address": "577 Grove St, Worcester, MA 01605, USA",
+    "addressPlaceId": "ChIJCeltdQQH5IkRUt0eMJ6IxbA",
+    "lat": 42.2936121,
+    "lng": -71.8172553,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Roofing",
+        "answers": {
+          "roofing_access": "Steep or difficult",
+          "roofing_problem": "Leak or water issue",
+          "roofing_scope": "Small section",
+          "roofing_type": "Tile",
+          "roofing_work_type": "Leak repair"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Small tile roof leak repair on steep/difficult access area",
+    "condition": "moderate",
+    "access": "difficult",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "tile",
+    "inferredScope": "small section of roof repair for leak",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "tile roof",
+      "steep access",
+      "leak repair",
+      "small section"
+    ],
+    "estimatorNotes": [
+      "Customer selected leak repair on a tile roof and indicated small section and steep/difficult access.",
+      "Satellite and photo support roof material as tile and show steep roof geometry; no pool or large hardscape detected."
+    ],
+    "serviceSignals": {
+      "Roofing": {
+        "serviceType": "Roofing",
+        "jobSubtype": "Leak repair",
+        "jobSubtypeLabel": "Leak repair",
+        "workType": "repair",
+        "fallbackFamily": "roof_like_surface",
+        "surfaceFamily": "roof_like_surface",
+        "targetObjectFamily": "roof",
+        "sizeBucket": "small",
+        "estimatedQuantity": 1,
+        "quantityUnit": "section",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "tile",
+        "materialSubtype": "tile",
+        "conditionClass": "leak_present",
+        "severityClass": "moderate",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "moderate",
+        "heightClass": "two_story",
+        "stories": 2,
+        "slopeClass": "steep",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": "tile",
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": true,
+        "aiConfidence": 70,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly states leak repair on tile roof and small section.",
+          "Satellite imagery and photo indicate tile roof and steep geometry but no exact square footage provided."
+        ],
+        "consistencyScore": 85,
+        "notes": [
+          "Steep access may require additional safety equipment or specialized crew.",
+          "Confirm exact location and extent of leak during assessment; customer indicated small section but no dimensions provided."
+        ],
+        "summary": "Repair small leaking section on tile roof with steep access."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.2,
+    "materialMultiplier": 1.1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about leak and roof type.",
+      "Imagery supports tile roofing and steep slope but lacks precise dimensions."
+    ]
+  }
+}

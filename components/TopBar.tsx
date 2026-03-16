@@ -22,8 +22,11 @@ export function TopBar({ email, orgId }: { email?: string | null; orgId: string 
       .channel(`notifications-${orgId}`)
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "leads", filter: `org_id=eq.${orgId}` },
+        { event: "UPDATE", schema: "public", table: "leads", filter: `org_id=eq.${orgId}` },
         (payload) => {
+          const previousStatus = (payload.old as { ai_status?: string }).ai_status;
+          const nextStatus = (payload.new as { ai_status?: string }).ai_status;
+          if (previousStatus === "ready" || nextStatus !== "ready") return;
           const text = `New lead received at ${(payload.new as any).address_full}`;
           setFeed((prev) => [{ id: crypto.randomUUID(), text, createdAt: new Date().toISOString() }, ...prev].slice(0, 12));
           toast(text);

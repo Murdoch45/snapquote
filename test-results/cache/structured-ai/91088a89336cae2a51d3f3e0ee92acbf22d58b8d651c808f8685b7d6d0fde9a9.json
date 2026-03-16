@@ -1,0 +1,120 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T08:13:55.267Z",
+  "promptHash": "b609ce18382138496c304da233eda37989cffe06d9db33a97923b62ab3349803",
+  "keyHash": "91088a89336cae2a51d3f3e0ee92acbf22d58b8d651c808f8685b7d6d0fde9a9",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Window Cleaning"
+    ],
+    "address": "12924 Cedar Springs Rd, Oklahoma City, OK 73120, USA",
+    "addressPlaceId": "ChIJ_z0yrGIcsocRtUEXpwmzF7E",
+    "lat": 35.6016417,
+    "lng": -97.5676136,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Window Cleaning",
+        "answers": {
+          "window_access": "Easy",
+          "window_count": "Not sure",
+          "window_property_type": "Small commercial building",
+          "window_target_type": "Second-story or hard-to-reach windows"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requested second-story/hard-to-reach window cleaning for a small commercial building; window count not provided — assume a modest medium-sized job for a two-story structure.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": null,
+    "inferredScope": "second-story window cleaning for small commercial building",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "second-story windows",
+      "commercial property",
+      "easy access"
+    ],
+    "estimatorNotes": [
+      "Customer specified second-story or hard-to-reach windows but did not provide a count.",
+      "Property classified as small commercial building in questionnaire."
+    ],
+    "serviceSignals": {
+      "Window Cleaning": {
+        "serviceType": "Window Cleaning",
+        "jobSubtype": "second_story_windows",
+        "jobSubtypeLabel": "Second-story or hard-to-reach windows",
+        "workType": "clean",
+        "fallbackFamily": "window_group",
+        "surfaceFamily": null,
+        "targetObjectFamily": "window_group",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 12,
+        "quantityUnit": "count",
+        "quantityEvidence": "weak_inference",
+        "materialClass": "glass",
+        "materialSubtype": "standard",
+        "conditionClass": "light_soiling",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "two_story",
+        "stories": 2,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": true,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 76,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly requested second-story/hard-to-reach windows.",
+          "No explicit window count provided so quantity inferred from property size and building stories."
+        ],
+        "consistencyScore": 82,
+        "notes": [
+          "Treat as standard exterior window cleaning for second-story access; confirm exact window count on site."
+        ],
+        "summary": "Exterior cleaning of second-story and ground-level windows for a small commercial building, count not provided."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": true,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about window target type.",
+      "Property context and imagery support a modest two-story commercial structure."
+    ]
+  }
+}

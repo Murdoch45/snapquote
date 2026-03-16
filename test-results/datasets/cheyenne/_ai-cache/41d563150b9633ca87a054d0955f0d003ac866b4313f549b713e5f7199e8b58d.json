@@ -1,0 +1,133 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T02:24:13.173Z",
+  "promptHash": "9b1805e9cc336d4fafe3451980718ae38dbdae80251544f3d3af9794ddb049d8",
+  "keyHash": "41d563150b9633ca87a054d0955f0d003ac866b4313f549b713e5f7199e8b58d",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Junk Removal"
+    ],
+    "address": "5618 Dayton Dr, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJj7v2QZo7b4cRO_KLm-GvTKw",
+    "lat": 41.1707669,
+    "lng": -104.7678762,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Junk Removal",
+        "answers": {
+          "junk_amount": "Medium load (about half a trailer or small truck)",
+          "junk_heavy_items": "Not sure",
+          "junk_location": "Garage or driveway",
+          "junk_type": "Other",
+          "junk_type_other_text": "custom scope requested for junk type 76"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests junk removal: medium load (~half trailer) from garage/driveway; likely small job, easy access.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "mixed household",
+    "inferredScope": "garage and driveway pickup of mixed debris; medium load (~0.5 load)",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "load_size",
+      "haul_distance",
+      "access_ease"
+    ],
+    "estimatorNotes": [
+      "Customer selected Junk Removal and specified 'Medium load (about half a trailer or small truck)'.",
+      "Pickup location listed as garage or driveway. Photos/satellite show clear driveway access."
+    ],
+    "serviceSignals": {
+      "Junk Removal": {
+        "serviceType": "Junk Removal",
+        "jobSubtype": "debris_load",
+        "jobSubtypeLabel": "Medium Load Pickup",
+        "workType": "remove",
+        "fallbackFamily": "debris_load",
+        "surfaceFamily": "mixed_custom",
+        "targetObjectFamily": "debris_load",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 0.5,
+        "quantityUnit": "load",
+        "quantityEvidence": "direct",
+        "materialClass": "mixed_household",
+        "materialSubtype": "other_custom",
+        "conditionClass": "general_debris",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": false,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": false,
+        "aiConfidence": 78,
+        "aiConfidenceReasons": [
+          "Customer explicitly described load size and location in questionnaire.",
+          "Satellite imagery confirms driveway/garage access for pickup."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Treat as single visit pickup from garage/driveway.",
+          "Unknown if heavy items present; flag on-site for potential extra charge."
+        ],
+        "summary": "Medium single-load junk removal from garage/driveway, mixed household debris."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Property context and imagery support the inferred scope."
+    ]
+  }
+}

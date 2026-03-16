@@ -1,0 +1,146 @@
+{
+  "8260 Oakwood Ave, Los Angeles, CA 90048": {
+    "city": "Los Angeles",
+    "originalAddress": "8260 Oakwood Ave, Los Angeles, CA 90048",
+    "formattedAddress": "8260 Oakwood Ave, Los Angeles, CA 90048, USA",
+    "placeId": "ChIJoyhFqMq-woAR_VBTx51HS3c",
+    "lat": 34.0779676,
+    "lng": -118.3694635
+  },
+  "935 S Burnside Ave, Los Angeles, CA 90036": {
+    "city": "Los Angeles",
+    "originalAddress": "935 S Burnside Ave, Los Angeles, CA 90036",
+    "formattedAddress": "935 Burnside Ave, Los Angeles, CA 90036, USA",
+    "placeId": "ChIJ_1o_zx65woAR28Q5Yc4qZdE",
+    "lat": 34.058076,
+    "lng": -118.3514135
+  },
+  "2481 Summitridge Dr, Beverly Hills, CA 90210": {
+    "city": "Beverly Hills",
+    "originalAddress": "2481 Summitridge Dr, Beverly Hills, CA 90210",
+    "formattedAddress": "2481 Summitridge Dr, Beverly Hills, CA 90210, USA",
+    "placeId": "ChIJw5RbRLm9woARPFqNmJANwtg",
+    "lat": 34.1199802,
+    "lng": -118.4212831
+  },
+  "424 NW 29th St, Oklahoma City, OK 73103": {
+    "city": "Oklahoma City",
+    "originalAddress": "424 NW 29th St, Oklahoma City, OK 73103",
+    "formattedAddress": "424 NW 29th St, Oklahoma City, OK 73103, USA",
+    "placeId": "ChIJQ7Rvw1MXsocRLG8Dbk3Y5Yw",
+    "lat": 35.4992706,
+    "lng": -97.5201175
+  },
+  "12924 Cedar Springs Rd, Oklahoma City, OK 73120": {
+    "city": "Oklahoma City",
+    "originalAddress": "12924 Cedar Springs Rd, Oklahoma City, OK 73120",
+    "formattedAddress": "12924 Cedar Springs Rd, Oklahoma City, OK 73120, USA",
+    "placeId": "ChIJ_z0yrGIcsocRtUEXpwmzF7E",
+    "lat": 35.6016417,
+    "lng": -97.5676136
+  },
+  "1202 Larchmont Ln, Nichols Hills, OK 73116": {
+    "city": "Nichols Hills",
+    "originalAddress": "1202 Larchmont Ln, Nichols Hills, OK 73116",
+    "formattedAddress": "1202 Larchmont Ln, Nichols Hills, OK 73116, USA",
+    "placeId": "ChIJySjKutIbsocRj8CEoxAlaik",
+    "lat": 35.5497582,
+    "lng": -97.53483050000001
+  },
+  "1120 Barber Rd, Bristol, TN 37620": {
+    "city": "Bristol",
+    "originalAddress": "1120 Barber Rd, Bristol, TN 37620",
+    "formattedAddress": "1120 Barber Rd, Bristol, TN 37620, USA",
+    "placeId": "ChIJJ5fNoHydWogRR3gpT3OQN7M",
+    "lat": 36.5614452,
+    "lng": -82.220179
+  },
+  "1216 Norway St, Bristol, VA 24201": {
+    "city": "Bristol",
+    "originalAddress": "1216 Norway St, Bristol, VA 24201",
+    "formattedAddress": "1216 Norway St, Bristol, VA 24201, USA",
+    "placeId": "ChIJSQAVgxN2UIgRc62c8VJioW0",
+    "lat": 36.5970084,
+    "lng": -82.19608559999999
+  },
+  "2070 King College Rd, Bristol, TN 37620": {
+    "city": "Bristol",
+    "originalAddress": "2070 King College Rd, Bristol, TN 37620",
+    "formattedAddress": "2070 King College Rd, Bristol, TN 37620, USA",
+    "placeId": "ChIJ32Mu-bV2UIgR8C_BrBTmahI",
+    "lat": 36.5870892,
+    "lng": -82.13291540000002
+  },
+  "1301 E 23rd St, Cheyenne, WY 82001": {
+    "city": "Cheyenne",
+    "originalAddress": "1301 E 23rd St, Cheyenne, WY 82001",
+    "formattedAddress": "1301 E 23rd St, Cheyenne, WY 82001, USA",
+    "placeId": "ChIJi8RhiOM6b4cRMw7GhSSaufo",
+    "lat": 41.1442781,
+    "lng": -104.8044048
+  },
+  "5618 Dayton Dr, Cheyenne, WY 82009": {
+    "city": "Cheyenne",
+    "originalAddress": "5618 Dayton Dr, Cheyenne, WY 82009",
+    "formattedAddress": "5618 Dayton Dr, Cheyenne, WY 82009, USA",
+    "placeId": "ChIJj7v2QZo7b4cRO_KLm-GvTKw",
+    "lat": 41.1707669,
+    "lng": -104.7678762
+  },
+  "1696 N Pass Trl, Cheyenne, WY 82009": {
+    "city": "Cheyenne",
+    "originalAddress": "1696 N Pass Trl, Cheyenne, WY 82009",
+    "formattedAddress": "1696 North Pass Trl, Cheyenne, WY 82009, USA",
+    "placeId": "ChIJfeI3GdQ4b4cRiz4wRGjyh-I",
+    "lat": 41.2460767,
+    "lng": -104.7575577
+  },
+  "22 Bittersweet Blvd, Worcester, MA 01607": {
+    "city": "Worcester",
+    "originalAddress": "22 Bittersweet Blvd, Worcester, MA 01607",
+    "formattedAddress": "22 Bittersweet Blvd, Worcester, MA 01607, USA",
+    "placeId": "ChIJoc9sdbUF5IkRMHNxoI9HMCA",
+    "lat": 42.228719,
+    "lng": -71.8067966
+  },
+  "577 Grove St, Worcester, MA 01605": {
+    "city": "Worcester",
+    "originalAddress": "577 Grove St, Worcester, MA 01605",
+    "formattedAddress": "577 Grove St, Worcester, MA 01605, USA",
+    "placeId": "ChIJCeltdQQH5IkRUt0eMJ6IxbA",
+    "lat": 42.2936121,
+    "lng": -71.8172553
+  },
+  "31 Lenox St, Worcester, MA 01602": {
+    "city": "Worcester",
+    "originalAddress": "31 Lenox St, Worcester, MA 01602",
+    "formattedAddress": "31 Lenox St, Worcester, MA 01602, USA",
+    "placeId": "ChIJD1cICMIG5IkRYY1iKGn1gck",
+    "lat": 42.2777158,
+    "lng": -71.8334735
+  },
+  "22 Bittersweet Blvd, Worcester, MA 01607, USA": {
+    "city": "Worcester",
+    "originalAddress": "22 Bittersweet Blvd, Worcester, MA 01607, USA",
+    "formattedAddress": "22 Bittersweet Blvd, Worcester, MA 01607, USA",
+    "placeId": "ChIJoc9sdbUF5IkRMHNxoI9HMCA",
+    "lat": 42.228719,
+    "lng": -71.8067966
+  },
+  "577 Grove St, Worcester, MA 01605, USA": {
+    "city": "Worcester",
+    "originalAddress": "577 Grove St, Worcester, MA 01605, USA",
+    "formattedAddress": "577 Grove St, Worcester, MA 01605, USA",
+    "placeId": "ChIJCeltdQQH5IkRUt0eMJ6IxbA",
+    "lat": 42.2936121,
+    "lng": -71.8172553
+  },
+  "31 Lenox St, Worcester, MA 01602, USA": {
+    "city": "Worcester",
+    "originalAddress": "31 Lenox St, Worcester, MA 01602, USA",
+    "formattedAddress": "31 Lenox St, Worcester, MA 01602, USA",
+    "placeId": "ChIJD1cICMIG5IkRYY1iKGn1gck",
+    "lat": 42.2777158,
+    "lng": -71.8334735
+  }
+}

@@ -1,0 +1,120 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T08:07:26.256Z",
+  "promptHash": "f6fefefc9e2ed674bd173512678d7452aec22ccc625ea36de8fbbca3c2aa49c3",
+  "keyHash": "243f302396511938251a7c1a91df2feed30251dc289e348e1562cea7bc18ea34",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Window Cleaning"
+    ],
+    "address": "424 NW 29th St, Oklahoma City, OK 73103, USA",
+    "addressPlaceId": "ChIJQ7Rvw1MXsocRLG8Dbk3Y5Yw",
+    "lat": 35.4992706,
+    "lng": -97.5201175,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Window Cleaning",
+        "answers": {
+          "window_access": "Not sure",
+          "window_count": "1-10",
+          "window_property_type": "Two-story home",
+          "window_target_type": "Other",
+          "window_target_type_other_text": "premium material preference for window target type 67"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requested window cleaning for a two-story home; customer selected 1-10 windows and indicated a premium material preference.",
+    "condition": "light",
+    "access": "moderate",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "premium glass",
+    "inferredScope": "exterior windows, likely ground and second story",
+    "treeSize": "medium",
+    "estimatedWindowCount": 6,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "window_count",
+      "two_story_height",
+      "premium_material"
+    ],
+    "estimatorNotes": [
+      "Customer selected window count 1-10 (treated as direct count range).",
+      "Property imagery shows two-story residence consistent with questionnaire."
+    ],
+    "serviceSignals": {
+      "Window Cleaning": {
+        "serviceType": "Window Cleaning",
+        "jobSubtype": "exterior_windows",
+        "jobSubtypeLabel": "Exterior Windows",
+        "workType": "clean",
+        "fallbackFamily": "window_group",
+        "surfaceFamily": "window_group",
+        "targetObjectFamily": "window",
+        "sizeBucket": "small",
+        "estimatedQuantity": 6,
+        "quantityUnit": "count",
+        "quantityEvidence": "direct",
+        "materialClass": "glass",
+        "materialSubtype": "premium",
+        "conditionClass": "light_soiling",
+        "severityClass": "minor",
+        "obstructionLevel": "low",
+        "heightClass": "two_story",
+        "stories": 2,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 70,
+        "aiConfidenceReasons": [
+          "Customer provided a window count range.",
+          "Property is a two-story home per questionnaire and imagery."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Range converted to a conservative mid-count for scheduling and labor estimation.",
+          "Access unknown; may require ladder or boom depending on final confirmation."
+        ],
+        "summary": "Exterior window cleaning for approximately 1-10 windows on a two-story home; premium glass noted."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 86,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire provided a window count range.",
+      "Satellite imagery and photo confirm two-story residential context."
+    ]
+  }
+}

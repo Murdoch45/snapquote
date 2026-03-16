@@ -1,0 +1,170 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T00:18:05.713Z",
+  "promptHash": "8671862b63a970b2f72db3f405f0d399e97a74f17b13aef862ee60c29e801daf",
+  "keyHash": "0cac16296bf396d5e87977e26ff3905630216936b3a57af900bdb0dc9edac703",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Pressure Washing"
+    ],
+    "address": "1696 North Pass Trl, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJfeI3GdQ4b4cRiz4wRGjyh-I",
+    "lat": 41.2460767,
+    "lng": -104.7575577,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Pressure Washing",
+        "answers": {
+          "pressure_washing_access": "Easy access",
+          "pressure_washing_condition": "Light dirt or dust",
+          "pressure_washing_size": "Whole property / very large area (3,000+ sq ft)",
+          "pressure_washing_target": [
+            "Driveway",
+            "Fence",
+            "House exterior",
+            "Other",
+            "Patio or porch",
+            "Roof"
+          ],
+          "pressure_washing_target_other_text": "special access needs for pressure washing target 14"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requested whole-property pressure washing including driveway, roof, fence, house exterior, and patio; light dirt, easy access.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": true,
+    "materialHint": "mixed",
+    "inferredScope": "whole_property_cleaning (driveway, house exterior, roof, patio, fence)",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "large_area",
+      "multiple_surface_types",
+      "roof_cleaning_required",
+      "easy_access"
+    ],
+    "estimatorNotes": [
+      "Customer selected whole property (3,000+ sq ft) in questionnaire.",
+      "Targets listed include driveway, roof, fence, house exterior, and patio.",
+      "Photo and satellite support presence of a driveway, walkways, and patio area; materials appear mixed (concrete and hardscape)."
+    ],
+    "serviceSignals": {
+      "Pressure Washing": {
+        "serviceType": "Pressure Washing",
+        "jobSubtype": "mixed_property",
+        "jobSubtypeLabel": "Whole property / mixed surfaces",
+        "workType": "clean",
+        "fallbackFamily": "mixed_custom",
+        "surfaceFamily": "flat_hardscape",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "very_large",
+        "estimatedQuantity": 3000,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "direct",
+        "materialClass": "mixed",
+        "materialSubtype": "standard_mixed",
+        "conditionClass": "light_soiling",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "mixed_height",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": true,
+        "deckPresent": false,
+        "roofType": "shingle",
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": false,
+        "aiConfidence": 78,
+        "aiConfidenceReasons": [
+          "Customer explicitly selected whole-property (3,000+ sq ft).",
+          "Multiple targets listed in questionnaire matching mixed surfaces seen on imagery."
+        ],
+        "consistencyScore": 86,
+        "notes": [
+          "Quote should account for mixed surfaces including roof, driveway, patio, and house exterior.",
+          "Special access note provided in other_text for pressure_washing_target_other_text."
+        ],
+        "summary": "Whole-property pressure washing for mixed surfaces (~3,000+ sqft) with light soiling.",
+        "quotedSurfaces": {
+          "driveway": 2100,
+          "walkway": 250,
+          "patio": 650
+        },
+        "surfaceDetections": [
+          {
+            "surface_type": "driveway",
+            "surface_area_sqft": 2100,
+            "confidence": 0.84
+          },
+          {
+            "surface_type": "walkway",
+            "surface_area_sqft": 250,
+            "confidence": 0.72
+          },
+          {
+            "surface_type": "patio",
+            "surface_area_sqft": 650,
+            "confidence": 0.68
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250,
+      "patio": 650
+    },
+    "quotedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250,
+      "patio": 650
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Property context and imagery support the inferred scope."
+    ]
+  }
+}

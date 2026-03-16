@@ -1,0 +1,167 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T00:10:03.077Z",
+  "promptHash": "46965768d2d1aee859442809f04048e04df6ceba4888794f84dd5303298d2b4b",
+  "keyHash": "c09fcd284090e9fa3b94b7b9dd372797ffa2df76eba155251ae244bae4dfd546",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Concrete"
+    ],
+    "address": "935 Burnside Ave, Los Angeles, CA 90036, USA",
+    "addressPlaceId": "ChIJ_1o_zx65woAR28Q5Yc4qZdE",
+    "lat": 34.058076,
+    "lng": -118.3514135,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Concrete",
+        "answers": {
+          "concrete_material": "Standard concrete",
+          "concrete_project_type": [
+            "Driveway",
+            "Other",
+            "Walkway"
+          ],
+          "concrete_project_type_other_text": "premium material preference for concrete project type 89",
+          "concrete_scope": "Not sure",
+          "concrete_site_condition": "Dirt or grading needed",
+          "concrete_work_type": "Not sure"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requested concrete work for driveway and walkway; scope uncertain and grading needed.",
+    "condition": "moderate",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": true,
+    "materialHint": "standard concrete; customer noted premium preference in other_text",
+    "inferredScope": "driveway and walkway installation/replacement with grading",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 64,
+    "pricingDrivers": [
+      "grading_needed",
+      "driveway_area",
+      "walkway_area",
+      "premium_material_preference"
+    ],
+    "estimatorNotes": [
+      "Customer selected Driveway, Walkway, and Other with 'premium material' note.",
+      "Site condition indicates dirt or grading needed; expect excavation and prep.",
+      "No explicit dimensions provided; quantities inferred from satellite and typical lot layout."
+    ],
+    "serviceSignals": {
+      "Concrete": {
+        "serviceType": "Concrete",
+        "jobSubtype": "driveway",
+        "jobSubtypeLabel": "Driveway",
+        "workType": "install",
+        "fallbackFamily": "flat_hardscape",
+        "surfaceFamily": "flat_hardscape",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 450,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "concrete",
+        "materialSubtype": "standard",
+        "conditionClass": "new_install",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 68,
+        "aiConfidenceReasons": [
+          "Driveway and Walkway selected in questionnaire with 'Other' premium note.",
+          "Site condition explicitly indicates dirt or grading needed.",
+          "No direct dimensions provided; areas inferred from satellite and lot size."
+        ],
+        "consistencyScore": 70,
+        "notes": [
+          "Primary scope estimated as driveway install; include grading/excavation.",
+          "Customer indicated premium preference—may affect material selections."
+        ],
+        "summary": "Install/replace driveway (~450 sqft) with grading; walkway also requested (separate line).",
+        "quotedSurfaces": {
+          "driveway": 450,
+          "walkway": 100
+        },
+        "surfaceDetections": [
+          {
+            "surface_type": "driveway",
+            "surface_area_sqft": 450,
+            "confidence": 0.8
+          },
+          {
+            "surface_type": "walkway",
+            "surface_area_sqft": 100,
+            "confidence": 0.72
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 500,
+        "confidence": 0.78
+      },
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 120,
+        "confidence": 0.7
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 500,
+      "walkway": 120
+    },
+    "quotedSurfaces": {
+      "driveway": 450,
+      "walkway": 100
+    },
+    "surfaceDetectionConfidence": 72,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 78,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire selections (Driveway, Walkway, Other) indicate concrete scope but not dimensions.",
+      "Site condition 'Dirt or grading needed' implies additional prep work.",
+      "Satellite imagery supports presence and approximate size of driveway and walkway."
+    ]
+  }
+}

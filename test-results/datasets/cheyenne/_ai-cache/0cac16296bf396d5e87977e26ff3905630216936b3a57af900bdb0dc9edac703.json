@@ -1,0 +1,150 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T02:25:30.745Z",
+  "promptHash": "8671862b63a970b2f72db3f405f0d399e97a74f17b13aef862ee60c29e801daf",
+  "keyHash": "0cac16296bf396d5e87977e26ff3905630216936b3a57af900bdb0dc9edac703",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Pressure Washing"
+    ],
+    "address": "1696 North Pass Trl, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJfeI3GdQ4b4cRiz4wRGjyh-I",
+    "lat": 41.2460767,
+    "lng": -104.7575577,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Pressure Washing",
+        "answers": {
+          "pressure_washing_access": "Easy access",
+          "pressure_washing_condition": "Light dirt or dust",
+          "pressure_washing_size": "Whole property / very large area (3,000+ sq ft)",
+          "pressure_washing_target": [
+            "Driveway",
+            "Fence",
+            "House exterior",
+            "Other",
+            "Patio or porch",
+            "Roof"
+          ],
+          "pressure_washing_target_other_text": "special access needs for pressure washing target 14"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requested whole-property pressure washing including driveway, roof, fence, house exterior, and patio. Condition reported light with easy access; satellite and photo support a mid-to-large driveway and walkways.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": true,
+    "materialHint": "concrete, roofing, wood fence, exterior siding",
+    "inferredScope": "whole_property_cleaning_partial_focus_driveway_and_house_exterior",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 78,
+    "pricingDrivers": [
+      "whole_property_area",
+      "roof_cleaning",
+      "driveway_area",
+      "fence_cleaning"
+    ],
+    "estimatorNotes": [
+      "Customer selected multiple targets including driveway, roof, fence, house exterior, and patio.",
+      "Questionnaire indicates whole-property / very large area (3,000+ sq ft) which likely includes house exterior and surrounding hardscape.",
+      "Satellite shows a sizable driveway and walkways; photo set limited to one test image."
+    ],
+    "serviceSignals": {
+      "Pressure Washing": {
+        "serviceType": "Pressure Washing",
+        "jobSubtype": "fence",
+        "jobSubtypeLabel": "Fence",
+        "workType": "clean",
+        "fallbackFamily": "linear_boundary",
+        "surfaceFamily": "linear_boundary",
+        "targetObjectFamily": "fence",
+        "sizeBucket": "small",
+        "estimatedQuantity": 120,
+        "quantityUnit": "linear_ft",
+        "quantityEvidence": "weak_inference",
+        "materialClass": "wood",
+        "materialSubtype": "standard",
+        "conditionClass": "light_soiling",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": true,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 66,
+        "aiConfidenceReasons": [
+          "Fence was selected by customer but no linear footage provided.",
+          "Satellite and photo suggest fenced backyard but exact perimeter unknown."
+        ],
+        "consistencyScore": 70,
+        "notes": [
+          "Recommend on-site measure for fence linear footage before final pricing."
+        ],
+        "summary": "Fence cleaning across residential backyard perimeter; estimate conservative."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 1600,
+        "confidence": 0.84
+      },
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 200,
+        "confidence": 0.7
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 1600,
+      "walkway": 200
+    },
+    "quotedSurfaces": {
+      "driveway": 1200,
+      "walkway": 150
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Property context and imagery support the inferred scope."
+    ]
+  }
+}

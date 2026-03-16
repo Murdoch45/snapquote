@@ -1,0 +1,131 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T00:08:47.802Z",
+  "promptHash": "74ad7483c5354763f4832408c78d933bffe35dda1b24bef747901a6c11b8eda3",
+  "keyHash": "6237d9064f946a23469d6fa8609fcf2b52912cbfc0612993690fd7710bffe992",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Landscaping / Installation"
+    ],
+    "address": "935 Burnside Ave, Los Angeles, CA 90036, USA",
+    "addressPlaceId": "ChIJ_1o_zx65woAR28Q5Yc4qZdE",
+    "lat": 34.058076,
+    "lng": -118.3514135,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Landscaping / Installation",
+        "answers": {
+          "landscape_access": "Easy",
+          "landscape_area_size": "Not sure",
+          "landscape_job_type": "Replace old landscaping",
+          "landscape_materials": [
+            "Mixed materials",
+            "Mostly plants",
+            "Sod or turf"
+          ],
+          "landscape_work_type": [
+            "New plants or garden beds",
+            "Sod or lawn installation",
+            "Yard makeover"
+          ]
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests yard makeover: replace old landscaping with sod and new plant beds (front and back yard).",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": true,
+    "materialHint": "sod and plantings",
+    "inferredScope": "install new sod and plants; remove existing landscaping",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "sod installation",
+      "planting beds",
+      "removal and haul away",
+      "easy access"
+    ],
+    "estimatorNotes": [
+      "Customer selected sod installation and new plants; size uncertain so quantities inferred from lot/backyard area.",
+      "Backyard estimated via property data at 5636 sqft; front yard likely smaller.",
+      "Expect removal of existing landscaping and prep work before install."
+    ],
+    "serviceSignals": {
+      "Landscaping / Installation": {
+        "serviceType": "Landscaping / Installation",
+        "jobSubtype": "sod_installation",
+        "jobSubtypeLabel": "Sod or lawn installation",
+        "workType": "install",
+        "fallbackFamily": "yard_area",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "landscape",
+        "sizeBucket": "large",
+        "estimatedQuantity": 1500,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "organic",
+        "materialSubtype": "sod",
+        "conditionClass": "poor_existing_landscape",
+        "severityClass": "moderate",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 70,
+        "aiConfidenceReasons": [
+          "Customer selected sod and new plants in questionnaire.",
+          "Property lot size and backyard estimate support a medium-to-large yard scope."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Blend of sod and planting beds per customer selections.",
+          "Quantity conservative given \"Not sure\" size answer."
+        ],
+        "summary": "Install approximately 1500 sqft of sod and create new planting beds; remove old landscape and haul away."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 80,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 12000,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers indicate sod and planting work.",
+      "Property and satellite imagery support a yard-focused scope."
+    ]
+  }
+}

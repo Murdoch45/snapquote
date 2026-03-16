@@ -1,0 +1,146 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T02:29:05.677Z",
+  "promptHash": "ae206239690d43cbde3511c75dd50e7f62ecd3bf408f40c5d89b3070823dda78",
+  "keyHash": "182637cc6ff581f59cb990d3676c61435075435e51887500e27b105279f737a7",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Exterior Painting"
+    ],
+    "address": "1696 North Pass Trl, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJfeI3GdQ4b4cRiz4wRGjyh-I",
+    "lat": 41.2460767,
+    "lng": -104.7575577,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Exterior Painting",
+        "answers": {
+          "painting_access": "Not sure",
+          "painting_condition": "Needs prep and repairs",
+          "painting_scope": "Full exterior",
+          "painting_surface_type": "Siding",
+          "painting_target": "Partial exterior"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests exterior painting of siding; notes prep and repairs needed. Scope uncertain between partial and full exterior; imagery supports a single-family residence with accessible exteriors.",
+    "condition": "moderate",
+    "access": "easy",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "siding (vinyl/wood)",
+    "inferredScope": "partial_to_full_exterior",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "siding preparation and repair",
+      "full exterior surface area"
+    ],
+    "estimatorNotes": [
+      "Questionnaire lists siding and needs prep/repairs.",
+      "Satellite imagery confirms a single-family house with accessible exterior surfaces.",
+      "Scope ambiguity between 'Partial exterior' and 'Full exterior' in answers; assume conservative near-full coverage but mark for review if customer clarifies."
+    ],
+    "serviceSignals": {
+      "Exterior Painting": {
+        "serviceType": "Exterior Painting",
+        "jobSubtype": "siding",
+        "jobSubtypeLabel": "Siding",
+        "workType": "repair",
+        "fallbackFamily": "exterior_finish_surface",
+        "surfaceFamily": "vertical_exterior_surface",
+        "targetObjectFamily": "exterior_finish_surface",
+        "sizeBucket": "large",
+        "estimatedQuantity": 4200,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "siding",
+        "materialSubtype": "vinyl_or_wood",
+        "conditionClass": "needs_prep_and_repair",
+        "severityClass": "moderate",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "two_story",
+        "stories": 2,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": true,
+        "aiConfidence": 76,
+        "aiConfidenceReasons": [
+          "Customer explicitly selected siding and indicated needs prep and repairs.",
+          "House square footage and satellite imagery used to infer painted surface area.",
+          "Scope answers conflicted (partial vs full) so conservative large estimate used and manual review flagged."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Confirm whether customer wants full exterior or only partial areas.",
+          "Verify siding material and extent of repairs required before final quote."
+        ],
+        "summary": "Painting of siding with prep and repairs; presumed large single-family home coverage.",
+        "surfaceDetections": [
+          {
+            "surface_type": "walkway",
+            "surface_area_sqft": 250,
+            "confidence": 0.5
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      },
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 250,
+        "confidence": 0.78
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers specified siding and prep needs.",
+      "Satellite imagery and property size support inferred exterior area.",
+      "Conflicting scope answer (partial vs full) increases uncertainty; manual review recommended."
+    ]
+  }
+}

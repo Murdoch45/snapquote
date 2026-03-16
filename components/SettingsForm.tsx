@@ -2,16 +2,28 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
+import { AddressAutocomplete } from "@/components/AddressAutocomplete";
+import { ServiceMultiSelectField } from "@/components/ServiceMultiSelectField";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { type ServiceType } from "@/lib/services";
+import { DEFAULT_QUOTE_SMS_TEMPLATE } from "@/lib/quote-template";
 
 type SettingsData = {
   business_name: string;
   public_slug: string;
   phone: string | null;
   email: string | null;
+  services: ServiceType[] | null;
+  business_address_full: string | null;
+  business_address_place_id: string | null;
+  business_lat: number | null;
+  business_lng: number | null;
+  quote_sms_template: string | null;
+  travel_pricing_disabled: boolean;
   notification_lead_sms: boolean;
   notification_lead_email: boolean;
   notification_accept_sms: boolean;
@@ -24,6 +36,13 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
     publicSlug: initial.public_slug,
     phone: initial.phone ?? "",
     email: initial.email ?? "",
+    services: initial.services ?? [],
+    businessAddressFull: initial.business_address_full ?? "",
+    businessAddressPlaceId: initial.business_address_place_id ?? "",
+    businessLat: initial.business_lat ?? null,
+    businessLng: initial.business_lng ?? null,
+    quoteSmsTemplate: initial.quote_sms_template ?? DEFAULT_QUOTE_SMS_TEMPLATE,
+    travelPricingDisabled: initial.travel_pricing_disabled,
     notificationLeadSms: initial.notification_lead_sms,
     notificationLeadEmail: initial.notification_lead_email,
     notificationAcceptSms: initial.notification_accept_sms,
@@ -31,7 +50,43 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
   });
   const [loading, setLoading] = useState(false);
 
+  const toggleService = (service: ServiceType) => {
+    setForm((current) => ({
+      ...current,
+      services: current.services.includes(service)
+        ? current.services.filter((item) => item !== service)
+        : [...current.services, service]
+    }));
+  };
+
+  const hasSelectedBusinessAddress = Boolean(
+    form.businessAddressPlaceId &&
+      form.businessAddressFull.trim().length >= 5 &&
+      form.businessLat !== null &&
+      form.businessLng !== null
+  );
+
+  const handleBusinessAddressChange = (businessAddressFull: string) => {
+    setForm((prev) => ({
+      ...prev,
+      businessAddressFull,
+      businessAddressPlaceId: "",
+      businessLat: null,
+      businessLng: null
+    }));
+  };
+
   const submit = async () => {
+    if (form.services.length === 0) {
+      toast.error("Select at least one service.");
+      return;
+    }
+
+    if (!form.travelPricingDisabled && !hasSelectedBusinessAddress) {
+      toast.error("Select a valid business address or disable travel distance pricing.");
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await fetch("/api/app/settings/update", {
@@ -87,6 +142,52 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
           />
         </div>
       </div>
+      <ServiceMultiSelectField
+        legend="Services offered"
+        helperText="These services are shown internally and used to keep your profile aligned with lead intake."
+        selectedServices={form.services}
+        onToggle={toggleService}
+      />
+      <div className="space-y-3 rounded-lg border border-gray-200 bg-gray-50 p-4">
+        <div className="space-y-1">
+          <h3 className="text-sm font-semibold text-gray-900">Business Address</h3>
+          <p className="text-xs text-gray-500">
+            Used to estimate travel distance for new leads when mobile-only pricing is off.
+          </p>
+        </div>
+        <AddressAutocomplete
+          label="Business address"
+          inputId="business-address"
+          value={form.businessAddressFull}
+          onAddressChange={handleBusinessAddressChange}
+          onPlaceResolved={({ placeId, lat, lng }) =>
+            setForm((prev) => ({
+              ...prev,
+              businessAddressPlaceId: placeId ?? "",
+              businessLat: lat ?? null,
+              businessLng: lng ?? null
+            }))
+          }
+          required={!form.travelPricingDisabled}
+          invalid={!form.travelPricingDisabled && form.businessAddressFull.trim().length > 0 && !hasSelectedBusinessAddress}
+          helperText={
+            form.travelPricingDisabled
+              ? "Travel distance is disabled. You can leave this blank."
+              : hasSelectedBusinessAddress
+                ? "Google verified business address selected."
+                : "Select your business address from the Google dropdown so travel can be calculated."
+          }
+        />
+        <label className="flex items-start gap-2 text-sm">
+          <Checkbox
+            checked={form.travelPricingDisabled}
+            onCheckedChange={(checked) =>
+              setForm((prev) => ({ ...prev, travelPricingDisabled: checked === true }))
+            }
+          />
+          <span>I operate mobile and do not want travel distance included in estimates.</span>
+        </label>
+      </div>
       <div className="grid gap-3 md:grid-cols-2">
         <label className="flex items-center gap-2 text-sm">
           <Checkbox
@@ -124,6 +225,19 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
           />
           Acceptance notifications by email
         </label>
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="quoteSmsTemplate">Quote SMS template</Label>
+        <Textarea
+          id="quoteSmsTemplate"
+          value={form.quoteSmsTemplate}
+          onChange={(e) => setForm((p) => ({ ...p, quoteSmsTemplate: e.target.value }))}
+          rows={10}
+        />
+        <p className="text-xs text-gray-500">
+          Supported variables: {`{{customer_name}}`}, {`{{company_name}}`}, {`{{quote_link}}`},{" "}
+          {`{{contractor_phone}}`}, {`{{contractor_email}}`}
+        </p>
       </div>
       <Button onClick={submit} disabled={loading}>
         {loading ? "Saving..." : "Save settings"}

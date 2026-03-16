@@ -1,0 +1,124 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T00:08:06.590Z",
+  "promptHash": "eac3800eaf73095fe0f45c6deca24c7f86be81a0d52b736811a98d46da6a0e7d",
+  "keyHash": "78156fac45d77e59d80b2973a44547bb8f88d540071dba13dba1292468da6084",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Pool Service / Cleaning"
+    ],
+    "address": "935 Burnside Ave, Los Angeles, CA 90036, USA",
+    "addressPlaceId": "ChIJ_1o_zx65woAR28Q5Yc4qZdE",
+    "lat": 34.058076,
+    "lng": -118.3514135,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Pool Service / Cleaning",
+        "answers": {
+          "pool_access": "No",
+          "pool_condition": "Not sure",
+          "pool_size": "Large",
+          "pool_type": "Not sure",
+          "pool_work_type": "Other",
+          "pool_work_type_other_text": "special access needs for pool work type 88"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requested pool service/cleaning for a large pool but indicated no access and noted special access needs; manual review recommended.",
+    "condition": "moderate",
+    "access": "difficult",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "pool_shell_unknown",
+    "inferredScope": "regular pool cleaning/maintenance with access restrictions",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 60,
+    "pricingDrivers": [
+      "restricted_access",
+      "large_pool",
+      "special_access_requirements"
+    ],
+    "estimatorNotes": [
+      "Customer selected Pool Service / Cleaning and specified Large pool but indicated No access.",
+      "Other-text notes mention special access needs; confirm gate/code or scheduling.",
+      "Satellite shows a pool-like feature nearby but access is unclear from imagery."
+    ],
+    "serviceSignals": {
+      "Pool Service / Cleaning": {
+        "serviceType": "Pool Service / Cleaning",
+        "jobSubtype": "pool_cleaning",
+        "jobSubtypeLabel": "Pool Cleaning",
+        "workType": "service",
+        "fallbackFamily": "pool_service_event",
+        "surfaceFamily": "unknown",
+        "targetObjectFamily": "pool",
+        "sizeBucket": "large",
+        "estimatedQuantity": 1,
+        "quantityUnit": "service_event",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "unknown",
+        "materialSubtype": "unknown",
+        "conditionClass": "unknown",
+        "severityClass": "moderate",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "moderate",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": true,
+        "fencePresent": true,
+        "deckPresent": true,
+        "roofType": null,
+        "premiumPropertySignal": true,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 54,
+        "aiConfidenceReasons": [
+          "Customer explicitly selected Pool Service and marked pool size Large.",
+          "Customer indicated No access and provided 'special access' free-text, creating ambiguity.",
+          "Satellite image shows pool-like feature near property but exact access unclear."
+        ],
+        "consistencyScore": 62,
+        "notes": [
+          "Confirm access method (gate code, appointment) before scheduling.",
+          "Verify whether pool is on subject property vs adjacent parcel in case of mis-match."
+        ],
+        "summary": "Large pool service requested; access restricted and special access noted so manual review required."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 70,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.2,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": true,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire specified Pool Service with Large size but no direct sqft provided.",
+      "Other-text mentions special access requirements; satellite shows pool-like object but access unclear."
+    ]
+  }
+}

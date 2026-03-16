@@ -1,0 +1,134 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T00:11:31.154Z",
+  "promptHash": "999301c227e3e950290d9feb7bcff9946840a95760ab1bc68d13525ba0371379",
+  "keyHash": "0b7d2544784592a7bc3e51d2e2a2dea04d986b66f7867ef8958dc139fe73ad59",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Junk Removal"
+    ],
+    "address": "935 Burnside Ave, Los Angeles, CA 90036, USA",
+    "addressPlaceId": "ChIJ_1o_zx65woAR28Q5Yc4qZdE",
+    "lat": 34.058076,
+    "lng": -118.3514135,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Junk Removal",
+        "answers": {
+          "junk_amount": "Medium load (about half a trailer or small truck)",
+          "junk_heavy_items": "Yes, a few",
+          "junk_location": "Garage or driveway",
+          "junk_type": "Furniture"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Medium load furniture removal from garage/driveway.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "moderate",
+    "multipleAreas": false,
+    "materialHint": null,
+    "inferredScope": "Pickup and haul away of furniture and a few heavy items from garage or driveway",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": 6,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "furniture",
+      "heavy_items",
+      "garage_driveway_location",
+      "haul_away"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Medium load (about half a trailer or small truck)' and indicated furniture and a few heavy items in garage/driveway.",
+      "Quantity estimated from customer's junk_amount description (direct).",
+      "Access appears straightforward from driveway per satellite."
+    ],
+    "serviceSignals": {
+      "Junk Removal": {
+        "serviceType": "Junk Removal",
+        "jobSubtype": "furniture",
+        "jobSubtypeLabel": "Furniture",
+        "workType": "remove",
+        "fallbackFamily": "debris_load",
+        "surfaceFamily": "debris_load",
+        "targetObjectFamily": "furniture",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 6,
+        "quantityUnit": "load",
+        "quantityEvidence": "direct",
+        "materialClass": "mixed",
+        "materialSubtype": "furniture",
+        "conditionClass": "used",
+        "severityClass": "moderate",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "moderate",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": false,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 80,
+        "aiConfidenceReasons": [
+          "Customer provided a medium-load descriptor and identified furniture/heavy items.",
+          "Location specified as garage or driveway, supported by satellite imagery showing driveway access."
+        ],
+        "consistencyScore": 90,
+        "notes": [
+          "Plan for a small truck or half-trailer capacity and at least two crew members for heavy items.",
+          "Confirm presence of any prohibited items prior to pickup."
+        ],
+        "summary": "Remove and haul away a medium furniture load (~half trailer) from garage/driveway."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Property context and imagery support driveway access and simple pickup scope."
+    ]
+  }
+}

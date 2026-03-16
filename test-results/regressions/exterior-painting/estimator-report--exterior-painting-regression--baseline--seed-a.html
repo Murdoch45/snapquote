@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SnapQuote Estimator Report</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f6f4ef;
+        --card: #ffffff;
+        --ink: #1f2937;
+        --muted: #6b7280;
+        --line: #d1d5db;
+        --accent: #14532d;
+        --accent-soft: #ecfdf5;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: Georgia, "Times New Roman", serif;
+        background: linear-gradient(180deg, #f8f7f2 0%, #eef3f7 100%);
+        color: var(--ink);
+      }
+      main {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 40px 20px 64px;
+      }
+      h1 {
+        margin: 0 0 12px;
+        font-size: 2.4rem;
+      }
+      .intro {
+        margin: 0 0 32px;
+        color: var(--muted);
+        font-size: 1rem;
+      }
+      .property-card {
+        background: var(--card);
+        border: 1px solid rgba(20, 83, 45, 0.12);
+        border-radius: 18px;
+        padding: 24px;
+        margin-bottom: 28px;
+        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.06);
+      }
+      .property-card h2 {
+        margin: 0 0 18px;
+        font-size: 1.5rem;
+      }
+      .property-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 12px;
+        margin-bottom: 24px;
+      }
+      .property-grid div {
+        background: var(--accent-soft);
+        border-radius: 12px;
+        padding: 12px 14px;
+      }
+      .property-grid strong {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 0.85rem;
+      }
+      .service-card {
+        border-top: 1px solid var(--line);
+        padding-top: 20px;
+        margin-top: 20px;
+      }
+      .service-card h3 {
+        margin: 0 0 6px;
+        font-size: 1.2rem;
+      }
+      .service-meta {
+        margin: 0 0 14px;
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fff;
+      }
+      th, td {
+        padding: 10px 12px;
+        border: 1px solid var(--line);
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        background: #f3f4f6;
+        font-size: 0.95rem;
+      }
+      .estimate {
+        margin: 14px 0 0;
+        font-size: 1rem;
+      }
+      @media (max-width: 720px) {
+        main {
+          padding: 24px 14px 48px;
+        }
+        h1 {
+          font-size: 1.9rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>SnapQuote Estimator Report</h1>
+      <p class="intro">
+        Exterior Painting Regression / Baseline / Seed: seed-a.
+        Grouped by property and service. The CSV backup remains available at snapquote-test-results.csv.
+      </p>
+      
+        <section class="property-card">
+          <h2>8260 Oakwood Ave, Los Angeles, CA 90048, USA</h2>
+          <div class="property-grid">
+            <div><strong>City</strong><span>Los Angeles</span></div>
+            <div><strong>Google Lot Size</strong><span>5113</span></div>
+            <div><strong>Google House Size</strong><span>1585</span></div>
+            <div><strong>Travel Distance</strong><span>5</span></div>
+          </div>
+          
+            <section class="service-card">
+              <h3>Exterior Painting</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-15T05:55:08.939Z
+                <br />
+                AI mode: off | Signal source: fallback | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;painting_target&quot;:&quot;Full house exterior&quot;,&quot;painting_surface_type&quot;:&quot;Siding&quot;,&quot;painting_condition&quot;:&quot;Not sure&quot;,&quot;painting_scope&quot;:&quot;Small touch-up&quot;,&quot;painting_access&quot;:&quot;Two-story areas&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What needs to be painted?</td>
+                      <td>Full house exterior</td>
+                    </tr>
+                    <tr>
+                      <td>What type of surface is being painted?</td>
+                      <td>Siding</td>
+                    </tr>
+                    <tr>
+                      <td>What is the current condition of the surface?</td>
+                      <td>Not sure</td>
+                    </tr>
+                    <tr>
+                      <td>What is the size of the job?</td>
+                      <td>Small touch-up</td>
+                    </tr>
+                    <tr>
+                      <td>How difficult is access?</td>
+                      <td>Two-story areas</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 1725.00</p>
+            </section>
+        </section>
+        <section class="property-card">
+          <h2>935 Burnside Ave, Los Angeles, CA 90036, USA</h2>
+          <div class="property-grid">
+            <div><strong>City</strong><span>Los Angeles</span></div>
+            <div><strong>Google Lot Size</strong><span>8168</span></div>
+            <div><strong>Google House Size</strong><span>2532</span></div>
+            <div><strong>Travel Distance</strong><span>5.2</span></div>
+          </div>
+          
+            <section class="service-card">
+              <h3>Exterior Painting</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-15T05:55:17.233Z
+                <br />
+                AI mode: off | Signal source: fallback | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;painting_target&quot;:&quot;Trim, doors, or garage only&quot;,&quot;painting_surface_type&quot;:&quot;Brick or masonry&quot;,&quot;painting_condition&quot;:&quot;Not sure&quot;,&quot;painting_scope&quot;:&quot;One side or small area&quot;,&quot;painting_access&quot;:&quot;Not sure&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What needs to be painted?</td>
+                      <td>Trim, doors, or garage only</td>
+                    </tr>
+                    <tr>
+                      <td>What type of surface is being painted?</td>
+                      <td>Brick or masonry</td>
+                    </tr>
+                    <tr>
+                      <td>What is the current condition of the surface?</td>
+                      <td>Not sure</td>
+                    </tr>
+                    <tr>
+                      <td>What is the size of the job?</td>
+                      <td>One side or small area</td>
+                    </tr>
+                    <tr>
+                      <td>How difficult is access?</td>
+                      <td>Not sure</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 2425.00</p>
+            </section>
+        </section>
+        <section class="property-card">
+          <h2>2481 Summitridge Dr, Beverly Hills, CA 90210, USA</h2>
+          <div class="property-grid">
+            <div><strong>City</strong><span>Beverly Hills</span></div>
+            <div><strong>Google Lot Size</strong><span>25742</span></div>
+            <div><strong>Google House Size</strong><span>9525</span></div>
+            <div><strong>Travel Distance</strong><span>6</span></div>
+          </div>
+          
+            <section class="service-card">
+              <h3>Exterior Painting</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-15T05:55:23.682Z
+                <br />
+                AI mode: off | Signal source: fallback | Status: ready
+              </p>
+              <p class="service-meta">Selected answers: {&quot;painting_target&quot;:&quot;Fence or detached structure&quot;,&quot;painting_surface_type&quot;:&quot;Stucco&quot;,&quot;painting_condition&quot;:&quot;Needs prep and repairs&quot;,&quot;painting_scope&quot;:&quot;Most of exterior&quot;,&quot;painting_access&quot;:&quot;Easy&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What needs to be painted?</td>
+                      <td>Fence or detached structure</td>
+                    </tr>
+                    <tr>
+                      <td>What type of surface is being painted?</td>
+                      <td>Stucco</td>
+                    </tr>
+                    <tr>
+                      <td>What is the current condition of the surface?</td>
+                      <td>Needs prep and repairs</td>
+                    </tr>
+                    <tr>
+                      <td>What is the size of the job?</td>
+                      <td>Most of exterior</td>
+                    </tr>
+                    <tr>
+                      <td>How difficult is access?</td>
+                      <td>Easy</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 5100.00</p>
+            </section>
+        </section>
+    </main>
+  </body>
+</html>

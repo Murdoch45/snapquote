@@ -1,0 +1,123 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T23:51:22.435Z",
+  "promptHash": "ded0591d7e4e1a6e62b934cf4be7e06b934e18a86946799d2271d8772196594f",
+  "keyHash": "3e2f24a03ca686225ec8d428080ccb25b2b6e7ff0b35117336d6d90c914e5892",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Roofing"
+    ],
+    "address": "1696 North Pass Trl, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJfeI3GdQ4b4cRiz4wRGjyh-I",
+    "lat": 41.2460767,
+    "lng": -104.7575577,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Roofing",
+        "answers": {
+          "roofing_access": "Not sure",
+          "roofing_problem": "Old roof needing replacement",
+          "roofing_scope": "One area or slope",
+          "roofing_type": "Flat roof",
+          "roofing_work_type": "Full roof replacement"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests full replacement of a flat roof; satellite and property data support a single-area flat roof replacement.",
+    "condition": "moderate",
+    "access": "moderate",
+    "severity": "major",
+    "debris": "moderate",
+    "multipleAreas": false,
+    "materialHint": "membrane/flat-roof",
+    "inferredScope": "full_roof_replacement_single_slope",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "roof_area",
+      "flat_roof",
+      "full_replacement",
+      "roof_access"
+    ],
+    "estimatorNotes": [
+      "Questionnaire explicitly requests full roof replacement on a flat roof.",
+      "House ground area used to infer roof area; no direct roof measurements provided.",
+      "Satellite imagery shows a single contiguous flat roof footprint."
+    ],
+    "serviceSignals": {
+      "Roofing": {
+        "serviceType": "Roofing",
+        "jobSubtype": "full_roof_replacement",
+        "jobSubtypeLabel": "Full roof replacement",
+        "workType": "replace",
+        "fallbackFamily": "roof_like_surface",
+        "surfaceFamily": "roof_like_surface",
+        "targetObjectFamily": "roof",
+        "sizeBucket": "large",
+        "estimatedQuantity": 3367,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "flat_roof_membrane",
+        "materialSubtype": "unknown",
+        "conditionClass": "aged",
+        "severityClass": "major",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "two_story",
+        "stories": 2,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": "flat",
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 70,
+        "aiConfidenceReasons": [
+          "Customer selected full roof replacement and flat roof type in questionnaire.",
+          "Roof area inferred from house sqft and satellite imagery rather than direct measurements."
+        ],
+        "consistencyScore": 80,
+        "notes": [
+          "Use house ground area (3367 sqft) as proxy for roof area; complex roof features may alter true square footage.",
+          "Access unknown from questionnaire - assume moderate for pricing planning."
+        ],
+        "summary": "Full replacement of flat roof for single-family home estimated at house footprint area."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Property context and imagery support the inferred scope."
+    ]
+  }
+}

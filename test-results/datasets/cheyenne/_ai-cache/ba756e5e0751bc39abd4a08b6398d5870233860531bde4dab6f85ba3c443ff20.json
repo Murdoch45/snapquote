@@ -1,0 +1,127 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T02:24:37.438Z",
+  "promptHash": "6ee7ad7abbacbb49c3f09169aa55e794d600b173f8bbc30eba08f75d819c7adb",
+  "keyHash": "ba756e5e0751bc39abd4a08b6398d5870233860531bde4dab6f85ba3c443ff20",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Outdoor Lighting Installation"
+    ],
+    "address": "5618 Dayton Dr, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJj7v2QZo7b4cRO_KLm-GvTKw",
+    "lat": 41.1707669,
+    "lng": -104.7678762,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Outdoor Lighting Installation",
+        "answers": {
+          "lighting_install_difficulty": "Some wiring or layout work needed",
+          "lighting_power": "Partly",
+          "lighting_scope": "One large area",
+          "lighting_type": [
+            "Accent or landscape lights",
+            "Pathway lights",
+            "Patio or string lights",
+            "Security or flood lights"
+          ],
+          "lighting_work_type": "Repair existing lighting"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Repair and partial re-powering of existing outdoor lighting across primary yard area (pathway, accent, security, and patio lights).",
+    "condition": "light",
+    "access": "moderate",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "low_voltage_lighting",
+    "inferredScope": "single_property_landscape_lighting_repair",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": 12,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "Existing lighting repair",
+      "Mixed fixture types (pathway, accent, security, patio)",
+      "Some wiring/layout work required"
+    ],
+    "estimatorNotes": [
+      "Customer selected repair of existing lighting and indicated partial power availability.",
+      "Multiple lighting types selected; assume mixed low-voltage landscape system servicing several fixtures around yard.",
+      "No explicit fixture count provided; quantity inferred from typical property size and 'one large area' scope."
+    ],
+    "serviceSignals": {
+      "Outdoor Lighting Installation": {
+        "serviceType": "Outdoor Lighting Installation",
+        "jobSubtype": "landscape_lighting_repair",
+        "jobSubtypeLabel": "Landscape Lighting Repair",
+        "workType": "repair",
+        "fallbackFamily": "lighting_system",
+        "surfaceFamily": "unknown",
+        "targetObjectFamily": "lighting_system",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 12,
+        "quantityUnit": "fixture_count",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "low_voltage",
+        "materialSubtype": "mixed_fixture_types",
+        "conditionClass": "existing_system_needs_repair",
+        "severityClass": "minor",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 70,
+        "aiConfidenceReasons": [
+          "Questionnaire clearly requests repair of existing lighting and lists multiple fixture types.",
+          "Property size and satellite imagery support a medium scope landscape lighting system for a single-family yard."
+        ],
+        "consistencyScore": 80,
+        "notes": [
+          "Customer indicated 'Partly' for power — expect some fixtures or circuits without power requiring troubleshooting.",
+          "Plan for wiring diagnostics and selective fixture replacement or rewiring as needed."
+        ],
+        "summary": "Repair of existing low-voltage landscape lighting across primary yard area (~12 fixtures)."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 78,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about lighting repair and fixture types.",
+      "Property context and imagery support a medium-sized residential lighting system."
+    ]
+  }
+}

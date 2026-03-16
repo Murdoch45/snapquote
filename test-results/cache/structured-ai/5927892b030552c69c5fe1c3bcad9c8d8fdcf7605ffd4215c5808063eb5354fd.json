@@ -1,0 +1,144 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T23:48:46.701Z",
+  "promptHash": "85412636eab7b8016e5d3b7d6bb8ee0fade4e9e7f148964e93a7f2fdf267507d",
+  "keyHash": "5927892b030552c69c5fe1c3bcad9c8d8fdcf7605ffd4215c5808063eb5354fd",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Tree Service / Removal"
+    ],
+    "address": "1696 North Pass Trl, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJfeI3GdQ4b4cRiz4wRGjyh-I",
+    "lat": 41.2460767,
+    "lng": -104.7575577,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Tree Service / Removal",
+        "answers": {
+          "tree_access": "Easy",
+          "tree_haul_away": "Yes",
+          "tree_location": "Front yard",
+          "tree_size": "Medium",
+          "tree_work_type": "Remove multiple trees"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Remove multiple medium trees in front yard with haul-away requested.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "moderate",
+    "multipleAreas": false,
+    "materialHint": null,
+    "inferredScope": "remove_trees_front_yard",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "tree_removal",
+      "haul_away",
+      "front_yard_access"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Remove multiple trees' and requested haul away.",
+      "Photo and satellite imagery show front yard tree coverage consistent with medium trees."
+    ],
+    "serviceSignals": {
+      "Tree Service / Removal": {
+        "serviceType": "Tree Service / Removal",
+        "jobSubtype": "remove_multiple_trees",
+        "jobSubtypeLabel": "Remove multiple trees",
+        "workType": "remove",
+        "fallbackFamily": "tree_work",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "tree_work",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 3,
+        "quantityUnit": "tree_count",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "wood",
+        "materialSubtype": "unknown",
+        "conditionClass": "live",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "two_story",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 78,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly requests removal of multiple trees.",
+          "Location and single photo indicate front yard trees with easy access."
+        ],
+        "consistencyScore": 90,
+        "notes": [
+          "No explicit tree count provided; assumed 2-4 medium trees based on 'multiple' and imagery.",
+          "Haul-away flagged in questionnaire."
+        ],
+        "summary": "Removal of multiple medium trees in the front yard with haul-away.",
+        "surfaceDetections": [
+          {
+            "surface_type": "walkway",
+            "surface_area_sqft": 0,
+            "confidence": 0
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      },
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 250,
+        "confidence": 0.7
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Property context and imagery support the inferred scope."
+    ]
+  }
+}

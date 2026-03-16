@@ -1,0 +1,153 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T00:12:17.462Z",
+  "promptHash": "96e70d3abb0aefbbe24c23c03571e8614cf30ef0ada646381a70ac410e45cb34",
+  "keyHash": "1cba3bb9d8b6da0b6df079314f7d025280c5145aaab4deec75db71a4299d612e",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Other"
+    ],
+    "address": "935 Burnside Ave, Los Angeles, CA 90036, USA",
+    "addressPlaceId": "ChIJ_1o_zx65woAR28Q5Yc4qZdE",
+    "lat": 34.058076,
+    "lng": -118.3514135,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Other",
+        "answers": {
+          "other_access": "Moderate",
+          "other_property_type": "Commercial property",
+          "other_size": "Small",
+          "other_work_type": "Cleaning"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Small commercial cleaning request focused on exterior flat hardscapes (driveway/walkway).",
+    "condition": "light",
+    "access": "moderate",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "concrete",
+    "inferredScope": "pressure washing of driveway and adjacent walkway",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": 350,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "surface_area",
+      "access",
+      "commercial_property"
+    ],
+    "estimatorNotes": [
+      "Customer selected Other/Cleaning (small) for a commercial property with moderate access.",
+      "Satellite shows driveway and walkway areas suitable for pressure washing; one pool present in adjacent yard.",
+      "Photo is a test image; rely more on questionnaire and satellite."
+    ],
+    "serviceSignals": {
+      "Pressure Washing": {
+        "serviceType": "Pressure Washing",
+        "jobSubtype": "driveway",
+        "jobSubtypeLabel": "Driveway",
+        "workType": "clean",
+        "fallbackFamily": "flat_hardscape",
+        "surfaceFamily": "flat_hardscape",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "small",
+        "estimatedQuantity": 800,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "concrete",
+        "materialSubtype": "standard",
+        "conditionClass": "light_soiling",
+        "severityClass": "minor",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": true,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": true,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 74,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly requested cleaning for a small commercial property.",
+          "Satellite imagery shows driveway and walkway areas consistent with estimated area.",
+          "Only one test photo provided; lower confidence from photos."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Quote assumes pressure washing only; no major repairs or stain removal specified.",
+          "Verify access/permits for commercial property during scheduling."
+        ],
+        "summary": "Pressure washing of driveway (~800 sqft) and minor walkway cleaning; light soiling.",
+        "quotedSurfaces": {
+          "driveway": 800
+        },
+        "surfaceDetections": [
+          {
+            "surface_type": "driveway",
+            "surface_area_sqft": 800,
+            "confidence": 0.82
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 800,
+        "confidence": 0.82
+      },
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 200,
+        "confidence": 0.7
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 800,
+      "walkway": 200
+    },
+    "quotedSurfaces": {
+      "driveway": 800
+    },
+    "surfaceDetectionConfidence": 80,
+    "satelliteClarity": 85,
+    "imageQuality": 50,
+    "scopeMatchConfidence": 78,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1,
+    "estateScore": 8168,
+    "premiumPropertySignal": false,
+    "commercialSignal": true,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers indicate cleaning for a small commercial property.",
+      "Satellite imagery supports presence of driveway and walkway consistent with inferred scope.",
+      "Single test photo is not diagnostic; relied more on satellite and questionnaire."
+    ]
+  }
+}

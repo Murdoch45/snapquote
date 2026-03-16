@@ -1,0 +1,121 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T00:18:31.375Z",
+  "promptHash": "4a94bd77cd8d6a0cb31ce6754098894eaf6448018b72f13ba8fd93c48f0ed295",
+  "keyHash": "36dae7982911f7b255ecbf8497691330528e1e9cb8cf9464c7f865afa95fff0a",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Gutter Cleaning"
+    ],
+    "address": "1696 North Pass Trl, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJfeI3GdQ4b4cRiz4wRGjyh-I",
+    "lat": 41.2460767,
+    "lng": -104.7575577,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Gutter Cleaning",
+        "answers": {
+          "gutter_access": "Not sure",
+          "gutter_building_type": "Single-story home",
+          "gutter_fill_level": "Moderate debris",
+          "gutter_work_type": "Minor gutter repair"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Gutter cleaning with minor repair requested; moderate debris reported. Likely single-story home gutters around roofline require cleaning and minor patching.",
+    "condition": "moderate",
+    "access": "moderate",
+    "severity": "minor",
+    "debris": "moderate",
+    "multipleAreas": false,
+    "materialHint": "aluminum",
+    "inferredScope": "full-house gutters",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "gutter linear footage",
+      "minor repair required",
+      "single-story access"
+    ],
+    "estimatorNotes": [
+      "Customer selected single-story and minor gutter repair with moderate debris.",
+      "No explicit linear footage provided; quantity inferred from house footprint and typical gutter run."
+    ],
+    "serviceSignals": {
+      "Gutter Cleaning": {
+        "serviceType": "Gutter Cleaning",
+        "jobSubtype": "standard_gutter_clean_repair",
+        "jobSubtypeLabel": "Gutter cleaning with minor repair",
+        "workType": "clean",
+        "fallbackFamily": "linear_boundary",
+        "surfaceFamily": "linear_boundary",
+        "targetObjectFamily": "gutter_system",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 180,
+        "quantityUnit": "linear_ft",
+        "quantityEvidence": "weak_inference",
+        "materialClass": "metal",
+        "materialSubtype": "aluminum",
+        "conditionClass": "moderate_debris",
+        "severityClass": "minor",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "single_story",
+        "stories": 1,
+        "slopeClass": "some_slope",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": "asphalt_shingle",
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 68,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly requested gutter cleaning and minor repair.",
+          "Property is single-story per questionnaire and satellite house footprint supports single-story estimate.",
+          "No direct linear footage provided; footage inferred from building perimeter."
+        ],
+        "consistencyScore": 74,
+        "notes": [
+          "Recommend onsite measurement to confirm gutter linear footage and exact repair locations.",
+          "Access was listed as 'Not sure' by customer; assumed typical single-story access."
+        ],
+        "summary": "Full-house gutter cleaning with minor repairs on a single-story home; moderate debris present."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 80,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about gutter work type and debris level.",
+      "Satellite imagery confirms single-building footprint consistent with single-story assumption."
+    ]
+  }
+}

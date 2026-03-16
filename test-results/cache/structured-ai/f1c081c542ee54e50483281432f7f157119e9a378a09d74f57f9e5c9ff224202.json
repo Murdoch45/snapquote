@@ -1,0 +1,140 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T00:15:52.837Z",
+  "promptHash": "8b2bf26dbb0e656135c506ba985cf2b39ca192254291e38009373beb62a5716c",
+  "keyHash": "f1c081c542ee54e50483281432f7f157119e9a378a09d74f57f9e5c9ff224202",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Exterior Painting"
+    ],
+    "address": "5618 Dayton Dr, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJj7v2QZo7b4cRO_KLm-GvTKw",
+    "lat": 41.1707669,
+    "lng": -104.7678762,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Exterior Painting",
+        "answers": {
+          "painting_access": "Not sure",
+          "painting_condition": "Heavy peeling or damage",
+          "painting_scope": "Most of exterior",
+          "painting_surface_type": "Stucco",
+          "painting_target": "Fence or detached structure"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Painting of stucco fence/detached structure with heavy peeling; customer indicates most of exterior may need work",
+    "condition": "heavy",
+    "access": "moderate",
+    "severity": "major",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "stucco",
+    "inferredScope": "fence/detached structure plus large exterior areas (customer indicated most of exterior)",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 65,
+    "pricingDrivers": [
+      "extensive peeling",
+      "stucco surface",
+      "large exterior scope",
+      "access uncertainty"
+    ],
+    "estimatorNotes": [
+      "Customer selected fence/detached structure and also indicated most of exterior — scope unclear, recommend manual review",
+      "Stucco surface with heavy peeling will require prep/patching before painting"
+    ],
+    "serviceSignals": {
+      "Exterior Painting": {
+        "serviceType": "Exterior Painting",
+        "jobSubtype": "fence_or_detached_structure",
+        "jobSubtypeLabel": "Fence or detached structure",
+        "workType": "replace",
+        "fallbackFamily": "exterior_finish_surface",
+        "surfaceFamily": "vertical_exterior_surface",
+        "targetObjectFamily": "fence",
+        "sizeBucket": "large",
+        "estimatedQuantity": 1200,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "stucco",
+        "materialSubtype": "standard",
+        "conditionClass": "damaged_finish",
+        "severityClass": "major",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "single_story",
+        "stories": 1,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": true,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": true,
+        "aiConfidence": 58,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly selected fence/detached structure and reported heavy peeling",
+          "Customer also selected 'Most of exterior' producing scope ambiguity",
+          "Satellite imagery confirms detached structures and typical suburban lot scale"
+        ],
+        "consistencyScore": 62,
+        "notes": [
+          "Confirm whether customer wants entire house exterior painted or only detached structure/fence",
+          "Estimate assumes stucco repair and standard two-coat painting system for listed area"
+        ],
+        "summary": "Paint stucco fence/detached structure with heavy peeling; possible larger exterior paint scope pending confirmation"
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 600,
+        "confidence": 0.72
+      },
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 150,
+        "confidence": 0.68
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 600,
+      "walkway": 150
+    },
+    "surfaceDetectionConfidence": 60,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 70,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1,
+    "luxuryMultiplier": 1,
+    "estateScore": 10000,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about surface and condition",
+      "Satellite imagery and photo support suburban single-family property context but do not resolve full exterior scope"
+    ]
+  }
+}

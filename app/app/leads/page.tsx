@@ -9,8 +9,9 @@ export default async function LeadsPage() {
   const [{ data: leads }, { data: photos }] = await Promise.all([
     supabase
       .from("leads")
-      .select("id,address_full,services,submitted_at,ai_estimate_low,ai_estimate_high")
+      .select("id,address_full,services,submitted_at,ai_suggested_price")
       .eq("org_id", auth.orgId)
+      .eq("ai_status", "ready")
       .order("submitted_at", { ascending: false }),
     supabase.from("lead_photos").select("lead_id").eq("org_id", auth.orgId)
   ]);
@@ -39,8 +40,7 @@ export default async function LeadsPage() {
             address_full: string;
             services: string[];
             submitted_at: string;
-            ai_estimate_low: number | null;
-            ai_estimate_high: number | null;
+            ai_suggested_price: number | null;
             photo_count?: number;
           }[]
         }

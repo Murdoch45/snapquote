@@ -1,0 +1,151 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T08:23:44.670Z",
+  "promptHash": "b01a878fd5c1865fab812680c21f808b3a7ce9b168b0c278bfacf6df3f69dbd5",
+  "keyHash": "192bee645e49a03cef15162bbbae16214fa525581a9f92d65a4ab37d2afb41fe",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Concrete"
+    ],
+    "address": "1202 Larchmont Ln, Nichols Hills, OK 73116, USA",
+    "addressPlaceId": "ChIJySjKutIbsocRj8CEoxAlaik",
+    "lat": 35.5497582,
+    "lng": -97.5348305,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Concrete",
+        "answers": {
+          "concrete_material": "Not sure",
+          "concrete_project_type": [
+            "Other"
+          ],
+          "concrete_project_type_other_text": "special access needs for concrete project type 67",
+          "concrete_scope": "Large (~600-1,500 sq ft)",
+          "concrete_site_condition": "Tight or difficult access",
+          "concrete_work_type": "New installation"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "New concrete installation, large scope with special access needs.",
+    "condition": "light",
+    "access": "difficult",
+    "severity": "moderate",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "concrete",
+    "inferredScope": "600-1500 sqft new concrete",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "large_area",
+      "tight_access",
+      "new_installation",
+      "concrete_material_unknown"
+    ],
+    "estimatorNotes": [
+      "Customer specified 'Large (~600-1,500 sq ft)' and 'New installation'.",
+      "Questionnaire mentions tight/difficult access; plan for access premium and logistics."
+    ],
+    "serviceSignals": {
+      "Concrete": {
+        "serviceType": "Concrete",
+        "jobSubtype": "driveway",
+        "jobSubtypeLabel": "Driveway / large flat hardscape",
+        "workType": "install",
+        "fallbackFamily": "flat_hardscape",
+        "surfaceFamily": "flat_hardscape",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "large",
+        "estimatedQuantity": 900,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "direct",
+        "materialClass": "concrete",
+        "materialSubtype": "standard",
+        "conditionClass": "new_work",
+        "severityClass": "moderate",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "moderate",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": true,
+        "fencePresent": false,
+        "deckPresent": true,
+        "roofType": null,
+        "premiumPropertySignal": true,
+        "luxuryHardscapeSignal": true,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 68,
+        "aiConfidenceReasons": [
+          "Customer provided scoped range (600-1,500 sq ft).",
+          "Satellite imagery shows multiple hardscape areas but exact target area unspecified.",
+          "Tight access noted in questionnaire increases complexity."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Confirm exact area and access constraints on site visit.",
+          "Material preference unspecified; assume standard concrete unless customer specifies."
+        ],
+        "summary": "Large new concrete installation (approx 900 sqft) with difficult access; site review recommended.",
+        "quotedSurfaces": {
+          "driveway": 900
+        },
+        "surfaceDetections": [
+          {
+            "surface_type": "driveway",
+            "surface_area_sqft": 2100,
+            "confidence": 0.84
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "quotedSurfaces": {
+      "driveway": 900
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.2,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": true,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers specify new concrete and a large scoped range.",
+      "Satellite imagery confirms large hardscape area but not exact installation footprint."
+    ]
+  }
+}

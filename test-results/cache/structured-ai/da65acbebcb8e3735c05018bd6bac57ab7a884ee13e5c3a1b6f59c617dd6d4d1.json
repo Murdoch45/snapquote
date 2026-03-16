@@ -1,0 +1,131 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T19:40:44.830Z",
+  "promptHash": "6b7593bedd87994be96aa8dab66feedeed6a1d85a36315ee8e12c84da968b64d",
+  "keyHash": "da65acbebcb8e3735c05018bd6bac57ab7a884ee13e5c3a1b6f59c617dd6d4d1",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Fence Installation / Repair"
+    ],
+    "address": "1216 Norway St, Bristol, VA 24201, USA",
+    "addressPlaceId": "ChIJSQAVgxN2UIgRc62c8VJioW0",
+    "lat": 36.5970084,
+    "lng": -82.1960856,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Fence Installation / Repair",
+        "answers": {
+          "fence_material": "Vinyl",
+          "fence_repair_condition": "Minor",
+          "fence_scope": "Other",
+          "fence_scope_other_text": "site-specific details for fence scope 52",
+          "fence_site": "Not sure",
+          "fence_work_type": "New fence installation"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests new vinyl fence installation; scope details provided in other-text. Site access uncertain.",
+    "condition": "light",
+    "access": "moderate",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "vinyl",
+    "inferredScope": "perimeter/backyard fencing (site-specific)",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "Material: vinyl",
+      "New installation",
+      "Site-specific scope text provided"
+    ],
+    "estimatorNotes": [
+      "Customer selected New fence installation and specified Vinyl.",
+      "Scope marked Other with supplemental text; site visit likely required to confirm linear footage and access."
+    ],
+    "serviceSignals": {
+      "Fence Installation / Repair": {
+        "serviceType": "Fence Installation / Repair",
+        "jobSubtype": "new_fence",
+        "jobSubtypeLabel": "New fence installation",
+        "workType": "install",
+        "fallbackFamily": "linear_boundary",
+        "surfaceFamily": "linear_boundary",
+        "targetObjectFamily": "fence",
+        "estimatedQuantity": 0,
+        "quantityUnit": "linear_ft",
+        "materialClass": "vinyl",
+        "materialSubtype": "vinyl_standard",
+        "conditionClass": "new_install",
+        "severityClass": "minor",
+        "accessDifficulty": "moderate",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 64,
+        "aiConfidenceReasons": [
+          "Customer explicitly requested new vinyl fence but provided no linear footage.",
+          "Scope described as Other requiring site-specific details."
+        ],
+        "consistencyScore": 72,
+        "notes": [
+          "No direct quantity provided; recommend manual review or site measure.",
+          "Photo count low; satellite shows property but not fence alignment."
+        ],
+        "summary": "New vinyl fence installation requested; quantity and exact alignment unspecified (Other)."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about fence type and new installation.",
+      "No linear footage provided; satellite and photo evidence insufficient to infer fence run reliably."
+    ]
+  }
+}

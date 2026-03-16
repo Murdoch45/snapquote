@@ -1,0 +1,120 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T21:30:47.017Z",
+  "promptHash": "9f89165d15c459acec590053ed0201c8641738b433569fc274b3306052880022",
+  "keyHash": "a0da11003738c4385be25aa78bb31ff638fde57bb1a072e0fc58e7d6aeb4b18f",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Junk Removal"
+    ],
+    "address": "577 Grove St, Worcester, MA 01605, USA",
+    "addressPlaceId": "ChIJCeltdQQH5IkRUt0eMJ6IxbA",
+    "lat": 42.2936121,
+    "lng": -71.8172553,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Junk Removal",
+        "answers": {
+          "junk_amount": "A few items (fits in part of a pickup bed)",
+          "junk_heavy_items": "Yes, a few",
+          "junk_location": "Backyard or hard-to-reach area",
+          "junk_type": "Furniture"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Small backyard furniture removal; fits in part of a pickup bed, some heavy items, access through backyard.",
+    "condition": "light",
+    "access": "moderate",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": null,
+    "inferredScope": "Remove a few furniture items from backyard; haul away required.",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": 1.5,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "haul_away",
+      "heavy_items",
+      "backyard_access"
+    ],
+    "estimatorNotes": [
+      "Customer selected furniture and reported a few items that fit in part of a pickup bed.",
+      "Photo and satellite show residential lot with backyard access; may require carrying items through yard."
+    ],
+    "serviceSignals": {
+      "Junk Removal": {
+        "serviceType": "Junk Removal",
+        "jobSubtype": "furniture",
+        "jobSubtypeLabel": "Furniture",
+        "workType": "remove",
+        "fallbackFamily": "debris_load",
+        "surfaceFamily": "unknown",
+        "targetObjectFamily": "debris_load",
+        "sizeBucket": "small",
+        "estimatedQuantity": 0.5,
+        "quantityUnit": "load",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "furniture",
+        "materialSubtype": "mixed",
+        "conditionClass": "used",
+        "severityClass": "minor",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "moderate",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "some_slope",
+        "removalNeeded": true,
+        "prepNeeded": false,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 68,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly states furniture and approximate amount.",
+          "Photo and satellite support backyard location and residential context."
+        ],
+        "consistencyScore": 82,
+        "notes": [
+          "Customer indicated heavy items present; may require two-person crew or dollies.",
+          "Location in backyard may require carry distance over lawn or steps."
+        ],
+        "summary": "Remove a few furniture items (~part of pickup bed) from backyard and haul away."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.15,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about junk type and approximate amount.",
+      "Imagery shows residential property with backyard access but no clear large-scale debris."
+    ]
+  }
+}

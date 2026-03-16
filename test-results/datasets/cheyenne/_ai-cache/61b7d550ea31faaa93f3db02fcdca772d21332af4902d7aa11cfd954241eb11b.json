@@ -1,0 +1,150 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T02:16:12.397Z",
+  "promptHash": "c2b4e4b0a4e9c583b53b3ee1f6c1c13b62146b21f071c8fef98630b053d26e8b",
+  "keyHash": "61b7d550ea31faaa93f3db02fcdca772d21332af4902d7aa11cfd954241eb11b",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Concrete"
+    ],
+    "address": "1301 E 23rd St, Cheyenne, WY 82001, USA",
+    "addressPlaceId": "ChIJi8RhiOM6b4cRMw7GhSSaufo",
+    "lat": 41.1442781,
+    "lng": -104.8044048,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Concrete",
+        "answers": {
+          "concrete_material": "Not sure",
+          "concrete_project_type": [
+            "Slab or pad",
+            "Walkway"
+          ],
+          "concrete_scope": "Medium (~200-600 sq ft)",
+          "concrete_site_condition": "Existing concrete needs removal",
+          "concrete_work_type": "Replacement"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests replacement of existing concrete slab/pad and walkway (medium scope).",
+    "condition": "moderate",
+    "access": "easy",
+    "severity": "moderate",
+    "debris": "moderate",
+    "multipleAreas": true,
+    "materialHint": "concrete",
+    "inferredScope": "medium_replacement (~200-600 sqft)",
+    "treeSize": "small",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": 3,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "concrete removal",
+      "replacement of slab and walkway",
+      "medium scope (~200-600 sqft)"
+    ],
+    "estimatorNotes": [
+      "Questionnaire indicates replacement of existing concrete (slab/pad and walkway).",
+      "Satellite and photo evidence show limited hardscape around house consistent with medium-sized walkway/slab.",
+      "Haul-away likely required for removed concrete; confirm thickness and reinforcement on site."
+    ],
+    "serviceSignals": {
+      "Concrete": {
+        "serviceType": "Concrete",
+        "jobSubtype": "walkway",
+        "jobSubtypeLabel": "Walkway / Slab",
+        "workType": "replace",
+        "fallbackFamily": "flat_hardscape",
+        "surfaceFamily": "flat_hardscape",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 350,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "direct",
+        "materialClass": "concrete",
+        "materialSubtype": "standard",
+        "conditionClass": "deteriorated",
+        "severityClass": "moderate",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": true,
+        "aiConfidence": 74,
+        "aiConfidenceReasons": [
+          "Customer explicitly selected slab/pad and walkway replacement and medium scope.",
+          "Satellite imagery confirms limited hardscape consistent with medium area.",
+          "Photo is generic; on-site verification needed for thickness and reinforcement."
+        ],
+        "consistencyScore": 82,
+        "notes": [
+          "Confirm excavation depth, rebar/mesh, and any subbase repairs prior to final pricing.",
+          "Estimate assumes combined walkway and small slab area totaling ~350 sqft based on customer scope."
+        ],
+        "summary": "Replace existing concrete slab/pad and walkway, medium scope (~200-600 sqft).",
+        "quotedSurfaces": {
+          "walkway": 350
+        },
+        "surfaceDetections": [
+          {
+            "surface_type": "walkway",
+            "surface_area_sqft": 350,
+            "confidence": 0.78
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 400,
+        "confidence": 0.76
+      }
+    ],
+    "detectedSurfaces": {
+      "walkway": 400
+    },
+    "quotedSurfaces": {
+      "walkway": 350
+    },
+    "surfaceDetectionConfidence": 78,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 1200,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers specify replacement and medium scope.",
+      "Satellite supports presence of walkways/slab but photo is generic; details require manual review."
+    ]
+  }
+}

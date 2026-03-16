@@ -1,0 +1,136 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T00:14:04.239Z",
+  "promptHash": "b45705f39636b4a2c663824648d7430717ffdbf04b955a80d8a5c2ee3e0f7854",
+  "keyHash": "54c758bb2d4585e99628921bd326bf1f35435cc52446f23d8913ea50e5dfb330",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Tree Service / Removal"
+    ],
+    "address": "5618 Dayton Dr, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJj7v2QZo7b4cRO_KLm-GvTKw",
+    "lat": 41.1707669,
+    "lng": -104.7678762,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Tree Service / Removal",
+        "answers": {
+          "tree_access": "Difficult",
+          "tree_haul_away": "Yes",
+          "tree_location": "Other",
+          "tree_location_other_text": "custom scope requested for tree location 92",
+          "tree_size": "Medium",
+          "tree_work_type": "Trim or cut back branches"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests medium tree trim/cut back with difficult access and haul-away.",
+    "condition": "moderate",
+    "access": "difficult",
+    "severity": "minor",
+    "debris": "moderate",
+    "multipleAreas": false,
+    "materialHint": null,
+    "inferredScope": "Trim or cut back branches for one medium tree at custom location",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 68,
+    "pricingDrivers": [
+      "Difficult access",
+      "Haul away required",
+      "Custom location instructions"
+    ],
+    "estimatorNotes": [
+      "Questionnaire indicates trim (not full removal) of a medium tree.",
+      "Customer selected difficult access and requested haul-away.",
+      "Photo and satellite imagery show a residential lot with driveway; tree not clearly visible so scope inferred from answers."
+    ],
+    "serviceSignals": {
+      "Tree Service / Removal": {
+        "serviceType": "Tree Service / Removal",
+        "jobSubtype": "trim",
+        "jobSubtypeLabel": "Trim or Cut Back Branches",
+        "workType": "service",
+        "fallbackFamily": "tree_work",
+        "surfaceFamily": "tree_work",
+        "targetObjectFamily": "tree",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 1,
+        "quantityUnit": "tree_count",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "wood",
+        "materialSubtype": "deciduous",
+        "conditionClass": "fair",
+        "severityClass": "minor",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "moderate",
+        "heightClass": "two_story",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 70,
+        "aiConfidenceReasons": [
+          "Customer questionnaire explicitly selected trim and haul-away.",
+          "Tree size provided as medium but count not given; single tree inferred conservatively.",
+          "Difficult access flag increases manual review need."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Confirm exact tree count and location on site visit.",
+          "Ensure crew has equipment for difficult access and haul-away."
+        ],
+        "summary": "Trim/cut back branches for one medium tree; haul-away required; difficult access."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.2,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about trim and haul-away.",
+      "Property context supports residential tree service but lacks exact tree count/location in imagery."
+    ]
+  }
+}

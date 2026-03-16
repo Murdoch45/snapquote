@@ -1,0 +1,134 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T19:46:36.731Z",
+  "promptHash": "05ab74f6148841f4ac0d766cf50f2e7e2ced0bc58eaa5b7806653953c08a6146",
+  "keyHash": "8d4c7acebc68772aa229a07949f99d2a0c9ad0f1e67afd88e6ca5f20c58ad925",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Tree Service / Removal"
+    ],
+    "address": "2070 King College Rd, Bristol, TN 37620, USA",
+    "addressPlaceId": "ChIJ32Mu-bV2UIgR8C_BrBTmahI",
+    "lat": 36.5870892,
+    "lng": -82.1329154,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Tree Service / Removal",
+        "answers": {
+          "tree_access": "Not sure",
+          "tree_haul_away": "No",
+          "tree_location": "Front yard",
+          "tree_size": "Small",
+          "tree_work_type": "Remove multiple trees"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Remove multiple small trees in front yard; customer selected removal of multiple small trees and doesn't want haul-away.",
+    "condition": "light",
+    "access": "moderate",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "wood",
+    "inferredScope": "remove 2-4 small front-yard trees",
+    "treeSize": "small",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "tree_count",
+      "tree_size",
+      "front_yard_access"
+    ],
+    "estimatorNotes": [
+      "Customer requested removal of multiple small trees in front yard.",
+      "No haul-away requested per questionnaire; clarify whether homeowner will retain wood/chips."
+    ],
+    "serviceSignals": {
+      "Tree Service / Removal": {
+        "serviceType": "Tree Service / Removal",
+        "jobSubtype": "remove_multiple_trees",
+        "jobSubtypeLabel": "Remove multiple trees",
+        "workType": "remove",
+        "fallbackFamily": "tree_work",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "tree_work",
+        "sizeBucket": "small",
+        "estimatedQuantity": 3,
+        "quantityUnit": "tree_count",
+        "quantityEvidence": "weak_inference",
+        "materialClass": "wood",
+        "materialSubtype": "deciduous",
+        "conditionClass": "unknown",
+        "severityClass": "minor",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": true,
+        "aiConfidence": 68,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly requests removal of multiple small trees.",
+          "Number of trees not specified so quantity inferred from 'multiple'.",
+          "Satellite shows several trees in front yard but exact trees for removal unspecified."
+        ],
+        "consistencyScore": 72,
+        "notes": [
+          "Confirm exact tree count and whether homeowner wants wood hauled or retained.",
+          "Check for utility lines and proximity to house prior to scheduling."
+        ],
+        "summary": "Removal of approximately 2-4 small front-yard trees; haul-away not requested per customer."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about tree removal.",
+      "Satellite shows front-yard trees consistent with request."
+    ]
+  }
+}

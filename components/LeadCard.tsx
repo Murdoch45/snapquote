@@ -9,14 +9,12 @@ type LeadCardProps = {
     address_full: string;
     services: string[];
     submitted_at: string;
-    ai_estimate_low: number | null;
-    ai_estimate_high: number | null;
+    ai_suggested_price: number | null;
     photo_count?: number;
   };
 };
 
 export function LeadCard({ lead }: LeadCardProps) {
-  const hasEstimate = lead.ai_estimate_low !== null && lead.ai_estimate_high !== null;
   return (
     <Card className="hover:border-blue-300">
       <CardContent className="space-y-3 p-4">
@@ -33,9 +31,7 @@ export function LeadCard({ lead }: LeadCardProps) {
           ))}
         </div>
         <p className="text-sm text-gray-700">
-          {hasEstimate
-            ? `AI range: ${toCurrency(lead.ai_estimate_low)} - ${toCurrency(lead.ai_estimate_high)}`
-            : "AI estimate pending"}
+          {`SnapQuote estimate: ${toCurrency(lead.ai_suggested_price ?? 0)}`}
         </p>
         <Link
           className="inline-flex text-sm font-medium text-primary hover:text-blue-700"

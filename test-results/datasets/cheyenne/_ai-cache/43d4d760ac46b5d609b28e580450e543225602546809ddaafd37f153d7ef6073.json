@@ -1,0 +1,164 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T02:30:10.196Z",
+  "promptHash": "78c4fe1e95f1f1e418f4bea93290b5a4f8971a2307bdf7eac735d67b31bf29a4",
+  "keyHash": "43d4d760ac46b5d609b28e580450e543225602546809ddaafd37f153d7ef6073",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Outdoor Lighting Installation"
+    ],
+    "address": "1696 North Pass Trl, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJfeI3GdQ4b4cRiz4wRGjyh-I",
+    "lat": 41.2460767,
+    "lng": -104.7575577,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Outdoor Lighting Installation",
+        "answers": {
+          "lighting_install_difficulty": "Complex or large-property installation",
+          "lighting_power": "No",
+          "lighting_scope": "Not sure",
+          "lighting_type": [
+            "Other",
+            "Pathway lights",
+            "Patio or string lights"
+          ],
+          "lighting_type_other_text": "premium material preference for lighting type 83",
+          "lighting_work_type": "Install a basic new lighting setup"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests a basic new outdoor lighting installation (pathway and patio/string lights). Scope uncertain; likely a medium-sized front/backyard installation with premium material preference.",
+    "condition": "light",
+    "access": "moderate",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": true,
+    "materialHint": "landscape lighting, premium",
+    "inferredScope": "pathway and patio lighting across front and rear yard; exact fixture count unspecified",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 68,
+    "pricingDrivers": [
+      "fixture count (unknown)",
+      "premium material preference",
+      "complex / large-property installation"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Install a basic new lighting setup' and indicated pathway and patio/string lights; also provided 'Other' with premium material note.",
+      "Scope not specified — assumed medium-sized job based on lot and house footprint."
+    ],
+    "serviceSignals": {
+      "Outdoor Lighting Installation": {
+        "serviceType": "Outdoor Lighting Installation",
+        "jobSubtype": "landscape_lighting",
+        "jobSubtypeLabel": "Landscape / Pathway & Patio Lighting",
+        "workType": "install",
+        "fallbackFamily": "lighting_system",
+        "surfaceFamily": "mixed_custom",
+        "targetObjectFamily": "lighting_system",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 12,
+        "quantityUnit": "fixture_count",
+        "quantityEvidence": "weak_inference",
+        "materialClass": "premium",
+        "materialSubtype": "unspecified_premium_fixture",
+        "conditionClass": "new_install",
+        "severityClass": "minor",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": 1,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 60,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly requests new lighting install and lists pathway and patio/string lights.",
+          "Customer indicated 'Complex or large-property installation' and premium material preference in free text.",
+          "No exact fixture counts or detailed layout provided, so quantity is inferred."
+        ],
+        "consistencyScore": 72,
+        "notes": [
+          "Recommend manual review to confirm fixture count, transformer/location, trenching/low-voltage wiring needs, and power availability.",
+          "Customer indicated no power (lighting_power = No) — confirm need for transformer or power run."
+        ],
+        "summary": "Install pathway and patio/string lights (estimated ~12 premium fixtures). Confirm power and layout during review.",
+        "quotedSurfaces": {
+          "walkway": 150,
+          "patio": 200
+        },
+        "surfaceDetections": [
+          {
+            "surface_type": "walkway",
+            "surface_area_sqft": 150,
+            "confidence": 0.7
+          },
+          {
+            "surface_type": "patio",
+            "surface_area_sqft": 200,
+            "confidence": 0.72
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "patio",
+        "surface_area_sqft": 200,
+        "confidence": 0.72
+      },
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 150,
+        "confidence": 0.7
+      }
+    ],
+    "detectedSurfaces": {
+      "walkway": 150,
+      "patio": 200
+    },
+    "quotedSurfaces": {
+      "walkway": 150,
+      "patio": 200
+    },
+    "surfaceDetectionConfidence": 70,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 75,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 12000,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers specify lighting install and types.",
+      "Premium material indicated in 'Other' text.",
+      "No direct fixture counts provided; satellite and photo used to infer general scope."
+    ]
+  }
+}

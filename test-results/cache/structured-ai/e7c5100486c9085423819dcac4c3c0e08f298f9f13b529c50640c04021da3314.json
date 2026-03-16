@@ -1,0 +1,122 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T00:19:11.628Z",
+  "promptHash": "6eb1175c9eb8a2794f73f12b95b2071221eeb2b0e108fdb41d342712c428b39d",
+  "keyHash": "e7c5100486c9085423819dcac4c3c0e08f298f9f13b529c50640c04021da3314",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Pool Service / Cleaning"
+    ],
+    "address": "1696 North Pass Trl, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJfeI3GdQ4b4cRiz4wRGjyh-I",
+    "lat": 41.2460767,
+    "lng": -104.7575577,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Pool Service / Cleaning",
+        "answers": {
+          "pool_access": "Yes",
+          "pool_condition": "Green or neglected",
+          "pool_size": "Large",
+          "pool_type": "Pool and spa",
+          "pool_work_type": "Green or dirty pool cleanup"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requested green/neglected pool and spa cleanup; access available. No hardscape work inferred from photos.",
+    "condition": "moderate",
+    "access": "easy",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "pool_and_spa",
+    "inferredScope": "green_pool_cleanup_with_chemical_balance_and_vacuum",
+    "treeSize": "small",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": 800,
+    "estimatedFixtureCount": 2,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "green_pool_cleanup",
+      "pool_and_spa",
+      "access_present"
+    ],
+    "estimatorNotes": [
+      "Customer selected green/dirty pool cleanup for pool and spa.",
+      "No pool visible in satellite image; rely on questionnaire as primary source.",
+      "Access confirmed by customer."
+    ],
+    "serviceSignals": {
+      "Pool Service / Cleaning": {
+        "serviceType": "Pool Service / Cleaning",
+        "jobSubtype": "green_pool_cleanup",
+        "jobSubtypeLabel": "Green/Neglected Pool Cleanup",
+        "workType": "service",
+        "fallbackFamily": "pool_service_event",
+        "surfaceFamily": "pool_service_event",
+        "targetObjectFamily": "pool",
+        "sizeBucket": "large",
+        "estimatedQuantity": 1,
+        "quantityUnit": "service_event",
+        "quantityEvidence": "direct",
+        "materialClass": "vinyl_or_gunite",
+        "materialSubtype": "unknown",
+        "conditionClass": "neglected_green",
+        "severityClass": "major",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": true,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 76,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly requests green pool cleanup.",
+          "Photos and property context do not contradict pool presence but pool not visible in satellite."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Include spa cleanup and chemical balancing.",
+          "Vacuuming and filtration service likely required."
+        ],
+        "summary": "Green pool and spa cleanup requested; one service event covering pool and spa."
+      }
+    },
+    "surfaceDetectionConfidence": 40,
+    "satelliteClarity": 70,
+    "imageQuality": 60,
+    "scopeMatchConfidence": 84,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1,
+    "luxuryMultiplier": 1,
+    "estateScore": 0,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about pool condition and type.",
+      "Lack of visible pool in imagery reduces confidence but does not override customer input."
+    ]
+  }
+}

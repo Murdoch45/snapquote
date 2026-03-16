@@ -1,0 +1,120 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T08:16:12.595Z",
+  "promptHash": "0d627acb067a6b68193e95112c90d01c52b7d370bf80fbad9d8ab5dcf4c8f933",
+  "keyHash": "d2f5db6b74922c09f75e72f09084cd85cb7ae5a70e6515a19487e75fac7d9be4",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Fence Installation / Repair"
+    ],
+    "address": "12924 Cedar Springs Rd, Oklahoma City, OK 73120, USA",
+    "addressPlaceId": "ChIJ_z0yrGIcsocRtUEXpwmzF7E",
+    "lat": 35.6016417,
+    "lng": -97.5676136,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Fence Installation / Repair",
+        "answers": {
+          "fence_material": "Metal or aluminum",
+          "fence_repair_condition": "Not sure",
+          "fence_scope": "Small section (up to ~25 linear ft)",
+          "fence_site": "Not sure",
+          "fence_work_type": "Gate repair or replacement"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Small metal gate repair/replacement, approx up to 25 lf",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "metal/aluminum",
+    "inferredScope": "Gate repair or replacement for small section up to 25 linear ft",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 78,
+    "pricingDrivers": [
+      "small linear repair",
+      "metal gate hardware"
+    ],
+    "estimatorNotes": [
+      "Customer selected gate repair/replacement and metal material.",
+      "Scope limited to a small section up to ~25 linear ft; site unknown but likely accessible from yard."
+    ],
+    "serviceSignals": {
+      "Fence Installation / Repair": {
+        "serviceType": "Fence Installation / Repair",
+        "jobSubtype": "gate_repair",
+        "jobSubtypeLabel": "Gate repair or replacement",
+        "workType": "repair",
+        "fallbackFamily": "linear_boundary",
+        "surfaceFamily": "linear_boundary",
+        "targetObjectFamily": "fence",
+        "sizeBucket": "small",
+        "estimatedQuantity": 25,
+        "quantityUnit": "linear_ft",
+        "quantityEvidence": "direct",
+        "materialClass": "metal",
+        "materialSubtype": "aluminum",
+        "conditionClass": "unknown",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": true,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 82,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly indicates gate repair/replacement and small scope.",
+          "Material indicated as metal/aluminum."
+        ],
+        "consistencyScore": 92,
+        "notes": [
+          "Customer indicated 'Small section (up to ~25 linear ft)'.",
+          "No photo evidence contradicting small, accessible gate repair."
+        ],
+        "summary": "Repair or replace a metal gate/small fence section (~25 lf)."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1,
+    "luxuryMultiplier": 1,
+    "estateScore": 0,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about gate repair and material.",
+      "No conflicting imagery or notes."
+    ]
+  }
+}

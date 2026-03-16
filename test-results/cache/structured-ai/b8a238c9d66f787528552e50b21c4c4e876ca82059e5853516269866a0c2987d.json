@@ -1,0 +1,158 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T00:18:33.455Z",
+  "promptHash": "96b511f076a84af5521765150fdd3e2db9c0081850f81afa8b615f4b3df3a1ae",
+  "keyHash": "b8a238c9d66f787528552e50b21c4c4e876ca82059e5853516269866a0c2987d",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Other"
+    ],
+    "address": "2481 Summitridge Dr, Beverly Hills, CA 90210, USA",
+    "addressPlaceId": "ChIJw5RbRLm9woARPFqNmJANwtg",
+    "lat": 34.1199802,
+    "lng": -118.4212831,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Other",
+        "answers": {
+          "other_access": "Very difficult",
+          "other_property_type": "Commercial property",
+          "other_size": "Very large",
+          "other_work_type": "Other",
+          "other_work_type_other_text": "premium material preference for other work type 47"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer selected Other/custom premium material work on a very large commercial property with limited access; likely multi-area exterior work across driveway and surrounding hardscape.",
+    "condition": "moderate",
+    "access": "difficult",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": true,
+    "materialHint": "premium material preference",
+    "inferredScope": "custom exterior hardscape and specialty work across driveway, walkways, and pool deck",
+    "treeSize": "large",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": 2000,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "very_large_property",
+      "limited_access",
+      "premium_materials",
+      "multiple_areas"
+    ],
+    "estimatorNotes": [
+      "Customer selected Other with premium material preference; scope appears custom and covers multiple outdoor surfaces.",
+      "Satellite shows large driveway/motor court and substantial pool deck area; access from cul-de-sac may limit equipment staging."
+    ],
+    "serviceSignals": {
+      "Other": {
+        "serviceType": "Other",
+        "jobSubtype": "custom",
+        "jobSubtypeLabel": "Custom / Other",
+        "workType": "custom",
+        "fallbackFamily": "mixed_custom",
+        "surfaceFamily": "flat_hardscape",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "very_large",
+        "estimatedQuantity": 1,
+        "quantityUnit": "service_event",
+        "quantityEvidence": "weak_inference",
+        "materialClass": "premium_finish",
+        "materialSubtype": "other_premium",
+        "conditionClass": "moderate_soiling",
+        "severityClass": "moderate",
+        "accessDifficulty": "very_difficult",
+        "obstructionLevel": "moderate",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": true,
+        "fencePresent": true,
+        "deckPresent": true,
+        "roofType": null,
+        "premiumPropertySignal": true,
+        "luxuryHardscapeSignal": true,
+        "commercialSignal": true,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 60,
+        "aiConfidenceReasons": [
+          "Questionnaire indicates Other with premium preference and very large commercial property.",
+          "Satellite imagery shows large hardscape areas and pool deck but no explicit customer dimensions."
+        ],
+        "consistencyScore": 68,
+        "notes": [
+          "Scope is custom; requires manual review to define exact surfaces and materials.",
+          "Difficult access noted by customer will impact staging and equipment selection."
+        ],
+        "summary": "Custom premium exterior hardscape job on a very large property with limited access; likely includes pool deck and driveway/motor court.",
+        "quotedSurfaces": {
+          "driveway": 2100,
+          "walkway": 250
+        },
+        "surfaceDetections": [
+          {
+            "surface_type": "driveway",
+            "surface_area_sqft": 2100,
+            "confidence": 0.84
+          },
+          {
+            "surface_type": "walkway",
+            "surface_area_sqft": 250,
+            "confidence": 0.7
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      },
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 250,
+        "confidence": 0.7
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "quotedSurfaces": {
+      "driveway": 2100
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 78,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.2,
+    "materialMultiplier": 1.1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": true,
+    "commercialSignal": true,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire indicates 'Other' and very large commercial property with difficult access.",
+      "Satellite imagery supports presence of large driveway, pool deck, and extensive hardscape but lacks explicit dimensions."
+    ]
+  }
+}

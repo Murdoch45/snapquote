@@ -1,0 +1,121 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T19:35:29.829Z",
+  "promptHash": "51a489208d7ea72971e18b2510b27d39c38ea85305796a602096c49e0398c7d5",
+  "keyHash": "39718d030f814ee34e8d589fcc788682c52211e1f1eeb6f19711bb8ae2f62203",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Deck Installation / Repair"
+    ],
+    "address": "1120 Barber Rd, Bristol, TN 37620, USA",
+    "addressPlaceId": "ChIJJ5fNoHydWogRR3gpT3OQN7M",
+    "lat": 36.5614452,
+    "lng": -82.220179,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Deck Installation / Repair",
+        "answers": {
+          "deck_area_type": "Multi-level",
+          "deck_material": "PVC or premium material",
+          "deck_repair_condition": "Not sure",
+          "deck_scope": "Large (~350-700 sq ft)",
+          "deck_work_type": "Repair existing deck"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests repair of a large multi-level PVC/premium deck (~350-700 sqft). Scope inferred from questionnaire; imagery supports presence of backyard and deck area. No obvious heavy debris or pools.",
+    "condition": "moderate",
+    "access": "easy",
+    "severity": "moderate",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "PVC or premium composite",
+    "inferredScope": "repair of existing multi-level deck, large footprint (~350-700 sqft)",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "large multi-level deck area",
+      "premium PVC material",
+      "repair work vs full replacement"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Repair existing deck' and indicated large multi-level area (~350-700 sqft).",
+      "Photos and satellite show residential backyard with space for a sizable deck; no pool detected."
+    ],
+    "serviceSignals": {
+      "Deck Installation / Repair": {
+        "serviceType": "Deck Installation / Repair",
+        "jobSubtype": "deck_repair",
+        "jobSubtypeLabel": "Deck Repair",
+        "workType": "repair",
+        "fallbackFamily": "install_area",
+        "surfaceFamily": "exterior_finish_surface",
+        "targetObjectFamily": "deck",
+        "sizeBucket": "very_large",
+        "estimatedQuantity": 500,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "direct",
+        "materialClass": "composite",
+        "materialSubtype": "PVC_or_premium",
+        "conditionClass": "unknown",
+        "severityClass": "moderate",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "mixed_height",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": true,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": true,
+        "aiConfidence": 74,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly indicates repair of existing multi-level PVC/premium deck and size band.",
+          "Satellite confirms backyard area but does not provide precise deck footprint."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Customer-provided size band used for quantity estimate (midpoint).",
+          "Recommend on-site review for precise sq ft and condition assessment."
+        ],
+        "summary": "Repair existing multi-level PVC/premium deck, estimated ~500 sqft based on customer-provided range."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 82,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers specific to deck repair and size band.",
+      "Imagery supports residential backyard but does not show deck detail for exact measurement."
+    ]
+  }
+}

@@ -1,0 +1,143 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T06:15:13.138Z",
+  "promptHash": "72acbfb8abf2e04641e41d8cb8bc04d312c5b1f63c66f85808f6d688751cfb79",
+  "keyHash": "99a5f4655a322cc9f8fd0e9e9ad067c4ae2215e166c85a437ed5291e8069c7d9",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Roofing"
+    ],
+    "address": "935 Burnside Ave, Los Angeles, CA 90036, USA",
+    "addressPlaceId": "ChIJ_1o_zx65woAR28Q5Yc4qZdE",
+    "lat": 34.058076,
+    "lng": -118.3514135,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Roofing",
+        "answers": {
+          "roofing_access": "Moderate",
+          "roofing_problem": "Storm or major damage",
+          "roofing_scope": "Not sure",
+          "roofing_type": "Other",
+          "roofing_type_other_text": "site-specific details for roofing type 4",
+          "roofing_work_type": "Full roof replacement"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Full roof replacement requested; customer indicates storm/major damage and is unsure of exact scope. Photos and satellite imagery support a large residential roof requiring replacement.",
+    "condition": "moderate",
+    "access": "moderate",
+    "severity": "major",
+    "debris": "moderate",
+    "multipleAreas": false,
+    "materialHint": "site-specific details for roofing type 4",
+    "inferredScope": "full_roof_replacement",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "full roof replacement",
+      "storm damage",
+      "moderate access"
+    ],
+    "estimatorNotes": [
+      "Customer selected full roof replacement and indicated storm/major damage.",
+      "Customer provided 'site-specific details for roofing type 4' as other text for roof type.",
+      "Satellite imagery confirms a large multi-section roof; quantity is inferred from building footprint."
+    ],
+    "serviceSignals": {
+      "Roofing": {
+        "serviceType": "Roofing",
+        "jobSubtype": "full_roof_replacement",
+        "jobSubtypeLabel": "Full roof replacement",
+        "workType": "replace",
+        "fallbackFamily": "roof_like_surface",
+        "surfaceFamily": "roof_like_surface",
+        "targetObjectFamily": "roof",
+        "sizeBucket": "large",
+        "estimatedQuantity": 30,
+        "quantityUnit": "roof_square",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "other",
+        "materialSubtype": "site-specific details for roofing type 4",
+        "conditionClass": "storm_damage",
+        "severityClass": "major",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "moderate",
+        "heightClass": "two_story",
+        "stories": 2,
+        "slopeClass": "some_slope",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": "other",
+        "premiumPropertySignal": true,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 62,
+        "aiConfidenceReasons": [
+          "Customer explicitly requested full roof replacement and indicated storm damage.",
+          "Roof area inferred from building footprint and house square footage; roof geometry is complex.",
+          "Roofing type is provided as 'Other' with custom text, requiring manual review."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Use customer 'site-specific details for roofing type 4' when preparing materials list.",
+          "Manual inspection recommended to confirm pitch, layers to remove, and decking condition."
+        ],
+        "summary": "Large full roof replacement inferred from questionnaire and satellite imagery; storm damage reported by customer.",
+        "surfaceDetections": [
+          {
+            "surface_type": "driveway",
+            "surface_area_sqft": 2100,
+            "confidence": 0.84
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": true,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers specify full roof replacement and storm damage.",
+      "Satellite imagery and property metrics support a large roof area but cannot confirm pitch or layers.",
+      "Customer provided custom roof type text requiring clarification."
+    ]
+  }
+}

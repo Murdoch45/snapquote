@@ -1,0 +1,120 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T00:14:26.878Z",
+  "promptHash": "ad22285ccc1e227db944675e28e79ba2e09ecdb99be135db16883d92e3785ea4",
+  "keyHash": "67e3907c64bdd8f36e03ee95d0b51bf5b23b95312f8a35d5eade979b3526ef85",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Lawn Care / Maintenance"
+    ],
+    "address": "2481 Summitridge Dr, Beverly Hills, CA 90210, USA",
+    "addressPlaceId": "ChIJw5RbRLm9woARPFqNmJANwtg",
+    "lat": 34.1199802,
+    "lng": -118.4212831,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Lawn Care / Maintenance",
+        "answers": {
+          "lawn_area_size": "Not sure",
+          "lawn_condition": "Not sure",
+          "lawn_property_type": "Multi-area property",
+          "lawn_work_type": "Other",
+          "lawn_work_type_other_text": "site-specific details for lawn work type 18"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Lawn maintenance request for multi-area property with large backyard; customer selected Other and provided minimal detail.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": true,
+    "materialHint": "turf",
+    "inferredScope": "full_lawn_maintenance",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "large_lawn_area",
+      "multi-area_property",
+      "site-specific instructions"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Other' for lawn work type with brief other-text.",
+      "Backyard area inferred from parcel/solar estimate and satellite imagery."
+    ],
+    "serviceSignals": {
+      "Lawn Care / Maintenance": {
+        "serviceType": "Lawn Care / Maintenance",
+        "jobSubtype": "lawn_maintenance",
+        "jobSubtypeLabel": "Lawn maintenance",
+        "workType": "maintain",
+        "fallbackFamily": "yard_area",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "very_large",
+        "estimatedQuantity": 16217,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "turf",
+        "materialSubtype": "mixed_grass",
+        "conditionClass": "unknown",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "some_slope",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": true,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": true,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": false,
+        "aiConfidence": 76,
+        "aiConfidenceReasons": [
+          "Lawn area inferred from lot and backyard sqft estimates.",
+          "Questionnaire provided non-specific 'Other' so scope inferred conservatively."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Recommend clarifying specific services required (mowing, edging, fertilization, cleanup)."
+        ],
+        "summary": "Large backyard lawn maintenance inferred from property data."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 80,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": true,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire selection ambiguous; property and satellite data used to infer lawn area.",
+      "No direct measurements provided so quantities are inferred from parcel/backyard estimates."
+    ]
+  }
+}

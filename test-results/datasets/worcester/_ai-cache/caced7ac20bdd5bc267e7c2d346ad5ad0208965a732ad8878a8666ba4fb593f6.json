@@ -1,0 +1,137 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T21:25:11.539Z",
+  "promptHash": "ba068d4918231316829b97972749a35465f882befce97d9663464f7520d6b8a5",
+  "keyHash": "caced7ac20bdd5bc267e7c2d346ad5ad0208965a732ad8878a8666ba4fb593f6",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Gutter Cleaning"
+    ],
+    "address": "577 Grove St, Worcester, MA 01605, USA",
+    "addressPlaceId": "ChIJCeltdQQH5IkRUt0eMJ6IxbA",
+    "lat": 42.2936121,
+    "lng": -71.8172553,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Gutter Cleaning",
+        "answers": {
+          "gutter_access": "Yes, landscaping or obstacles",
+          "gutter_building_type": "Single-story home",
+          "gutter_fill_level": "Light debris",
+          "gutter_work_type": "Minor gutter repair"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Minor gutter repair and cleaning requested with light debris and some landscaping access obstacles.",
+    "condition": "light",
+    "access": "moderate",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "metal",
+    "inferredScope": "minor_repair_and_clean",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "minor_repair",
+      "obstructed_access",
+      "light_debris"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Minor gutter repair' and indicated light debris.",
+      "Landscaping or obstacles reported which may increase access difficulty."
+    ],
+    "serviceSignals": {
+      "Gutter Cleaning": {
+        "serviceType": "Gutter Cleaning",
+        "jobSubtype": "gutter_repair",
+        "jobSubtypeLabel": "Gutter Repair",
+        "workType": "repair",
+        "fallbackFamily": "vertical_exterior_surface",
+        "surfaceFamily": "vertical_exterior_surface",
+        "targetObjectFamily": "gutter_system",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 150,
+        "quantityUnit": "linear_ft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "metal",
+        "materialSubtype": "aluminum",
+        "conditionClass": "light_debris",
+        "severityClass": "minor",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "moderate",
+        "heightClass": "single_story",
+        "stories": 1,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 68,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly selected minor gutter repair and light debris.",
+          "Photo and satellite show single-story building and surrounding landscaping that can obstruct access."
+        ],
+        "consistencyScore": 80,
+        "notes": [
+          "Assumed full-home gutter system coverage based on single-story building footprint.",
+          "No direct length provided; linear footage inferred from house perimeter (~150 ft)."
+        ],
+        "summary": "Minor gutter repair and cleaning across an estimated 150 linear feet of gutters with moderate access difficulty due to landscaping.",
+        "surfaceDetections": [
+          {
+            "surface_type": "walkway",
+            "surface_area_sqft": 100,
+            "confidence": 0.7
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 100,
+        "confidence": 0.7
+      }
+    ],
+    "detectedSurfaces": {
+      "walkway": 100
+    },
+    "surfaceDetectionConfidence": 60,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Property context and imagery support a single-story home with surrounding landscaping that may obstruct gutters."
+    ]
+  }
+}

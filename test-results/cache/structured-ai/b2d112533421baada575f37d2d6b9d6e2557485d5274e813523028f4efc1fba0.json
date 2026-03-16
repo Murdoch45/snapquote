@@ -1,0 +1,128 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T23:49:20.356Z",
+  "promptHash": "eccafa288c12a9ccc8a233c67e1c4085fe47dbef6d2f750ddaac2d13325a16a8",
+  "keyHash": "b2d112533421baada575f37d2d6b9d6e2557485d5274e813523028f4efc1fba0",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Fence Installation / Repair"
+    ],
+    "address": "1696 North Pass Trl, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJfeI3GdQ4b4cRiz4wRGjyh-I",
+    "lat": 41.2460767,
+    "lng": -104.7575577,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Fence Installation / Repair",
+        "answers": {
+          "fence_material": "Vinyl",
+          "fence_repair_condition": "Fence is falling or missing sections",
+          "fence_scope": "Several sides (~75-200 linear ft)",
+          "fence_site": "Tight access",
+          "fence_work_type": "Other",
+          "fence_work_type_other_text": "special access needs for fence work type 10"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Vinyl fence repair on several sides with special access needs; sections are falling or missing.",
+    "condition": "moderate",
+    "access": "difficult",
+    "severity": "major",
+    "debris": "light",
+    "multipleAreas": true,
+    "materialHint": "vinyl",
+    "inferredScope": "Repair or replace several sides of vinyl fence, customer estimates ~75-200 linear ft",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 70,
+    "pricingDrivers": [
+      "vinyl material",
+      "linear_ft",
+      "tight_access",
+      "missing_sections",
+      "haul_away"
+    ],
+    "estimatorNotes": [
+      "Customer explicitly provided approximate linear footage (75-200 lf); use midpoint for estimate.",
+      "Special access requested in other_text; likely requires manual review for staging/crew access.",
+      "Photos and satellite show fenced backyard perimeter consistent with provided scope."
+    ],
+    "serviceSignals": {
+      "Fence Installation / Repair": {
+        "serviceType": "Fence Installation / Repair",
+        "jobSubtype": "repair",
+        "jobSubtypeLabel": "Fence Repair",
+        "workType": "repair",
+        "fallbackFamily": "linear_boundary",
+        "surfaceFamily": "linear_boundary",
+        "targetObjectFamily": "fence",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 125,
+        "quantityUnit": "linear_ft",
+        "quantityEvidence": "direct",
+        "materialClass": "vinyl",
+        "materialSubtype": "vinyl",
+        "conditionClass": "damaged",
+        "severityClass": "major",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "moderate",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": true,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 66,
+        "aiConfidenceReasons": [
+          "Customer provided an approximate linear footage range.",
+          "Customer specified vinyl material and described missing/falling sections.",
+          "Special access note increases uncertainty and need for manual review."
+        ],
+        "consistencyScore": 72,
+        "notes": [
+          "Use midpoint of provided range for automated quantity (125 lf); verify on-site.",
+          "Plan for removal and haul-away of damaged sections.",
+          "Confirm gates, posts condition and any buried concrete during manual review."
+        ],
+        "summary": "Repair/replace approximately 125 linear feet of vinyl fence across several sides; tight access and missing sections reported."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 60,
+    "scopeMatchConfidence": 78,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.15,
+    "materialMultiplier": 1.1,
+    "regionMultiplier": 1,
+    "luxuryMultiplier": 1,
+    "estateScore": 1200,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire provided fence-specific answers including material and linear footage range.",
+      "Other-text indicated special access needs which raises complexity.",
+      "Satellite and photo confirm fenced perimeter but not exact linear footage."
+    ]
+  }
+}

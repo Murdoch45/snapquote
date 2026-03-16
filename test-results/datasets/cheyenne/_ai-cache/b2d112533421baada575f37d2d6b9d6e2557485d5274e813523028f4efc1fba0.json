@@ -1,0 +1,125 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T02:27:57.597Z",
+  "promptHash": "eccafa288c12a9ccc8a233c67e1c4085fe47dbef6d2f750ddaac2d13325a16a8",
+  "keyHash": "b2d112533421baada575f37d2d6b9d6e2557485d5274e813523028f4efc1fba0",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Fence Installation / Repair"
+    ],
+    "address": "1696 North Pass Trl, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJfeI3GdQ4b4cRiz4wRGjyh-I",
+    "lat": 41.2460767,
+    "lng": -104.7575577,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Fence Installation / Repair",
+        "answers": {
+          "fence_material": "Vinyl",
+          "fence_repair_condition": "Fence is falling or missing sections",
+          "fence_scope": "Several sides (~75-200 linear ft)",
+          "fence_site": "Tight access",
+          "fence_work_type": "Other",
+          "fence_work_type_other_text": "special access needs for fence work type 10"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests vinyl fence installation/repair on several sides of property; some sections are missing or falling and special access considerations noted.",
+    "condition": "moderate",
+    "access": "difficult",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "Vinyl",
+    "inferredScope": "Approximately 75-200 linear feet of vinyl fence along multiple sides (~150 lf estimate).",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 68,
+    "pricingDrivers": [
+      "material:vinyl",
+      "tight access/special access needs",
+      "missing/falling sections",
+      "linear footage"
+    ],
+    "estimatorNotes": [
+      "Customer provided a range for scope (~75-200 lf).",
+      "Special access noted in other-text; manual review recommended for logistics and equipment needs."
+    ],
+    "serviceSignals": {
+      "Fence Installation / Repair": {
+        "serviceType": "Fence Installation / Repair",
+        "jobSubtype": "perimeter_repair_install",
+        "jobSubtypeLabel": "Perimeter fence repair/installation",
+        "workType": "repair",
+        "fallbackFamily": "linear_boundary",
+        "surfaceFamily": "linear_boundary",
+        "targetObjectFamily": "fence",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 150,
+        "quantityUnit": "linear_ft",
+        "quantityEvidence": "direct",
+        "materialClass": "vinyl",
+        "materialSubtype": "standard_vinyl",
+        "conditionClass": "failed_sections",
+        "severityClass": "moderate",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "moderate",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": true,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": true,
+        "aiConfidence": 72,
+        "aiConfidenceReasons": [
+          "Customer explicitly supplied scope range and material.",
+          "Other-text flagged special access needs requiring manual logistics review.",
+          "Satellite shows typical residential lot allowing perimeter fencing but access constraints uncertain."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Scope taken from questionnaire 'Several sides (~75-200 linear ft)'.",
+          "Other-text: 'special access needs for fence work type 10' - recommend manual scheduling review."
+        ],
+        "summary": "Repair/replace several sides of vinyl perimeter fence; ~150 linear ft estimated."
+      }
+    },
+    "surfaceDetectionConfidence": 48,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 82,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.15,
+    "materialMultiplier": 1.05,
+    "regionMultiplier": 1,
+    "luxuryMultiplier": 1,
+    "estateScore": 7800,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire provided explicit scope and material.",
+      "Other-text indicates special access needs.",
+      "Imagery supports residential lot with perimeter but cannot confirm exact fence segments due to resolution."
+    ]
+  }
+}

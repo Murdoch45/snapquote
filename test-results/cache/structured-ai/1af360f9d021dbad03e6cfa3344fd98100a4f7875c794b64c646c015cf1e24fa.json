@@ -1,0 +1,133 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T19:34:46.925Z",
+  "promptHash": "27e779601becee3969c3def3f5529a274a56d9e34356081bfeb5b638aeb07740",
+  "keyHash": "1af360f9d021dbad03e6cfa3344fd98100a4f7875c794b64c646c015cf1e24fa",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Fence Installation / Repair"
+    ],
+    "address": "1120 Barber Rd, Bristol, TN 37620, USA",
+    "addressPlaceId": "ChIJJ5fNoHydWogRR3gpT3OQN7M",
+    "lat": 36.5614452,
+    "lng": -82.220179,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Fence Installation / Repair",
+        "answers": {
+          "fence_material": "Other",
+          "fence_material_other_text": "site-specific details for fence material 20",
+          "fence_repair_condition": "Moderate",
+          "fence_scope": "One side (~25-75 linear ft)",
+          "fence_site": "Heavy slope or obstacles",
+          "fence_work_type": "Other",
+          "fence_work_type_other_text": "custom scope requested for fence work type 82"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests custom fence work on one side of property (~25-75 lf) with site-specific material details and heavy slope/obstacles.",
+    "condition": "moderate",
+    "access": "difficult",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "other - site-specific",
+    "inferredScope": "single-side fence repair/installation ~25-75 lf",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "slope_and_site_obstacles",
+      "custom_material_requirements",
+      "linear_length"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Other' for work type and material with custom text.",
+      "Questionnaire indicates one side, 25-75 linear feet; use conservative central estimate.",
+      "Heavy slope/obstacles will increase labor and may require manual post-setting."
+    ],
+    "serviceSignals": {
+      "Fence Installation / Repair": {
+        "serviceType": "Fence Installation / Repair",
+        "jobSubtype": "fence_repair_install",
+        "jobSubtypeLabel": "Fence repair/installation (custom)",
+        "workType": "install",
+        "fallbackFamily": "linear_boundary",
+        "surfaceFamily": "linear_boundary",
+        "targetObjectFamily": "fence",
+        "sizeBucket": "small",
+        "estimatedQuantity": 50,
+        "quantityUnit": "linear_ft",
+        "quantityEvidence": "direct",
+        "materialClass": "other",
+        "materialSubtype": "site_specific",
+        "conditionClass": "moderate",
+        "severityClass": "moderate",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "high",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "steep",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": true,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 68,
+        "aiConfidenceReasons": [
+          "Customer provided a scoped range in questionnaire (~25-75 lf).",
+          "Site-specific material noted in free text.",
+          "Satellite shows a single-side boundary and sloped yard consistent with customer's note."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Verify exact linear footage on site or via additional photos.",
+          "Confirm material specification and whether existing fence removal is needed.",
+          "Slope may require concrete footings or stepped posts."
+        ],
+        "summary": "Custom fence installation/repair on one side of property approximately 50 linear feet in sloped terrain; material to be specified."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 0,
+        "confidence": 0
+      }
+    ],
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "moderate_slope",
+    "accessType": "tight_access",
+    "terrainMultiplier": 1.2,
+    "accessTypeMultiplier": 1.1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1,
+    "luxuryMultiplier": 1,
+    "estateScore": 4619,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about scope and slope.",
+      "Custom material and work-type text requires estimator follow-up."
+    ]
+  }
+}

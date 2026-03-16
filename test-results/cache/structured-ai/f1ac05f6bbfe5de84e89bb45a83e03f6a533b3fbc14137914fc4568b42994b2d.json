@@ -1,0 +1,128 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T08:12:25.560Z",
+  "promptHash": "3ee9eb0885d6487fe5feda1a364258b2e4bce05e554aa6fe8191f41a415feca0",
+  "keyHash": "f1ac05f6bbfe5de84e89bb45a83e03f6a533b3fbc14137914fc4568b42994b2d",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Outdoor Lighting Installation"
+    ],
+    "address": "424 NW 29th St, Oklahoma City, OK 73103, USA",
+    "addressPlaceId": "ChIJQ7Rvw1MXsocRLG8Dbk3Y5Yw",
+    "lat": 35.4992706,
+    "lng": -97.5201175,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Outdoor Lighting Installation",
+        "answers": {
+          "lighting_install_difficulty": "Easy access, simple install",
+          "lighting_power": "Yes",
+          "lighting_scope": "Not sure",
+          "lighting_type": [
+            "Accent or landscape lights",
+            "Other",
+            "Patio or string lights",
+            "Security or flood lights"
+          ],
+          "lighting_type_other_text": "custom scope requested for lighting type 85",
+          "lighting_work_type": "Add to an existing system"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests adding to an existing outdoor lighting system (accent, patio/string, and security lights). Scope is uncertain and customer provided custom text; likely a small expansion of low-voltage LED fixtures.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "low-voltage landscape lighting",
+    "inferredScope": "add/expand outdoor lighting fixtures to existing system",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": 6,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 68,
+    "pricingDrivers": [
+      "fixture_count",
+      "existing_system_connection",
+      "fixture_types (accent/patio/security)",
+      "accessibility"
+    ],
+    "estimatorNotes": [
+      "Questionnaire indicates 'Add to an existing system' and power is available.",
+      "Customer provided custom text for lighting type; scope unclear — manual review recommended."
+    ],
+    "serviceSignals": {
+      "Outdoor Lighting Installation": {
+        "serviceType": "Outdoor Lighting Installation",
+        "jobSubtype": "outdoor_lighting",
+        "jobSubtypeLabel": "Outdoor Lighting",
+        "workType": "extend",
+        "fallbackFamily": "lighting_system",
+        "surfaceFamily": "lighting_system",
+        "targetObjectFamily": "fixture",
+        "sizeBucket": "small",
+        "estimatedQuantity": 6,
+        "quantityUnit": "fixture_count",
+        "quantityEvidence": "weak_inference",
+        "materialClass": "low_voltage",
+        "materialSubtype": "LED",
+        "conditionClass": "unknown",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "single_story",
+        "stories": 1,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 64,
+        "aiConfidenceReasons": [
+          "Customer selected 'Add to an existing system' and indicated power is available.",
+          "Customer provided 'other' lighting type text indicating custom scope.",
+          "No explicit fixture count provided; quantity inferred conservatively."
+        ],
+        "consistencyScore": 70,
+        "notes": [
+          "Customer unsure of scope; confirm fixture count, preferred fixture types, mounting locations, and required transformer/load capacity during manual review."
+        ],
+        "summary": "Add/expand low-voltage LED outdoor lighting (accent, patio/string, security)."
+      }
+    },
+    "surfaceDetectionConfidence": 40,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 72,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers indicate adding to an existing system and available power.",
+      "Custom lighting type text increases uncertainty; manual clarification required."
+    ]
+  }
+}

@@ -1,0 +1,123 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T21:29:07.329Z",
+  "promptHash": "dc98db58a76d81b5574fb3cfb175d4c49a9b86786e93543626072a297e3785b4",
+  "keyHash": "82d4fae553286f8de448584b139201ffef8d8a680b99e0166e95a5e7d7ba8d99",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Deck Installation / Repair"
+    ],
+    "address": "577 Grove St, Worcester, MA 01605, USA",
+    "addressPlaceId": "ChIJCeltdQQH5IkRUt0eMJ6IxbA",
+    "lat": 42.2936121,
+    "lng": -71.8172553,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Deck Installation / Repair",
+        "answers": {
+          "deck_area_type": "Raised deck",
+          "deck_material": "PVC or premium material",
+          "deck_repair_condition": "Not applicable / not a repair",
+          "deck_scope": "Large (~350-700 sq ft)",
+          "deck_work_type": "Repair existing deck"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests repair of an existing raised deck constructed from PVC/premium material. Questionnaire indicates large scope (~350-700 sqft); photos and satellite offer limited additional detail. Conflicting fields on repair condition present; manual review recommended.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "PVC or premium material",
+    "inferredScope": "Large deck repair ~350-700 sqft",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "deck_material",
+      "deck_size",
+      "raised_deck_access"
+    ],
+    "estimatorNotes": [
+      "Questionnaire explicitly selects repair of an existing raised deck and cites PVC/premium material and large area.",
+      "Customer provided size band (~350-700 sqft) — using midpoint estimate for planning but verify on site.",
+      "Questionnaire has conflicting answer for repair condition; needs manual review to confirm scope and condition."
+    ],
+    "serviceSignals": {
+      "Deck Installation / Repair": {
+        "serviceType": "Deck Installation / Repair",
+        "jobSubtype": "deck_repair",
+        "jobSubtypeLabel": "Deck repair",
+        "workType": "repair",
+        "fallbackFamily": "install_area",
+        "surfaceFamily": "deck",
+        "targetObjectFamily": "deck",
+        "sizeBucket": "large",
+        "estimatedQuantity": 500,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "direct",
+        "materialClass": "composite",
+        "materialSubtype": "PVC",
+        "conditionClass": "unknown",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "single_story",
+        "stories": 1,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": true,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": true,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": true,
+        "aiConfidence": 60,
+        "aiConfidenceReasons": [
+          "Customer provided a size band and material preference explicitly.",
+          "Conflicting questionnaire entries about repair applicability reduce confidence.",
+          "Limited photo detail for deck specifics."
+        ],
+        "consistencyScore": 60,
+        "notes": [
+          "Use onsite verification to confirm exact deck area, structural condition, and extent of repairs.",
+          "PVC material and raised configuration noted — may affect fastening and ventilation work."
+        ],
+        "summary": "Repair existing raised PVC/premium deck, estimated ~500 sqft (customer indicated 350-700 sqft)."
+      }
+    },
+    "surfaceDetectionConfidence": 72,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 78,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1.1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about deck size band and material.",
+      "Conflicting questionnaire entries and limited imagery require verification."
+    ]
+  }
+}

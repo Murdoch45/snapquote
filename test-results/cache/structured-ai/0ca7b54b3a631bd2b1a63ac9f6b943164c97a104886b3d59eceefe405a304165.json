@@ -1,0 +1,134 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T08:15:43.554Z",
+  "promptHash": "320902c675b220f70682457c851a661c4cdefc7e489d10ae2dec4ec5c21954c9",
+  "keyHash": "0ca7b54b3a631bd2b1a63ac9f6b943164c97a104886b3d59eceefe405a304165",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Tree Service / Removal"
+    ],
+    "address": "12924 Cedar Springs Rd, Oklahoma City, OK 73120, USA",
+    "addressPlaceId": "ChIJ_z0yrGIcsocRtUEXpwmzF7E",
+    "lat": 35.6016417,
+    "lng": -97.5676136,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Tree Service / Removal",
+        "answers": {
+          "tree_access": "Not sure",
+          "tree_haul_away": "Not sure",
+          "tree_location": "Other",
+          "tree_location_other_text": "site-specific details for tree location 5",
+          "tree_size": "Small",
+          "tree_work_type": "Stump grinding"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Stump grinding requested for a small tree; access uncertain.",
+    "condition": "light",
+    "access": "moderate",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "wood",
+    "inferredScope": "single stump grinding",
+    "treeSize": "small",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "stump grinding",
+      "access difficulty unknown",
+      "small tree size"
+    ],
+    "estimatorNotes": [
+      "Customer selected stump grinding in questionnaire.",
+      "Location details provided in other-text field; verify access on site."
+    ],
+    "serviceSignals": {
+      "Tree Service / Removal": {
+        "serviceType": "Tree Service / Removal",
+        "jobSubtype": "stump_grind",
+        "jobSubtypeLabel": "Stump grinding",
+        "workType": "remove",
+        "fallbackFamily": "tree_work",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "tree_work",
+        "sizeBucket": "small",
+        "estimatedQuantity": 1,
+        "quantityUnit": "stump_count",
+        "quantityEvidence": "direct",
+        "materialClass": "wood",
+        "materialSubtype": "tree_stump",
+        "conditionClass": "standing_stump",
+        "severityClass": "minor",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "some_slope",
+        "removalNeeded": true,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 78,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly requests stump grinding.",
+          "Tree size listed as small; single-stump scope implied."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Confirm exact stump location from 'tree_location_other_text' before scheduling.",
+          "Customer marked access and haul-away as 'Not sure'—verify onsite."
+        ],
+        "summary": "Single small stump grinding; likely no haul-away required but to be confirmed."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Property context and imagery support the inferred scope."
+    ]
+  }
+}

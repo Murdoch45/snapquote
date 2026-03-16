@@ -1,0 +1,150 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T19:41:21.811Z",
+  "promptHash": "3cd4252d1e6ada6632f63af47ec51fe45d3f87aa326a918833d08fc099c5fce5",
+  "keyHash": "a6c320747a7db03a988d24455349ed8291eda779f0c63ece62758b874903ee5a",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Concrete"
+    ],
+    "address": "1216 Norway St, Bristol, VA 24201, USA",
+    "addressPlaceId": "ChIJSQAVgxN2UIgRc62c8VJioW0",
+    "lat": 36.5970084,
+    "lng": -82.1960856,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Concrete",
+        "answers": {
+          "concrete_material": "Exposed aggregate or specialty finish",
+          "concrete_project_type": [
+            "Driveway",
+            "Other",
+            "Patio",
+            "Slab or pad",
+            "Walkway"
+          ],
+          "concrete_project_type_other_text": "premium material preference for concrete project type 89",
+          "concrete_scope": "Large (~600-1,500 sq ft)",
+          "concrete_site_condition": "Not sure",
+          "concrete_work_type": "Repair or resurfacing"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests concrete repair/resurfacing across multiple flat hardscape areas including driveway and walkways; prefers exposed aggregate/specialty finish.",
+    "condition": "moderate",
+    "access": "easy",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": true,
+    "materialHint": "exposed aggregate or specialty finish",
+    "inferredScope": "Large (~600-1,500 sq ft) across combined hardscape areas; satellite shows larger total impervious area",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "large_area",
+      "specialty_finish",
+      "repair_or_resurface",
+      "multiple_surfaces"
+    ],
+    "estimatorNotes": [
+      "Customer selected multiple concrete project types including driveway, walkway, patio, and slab/pad; photo and satellite show extensive existing concrete/flagstone-like surface requiring repair or resurfacing.",
+      "Quantity estimated conservatively for quoted surfaces; overall detected hardscape area larger than customer scope band."
+    ],
+    "serviceSignals": {
+      "Concrete": {
+        "serviceType": "Concrete",
+        "jobSubtype": "slab_or_pad",
+        "jobSubtypeLabel": "Slab or pad",
+        "workType": "repair",
+        "fallbackFamily": "flat_hardscape",
+        "surfaceFamily": "flat_hardscape",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "small",
+        "estimatedQuantity": 200,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "weak_inference",
+        "materialClass": "concrete",
+        "materialSubtype": "exposed_aggregate_or_specialty",
+        "conditionClass": "damaged",
+        "severityClass": "moderate",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": true,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": false,
+        "aiConfidence": 60,
+        "aiConfidenceReasons": [
+          "Customer selected slab or pad and other types; satellite shows additional flat areas that could be slabs.",
+          "No explicit dimensions provided."
+        ],
+        "consistencyScore": 65,
+        "notes": [
+          "Include small slab/pad repairs as part of combined resurfacing scope."
+        ],
+        "summary": "Small slab/pad repair/resurface included as part of multi-area job.",
+        "surfaceDetections": [
+          {
+            "surface_type": "walkway",
+            "surface_area_sqft": 200,
+            "confidence": 0.45
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "quotedSurfaces": {
+      "driveway": 2100
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Property context and imagery support the inferred scope."
+    ]
+  }
+}

@@ -1,0 +1,121 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T02:12:50.738Z",
+  "promptHash": "38395fea031abbaadf50b4515a48f7ca27fd68aa8c7a56cc980e452985964cbf",
+  "keyHash": "3cdbc2f28024ff3c907c3cb6242a642ea7a935f376ef727056a8bd909ccfb9b7",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Window Cleaning"
+    ],
+    "address": "1301 E 23rd St, Cheyenne, WY 82001, USA",
+    "addressPlaceId": "ChIJi8RhiOM6b4cRMw7GhSSaufo",
+    "lat": 41.1442781,
+    "lng": -104.8044048,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Window Cleaning",
+        "answers": {
+          "window_access": "Easy",
+          "window_count": "11-25",
+          "window_property_type": "Other",
+          "window_property_type_other_text": "premium material preference for window property type 85",
+          "window_target_type": "Second-story or hard-to-reach windows"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Window cleaning for second-story and ground-level windows; easy access reported.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "glass",
+    "inferredScope": "whole-house windows (front/back)",
+    "treeSize": "medium",
+    "estimatedWindowCount": 18,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "second_story_windows",
+      "window_count_11-25",
+      "easy_access"
+    ],
+    "estimatorNotes": [
+      "Customer selected 11-25 windows and specified second-story/hard-to-reach targets.",
+      "Property is a single-family home with easy access from ground; satellite supports typical footprint."
+    ],
+    "serviceSignals": {
+      "Window Cleaning": {
+        "serviceType": "Window Cleaning",
+        "jobSubtype": "second_story_or_hard_to_reach",
+        "jobSubtypeLabel": "Second-story or hard-to-reach windows",
+        "workType": "clean",
+        "fallbackFamily": "window_group",
+        "surfaceFamily": "window_group",
+        "targetObjectFamily": "window_group",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 18,
+        "quantityUnit": "count",
+        "quantityEvidence": "direct",
+        "materialClass": "glass",
+        "materialSubtype": "standard",
+        "conditionClass": "light_soiling",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "two_story",
+        "stories": 2,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 78,
+        "aiConfidenceReasons": [
+          "Customer explicitly answered window_count and target type.",
+          "Access reported as easy and property imagery shows typical residential access."
+        ],
+        "consistencyScore": 90,
+        "notes": [
+          "Use rope/ladder access for second-story windows as indicated.",
+          "Count falls within provided 11-25 range; assume mixed ground and second-story distribution."
+        ],
+        "summary": "Cleaning of approximately 18 windows including second-story/hard-to-reach windows."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Property context and imagery support the inferred scope."
+    ]
+  }
+}

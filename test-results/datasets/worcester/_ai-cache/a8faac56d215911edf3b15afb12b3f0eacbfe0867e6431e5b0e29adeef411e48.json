@@ -1,0 +1,132 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T21:27:07.860Z",
+  "promptHash": "9d8a3ed690f7424ca30a69d82666d089e9b1fbaa0040cd028890975b32a497d8",
+  "keyHash": "a8faac56d215911edf3b15afb12b3f0eacbfe0867e6431e5b0e29adeef411e48",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Landscaping / Installation"
+    ],
+    "address": "577 Grove St, Worcester, MA 01605, USA",
+    "addressPlaceId": "ChIJCeltdQQH5IkRUt0eMJ6IxbA",
+    "lat": 42.2936121,
+    "lng": -71.8172553,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Landscaping / Installation",
+        "answers": {
+          "landscape_access": "Difficult",
+          "landscape_area_size": "One side of yard (~500-1,500 sq ft)",
+          "landscape_job_type": "Refresh existing landscaping",
+          "landscape_materials": [
+            "Mixed materials",
+            "Mostly plants",
+            "Sod or turf"
+          ],
+          "landscape_work_type": [
+            "New plants or garden beds",
+            "Yard makeover"
+          ]
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests a side-yard refresh/new planting and yard makeover covering approximately 500-1,500 sq ft; access reported difficult.",
+    "condition": "light",
+    "access": "difficult",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "plants, sod, mixed materials",
+    "inferredScope": "side yard refresh / new garden beds and plantings",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 68,
+    "pricingDrivers": [
+      "access_difficulty",
+      "plant_materials",
+      "area_size"
+    ],
+    "estimatorNotes": [
+      "Questionnaire indicates new plants/garden beds and yard makeover on one side of yard (~500-1,500 sq ft).",
+      "Access described as difficult; may require additional labor or equipment handling.",
+      "No explicit counts provided for plants or sod area; quantity inferred from provided size band and satellite/backyard estimate."
+    ],
+    "serviceSignals": {
+      "Landscaping / Installation": {
+        "serviceType": "Landscaping / Installation",
+        "jobSubtype": "garden_bed",
+        "jobSubtypeLabel": "Garden Beds / Planting",
+        "workType": "install",
+        "fallbackFamily": "yard_area",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "planting_area",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 1000,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "plants",
+        "materialSubtype": "mixed",
+        "conditionClass": "fair",
+        "severityClass": "minor",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "moderate",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "some_slope",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": true,
+        "aiConfidence": 68,
+        "aiConfidenceReasons": [
+          "Customer selected side-yard size band (500-1,500 sq ft).",
+          "Questionnaire lists mixed materials and new plants; satellite imagery supports presence of vegetated side yard.",
+          "Access flagged as difficult which increases uncertainty for logistics."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Estimate uses midpoint of provided size band for quantity (approx 1,000 sq ft).",
+          "Plan assumes removal of existing vegetation/soil prep and haul-away for cleared material.",
+          "Recommend on-site verification for final plant counts, bed edging, and sod vs seed decisions."
+        ],
+        "summary": "Medium side-yard landscaping installation (garden beds and plantings) with difficult access; prep and haul-away likely required."
+      }
+    },
+    "surfaceDetectionConfidence": 70,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 80,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers specified job type and size band.",
+      "Satellite imagery and property metrics support presence of side yard but do not provide exact measurements.",
+      "Access described as difficult increasing logistical uncertainty."
+    ]
+  }
+}

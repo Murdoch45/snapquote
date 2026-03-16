@@ -1,0 +1,189 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T08:26:36.711Z",
+  "promptHash": "bcc50c0dab55a9e16f044bb2a3cd3e449b81a558157c3482ecfb4538fe3f7e27",
+  "keyHash": "3f400d8f7820997927d21d7f31fa51841b5b6e56306300a2b25ac495c99c1cc0",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Other"
+    ],
+    "address": "1202 Larchmont Ln, Nichols Hills, OK 73116, USA",
+    "addressPlaceId": "ChIJySjKutIbsocRj8CEoxAlaik",
+    "lat": 35.5497582,
+    "lng": -97.5348305,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Other",
+        "answers": {
+          "other_access": "Not sure",
+          "other_property_type": "Not sure",
+          "other_size": "Very large",
+          "other_work_type": "Removal"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Automated estimator test indicates large scope removal request; imagery shows driveway, walkways, and pool present. Recommend driveway-focused pressure washing signal with supplemental review for removal scope.",
+    "condition": "moderate",
+    "access": "easy",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": true,
+    "materialHint": "concrete",
+    "inferredScope": "driveway cleaning plus potential debris removal indicated by questionnaire 'Removal' selection",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": 500,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": 8,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "large_area",
+      "pool_present",
+      "removal_requested"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Other' with Removal and Very large size; satellite shows extensive driveway/motor court and pool.",
+      "Surface detections conservative — quoted driveway equals detected motor court area to align with questionnaire uncertainty.",
+      "Needs manual review if removal involves structural or landscape elements."
+    ],
+    "serviceSignals": {
+      "Pressure Washing": {
+        "serviceType": "Pressure Washing",
+        "jobSubtype": "driveway",
+        "jobSubtypeLabel": "Driveway",
+        "workType": "clean",
+        "fallbackFamily": "flat_hardscape",
+        "surfaceFamily": "flat_hardscape",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "very_large",
+        "estimatedQuantity": 2100,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "concrete",
+        "materialSubtype": "standard",
+        "conditionClass": "moderate_soiling",
+        "severityClass": "moderate",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": true,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": true,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 76,
+        "aiConfidenceReasons": [
+          "Questionnaire flagged 'Removal' and 'Very large' which increases uncertainty.",
+          "Satellite imagery clearly shows large driveway/motor court and pool nearby."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Primary focus on driveway/motor court cleaning; removal scope requires clarification."
+        ],
+        "summary": "Large driveway/motor court pressure washing inferred from satellite and customer inputs.",
+        "quotedSurfaces": {
+          "driveway": 2100
+        },
+        "surfaceDetections": [
+          {
+            "surface_type": "driveway",
+            "surface_area_sqft": 2100,
+            "confidence": 0.84
+          }
+        ]
+      },
+      "Junk Removal": {
+        "serviceType": "Junk Removal",
+        "jobSubtype": "unknown",
+        "jobSubtypeLabel": "General Debris Removal",
+        "workType": "remove",
+        "fallbackFamily": "debris_load",
+        "surfaceFamily": "unknown",
+        "targetObjectFamily": "debris",
+        "sizeBucket": "large",
+        "estimatedQuantity": 8,
+        "quantityUnit": "load",
+        "quantityEvidence": "weak_inference",
+        "materialClass": "mixed",
+        "materialSubtype": "yard_debris",
+        "conditionClass": "n/a",
+        "severityClass": "moderate",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "moderate",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": true,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 60,
+        "aiConfidenceReasons": [
+          "Customer selected 'Removal' without details; photo/satellite show landscaping and pool area that could generate moderate debris.",
+          "No direct counts provided."
+        ],
+        "consistencyScore": 62,
+        "notes": [
+          "Confirm what materials need removal and access/haul restrictions with customer."
+        ],
+        "summary": "Customer requested removal; estimated moderate-volume junk removal pending clarification."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "quotedSurfaces": {
+      "driveway": 2100
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about removal but lacked detail.",
+      "Property context and imagery support large hardscape detection but removal scope unclear."
+    ]
+  }
+}

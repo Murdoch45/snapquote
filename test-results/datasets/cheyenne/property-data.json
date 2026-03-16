@@ -1,0 +1,38 @@
+[
+  {
+    "address": "1301 E 23rd St, Cheyenne, WY 82001",
+    "formattedAddress": "1301 E 23rd St, Cheyenne, WY 82001, USA",
+    "city": "Cheyenne",
+    "lat": 41.1442781,
+    "lng": -104.8044048,
+    "google_building_sqft": 1296,
+    "google_lot_sqft": 4181,
+    "house_sqft_source": "solar_building_ground_area",
+    "lot_sqft_source": "solar_estimate",
+    "location_source": "reverse_geocode"
+  },
+  {
+    "address": "5618 Dayton Dr, Cheyenne, WY 82009",
+    "formattedAddress": "5618 Dayton Dr, Cheyenne, WY 82009, USA",
+    "city": "Cheyenne",
+    "lat": 41.1707669,
+    "lng": -104.7678762,
+    "google_building_sqft": 2742,
+    "google_lot_sqft": 8280,
+    "house_sqft_source": "solar_building_ground_area",
+    "lot_sqft_source": "solar_estimate",
+    "location_source": "reverse_geocode"
+  },
+  {
+    "address": "1696 N Pass Trl, Cheyenne, WY 82009",
+    "formattedAddress": "1696 North Pass Trl, Cheyenne, WY 82009, USA",
+    "city": "Cheyenne",
+    "lat": 41.2460767,
+    "lng": -104.7575577,
+    "google_building_sqft": 3367,
+    "google_lot_sqft": 9099,
+    "house_sqft_source": "solar_building_ground_area",
+    "lot_sqft_source": "solar_estimate",
+    "location_source": "reverse_geocode"
+  }
+]

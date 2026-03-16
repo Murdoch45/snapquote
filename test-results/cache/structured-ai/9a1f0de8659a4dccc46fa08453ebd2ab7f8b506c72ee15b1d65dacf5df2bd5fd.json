@@ -1,0 +1,126 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T19:39:10.406Z",
+  "promptHash": "6a3abf1f3da8f88c7c7dfd8098c8cb33503770793db582021087c6b85a936dba",
+  "keyHash": "9a1f0de8659a4dccc46fa08453ebd2ab7f8b506c72ee15b1d65dacf5df2bd5fd",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Pool Service / Cleaning"
+    ],
+    "address": "1216 Norway St, Bristol, VA 24201, USA",
+    "addressPlaceId": "ChIJSQAVgxN2UIgRc62c8VJioW0",
+    "lat": 36.5970084,
+    "lng": -82.1960856,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Pool Service / Cleaning",
+        "answers": {
+          "pool_access": "Not sure",
+          "pool_condition": "Needs normal cleaning",
+          "pool_size": "Large",
+          "pool_type": "Spa only",
+          "pool_work_type": "Opening or startup"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requested a spa opening/startup service. Spa-only opening with normal cleaning indicated; access unknown.",
+    "condition": "light",
+    "access": "moderate",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "pool_spa",
+    "inferredScope": "spa_opening_startup_with_basic_clean",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": 200,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "spa_opening",
+      "chemistry_balancing",
+      "filter_service"
+    ],
+    "estimatorNotes": [
+      "Questionnaire indicates 'Spa only' and 'Opening or startup'.",
+      "No direct dimensions provided; spa sqft estimated from typical spa size for scope and 'Large' size flag."
+    ],
+    "serviceSignals": {
+      "Pool Service / Cleaning": {
+        "serviceType": "Pool Service / Cleaning",
+        "jobSubtype": "spa",
+        "jobSubtypeLabel": "Spa",
+        "workType": "service",
+        "fallbackFamily": "pool_service_event",
+        "surfaceFamily": "pool_service_event",
+        "targetObjectFamily": "pool_or_spa",
+        "sizeBucket": "small",
+        "estimatedQuantity": 1,
+        "quantityUnit": "service_event",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "vinyl_or_concrete",
+        "materialSubtype": "unknown",
+        "conditionClass": "light_soiling",
+        "severityClass": "minor",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": true,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 72,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly selected pool work type and spa only.",
+          "No photos showing spa; inference based on answers."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Opening/startup typically includes cleaning, chemical balancing, and basic filter service.",
+          "Customer listed pool_size as 'Large' but pool_type is 'Spa only' — treated as single spa service."
+        ],
+        "summary": "Spa opening/startup with light cleaning and chemistry work."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 0,
+        "confidence": 0
+      }
+    ],
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 86,
+    "terrainType": "flat",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific to spa opening.",
+      "No contradictory imagery or notes found."
+    ]
+  }
+}

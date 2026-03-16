@@ -1,0 +1,124 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T21:21:30.158Z",
+  "promptHash": "8e3954819c0f97633a8ccf8f7343060cc845362742d23c015d23ab8b139e2b87",
+  "keyHash": "9ff926ce5611fe68beea16d8fe7a03595bcb3d0ad2b947322844e5d48aec9f85",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Fence Installation / Repair"
+    ],
+    "address": "22 Bittersweet Blvd, Worcester, MA 01607, USA",
+    "addressPlaceId": "ChIJoc9sdbUF5IkRMHNxoI9HMCA",
+    "lat": 42.228719,
+    "lng": -71.8067966,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Fence Installation / Repair",
+        "answers": {
+          "fence_material": "Wood",
+          "fence_repair_condition": "Minor",
+          "fence_scope": "Full yard (200+ linear ft)",
+          "fence_site": "Flat and clear",
+          "fence_work_type": "Fence replacement"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Full-yard wood fence replacement requested (~200+ linear ft)",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "wood",
+    "inferredScope": "full_yard_replacement",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 78,
+    "pricingDrivers": [
+      "linear_footage",
+      "wood_material",
+      "old_fence_removal",
+      "haul_away"
+    ],
+    "estimatorNotes": [
+      "Customer selected fence replacement for full yard and indicated 200+ linear feet.",
+      "Photos and satellite indicate a suburban lot with accessible flat site and existing fence present along property edges.",
+      "Assume standard wood privacy/farm-style fence unless customer specifies picket/split-rail."
+    ],
+    "serviceSignals": {
+      "Fence Installation / Repair": {
+        "serviceType": "Fence Installation / Repair",
+        "jobSubtype": "full_fence_replacement",
+        "jobSubtypeLabel": "Full yard fence replacement",
+        "workType": "replace",
+        "fallbackFamily": "linear_boundary",
+        "surfaceFamily": "linear_boundary",
+        "targetObjectFamily": "fence",
+        "sizeBucket": "large",
+        "estimatedQuantity": 200,
+        "quantityUnit": "linear_ft",
+        "quantityEvidence": "direct",
+        "materialClass": "wood",
+        "materialSubtype": "standard",
+        "conditionClass": "minor_damage",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": true,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 84,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly requests full-yard replacement and provides 200+ linear ft.",
+          "Property satellite imagery shows a single-family lot with clear access and existing perimeter fence lines."
+        ],
+        "consistencyScore": 90,
+        "notes": [
+          "Use customer-provided scope of 200+ lf as primary quantity.",
+          "Plan for removal and haul-away of existing wood fence.",
+          "Confirm fence height and style on follow-up."
+        ],
+        "summary": "Replace ~200 linear feet of wood fence around yard; removal and haul-away needed."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Satellite imagery supports a replace-suitable perimeter and easy access."
+    ]
+  }
+}

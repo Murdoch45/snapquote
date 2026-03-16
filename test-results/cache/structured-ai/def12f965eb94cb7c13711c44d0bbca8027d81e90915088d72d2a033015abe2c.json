@@ -1,0 +1,126 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T06:17:46.363Z",
+  "promptHash": "12edcf000ad4bb0f3548d0f6a10208ebfb92c8bd6917939fbcc73f879975fb99",
+  "keyHash": "def12f965eb94cb7c13711c44d0bbca8027d81e90915088d72d2a033015abe2c",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Roofing"
+    ],
+    "address": "2481 Summitridge Dr, Beverly Hills, CA 90210, USA",
+    "addressPlaceId": "ChIJw5RbRLm9woARPFqNmJANwtg",
+    "lat": 34.1199802,
+    "lng": -118.4212831,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Roofing",
+        "answers": {
+          "roofing_access": "Not sure",
+          "roofing_problem": "Old roof needing replacement",
+          "roofing_scope": "Entire roof",
+          "roofing_type": "Tile",
+          "roofing_work_type": "Leak repair"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests full roof replacement/repair on tiled roof; likely full roof replacement based on questionnaire indicating old roof needing replacement.",
+    "condition": "moderate",
+    "access": "moderate",
+    "severity": "major",
+    "debris": "moderate",
+    "multipleAreas": false,
+    "materialHint": "tile",
+    "inferredScope": "entire_roof_replacement",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": 1200,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 68,
+    "pricingDrivers": [
+      "full roof replacement",
+      "tile roofing material",
+      "haul away and disposal",
+      "access and height (two story)"
+    ],
+    "estimatorNotes": [
+      "Questionnaire indicates 'Old roof needing replacement' and 'Entire roof' scope.",
+      "Satellite shows a large tiled roof and on-site pool; property appears high-end (Beverly Hills).",
+      "No explicit roof square footage provided; roof area inferred from house footprint."
+    ],
+    "serviceSignals": {
+      "Roofing": {
+        "serviceType": "Roofing",
+        "jobSubtype": "roof_replacement",
+        "jobSubtypeLabel": "Roof Replacement",
+        "workType": "replace",
+        "fallbackFamily": "roof_like_surface",
+        "surfaceFamily": "roof_like_surface",
+        "targetObjectFamily": "roof",
+        "sizeBucket": "very_large",
+        "estimatedQuantity": 9600,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "tile",
+        "materialSubtype": "clay_tile",
+        "conditionClass": "poor",
+        "severityClass": "major",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "moderate",
+        "heightClass": "two_story",
+        "stories": 2,
+        "slopeClass": "some_slope",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": true,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": "tile",
+        "premiumPropertySignal": true,
+        "luxuryHardscapeSignal": true,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": true,
+        "aiConfidence": 70,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly requests entire roof replacement.",
+          "House footprint and satellite imagery support large roof area estimate.",
+          "No explicit roof area provided by customer."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Treat as full roof replacement with tile removal and re-roof.",
+          "Recommend manual review for exact roof pitch, penetrations, and structural checks."
+        ],
+        "summary": "Full tile roof replacement over entire property roof (inferred ~9600 sqft)."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "stone",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": true,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers specify entire roof replacement and tile material.",
+      "Property and satellite imagery support a large residential roof footprint.",
+      "No explicit roof square footage provided; quantity inferred from house area."
+    ]
+  }
+}

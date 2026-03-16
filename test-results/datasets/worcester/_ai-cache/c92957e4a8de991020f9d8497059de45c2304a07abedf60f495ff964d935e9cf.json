@@ -1,0 +1,120 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T21:33:39.996Z",
+  "promptHash": "826c8cc0b113f350e32cb7e17472e52c704d513f83edb53bdf3b6a5bad37706c",
+  "keyHash": "c92957e4a8de991020f9d8497059de45c2304a07abedf60f495ff964d935e9cf",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Window Cleaning"
+    ],
+    "address": "31 Lenox St, Worcester, MA 01602, USA",
+    "addressPlaceId": "ChIJD1cICMIG5IkRYY1iKGn1gck",
+    "lat": 42.2777158,
+    "lng": -71.8334735,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Window Cleaning",
+        "answers": {
+          "window_access": "Easy",
+          "window_count": "50+",
+          "window_property_type": "Single-story home",
+          "window_target_type": "Second-story or hard-to-reach windows"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Window cleaning for a large single-family home; customer reports 50+ windows including hard-to-reach/high windows.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "glass",
+    "inferredScope": "full-property window cleaning including hard-to-reach windows",
+    "treeSize": "medium",
+    "estimatedWindowCount": 50,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "window_count",
+      "hard_to_reach_windows",
+      "single_family_large_home"
+    ],
+    "estimatorNotes": [
+      "Customer selected Window Cleaning and indicated 50+ windows and hard-to-reach windows.",
+      "Property imagery and house square footage support large window count estimate.",
+      "No pool service or junk removal requested."
+    ],
+    "serviceSignals": {
+      "Window Cleaning": {
+        "serviceType": "Window Cleaning",
+        "jobSubtype": "high_windows",
+        "jobSubtypeLabel": "Hard-to-reach / high windows",
+        "workType": "clean",
+        "fallbackFamily": "window_group",
+        "surfaceFamily": "window_group",
+        "targetObjectFamily": "window_group",
+        "sizeBucket": "large",
+        "estimatedQuantity": 50,
+        "quantityUnit": "count",
+        "quantityEvidence": "direct",
+        "materialClass": "glass",
+        "materialSubtype": "standard",
+        "conditionClass": "unknown",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "single_story",
+        "stories": 1,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 76,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly lists 50+ windows and hard-to-reach windows.",
+          "Property square footage and photo count support a larger single-family home window count."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Treat as full-window cleaning job for a large single-family home; confirm exact window count on follow-up."
+        ],
+        "summary": "Large-window-count cleaning including hard-to-reach windows; access reported easy."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1,
+    "luxuryMultiplier": 1,
+    "estateScore": 0,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Imagery and property data consistent with a large residential home."
+    ]
+  }
+}

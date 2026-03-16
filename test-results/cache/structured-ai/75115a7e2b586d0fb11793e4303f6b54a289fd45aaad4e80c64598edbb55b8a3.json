@@ -1,0 +1,123 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T06:19:35.767Z",
+  "promptHash": "890a948dc6344bbeb14650906104fb9279dbf455b124f22235f91182d19bc847",
+  "keyHash": "75115a7e2b586d0fb11793e4303f6b54a289fd45aaad4e80c64598edbb55b8a3",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Exterior Painting"
+    ],
+    "address": "2481 Summitridge Dr, Beverly Hills, CA 90210, USA",
+    "addressPlaceId": "ChIJw5RbRLm9woARPFqNmJANwtg",
+    "lat": 34.1199802,
+    "lng": -118.4212831,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Exterior Painting",
+        "answers": {
+          "painting_access": "Easy",
+          "painting_condition": "Needs prep and repairs",
+          "painting_scope": "Most of exterior",
+          "painting_surface_type": "Stucco",
+          "painting_target": "Fence or detached structure"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Paint/stucco repair for fence or detached structure and majority of exterior; needs prep and repairs; easy access",
+    "condition": "moderate",
+    "access": "easy",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "stucco",
+    "inferredScope": "most_of_exterior_including_detached_structure",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": 1200,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "stucco_surface",
+      "needs_prep_and_repairs",
+      "large_estate",
+      "pool_present"
+    ],
+    "estimatorNotes": [
+      "Customer selected fence/detached structure and stucco; indicated most of exterior and that prep/repairs are needed.",
+      "Property satellite shows large estate and pool; expect multi-story elevation and premium finishes."
+    ],
+    "serviceSignals": {
+      "Exterior Painting": {
+        "serviceType": "Exterior Painting",
+        "jobSubtype": "fence_or_detached_structure",
+        "jobSubtypeLabel": "Fence / Detached Structure",
+        "workType": "repair",
+        "fallbackFamily": "exterior_finish_surface",
+        "surfaceFamily": "vertical_exterior_surface",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "very_large",
+        "estimatedQuantity": 6000,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "stucco",
+        "materialSubtype": "stucco",
+        "conditionClass": "needs_prep",
+        "severityClass": "moderate",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "moderate",
+        "heightClass": "two_story",
+        "stories": 2,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": true,
+        "fencePresent": true,
+        "deckPresent": false,
+        "roofType": "tile",
+        "premiumPropertySignal": true,
+        "luxuryHardscapeSignal": true,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 72,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly selected stucco and fence/detached structure and indicated most of exterior.",
+          "Satellite imagery confirms large multi-story estate and presence of pool which aligns with premium property signals."
+        ],
+        "consistencyScore": 82,
+        "notes": [
+          "Quantity is inferred from house ground area and stated scope rather than direct square footage provided by customer.",
+          "Expect paint plus patch/repair allowances for stucco surfaces."
+        ],
+        "summary": "Painting and repair of stucco surfaces on majority of exterior including detached/fence elements; prep work required."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "stone",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": true,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about target and surface.",
+      "Property context and imagery support multi-story premium property diagnosis and scope."
+    ]
+  }
+}

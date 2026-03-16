@@ -1,0 +1,124 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T08:11:02.353Z",
+  "promptHash": "5d326938d5182c4747c072643b74f7487b4d725256e6548d1fba190f919c73c6",
+  "keyHash": "3293e92d751e66aa4d9875d3a45a337e6d16286e017837247c223466c2889caa",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Exterior Painting"
+    ],
+    "address": "424 NW 29th St, Oklahoma City, OK 73103, USA",
+    "addressPlaceId": "ChIJQ7Rvw1MXsocRLG8Dbk3Y5Yw",
+    "lat": 35.4992706,
+    "lng": -97.5201175,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Exterior Painting",
+        "answers": {
+          "painting_access": "Steep or hard-to-reach areas",
+          "painting_condition": "Good condition",
+          "painting_scope": "Small touch-up",
+          "painting_surface_type": "Brick or masonry",
+          "painting_target": "Fence or detached structure"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Small brick fence touch-up painting; steep/hard-to-reach access noted.",
+    "condition": "light",
+    "access": "difficult",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "brick/masonry",
+    "inferredScope": "small touch-up to fence or detached structure",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "access difficulty",
+      "masonry surface",
+      "small touch-up"
+    ],
+    "estimatorNotes": [
+      "Customer selected fence/detached structure and brick surface.",
+      "Scope described as small touch-up; likely a localized paint repair.",
+      "Steep or hard-to-reach access may increase setup time and safety precautions."
+    ],
+    "serviceSignals": {
+      "Exterior Painting": {
+        "serviceType": "Exterior Painting",
+        "jobSubtype": "fence",
+        "jobSubtypeLabel": "Fence",
+        "workType": "repair",
+        "fallbackFamily": "vertical_exterior_surface",
+        "surfaceFamily": "vertical_exterior_surface",
+        "targetObjectFamily": "fence",
+        "sizeBucket": "small",
+        "estimatedQuantity": 20,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "weak_inference",
+        "materialClass": "masonry",
+        "materialSubtype": "brick",
+        "conditionClass": "good",
+        "severityClass": "minor",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "steep",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": true,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 70,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly selected fence/detached structure and brick surface.",
+          "Scope listed as small touch-up rather than full repaint.",
+          "Access described as steep or hard-to-reach."
+        ],
+        "consistencyScore": 86,
+        "notes": [
+          "Recommend small-area masonry touch-up painting with prep (cleaning/spot priming).",
+          "Confirm exact sqft and access details on site visit."
+        ],
+        "summary": "Small-area brick fence touch-up painting with difficult access."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "materialType": "brick",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.2,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about target and surface.",
+      "Imagery and property context consistent with a small detached fence area needing touch-up."
+    ]
+  }
+}

@@ -1,0 +1,144 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T00:13:31.160Z",
+  "promptHash": "44fd5a05555f58efad647c7dd68cee6035addde057e9ed794162dfe0e7c924ca",
+  "keyHash": "6c09dfef719a88baaf93f89dfba720e64d7b280bdf1050c26b23b23d8b9f1f63",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Landscaping / Installation"
+    ],
+    "address": "5618 Dayton Dr, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJj7v2QZo7b4cRO_KLm-GvTKw",
+    "lat": 41.1707669,
+    "lng": -104.7678762,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Landscaping / Installation",
+        "answers": {
+          "landscape_access": "Difficult",
+          "landscape_area_size": "Not sure",
+          "landscape_job_type": "Not sure",
+          "landscape_materials": [
+            "Not sure"
+          ],
+          "landscape_work_type": [
+            "Rock or mulch installation",
+            "Sod or lawn installation",
+            "Yard makeover"
+          ]
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests landscaping work (sod/yard makeover/rock or mulch) with uncertain area; property has sizeable backyard and driveway visible in imagery.",
+    "condition": "moderate",
+    "access": "difficult",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "soil/sod/rock",
+    "inferredScope": "backyard lawn installation and rock/mulch beds",
+    "treeSize": "small",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 68,
+    "pricingDrivers": [
+      "backyard area",
+      "access difficulty",
+      "sod installation vs mulch/rock material choice"
+    ],
+    "estimatorNotes": [
+      "Customer selected multiple landscape work types but was unsure of sizes.",
+      "Satellite shows a medium-to-large backyard (~5500 sqft lot area remaining) — expect partial-yard work rather than whole-lot by default.",
+      "Access flagged as difficult by customer; may increase labor/time."
+    ],
+    "serviceSignals": {
+      "Landscaping / Installation": {
+        "serviceType": "Landscaping / Installation",
+        "jobSubtype": "rock_or_mulch_installation",
+        "jobSubtypeLabel": "Rock or Mulch Installation",
+        "workType": "install",
+        "fallbackFamily": "yard_area",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "yard_area",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 400,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "weak_inference",
+        "materialClass": "mulch_or_rock",
+        "materialSubtype": "unknown",
+        "conditionClass": "existing_bare_beds",
+        "severityClass": "minor",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": true,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 56,
+        "aiConfidenceReasons": [
+          "Customer selected rock or mulch but provided no area.",
+          "Visuals imply limited bed areas that could receive mulch/rock rather than full-yard coverage."
+        ],
+        "consistencyScore": 60,
+        "notes": [
+          "Treat rock/mulch as an add-on to sod/yard installation; confirm bed footprints during manual review."
+        ],
+        "summary": "Small-to-medium rock or mulch installation in perimeter beds adjacent to backyard."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 900,
+        "confidence": 0.85
+      },
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 200,
+        "confidence": 0.78
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 900,
+      "walkway": 200
+    },
+    "surfaceDetectionConfidence": 72,
+    "satelliteClarity": 85,
+    "imageQuality": 60,
+    "scopeMatchConfidence": 68,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.15,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1,
+    "luxuryMultiplier": 1,
+    "estateScore": 8200,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Customer was unsure of sizes and specifics.",
+      "Satellite imagery provides backyard area but not exact project footprints.",
+      "Photo count is low; recommend follow-up for precise quoting."
+    ]
+  }
+}

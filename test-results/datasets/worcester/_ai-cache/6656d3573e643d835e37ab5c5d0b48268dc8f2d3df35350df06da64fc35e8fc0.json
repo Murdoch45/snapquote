@@ -1,0 +1,129 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T21:38:48.176Z",
+  "promptHash": "c727f31381f0da91ef8a4718afc8e9c77f8ab29cc71d5bcbbb7aecbaa7f563b5",
+  "keyHash": "6656d3573e643d835e37ab5c5d0b48268dc8f2d3df35350df06da64fc35e8fc0",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Junk Removal"
+    ],
+    "address": "31 Lenox St, Worcester, MA 01602, USA",
+    "addressPlaceId": "ChIJD1cICMIG5IkRYY1iKGn1gck",
+    "lat": 42.2777158,
+    "lng": -71.8334735,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Junk Removal",
+        "answers": {
+          "junk_amount": "Small load (about a pickup load)",
+          "junk_heavy_items": "Yes, many",
+          "junk_location": "Garage or driveway",
+          "junk_type": "Household junk"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Small household junk removal from garage/driveway; includes heavy items; single pickup load.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "household",
+    "inferredScope": "single small load from garage or driveway; includes heavy items",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": 1.5,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "small load",
+      "heavy items",
+      "garage/driveway location"
+    ],
+    "estimatorNotes": [
+      "Customer selected small pickup load (~1 pickup load).",
+      "Customer indicated many heavy items — may require two-person crew or lift gate.",
+      "Items located in garage or driveway, easy access for pickup."
+    ],
+    "serviceSignals": {
+      "Junk Removal": {
+        "serviceType": "Junk Removal",
+        "jobSubtype": "debris_load",
+        "jobSubtypeLabel": "Household Junk Removal",
+        "workType": "remove",
+        "fallbackFamily": "debris_load",
+        "surfaceFamily": "unknown",
+        "targetObjectFamily": "debris",
+        "sizeBucket": "small",
+        "estimatedQuantity": 1,
+        "quantityUnit": "load",
+        "quantityEvidence": "direct",
+        "materialClass": "household_junk",
+        "materialSubtype": "mixed_household",
+        "conditionClass": "mixed",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": false,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 86,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly indicates a small pickup load.",
+          "Customer notes many heavy items which increases handling complexity."
+        ],
+        "consistencyScore": 92,
+        "notes": [
+          "Pickup likely from garage or driveway per questionnaire.",
+          "Crew should prepare for heavy items and standard haul-away."
+        ],
+        "summary": "Small household junk removal (about one pickup load) from garage/driveway; heavy items present."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 0,
+        "confidence": 0.5
+      }
+    ],
+    "surfaceDetectionConfidence": 50,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Imagery and property context support easy driveway/garage access."
+    ]
+  }
+}

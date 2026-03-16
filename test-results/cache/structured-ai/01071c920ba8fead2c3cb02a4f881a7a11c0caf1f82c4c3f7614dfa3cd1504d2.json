@@ -1,0 +1,133 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T00:17:45.554Z",
+  "promptHash": "c5e84267c5d510b79396adf2dd9ce777c06d276ff1c9bb045de60024e046ac7a",
+  "keyHash": "01071c920ba8fead2c3cb02a4f881a7a11c0caf1f82c4c3f7614dfa3cd1504d2",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Junk Removal"
+    ],
+    "address": "2481 Summitridge Dr, Beverly Hills, CA 90210, USA",
+    "addressPlaceId": "ChIJw5RbRLm9woARPFqNmJANwtg",
+    "lat": 34.1199802,
+    "lng": -118.4212831,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Junk Removal",
+        "answers": {
+          "junk_amount": "Small load (about a pickup load)",
+          "junk_heavy_items": "Yes, a few",
+          "junk_location": "Garage or driveway",
+          "junk_type": "Other",
+          "junk_type_other_text": "special access needs for junk type 88"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Small residential junk removal from garage/driveway. Customer requests removal of about a pickup-load with a few heavy items and notes special access needs.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": null,
+    "inferredScope": "Garage/driveway small load pickup; includes some heavy items and special access considerations.",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": 1.5,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "small_load",
+      "heavy_items",
+      "special_access"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Small load (about a pickup load)' in questionnaire.",
+      "Other-text notes mention special access needs; flag for manual review."
+    ],
+    "serviceSignals": {
+      "Junk Removal": {
+        "serviceType": "Junk Removal",
+        "jobSubtype": "small_load",
+        "jobSubtypeLabel": "Small load (pickup)",
+        "workType": "remove",
+        "fallbackFamily": "debris_load",
+        "surfaceFamily": "mixed_custom",
+        "targetObjectFamily": "debris",
+        "sizeBucket": "small",
+        "estimatedQuantity": 1.5,
+        "quantityUnit": "load",
+        "quantityEvidence": "direct",
+        "materialClass": "mixed",
+        "materialSubtype": "household_misc",
+        "conditionClass": "n_a",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": false,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 70,
+        "aiConfidenceReasons": [
+          "Customer explicitly selected small pickup-load in questionnaire.",
+          "Other-text indicates special access needs requiring review.",
+          "Photos and satellite show driveway/garage access consistent with pickup removal."
+        ],
+        "consistencyScore": 80,
+        "notes": [
+          "Pickup-load estimated from questionnaire selection.",
+          "Heavy items indicated; ensure team prepared for manual handling."
+        ],
+        "summary": "Remove small garage/driveway load (~1 pickup) including a few heavy items; special access noted."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 400,
+        "confidence": 0.8
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 400
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Property context and imagery support the inferred scope."
+    ]
+  }
+}

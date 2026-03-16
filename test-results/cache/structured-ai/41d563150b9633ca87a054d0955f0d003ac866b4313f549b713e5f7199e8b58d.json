@@ -1,0 +1,144 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T00:16:57.006Z",
+  "promptHash": "9b1805e9cc336d4fafe3451980718ae38dbdae80251544f3d3af9794ddb049d8",
+  "keyHash": "41d563150b9633ca87a054d0955f0d003ac866b4313f549b713e5f7199e8b58d",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Junk Removal"
+    ],
+    "address": "5618 Dayton Dr, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJj7v2QZo7b4cRO_KLm-GvTKw",
+    "lat": 41.1707669,
+    "lng": -104.7678762,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Junk Removal",
+        "answers": {
+          "junk_amount": "Medium load (about half a trailer or small truck)",
+          "junk_heavy_items": "Not sure",
+          "junk_location": "Garage or driveway",
+          "junk_type": "Other",
+          "junk_type_other_text": "custom scope requested for junk type 76"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Medium garage/driveway junk removal requested; customer indicated custom junk type.",
+    "condition": "moderate",
+    "access": "easy",
+    "severity": "moderate",
+    "debris": "moderate",
+    "multipleAreas": false,
+    "materialHint": "mixed household/garden",
+    "inferredScope": "garage and driveway loadout and haul-away",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": 6,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "haul_away",
+      "medium_volume",
+      "garage_location"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Other' junk type with custom text 'custom scope requested for junk type 76'.",
+      "Customer indicated 'Medium load (about half a trailer or small truck)'.",
+      "Access appears straightforward from driveway and street."
+    ],
+    "serviceSignals": {
+      "Junk Removal": {
+        "serviceType": "Junk Removal",
+        "jobSubtype": "debris_load",
+        "jobSubtypeLabel": "Junk Removal Load",
+        "workType": "remove",
+        "fallbackFamily": "debris_load",
+        "surfaceFamily": "mixed_custom",
+        "targetObjectFamily": "debris_load",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 1,
+        "quantityUnit": "load",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "mixed",
+        "materialSubtype": "household_garden",
+        "conditionClass": "mixed",
+        "severityClass": "moderate",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": false,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": false,
+        "aiConfidence": 70,
+        "aiConfidenceReasons": [
+          "Customer explicitly selected medium load and provided custom junk type text.",
+          "Photo and satellite show driveway/garage access consistent with haul-away."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Estimate based on customer's medium-load description (half trailer/small truck).",
+          "Confirm heavy items and hazardous material status during scheduling."
+        ],
+        "summary": "Remove medium volume of mixed household/garden junk from garage/driveway; haul away required.",
+        "surfaceDetections": [
+          {
+            "surface_type": "driveway",
+            "surface_area_sqft": 2100,
+            "confidence": 0.84
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "quotedSurfaces": {
+      "driveway": 2100
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about load size.",
+      "Property context and imagery support driveway/garage access and medium load haul-away."
+    ]
+  }
+}

@@ -1,0 +1,121 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T21:23:50.157Z",
+  "promptHash": "6f3ba594099ad428eea4d41bcba08c1ec699fc8eb6991a0fe5f106976e4adc4d",
+  "keyHash": "f03c0e02cea8acf1c733cd28bf903bdd1f4eed3bcb6952aeb7c6ea3cc170354f",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Junk Removal"
+    ],
+    "address": "22 Bittersweet Blvd, Worcester, MA 01607, USA",
+    "addressPlaceId": "ChIJoc9sdbUF5IkRMHNxoI9HMCA",
+    "lat": 42.228719,
+    "lng": -71.8067966,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Junk Removal",
+        "answers": {
+          "junk_amount": "Small load (about a pickup load)",
+          "junk_heavy_items": "Yes, a few",
+          "junk_location": "Backyard or hard-to-reach area",
+          "junk_type": "Household junk"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Small backyard household junk removal; pickup-load sized with a few heavy items and limited access.",
+    "condition": "light",
+    "access": "moderate",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "household/mixed",
+    "inferredScope": "Small load (~1 pickup load) located in backyard, some heavy items",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": 1,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "backyard access",
+      "heavy items",
+      "small load"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Small load (about a pickup load)'.",
+      "Location listed as backyard/hard-to-reach; may require hand-carrying.",
+      "Contains a few heavy items per questionnaire."
+    ],
+    "serviceSignals": {
+      "Junk Removal": {
+        "serviceType": "Junk Removal",
+        "jobSubtype": "debris_load",
+        "jobSubtypeLabel": "Household junk removal (small load)",
+        "workType": "remove",
+        "fallbackFamily": "debris_load",
+        "surfaceFamily": "mixed_custom",
+        "targetObjectFamily": "debris_load",
+        "sizeBucket": "small",
+        "estimatedQuantity": 1,
+        "quantityUnit": "load",
+        "quantityEvidence": "direct",
+        "materialClass": "household",
+        "materialSubtype": "mixed",
+        "conditionClass": "n/a",
+        "severityClass": "minor",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "moderate",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": false,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 78,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly states small pickup load and backyard location.",
+          "Single uploaded photo is a placeholder; satellite shows typical residential backyard access which may be constrained."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Prepare for at least one or two heavy items requiring additional manpower or equipment.",
+          "Confirm exact pickup location and access path with customer prior to scheduling."
+        ],
+        "summary": "Remove ~1 pickup-load of mixed household junk from backyard; some heavy items, limited access."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 50,
+    "scopeMatchConfidence": 86,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1,
+    "luxuryMultiplier": 1,
+    "estateScore": 4945,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about load size and location.",
+      "Satellite and property metrics indicate a typical residential backyard with constrained access."
+    ]
+  }
+}

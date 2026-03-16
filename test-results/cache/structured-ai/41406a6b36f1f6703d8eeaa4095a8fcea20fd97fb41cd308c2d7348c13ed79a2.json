@@ -1,0 +1,134 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T00:07:14.612Z",
+  "promptHash": "972b1ee93825f68fd7036606a417c8702e53e62ad8e0ebe1a15fb2aa7cc59493",
+  "keyHash": "41406a6b36f1f6703d8eeaa4095a8fcea20fd97fb41cd308c2d7348c13ed79a2",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Fence Installation / Repair"
+    ],
+    "address": "1301 E 23rd St, Cheyenne, WY 82001, USA",
+    "addressPlaceId": "ChIJi8RhiOM6b4cRMw7GhSSaufo",
+    "lat": 41.1442781,
+    "lng": -104.8044048,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Fence Installation / Repair",
+        "answers": {
+          "fence_material": "Chain link",
+          "fence_repair_condition": "Not sure",
+          "fence_scope": "Other",
+          "fence_scope_other_text": "custom scope requested for fence scope 36",
+          "fence_site": "Heavy slope or obstacles",
+          "fence_work_type": "Gate repair or replacement"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests chain-link gate repair/replacement with custom scope; property has sloped site access and may require site review.",
+    "condition": "light",
+    "access": "difficult",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "chain link",
+    "inferredScope": "gate repair or replacement with custom modifications",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 60,
+    "pricingDrivers": [
+      "Gate repair",
+      "Chain link material",
+      "Heavy slope / access difficulty",
+      "Custom scope specified"
+    ],
+    "estimatorNotes": [
+      "Customer selected gate repair/replacement and specified custom scope.",
+      "Site has heavy slope/obstacles which may increase labor and equipment needs.",
+      "Needs manual review for exact scope, measurements, and potential retaining work."
+    ],
+    "serviceSignals": {
+      "Fence Installation / Repair": {
+        "serviceType": "Fence Installation / Repair",
+        "jobSubtype": "gate_repair",
+        "jobSubtypeLabel": "Gate repair or replacement",
+        "workType": "repair",
+        "fallbackFamily": "linear_boundary",
+        "surfaceFamily": "linear_boundary",
+        "targetObjectFamily": "fence_component",
+        "sizeBucket": "small",
+        "estimatedQuantity": 1,
+        "quantityUnit": "count",
+        "quantityEvidence": "direct",
+        "materialClass": "chain_link",
+        "materialSubtype": "standard_chain_link",
+        "conditionClass": "unknown",
+        "severityClass": "minor",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "moderate",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "steep",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": true,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 62,
+        "aiConfidenceReasons": [
+          "Customer explicitly selected gate repair and chain link material.",
+          "Customer noted heavy slope/obstacles which affects access and scope."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Confirm gate dimensions, hinge/post condition, and whether replacement of posts or concrete footings is required.",
+          "Custom scope text indicates non-standard work - on-site review recommended."
+        ],
+        "summary": "Chain-link gate repair / replacement; custom scope with difficult access due to slope."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 200,
+        "confidence": 0.72
+      }
+    ],
+    "detectedSurfaces": {
+      "walkway": 200
+    },
+    "surfaceDetectionConfidence": 72,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 78,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.2,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers specified gate repair and chain link material.",
+      "Customer noted heavy slope/obstacles; imagery consistent with small urban lot."
+    ]
+  }
+}

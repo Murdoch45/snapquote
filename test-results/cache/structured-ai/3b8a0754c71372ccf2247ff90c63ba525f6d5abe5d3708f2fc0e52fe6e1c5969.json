@@ -1,0 +1,124 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T00:07:15.339Z",
+  "promptHash": "1403de7e4fa85863f501c3faf62792eb8c1147589f8adadeddfd0e57be324382",
+  "keyHash": "3b8a0754c71372ccf2247ff90c63ba525f6d5abe5d3708f2fc0e52fe6e1c5969",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Gutter Cleaning"
+    ],
+    "address": "935 Burnside Ave, Los Angeles, CA 90036, USA",
+    "addressPlaceId": "ChIJ_1o_zx65woAR28Q5Yc4qZdE",
+    "lat": 34.058076,
+    "lng": -118.3514135,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Gutter Cleaning",
+        "answers": {
+          "gutter_access": "Yes, landscaping or obstacles",
+          "gutter_building_type": "Three-story or taller",
+          "gutter_fill_level": "Very full or overflowing",
+          "gutter_work_type": "Other",
+          "gutter_work_type_other_text": "custom scope requested for gutter work type 63"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Three-story building with very full gutters; customer requested custom gutter scope",
+    "condition": "heavy",
+    "access": "moderate",
+    "severity": "major",
+    "debris": "heavy",
+    "multipleAreas": false,
+    "materialHint": "metal",
+    "inferredScope": "full-property gutters, three-story access required; custom scope per customer notes",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "three_story_access",
+      "very_full_gutters",
+      "landscaping_obstacles",
+      "custom_scope"
+    ],
+    "estimatorNotes": [
+      "Customer specified three-story building and very full/overflowing gutters.",
+      "Access complicators noted (landscaping / obstacles).",
+      "Work type labeled 'Other' with custom scope text; confirm details on site."
+    ],
+    "serviceSignals": {
+      "Gutter Cleaning": {
+        "serviceType": "Gutter Cleaning",
+        "jobSubtype": "gutter_cleaning",
+        "jobSubtypeLabel": "Gutter Cleaning",
+        "workType": "clean",
+        "fallbackFamily": "linear_boundary",
+        "surfaceFamily": "vertical_exterior_surface",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 1,
+        "quantityUnit": "visit",
+        "quantityEvidence": "weak_inference",
+        "materialClass": "metal",
+        "materialSubtype": "unknown",
+        "conditionClass": "very_full",
+        "severityClass": "major",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "moderate",
+        "heightClass": "three_plus",
+        "stories": 3,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 68,
+        "aiConfidenceReasons": [
+          "Customer explicitly indicated three-story and very full gutters with custom scope.",
+          "No explicit gutter counts or linear footage provided; scope inferred from property size and description.",
+          "Access obstacles increase complexity and warrant manual confirmation."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Confirm linear footage, number of downspouts, and any repairs included in custom scope.",
+          "Site visit recommended due to three-story height and landscaping obstacles."
+        ],
+        "summary": "Gutter cleaning for three-story house; gutters reported very full. Custom scope requires onsite confirmation."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 86,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.2,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about height and fill level.",
+      "Custom 'other' scope requires manual confirmation of deliverables and quantities."
+    ]
+  }
+}

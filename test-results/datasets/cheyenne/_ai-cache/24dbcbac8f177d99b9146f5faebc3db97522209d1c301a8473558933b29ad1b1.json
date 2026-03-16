@@ -1,0 +1,122 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T02:12:23.317Z",
+  "promptHash": "7c2164357d32aaee1f807ed329c82ef26ab4a546878566e21667ce51126f8c36",
+  "keyHash": "24dbcbac8f177d99b9146f5faebc3db97522209d1c301a8473558933b29ad1b1",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Gutter Cleaning"
+    ],
+    "address": "1301 E 23rd St, Cheyenne, WY 82001, USA",
+    "addressPlaceId": "ChIJi8RhiOM6b4cRMw7GhSSaufo",
+    "lat": 41.1442781,
+    "lng": -104.8044048,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Gutter Cleaning",
+        "answers": {
+          "gutter_access": "Not sure",
+          "gutter_building_type": "Two-story home",
+          "gutter_fill_level": "Not sure",
+          "gutter_work_type": "Clean gutters only"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requested gutter cleaning for a two-story home; scope inferred as full-house gutter clean only.",
+    "condition": "light",
+    "access": "moderate",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "metal",
+    "inferredScope": "clean gutters only (full perimeter)",
+    "treeSize": "small",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 78,
+    "pricingDrivers": [
+      "two_story_access",
+      "full_perimeter_gutters",
+      "light_debris"
+    ],
+    "estimatorNotes": [
+      "Questionnaire explicitly requests 'clean gutters only' on a two-story home.",
+      "No evidence of heavy debris or major obstructions from photos or satellite.",
+      "Quantity inferred from building type and house footprint; customer did not provide linear footage."
+    ],
+    "serviceSignals": {
+      "Gutter Cleaning": {
+        "serviceType": "Gutter Cleaning",
+        "jobSubtype": "gutters_full_perimeter",
+        "jobSubtypeLabel": "Gutter cleaning - full perimeter",
+        "workType": "clean",
+        "fallbackFamily": "linear_boundary",
+        "surfaceFamily": "linear_boundary",
+        "targetObjectFamily": "linear_boundary",
+        "sizeBucket": "small",
+        "estimatedQuantity": 120,
+        "quantityUnit": "linear_ft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "metal",
+        "materialSubtype": "standard",
+        "conditionClass": "light_soiling",
+        "severityClass": "minor",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "two_story",
+        "stories": 2,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 72,
+        "aiConfidenceReasons": [
+          "Customer answered 'Clean gutters only' explicitly.",
+          "Building type 'Two-story' implies higher access difficulty.",
+          "No dimensions provided; linear footage estimated from house footprint."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Assumed full-perimeter clean for typical single-family two-story footprint.",
+          "Recommend confirming gutter linear footage and any gutter guards or downspout blockages."
+        ],
+        "summary": "Gutter clean (full perimeter) for a two-story residence, light debris, moderate access."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1,
+    "luxuryMultiplier": 1,
+    "estateScore": 8200,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific for service and building type.",
+      "Imagery and property metadata support a single-family two-story scope with no visible complicating factors."
+    ]
+  }
+}

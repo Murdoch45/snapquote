@@ -1,0 +1,137 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T00:15:35.660Z",
+  "promptHash": "4752907f6183e9b8f3536a7e756409321076be5f1b2a817488d979b1ff551df7",
+  "keyHash": "36c4d2a32332e05bc1d4c947b3f3de74953592f648c2ea9d4debcde38f39c476",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Fence Installation / Repair"
+    ],
+    "address": "2481 Summitridge Dr, Beverly Hills, CA 90210, USA",
+    "addressPlaceId": "ChIJw5RbRLm9woARPFqNmJANwtg",
+    "lat": 34.1199802,
+    "lng": -118.4212831,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Fence Installation / Repair",
+        "answers": {
+          "fence_material": "Wood",
+          "fence_repair_condition": "Not applicable / not a repair",
+          "fence_scope": "Small section (up to ~25 linear ft)",
+          "fence_site": "Heavy slope or obstacles",
+          "fence_work_type": "Other",
+          "fence_work_type_other_text": "special access needs for fence work type 90"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests small wood fence installation for a short section with special access needs on a sloped site.",
+    "condition": "light",
+    "access": "difficult",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "Wood",
+    "inferredScope": "Small new wood fence section (~25 linear ft) with special access constraints on slope",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "Special access / heavy slope",
+      "Material: wood",
+      "Small linear footage (<=25 lf)"
+    ],
+    "estimatorNotes": [
+      "Questionnaire explicitly states wood material and small section (~25 lf).",
+      "Site is sloped and may require special access equipment or labor.",
+      "No photos contradicting scope; satellite shows large lot and pool but not relevant to fence length."
+    ],
+    "serviceSignals": {
+      "Fence Installation / Repair": {
+        "serviceType": "Fence Installation / Repair",
+        "jobSubtype": "install_area",
+        "jobSubtypeLabel": "Small Section Installation",
+        "workType": "install",
+        "fallbackFamily": "linear_boundary",
+        "surfaceFamily": "linear_boundary",
+        "targetObjectFamily": "fence",
+        "sizeBucket": "small",
+        "estimatedQuantity": 25,
+        "quantityUnit": "linear_ft",
+        "quantityEvidence": "direct",
+        "materialClass": "wood",
+        "materialSubtype": "standard_wood",
+        "conditionClass": "new_install",
+        "severityClass": "minor",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "moderate",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "steep",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": true,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": true,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 78,
+        "aiConfidenceReasons": [
+          "Customer provided explicit scope (small section up to ~25 linear ft).",
+          "Customer specified wood material and heavy slope site.",
+          "Special access note increases complexity and triggers manual review."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Estimate should account for slope access and potential equipment for tight or steep area.",
+          "Confirm exact linear footage and any gate or post preferences during follow-up.",
+          "Verify fence height and local permitting requirements."
+        ],
+        "summary": "Install ~25 lf of wood fence on sloped terrain with special access requirements."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Property context and imagery support the inferred scope."
+    ]
+  }
+}

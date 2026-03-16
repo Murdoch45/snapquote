@@ -1,0 +1,123 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T21:26:04.681Z",
+  "promptHash": "12b9ca47b8d795491664ef4f2e6c8b6f896b31851ad2d2f8cf54943e4a4d839d",
+  "keyHash": "66bb1bad53f05d04eda5527ce3fceaa54b5f005bbb590a9c6774ddd5d55485be",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Pool Service / Cleaning"
+    ],
+    "address": "577 Grove St, Worcester, MA 01605, USA",
+    "addressPlaceId": "ChIJCeltdQQH5IkRUt0eMJ6IxbA",
+    "lat": 42.2936121,
+    "lng": -71.8172553,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Pool Service / Cleaning",
+        "answers": {
+          "pool_access": "Somewhat",
+          "pool_condition": "Green or neglected",
+          "pool_size": "Small",
+          "pool_type": "Above-ground pool",
+          "pool_work_type": "Opening or startup"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests opening/startup for a small above-ground pool that is green/neglected.",
+    "condition": "moderate",
+    "access": "moderate",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "vinyl/above-ground",
+    "inferredScope": "Pool opening and initial cleaning of green/neglected above-ground pool; treatment and vacuuming likely needed.",
+    "treeSize": "small",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": 300,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "Above-ground pool",
+      "Green/neglected condition",
+      "Opening/startup service"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Opening or startup' and 'Above-ground pool' in questionnaire.",
+      "Photos and satellite show residential property with limited backyard area; no visible in-ground pool from satellite.",
+      "Assume single small above-ground pool requiring chemical treatment, filtration run, and debris removal."
+    ],
+    "serviceSignals": {
+      "Pool Service / Cleaning": {
+        "serviceType": "Pool Service / Cleaning",
+        "jobSubtype": "opening_startup",
+        "jobSubtypeLabel": "Pool Opening",
+        "workType": "service",
+        "fallbackFamily": "pool_service_event",
+        "surfaceFamily": "pool_service_event",
+        "targetObjectFamily": "pool",
+        "sizeBucket": "small",
+        "estimatedQuantity": 1,
+        "quantityUnit": "service_event",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "above_ground",
+        "materialSubtype": "vinyl_or_above_ground_standard",
+        "conditionClass": "neglected",
+        "severityClass": "moderate",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": true,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 72,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly requests pool opening for an above-ground pool.",
+          "Pool condition marked as green/neglected, consistent with required service type.",
+          "No explicit dimensions provided; quantity inferred as single pool."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Treat as one small above-ground pool opening with chemical treatment and vacuuming.",
+          "Recommend technician confirm pool diameter and access during visit."
+        ],
+        "summary": "Opening/startup for one small above-ground pool in neglected (green) condition."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 60,
+    "scopeMatchConfidence": 86,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1,
+    "estateScore": 0,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific to pool opening and above-ground pool type.",
+      "Imagery and description do not contradict the requested service; scope inferred conservatively."
+    ]
+  }
+}

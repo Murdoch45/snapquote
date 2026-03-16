@@ -1,0 +1,122 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T19:40:22.230Z",
+  "promptHash": "241c29059c5b9e4842f81893fb4e80c08d9cb941a03cb8de709be4a88bba2547",
+  "keyHash": "c98b63d7ecee4693e4432665ec904c01e38823953296319ababcdc553a7448e2",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Tree Service / Removal"
+    ],
+    "address": "1216 Norway St, Bristol, VA 24201, USA",
+    "addressPlaceId": "ChIJSQAVgxN2UIgRc62c8VJioW0",
+    "lat": 36.5970084,
+    "lng": -82.1960856,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Tree Service / Removal",
+        "answers": {
+          "tree_access": "Not sure",
+          "tree_haul_away": "Yes",
+          "tree_location": "Backyard",
+          "tree_size": "Not sure",
+          "tree_work_type": "Remove multiple trees"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests removal of multiple trees in backyard with haul-away requested; size/count not specified.",
+    "condition": "moderate",
+    "access": "moderate",
+    "severity": "moderate",
+    "debris": "heavy",
+    "multipleAreas": false,
+    "materialHint": "wood",
+    "inferredScope": "remove multiple trees in backyard with haul away",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 60,
+    "pricingDrivers": [
+      "multiple trees to remove",
+      "haul away required",
+      "backyard access uncertain"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Remove multiple trees' but did not provide count or sizes.",
+      "Haul-away confirmed in questionnaire.",
+      "Satellite shows open backyard area likely accommodating removal equipment."
+    ],
+    "serviceSignals": {
+      "Tree Service / Removal": {
+        "serviceType": "Tree Service / Removal",
+        "jobSubtype": "remove_trees",
+        "jobSubtypeLabel": "Tree removal",
+        "workType": "remove",
+        "fallbackFamily": "tree_work",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "tree",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 2,
+        "quantityUnit": "tree_count",
+        "quantityEvidence": "weak_inference",
+        "materialClass": "wood",
+        "materialSubtype": "unknown",
+        "conditionClass": "unknown",
+        "severityClass": "moderate",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "mixed_height",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": false,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": true,
+        "aiConfidence": 48,
+        "aiConfidenceReasons": [
+          "Questionnaire indicates removal but provides no counts or sizes.",
+          "Satellite imagery shows backyard space consistent with tree locations but does not confirm count."
+        ],
+        "consistencyScore": 60,
+        "notes": [
+          "Haul-away required per customer.",
+          "Recommend onsite assessment to confirm tree sizes, counts, and access for equipment."
+        ],
+        "summary": "Removal of multiple backyard trees with haul-away; unknown count and sizes."
+      }
+    },
+    "surfaceDetectionConfidence": 20,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 70,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1,
+    "luxuryMultiplier": 1,
+    "estateScore": 0,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire indicates removal but lacks counts or sizes.",
+      "Imagery confirms backyard location but not detailed tree metrics."
+    ]
+  }
+}

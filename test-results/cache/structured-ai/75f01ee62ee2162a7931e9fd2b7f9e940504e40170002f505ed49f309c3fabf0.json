@@ -1,0 +1,145 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T19:43:52.380Z",
+  "promptHash": "e378a5dae55fce604efbb62b1f1ca89db160edf1090c2eb43d52eba69f41d3b8",
+  "keyHash": "75f01ee62ee2162a7931e9fd2b7f9e940504e40170002f505ed49f309c3fabf0",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Other"
+    ],
+    "address": "1216 Norway St, Bristol, VA 24201, USA",
+    "addressPlaceId": "ChIJSQAVgxN2UIgRc62c8VJioW0",
+    "lat": 36.5970084,
+    "lng": -82.1960856,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Other",
+        "answers": {
+          "other_access": "Very difficult",
+          "other_property_type": "Not sure",
+          "other_size": "Very large",
+          "other_work_type": "Cleaning"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Large exterior hardscape cleaning requested; likely full driveway/motor court area.",
+    "condition": "moderate",
+    "access": "difficult",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": true,
+    "materialHint": "asphalt/concrete",
+    "inferredScope": "full front hardscape and parking area",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 68,
+    "pricingDrivers": [
+      "large_surface_area",
+      "difficult_access",
+      "mixed_materials"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Other' cleaning and indicated very large size with very difficult access.",
+      "Satellite shows an extensive irregular hardscape in front of building consistent with parking/motor court."
+    ],
+    "serviceSignals": {
+      "Pressure Washing": {
+        "serviceType": "Pressure Washing",
+        "jobSubtype": "driveway",
+        "jobSubtypeLabel": "Driveway / Motor court",
+        "workType": "clean",
+        "fallbackFamily": "flat_hardscape",
+        "surfaceFamily": "flat_hardscape",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "very_large",
+        "estimatedQuantity": 2100,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "asphalt",
+        "materialSubtype": "aged",
+        "conditionClass": "heavy_soiling",
+        "severityClass": "moderate",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "moderate",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 62,
+        "aiConfidenceReasons": [
+          "Customer explicitly marked very large and difficult access in questionnaire.",
+          "Satellite imagery shows large irregular hardscape consistent with a motor court/parking area."
+        ],
+        "consistencyScore": 72,
+        "notes": [
+          "Recommend manual review for access logistics and confirm material (asphalt vs concrete).",
+          "Large area may require multiple crew passes or water reclamation considerations."
+        ],
+        "summary": "Very large hardscape cleaning (driveway/motor court) with difficult access; likely asphalt, heavy soiling.",
+        "quotedSurfaces": {
+          "driveway": 2100
+        },
+        "surfaceDetections": [
+          {
+            "surface_type": "driveway",
+            "surface_area_sqft": 2100,
+            "confidence": 0.84
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "quotedSurfaces": {
+      "driveway": 2100
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 80,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "materialType": "asphalt",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.15,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire indicates very large job and difficult access.",
+      "Imagery supports large front hardscape area; photo count limited (1) so material and obstructions need confirmation."
+    ]
+  }
+}

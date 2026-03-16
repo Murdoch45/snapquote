@@ -1,0 +1,131 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T00:06:21.415Z",
+  "promptHash": "af932ee8b7ecc3136e76b77bd2ae43020244549c0d9641307d307523e53cbc2c",
+  "keyHash": "d2270f52b06980d1b88adc296abe1db9346f696be090b0409981478ff2e4c836",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Other"
+    ],
+    "address": "8260 Oakwood Ave, Los Angeles, CA 90048, USA",
+    "addressPlaceId": "ChIJoyhFqMq-woAR_VBTx51HS3c",
+    "lat": 34.0779676,
+    "lng": -118.3694635,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Other",
+        "answers": {
+          "other_access": "Very difficult",
+          "other_property_type": "Not sure",
+          "other_size": "Large",
+          "other_work_type": "Cleaning"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requested a large exterior cleaning (other) with very difficult access. Scope is unclear; likely general hardscape and walkways around property.",
+    "condition": "moderate",
+    "access": "difficult",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": null,
+    "inferredScope": "general exterior cleaning of hardscape and walkways; customer selected 'Other' cleaning without specifics",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 60,
+    "pricingDrivers": [
+      "access_difficulty",
+      "large_size",
+      "uncertain_scope"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Other' and reported Large and Very difficult access; follow-up required to confirm exact surfaces and access constraints.",
+      "Satellite shows small driveway and walkways; photo is a test image and non-diagnostic."
+    ],
+    "serviceSignals": {
+      "Other": {
+        "serviceType": "Other",
+        "jobSubtype": "other_cleaning",
+        "jobSubtypeLabel": "Other - General Cleaning",
+        "workType": "clean",
+        "fallbackFamily": "mixed_custom",
+        "surfaceFamily": "flat_hardscape",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "large",
+        "estimatedQuantity": 1200,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "weak_inference",
+        "materialClass": "unknown",
+        "materialSubtype": "unknown",
+        "conditionClass": "moderate_soiling",
+        "severityClass": "moderate",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "moderate",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 50,
+        "aiConfidenceReasons": [
+          "Questionnaire indicates 'Other' with no surface specifics.",
+          "Access reported as very difficult which increases uncertainty."
+        ],
+        "consistencyScore": 60,
+        "notes": [
+          "Manual follow-up recommended to confirm which surfaces are included and to assess access constraints."
+        ],
+        "summary": "Large, unspecified exterior cleaning with difficult access; manual review recommended."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 40,
+    "scopeMatchConfidence": 58,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.2,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers indicate vague 'Other' cleaning and very difficult access.",
+      "Satellite imagery shows hardscape but customer did not specify surfaces; photo provided is non-diagnostic."
+    ]
+  }
+}

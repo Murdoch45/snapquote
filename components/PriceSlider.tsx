@@ -6,32 +6,39 @@ import { Label } from "@/components/ui/label";
 import { toCurrency } from "@/lib/utils";
 
 type PriceSliderProps = {
-  estimateLow: number;
-  estimateHigh: number;
+  snapQuote: number;
   value: number;
   onChange: (value: number) => void;
 };
 
-export function PriceSlider({
-  estimateLow,
-  estimateHigh,
-  value,
-  onChange
-}: PriceSliderProps) {
+export function PriceSlider({ snapQuote, value, onChange }: PriceSliderProps) {
   const { min, max } = useMemo(() => {
-    const spread = Math.max(estimateHigh - estimateLow, 100);
-    const extension = Math.ceil(spread * 0.25);
+    const extension = Math.max(100, Math.ceil(snapQuote * 0.25));
     return {
-      min: Math.max(0, estimateLow - extension),
-      max: estimateHigh + extension
+      min: Math.max(0, snapQuote - extension),
+      max: snapQuote + extension
     };
-  }, [estimateLow, estimateHigh]);
+  }, [snapQuote]);
+
+  const snapQuoteLeft = `${((snapQuote - min) / Math.max(max - min, 1)) * 100}%`;
 
   return (
     <div className="space-y-3 rounded-lg border border-gray-200 bg-gray-50 p-4">
       <div className="flex items-center justify-between">
         <Label htmlFor="price-range">Final price</Label>
         <p className="text-sm font-medium text-gray-700">{toCurrency(value)}</p>
+      </div>
+      <div className="rounded-lg border border-gray-200 bg-white p-3">
+        <div className="relative h-12">
+          <div
+            className="absolute top-0 -translate-x-1/2 text-center"
+            style={{ left: snapQuoteLeft }}
+          >
+            <div className="mx-auto h-2.5 w-2.5 rounded-full bg-blue-600" />
+            <p className="mt-1 text-[11px] font-semibold text-gray-700">SnapQuote</p>
+            <p className="text-[11px] text-gray-500">{toCurrency(snapQuote)}</p>
+          </div>
+        </div>
       </div>
       <input
         id="price-range"

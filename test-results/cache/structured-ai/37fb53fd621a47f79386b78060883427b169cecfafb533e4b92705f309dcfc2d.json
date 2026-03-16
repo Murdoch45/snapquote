@@ -1,0 +1,133 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T19:44:45.032Z",
+  "promptHash": "806b527adeae0f1951a79dc5395825aa4f2fe3b974504a2570f8674cb700e301",
+  "keyHash": "37fb53fd621a47f79386b78060883427b169cecfafb533e4b92705f309dcfc2d",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Gutter Cleaning"
+    ],
+    "address": "2070 King College Rd, Bristol, TN 37620, USA",
+    "addressPlaceId": "ChIJ32Mu-bV2UIgR8C_BrBTmahI",
+    "lat": 36.5870892,
+    "lng": -82.1329154,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Gutter Cleaning",
+        "answers": {
+          "gutter_access": "Yes, steep roof or hard access",
+          "gutter_building_type": "Single-story home",
+          "gutter_fill_level": "Plants or heavy buildup",
+          "gutter_work_type": "Clean gutters only"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Gutter cleaning requested for single-story home with reports of heavy plant buildup and steep roof access.",
+    "condition": "moderate",
+    "access": "difficult",
+    "severity": "moderate",
+    "debris": "moderate",
+    "multipleAreas": false,
+    "materialHint": "metal",
+    "inferredScope": "full-perimeter gutters",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "steep roof / hard access",
+      "heavy plant buildup",
+      "single-story full perimeter"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Clean gutters only' and reported plants/heavy buildup.",
+      "Single-story home reduces ladder complexity but steep roof increases safety/time.",
+      "No explicit linear footage provided; inferred from house size and lot."
+    ],
+    "serviceSignals": {
+      "Gutter Cleaning": {
+        "serviceType": "Gutter Cleaning",
+        "jobSubtype": "standard_gutter_cleaning",
+        "jobSubtypeLabel": "Standard Gutter Cleaning",
+        "workType": "clean",
+        "fallbackFamily": "linear_boundary",
+        "surfaceFamily": "linear_boundary",
+        "targetObjectFamily": "gutter",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 180,
+        "quantityUnit": "linear_ft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "metal",
+        "materialSubtype": "unknown",
+        "conditionClass": "heavy_soiling",
+        "severityClass": "moderate",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "moderate",
+        "heightClass": "single_story",
+        "stories": 1,
+        "slopeClass": "some_slope",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": "shingle",
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 78,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly requested gutter cleaning and indicated heavy buildup.",
+          "Property imagery and house sqft support medium perimeter gutter length estimate."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Assumed full-perimeter clean given 'Clean gutters only' and no partial selection.",
+          "Steep roof access flagged for safety equipment/time considerations."
+        ],
+        "summary": "Medium-sized gutter cleaning with heavy vegetal buildup and difficult access."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 1200,
+        "confidence": 0.7
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 1200,
+      "walkway": 200
+    },
+    "surfaceDetectionConfidence": 70,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 86,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.2,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Satellite imagery supports medium-sized residential property and access notes."
+    ]
+  }
+}

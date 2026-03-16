@@ -1,0 +1,120 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T08:06:57.150Z",
+  "promptHash": "720ae8702fcaa23a8031137cb20a336d65ee49b77e9c206f17d1c2f998253b4a",
+  "keyHash": "333b72e94c682a4f00b52362f7c4aa6380a5e5d0eff77cf8f8db5db188ad4ad0",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Gutter Cleaning"
+    ],
+    "address": "424 NW 29th St, Oklahoma City, OK 73103, USA",
+    "addressPlaceId": "ChIJQ7Rvw1MXsocRLG8Dbk3Y5Yw",
+    "lat": 35.4992706,
+    "lng": -97.5201175,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Gutter Cleaning",
+        "answers": {
+          "gutter_access": "No",
+          "gutter_building_type": "Single-story home",
+          "gutter_fill_level": "Moderate debris",
+          "gutter_work_type": "Gutter guard cleaning"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Gutter guard cleaning for single-story home; moderate debris in gutters per questionnaire.",
+    "condition": "moderate",
+    "access": "moderate",
+    "severity": "moderate",
+    "debris": "moderate",
+    "multipleAreas": false,
+    "materialHint": "metal or vinyl gutters with guards",
+    "inferredScope": "gutter guard cleaning across single-story perimeter",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 78,
+    "pricingDrivers": [
+      "gutter guards",
+      "single-story access",
+      "moderate debris"
+    ],
+    "estimatorNotes": [
+      "Customer selected gutter guard cleaning on a single-story home with moderate debris.",
+      "No explicit linear footage provided; length inferred from typical single-family footprint and satellite imagery."
+    ],
+    "serviceSignals": {
+      "Gutter Cleaning": {
+        "serviceType": "Gutter Cleaning",
+        "jobSubtype": "gutter_guard_cleaning",
+        "jobSubtypeLabel": "Gutter Guard Cleaning",
+        "workType": "clean",
+        "fallbackFamily": "linear_boundary",
+        "surfaceFamily": "linear_boundary",
+        "targetObjectFamily": "gutter",
+        "sizeBucket": "small",
+        "estimatedQuantity": 120,
+        "quantityUnit": "linear_ft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "metal",
+        "materialSubtype": "standard",
+        "conditionClass": "moderate_soiling",
+        "severityClass": "moderate",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "single_story",
+        "stories": 1,
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": "asphalt_shingle",
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 72,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly selected gutter guard cleaning",
+          "Single-story building type directly provided",
+          "No explicit footage provided so quantity inferred from lot and building footprint"
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Recommend verifying linear footage if guards run continuous around roofline.",
+          "Customer reported moderate debris — assume debris removal included in cleaning scope."
+        ],
+        "summary": "Gutter guard cleaning for a single-story residence with moderate debris."
+      }
+    },
+    "surfaceDetectionConfidence": 40,
+    "satelliteClarity": 85,
+    "imageQuality": 60,
+    "scopeMatchConfidence": 84,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1,
+    "estateScore": 1000,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific to gutter guard cleaning.",
+      "Satellite imagery and property data support a small single-story footprint used for inference."
+    ]
+  }
+}

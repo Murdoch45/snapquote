@@ -1,0 +1,123 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T19:49:21.962Z",
+  "promptHash": "6939674c735d502f702c8f2bc14921a2aab1a11c48d639c64cc61fcb71848b7f",
+  "keyHash": "27ebbc02ba35ad494de7432c9328d9dae63610b32d4de3e0178d4562b818f3fd",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Junk Removal"
+    ],
+    "address": "2070 King College Rd, Bristol, TN 37620, USA",
+    "addressPlaceId": "ChIJ32Mu-bV2UIgR8C_BrBTmahI",
+    "lat": 36.5870892,
+    "lng": -82.1329154,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Junk Removal",
+        "answers": {
+          "junk_amount": "Large load (about a full trailer or truck load+)",
+          "junk_heavy_items": "Yes, many",
+          "junk_location": "Inside the home",
+          "junk_type": "Yard debris"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Large yard debris removal requested; customer reports many heavy items and approximately a full truck/trailer load. Location answer indicates items are inside the home which conflicts with yard debris type; manual review recommended.",
+    "condition": "moderate",
+    "access": "easy",
+    "severity": "moderate",
+    "debris": "heavy",
+    "multipleAreas": false,
+    "materialHint": "organic/yard",
+    "inferredScope": "single large load of mixed yard debris with heavy items; possible interior transfer required",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": 12,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "large_load",
+      "heavy_items",
+      "yard_debris",
+      "inside_location_flag"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Yard debris' and 'Large load (about a full trailer or truck load+)' — treat as ~12 cubic yards for planning.",
+      "Customer answered 'Inside the home' for location which conflicts with yard debris; confirm access and whether haul-out from interior needed.",
+      "Many heavy items reported; labor and possibly equipment required."
+    ],
+    "serviceSignals": {
+      "Junk Removal": {
+        "serviceType": "Junk Removal",
+        "jobSubtype": "debris_load",
+        "jobSubtypeLabel": "Yard / Debris Load",
+        "workType": "remove",
+        "fallbackFamily": "debris_load",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "debris",
+        "sizeBucket": "large",
+        "estimatedQuantity": 12,
+        "quantityUnit": "count",
+        "quantityEvidence": "direct",
+        "materialClass": "organic",
+        "materialSubtype": "yard_debris_mixed",
+        "conditionClass": "mixed",
+        "severityClass": "major",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "moderate",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": true,
+        "aiConfidence": 78,
+        "aiConfidenceReasons": [
+          "Customer explicitly selected large load and yard debris.",
+          "Customer indicated many heavy items which increases complexity.",
+          "Conflicting location answer (inside home) requires confirmation."
+        ],
+        "consistencyScore": 62,
+        "notes": [
+          "Estimate quantity derived from customer's 'full trailer or truck load+' answer; verify cubic yards during booking.",
+          "Confirm whether debris is interior, exterior, or both; interior removal affects labor and access."
+        ],
+        "summary": "Removal of one large mixed yard debris load with heavy items; verify interior vs exterior location."
+      }
+    },
+    "surfaceDetectionConfidence": 40,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 70,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers provided a clear large-load indicator.",
+      "Conflicting location responses require human clarification before final pricing."
+    ]
+  }
+}

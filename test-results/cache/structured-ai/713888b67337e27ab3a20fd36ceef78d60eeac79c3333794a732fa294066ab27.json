@@ -1,0 +1,131 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T19:32:32.319Z",
+  "promptHash": "b49d198362def25f1d7ad4f692d0e440287f6004614a3fdf0c1f1d69730844b6",
+  "keyHash": "713888b67337e27ab3a20fd36ceef78d60eeac79c3333794a732fa294066ab27",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Gutter Cleaning"
+    ],
+    "address": "1120 Barber Rd, Bristol, TN 37620, USA",
+    "addressPlaceId": "ChIJJ5fNoHydWogRR3gpT3OQN7M",
+    "lat": 36.5614452,
+    "lng": -82.220179,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Gutter Cleaning",
+        "answers": {
+          "gutter_access": "Yes, landscaping or obstacles",
+          "gutter_building_type": "Other",
+          "gutter_building_type_other_text": "custom scope requested for gutter building type 4",
+          "gutter_fill_level": "Light debris",
+          "gutter_work_type": "Minor gutter repair"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Gutter cleaning with light debris and minor repair requested; landscaped access may restrict ladder placement.",
+    "condition": "light",
+    "access": "moderate",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "metal",
+    "inferredScope": "full-perimeter gutters with some minor repair points",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "gutter_linear_feet",
+      "minor_repair",
+      "landscaping_access"
+    ],
+    "estimatorNotes": [
+      "Customer selected gutter cleaning and noted minor repairs and landscaping obstacles.",
+      "No explicit linear feet provided; perimeter estimated from house footprint."
+    ],
+    "serviceSignals": {
+      "Gutter Cleaning": {
+        "serviceType": "Gutter Cleaning",
+        "jobSubtype": "gutter_cleaning",
+        "jobSubtypeLabel": "Gutter Cleaning",
+        "workType": "clean",
+        "fallbackFamily": "linear_boundary",
+        "surfaceFamily": "linear_boundary",
+        "targetObjectFamily": "gutter_system",
+        "sizeBucket": "small",
+        "estimatedQuantity": 150,
+        "quantityUnit": "linear_ft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "metal",
+        "materialSubtype": "unknown_metal",
+        "conditionClass": "light_debris",
+        "severityClass": "minor",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "moderate",
+        "heightClass": "single_story",
+        "stories": 1,
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": "asphalt_shingle",
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 68,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly requested minor gutter repair and noted obstacles.",
+          "No direct linear footage provided; perimeter inferred from building footprint."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Customer selected 'Other' building type with custom text; manual review advised to confirm building specifics.",
+          "Landscaping or obstacles reported may require ladder protection or alternate access."
+        ],
+        "summary": "Clean gutters around the house perimeter; perform minor repairs as noted. Access impediments may increase labor."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 400,
+        "confidence": 0.64
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 400,
+      "walkway": 150
+    },
+    "surfaceDetectionConfidence": 66,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 76,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about repairs and obstacles.",
+      "No direct linear feet provided; inferred from house footprint and satellite."
+    ]
+  }
+}

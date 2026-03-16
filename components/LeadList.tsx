@@ -5,8 +5,7 @@ type Lead = {
   address_full: string;
   services: string[];
   submitted_at: string;
-  ai_estimate_low: number | null;
-  ai_estimate_high: number | null;
+  ai_suggested_price: number | null;
   photo_count?: number;
 };
 

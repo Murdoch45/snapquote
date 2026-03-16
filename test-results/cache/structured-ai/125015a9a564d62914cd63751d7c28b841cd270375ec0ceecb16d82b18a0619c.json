@@ -1,0 +1,133 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T08:09:38.995Z",
+  "promptHash": "c0e6d0307167cfeae7eae2872c1d9fac741a4dc813d12a02455edc5a9446158c",
+  "keyHash": "125015a9a564d62914cd63751d7c28b841cd270375ec0ceecb16d82b18a0619c",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Fence Installation / Repair"
+    ],
+    "address": "424 NW 29th St, Oklahoma City, OK 73103, USA",
+    "addressPlaceId": "ChIJQ7Rvw1MXsocRLG8Dbk3Y5Yw",
+    "lat": 35.4992706,
+    "lng": -97.5201175,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Fence Installation / Repair",
+        "answers": {
+          "fence_material": "Vinyl",
+          "fence_repair_condition": "Fence is falling or missing sections",
+          "fence_scope": "Small section (up to ~25 linear ft)",
+          "fence_site": "Some slope",
+          "fence_work_type": "Gate repair or replacement"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Vinyl gate/section repair or replacement for a small damaged area (up to ~25 linear ft).",
+    "condition": "moderate",
+    "access": "moderate",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "vinyl",
+    "inferredScope": "small section repair or gate replacement up to 25 linear ft",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 78,
+    "pricingDrivers": [
+      "vinyl material",
+      "gate repair or replacement",
+      "small linear footage",
+      "site slope"
+    ],
+    "estimatorNotes": [
+      "Customer selected gate repair or replacement and specified small section up to ~25 linear ft.",
+      "Property is residential with moderate access and slight slope noted in answers."
+    ],
+    "serviceSignals": {
+      "Fence Installation / Repair": {
+        "serviceType": "Fence Installation / Repair",
+        "jobSubtype": "Gate repair or replacement",
+        "jobSubtypeLabel": "Gate repair or replacement",
+        "workType": "repair",
+        "fallbackFamily": "linear_boundary",
+        "surfaceFamily": "linear_boundary",
+        "targetObjectFamily": "fence",
+        "sizeBucket": "small",
+        "estimatedQuantity": 25,
+        "quantityUnit": "linear_ft",
+        "quantityEvidence": "direct",
+        "materialClass": "vinyl",
+        "materialSubtype": "vinyl_standard",
+        "conditionClass": "damaged_missing_sections",
+        "severityClass": "minor",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "some_slope",
+        "removalNeeded": true,
+        "prepNeeded": false,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": true,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 88,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly selected gate repair/replacement and scope up to ~25 lf.",
+          "Material specified as vinyl in questionnaire."
+        ],
+        "consistencyScore": 92,
+        "notes": [
+          "Small section repair indicated; verify gate hardware and post condition on site.",
+          "Slope may require additional leveling or post work."
+        ],
+        "summary": "Repair or replace vinyl gate/small fence section up to 25 linear ft."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 90,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about fence material, scope, and work type.",
+      "Property context and imagery support a residential linear fence task."
+    ]
+  }
+}

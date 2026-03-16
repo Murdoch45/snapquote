@@ -1,0 +1,120 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T21:18:18.154Z",
+  "promptHash": "ff0267709344ca34037c502686a2a7fad67c34c18649479f00251e2b2369f6e7",
+  "keyHash": "770d523601ce48b94ffbb7e3d9ffb5cb25956c22726569d89529c6069b7492d4",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Gutter Cleaning"
+    ],
+    "address": "22 Bittersweet Blvd, Worcester, MA 01607, USA",
+    "addressPlaceId": "ChIJoc9sdbUF5IkRMHNxoI9HMCA",
+    "lat": 42.228719,
+    "lng": -71.8067966,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Gutter Cleaning",
+        "answers": {
+          "gutter_access": "Yes, landscaping or obstacles",
+          "gutter_building_type": "Detached garage or shed",
+          "gutter_fill_level": "Very full or overflowing",
+          "gutter_work_type": "Clean gutters only"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Gutter cleaning requested for a detached garage/shed; gutters very full and overflowing with some landscaping access obstacles.",
+    "condition": "heavy",
+    "access": "moderate",
+    "severity": "moderate",
+    "debris": "heavy",
+    "multipleAreas": false,
+    "materialHint": null,
+    "inferredScope": "Clean gutters on detached garage/shed; remove debris and haul away if needed",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "overflowing gutters",
+      "landscaping access obstacles",
+      "detached garage building type"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Detached garage or shed' and 'Clean gutters only'.",
+      "Fill level reported as very full or overflowing — expect significant debris and potential haul-away.",
+      "Access noted as 'Yes, landscaping or obstacles' which may slow work or require trimming/extra care."
+    ],
+    "serviceSignals": {
+      "Gutter Cleaning": {
+        "serviceType": "Gutter Cleaning",
+        "jobSubtype": "gutter_clean",
+        "jobSubtypeLabel": "Gutter Cleaning",
+        "workType": "clean",
+        "fallbackFamily": "linear_boundary",
+        "surfaceFamily": "linear_boundary",
+        "targetObjectFamily": "gutter",
+        "sizeBucket": "small",
+        "estimatedQuantity": 40,
+        "quantityUnit": "linear_ft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "metal",
+        "materialSubtype": "standard",
+        "conditionClass": "very_full",
+        "severityClass": "moderate",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "moderate",
+        "heightClass": "single_story",
+        "stories": 1,
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 68,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly indicates very full/overflowing gutters and detached garage building type.",
+          "Access obstacles noted in questionnaire increase uncertainty about time/effort."
+        ],
+        "consistencyScore": 80,
+        "notes": [
+          "Quantity estimated from typical detached garage gutter run; customer did not provide linear footage.",
+          "Recommend confirmation of linear footage and any roof/gutter damage during quoting."
+        ],
+        "summary": "Gutter cleaning for a detached garage with very full gutters and landscape access obstacles; haul-away likely."
+      }
+    },
+    "surfaceDetectionConfidence": 50,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 86,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.05,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1,
+    "luxuryMultiplier": 1,
+    "estateScore": 0,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about building type and gutter condition.",
+      "No explicit linear footage provided, so quantity is inferred conservatively."
+    ]
+  }
+}

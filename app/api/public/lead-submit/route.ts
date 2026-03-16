@@ -1,12 +1,16 @@
 import { randomUUID } from "crypto";
-import { NextResponse } from "next/server";
-import { generateEstimate } from "@/lib/ai/estimate";
+import { after, NextResponse } from "next/server";
+import { generateEstimateAsync } from "@/lib/ai/estimate";
+import { haversineMiles } from "@/lib/maps";
 import { notifyContractor, notifyCustomer } from "@/lib/notify";
+import { normalizeServiceTypes } from "@/lib/services";
+import { SubscriptionRequiredError, requireActiveSubscription } from "@/lib/subscription";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAppUrl } from "@/lib/utils";
-import { leadSubmitSchema } from "@/lib/validations";
+import { leadSubmitSchema, parseLeadSubmitQuestionAnswers } from "@/lib/validations";
 
 export const runtime = "nodejs";
+const MAX_PHOTO_UPLOADS = 10;
 
 function parseNumber(input: FormDataEntryValue | null): number | undefined {
   if (!input || typeof input !== "string" || input.length === 0) return undefined;
@@ -14,32 +18,23 @@ function parseNumber(input: FormDataEntryValue | null): number | undefined {
   return Number.isFinite(num) ? num : undefined;
 }
 
-async function geocodeAddressIfNeeded(
-  address: string,
-  currentLat?: number | null,
-  currentLng?: number | null
-): Promise<{ lat?: number; lng?: number }> {
-  if (currentLat != null && currentLng != null) {
-    return { lat: currentLat, lng: currentLng };
+function parseJsonField<T>(input: FormDataEntryValue | null, fallback: T): T {
+  if (!input || typeof input !== "string" || input.trim().length === 0) return fallback;
+
+  try {
+    return JSON.parse(input) as T;
+  } catch {
+    return fallback;
   }
-  const key = process.env.GOOGLE_MAPS_API_KEY;
-  if (!key) return {};
-  const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${key}`;
-  const response = await fetch(url, { method: "GET" });
-  if (!response.ok) return {};
-  const json = await response.json();
-  const location = json?.results?.[0]?.geometry?.location;
-  if (!location) return {};
-  return {
-    lat: Number(location.lat),
-    lng: Number(location.lng)
-  };
 }
 
 export async function POST(request: Request) {
   try {
     const formData = await request.formData();
-    const services = formData.getAll("services[]").map((value) => String(value));
+    const services = normalizeServiceTypes(formData.getAll("services[]").map((value) => String(value)));
+    const rawServiceQuestionAnswers = parseJsonField<unknown>(formData.get("serviceQuestionAnswers"), null);
+    const serviceQuestionAnswers = parseLeadSubmitQuestionAnswers(rawServiceQuestionAnswers);
+    const photos = formData.getAll("photos").filter((item): item is File => item instanceof File);
 
     const payload = leadSubmitSchema.parse({
       contractorSlug: String(formData.get("contractorSlug") ?? ""),
@@ -51,7 +46,9 @@ export async function POST(request: Request) {
       lat: parseNumber(formData.get("lat")),
       lng: parseNumber(formData.get("lng")),
       services,
-      description: String(formData.get("description") ?? "")
+      description: String(formData.get("description") ?? ""),
+      serviceQuestionAnswers,
+      photoCount: photos.length
     });
 
     console.log("lead-submit parsed payload:", {
@@ -66,7 +63,7 @@ export async function POST(request: Request) {
     const { data: contractor, error: contractorError } = await admin
       .from("contractor_profile")
       .select(
-        "org_id,business_name,public_slug,phone,email,notification_lead_sms,notification_lead_email"
+        "org_id,business_name,public_slug,phone,email,business_address_full,business_lat,business_lng,travel_pricing_disabled,notification_lead_sms,notification_lead_email"
       )
       .eq("public_slug", payload.contractorSlug)
       .single();
@@ -89,7 +86,25 @@ export async function POST(request: Request) {
     });
 
     const orgId = contractor.org_id as string;
-    const geocoded = await geocodeAddressIfNeeded(payload.addressFull, payload.lat, payload.lng);
+    await requireActiveSubscription(orgId);
+
+    const travelDistanceMiles =
+      !contractor.travel_pricing_disabled &&
+      contractor.business_lat != null &&
+      contractor.business_lng != null
+        ? Number(
+            haversineMiles(
+              {
+                lat: Number(contractor.business_lat),
+                lng: Number(contractor.business_lng)
+              },
+              {
+                lat: Number(payload.lat),
+                lng: Number(payload.lng)
+              }
+            ).toFixed(1)
+          )
+        : null;
 
     const { data: customer, error: customerError } = await admin
       .from("customers")
@@ -121,13 +136,16 @@ export async function POST(request: Request) {
         customer_email: payload.customerEmail || null,
         address_full: payload.addressFull,
         address_place_id: payload.addressPlaceId || null,
-        lat: geocoded.lat ?? payload.lat ?? null,
-        lng: geocoded.lng ?? payload.lng ?? null,
+        lat: payload.lat,
+        lng: payload.lng,
+        travel_distance_miles: travelDistanceMiles,
         services: payload.services,
+        service_question_answers: payload.serviceQuestionAnswers,
         description: payload.description || null,
-        status: "NEW"
+        status: "NEW",
+        ai_status: "processing"
       })
-      .select("id")
+      .select("id,parcel_lot_size_sqft")
       .single();
 
     if (leadError || !lead) {
@@ -136,10 +154,9 @@ export async function POST(request: Request) {
 
     const leadId = lead.id as string;
     console.log("lead-submit lead created:", { leadId, orgId });
-    const photos = formData.getAll("photos").filter((item): item is File => item instanceof File);
     const uploadedPaths: { path: string; url: string }[] = [];
 
-    for (const photo of photos.slice(0, 5)) {
+    for (const photo of photos.slice(0, MAX_PHOTO_UPLOADS)) {
       const ext = photo.type.includes("png") ? "png" : "jpg";
       const path = `${orgId}/${leadId}/${randomUUID()}.${ext}`;
       // eslint-disable-next-line no-await-in-loop
@@ -169,26 +186,7 @@ export async function POST(request: Request) {
       await admin.from("lead_photos").insert(photoRows);
     }
 
-    const estimate = await generateEstimate({
-      businessName: contractor.business_name as string,
-      services: payload.services,
-      address: payload.addressFull,
-      description: payload.description,
-      photoUrls: uploadedPaths.map((p) => p.url)
-    });
-
-    await admin
-      .from("leads")
-      .update({
-        ai_job_summary: estimate.jobSummary,
-        ai_estimate_low: estimate.estimateLow,
-        ai_estimate_high: estimate.estimateHigh,
-        ai_suggested_price: estimate.suggestedPrice,
-        ai_draft_message: estimate.draftMessage,
-        ai_generated_at: new Date().toISOString()
-      })
-      .eq("id", leadId)
-      .eq("org_id", orgId);
+    after(() => generateEstimateAsync(leadId));
 
     const leadLink = `${getAppUrl()}/app/leads/${leadId}`;
     const serviceText = payload.services.join(", ");
@@ -220,8 +218,18 @@ export async function POST(request: Request) {
     });
     console.log("lead-submit customer notifications:", customerNotifications);
 
-    return NextResponse.json({ leadId, received: true });
+    return NextResponse.json({ success: true, leadId, received: true });
   } catch (error) {
+    if (error instanceof SubscriptionRequiredError) {
+      return NextResponse.json(
+        {
+          code: error.code,
+          error: "Your subscription is inactive. Please update billing to continue."
+        },
+        { status: error.statusCode }
+      );
+    }
+
     console.error("lead-submit failed:", error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Lead submission failed." },

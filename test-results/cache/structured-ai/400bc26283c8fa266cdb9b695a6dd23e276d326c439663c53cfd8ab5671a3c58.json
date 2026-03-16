@@ -1,0 +1,127 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T00:20:04.599Z",
+  "promptHash": "4282b7df303a760037f17e86bbaf7d95363afebd1eef756b552d7786c6331ccf",
+  "keyHash": "400bc26283c8fa266cdb9b695a6dd23e276d326c439663c53cfd8ab5671a3c58",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Landscaping / Installation"
+    ],
+    "address": "1696 North Pass Trl, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJfeI3GdQ4b4cRiz4wRGjyh-I",
+    "lat": 41.2460767,
+    "lng": -104.7575577,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Landscaping / Installation",
+        "answers": {
+          "landscape_access": "Somewhat difficult",
+          "landscape_area_size": "Small section (up to ~500 sq ft)",
+          "landscape_job_type": "New installation on bare area",
+          "landscape_materials": [
+            "Mostly mulch or rock"
+          ],
+          "landscape_work_type": [
+            "Other",
+            "Yard makeover"
+          ],
+          "landscape_work_type_other_text": "custom scope requested for landscape work type 2"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Small backyard/new landscape installation (mulch/rock) for a bare area; access somewhat difficult.",
+    "condition": "light",
+    "access": "moderate",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "mulch/rock",
+    "inferredScope": "install mulch/rock on small bare area",
+    "treeSize": "small",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "materials (mulch/rock)",
+      "access difficulty",
+      "small bespoke installation"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Small section (up to ~500 sq ft)' and 'New installation on bare area'.",
+      "Photos and satellite show a fenced backyard with largely bare soil consistent with new installation."
+    ],
+    "serviceSignals": {
+      "Landscaping / Installation": {
+        "serviceType": "Landscaping / Installation",
+        "jobSubtype": "landscape_installation",
+        "jobSubtypeLabel": "Landscape installation - small area",
+        "workType": "install",
+        "fallbackFamily": "install_area",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "planting_bed",
+        "sizeBucket": "small",
+        "estimatedQuantity": 400,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "mulch_rock",
+        "materialSubtype": "mostly_mulch_or_rock",
+        "conditionClass": "bare_soil",
+        "severityClass": "minor",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": true,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": false,
+        "aiConfidence": 74,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly indicates new installation and small area.",
+          "Satellite shows a defined backyard area with bare soil consistent with survey."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Customer provided 'Other' with custom scope text; clarify plant selections and edging in follow-up.",
+          "Estimate quantity uses upper-small-band conservative value within client-provided band."
+        ],
+        "summary": "Install mulch/rock over ~400 sqft bare backyard area; moderate access."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 86,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1,
+    "luxuryMultiplier": 1,
+    "estateScore": 0,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific to installation and size band.",
+      "Satellite and photo evidence match a small bare backyard area suitable for mulch/rock installation."
+    ]
+  }
+}

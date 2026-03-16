@@ -1,0 +1,121 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T08:14:25.907Z",
+  "promptHash": "4e99fa994ecc9dfb8c20865d08dca8e827cb48e9add1b2b2e3cb5aec5573f9a4",
+  "keyHash": "b71713b0ce23fbec8a7e834afd96215cb21ea233d199276ff0648e3fa6e4f8c4",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Pool Service / Cleaning"
+    ],
+    "address": "12924 Cedar Springs Rd, Oklahoma City, OK 73120, USA",
+    "addressPlaceId": "ChIJ_z0yrGIcsocRtUEXpwmzF7E",
+    "lat": 35.6016417,
+    "lng": -97.5676136,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Pool Service / Cleaning",
+        "answers": {
+          "pool_access": "Yes",
+          "pool_condition": "Needs normal cleaning",
+          "pool_size": "Large",
+          "pool_type": "Not sure",
+          "pool_work_type": "Closing or winterizing"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requested pool closing/winterizing for a large pool; normal cleaning expected prior to closing.",
+    "condition": "moderate",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "pool",
+    "inferredScope": "closing/winterizing pool with normal cleaning",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": 600,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 70,
+    "pricingDrivers": [
+      "Pool closing / winterizing",
+      "Large pool size",
+      "Normal cleaning required prior to closing"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Closing or winterizing' and indicated 'Large' pool.",
+      "No explicit pool dimensions provided; area estimated from customer size and satellite context."
+    ],
+    "serviceSignals": {
+      "Pool Service / Cleaning": {
+        "serviceType": "Pool Service / Cleaning",
+        "jobSubtype": "closing",
+        "jobSubtypeLabel": "Pool closing/winterizing",
+        "workType": "service",
+        "fallbackFamily": "pool_service_event",
+        "surfaceFamily": "pool_service_event",
+        "targetObjectFamily": "pool",
+        "sizeBucket": "large",
+        "estimatedQuantity": 600,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "unknown",
+        "materialSubtype": "unknown",
+        "conditionClass": "normal",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": true,
+        "fencePresent": true,
+        "deckPresent": true,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 68,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly requests pool closing/winterizing.",
+          "Customer indicated pool is large; satellite imagery shows a residential inground pool consistent with that size."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Plan for normal cleaning and winterization tasks (balance, winterize plumbing/equipment, cover).",
+          "Confirm pool type and exact dimensions during scheduling."
+        ],
+        "summary": "Service event: closing/winterizing a large residential pool; includes normal cleaning prior to closing."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific to pool closing.",
+      "Satellite imagery confirms presence of an inground pool consistent with a large residential pool."
+    ]
+  }
+}

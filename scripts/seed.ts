@@ -27,7 +27,8 @@ async function main() {
   await supabase.from("contractor_profile").insert({
     org_id: org.id,
     business_name: "Greenline Outdoor",
-    public_slug: `greenline-${Math.floor(Math.random() * 9000 + 1000)}`
+    public_slug: `greenline-${Math.floor(Math.random() * 9000 + 1000)}`,
+    services: ["Lawn Care / Maintenance", "Landscaping / Installation"]
   });
 
   const { data: customer } = await supabase
@@ -50,7 +51,7 @@ async function main() {
       customer_phone: "+15555550123",
       customer_email: "alex@example.com",
       address_full: "123 Main St, Austin, TX",
-      services: ["Landscaping", "Lawn Care"],
+      services: ["Lawn Care / Maintenance"],
       description: "Front yard cleanup and monthly maintenance.",
       ai_job_summary: "Medium-size front yard cleanup and recurring lawn care.",
       ai_estimate_low: 300,

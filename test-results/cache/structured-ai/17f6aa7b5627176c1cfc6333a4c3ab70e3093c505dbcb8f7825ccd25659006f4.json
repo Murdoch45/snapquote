@@ -1,0 +1,141 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T08:15:20.084Z",
+  "promptHash": "8d660fef0bcdd26a2d782e3e5bc57c2c6c62e459d28aa9719461397de9d533fe",
+  "keyHash": "17f6aa7b5627176c1cfc6333a4c3ab70e3093c505dbcb8f7825ccd25659006f4",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Landscaping / Installation"
+    ],
+    "address": "12924 Cedar Springs Rd, Oklahoma City, OK 73120, USA",
+    "addressPlaceId": "ChIJ_z0yrGIcsocRtUEXpwmzF7E",
+    "lat": 35.6016417,
+    "lng": -97.5676136,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Landscaping / Installation",
+        "answers": {
+          "landscape_access": "Not sure",
+          "landscape_area_size": "Full property (4,000+ sq ft)",
+          "landscape_job_type": "Major redesign",
+          "landscape_materials": [
+            "Not sure"
+          ],
+          "landscape_work_type": [
+            "New plants or garden beds",
+            "Rock or mulch installation",
+            "Sod or lawn installation"
+          ]
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Full-property landscaping redesign including sod, planting beds, and rock/mulch installation focused on front and back yards.",
+    "condition": "moderate",
+    "access": "moderate",
+    "severity": "moderate",
+    "debris": "moderate",
+    "multipleAreas": true,
+    "materialHint": "mixed (sod, mulch, rock, plants)",
+    "inferredScope": "full property landscaping redesign (front and backyard)",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "large area (full property)",
+      "sod installation",
+      "planting beds and mulch/rock",
+      "haul away of existing materials"
+    ],
+    "estimatorNotes": [
+      "Customer requested major redesign covering full property.",
+      "Satellite and lot data indicate large yard area (~5826 sqft backyard; lot 9248 sqft).",
+      "Photos limited but support residential yard context."
+    ],
+    "serviceSignals": {
+      "Landscaping / Installation": {
+        "serviceType": "Landscaping / Installation",
+        "jobSubtype": "landscape_redesign",
+        "jobSubtypeLabel": "Major landscape redesign",
+        "workType": "install",
+        "fallbackFamily": "install_area",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "yard_area",
+        "sizeBucket": "very_large",
+        "estimatedQuantity": 5826,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "mixed_materials",
+        "materialSubtype": "sod_mulch_rock_plants",
+        "conditionClass": "overgrown_or_existing_lawn",
+        "severityClass": "moderate",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "moderate",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": true,
+        "fencePresent": true,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 68,
+        "aiConfidenceReasons": [
+          "Customer selected multiple installation types including sod and planting beds.",
+          "Questionnaire indicates full-property major redesign but no exact sqft provided for all areas.",
+          "Satellite and property data used to estimate area."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Plan includes sod/lawn installation, new planting beds, and rock/mulch installation.",
+          "Recommend manual review to confirm exact scope, access, and existing material removal quantities."
+        ],
+        "summary": "Full-property landscape installation (sod, beds, rock/mulch) estimated for large yard area."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 86,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 9200,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers indicate major redesign across full property.",
+      "Satellite and lot area support large yard scope but lack itemized quantities."
+    ]
+  }
+}

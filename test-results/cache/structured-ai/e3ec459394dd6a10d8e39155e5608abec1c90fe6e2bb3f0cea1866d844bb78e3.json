@@ -1,0 +1,153 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T19:35:08.971Z",
+  "promptHash": "debcf09924f9954f190984d69e8622b0fe61ca6d89d15079a702deddea115229",
+  "keyHash": "e3ec459394dd6a10d8e39155e5608abec1c90fe6e2bb3f0cea1866d844bb78e3",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Concrete"
+    ],
+    "address": "1120 Barber Rd, Bristol, TN 37620, USA",
+    "addressPlaceId": "ChIJJ5fNoHydWogRR3gpT3OQN7M",
+    "lat": 36.5614452,
+    "lng": -82.220179,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Concrete",
+        "answers": {
+          "concrete_material": "Not sure",
+          "concrete_project_type": [
+            "Driveway"
+          ],
+          "concrete_scope": "Medium (~200-600 sq ft)",
+          "concrete_site_condition": "Not sure",
+          "concrete_work_type": "Replacement"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests driveway concrete replacement, medium scope (~200-600 sqft).",
+    "condition": "moderate",
+    "access": "easy",
+    "severity": "major",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "concrete",
+    "inferredScope": "driveway replacement ~350 sqft",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "replacement",
+      "driveway_area",
+      "concrete_material"
+    ],
+    "estimatorNotes": [
+      "Questionnaire indicates concrete driveway replacement, medium size (200-600 sqft).",
+      "Satellite and single photo show a standard residential driveway; no large motor court detected."
+    ],
+    "serviceSignals": {
+      "Concrete": {
+        "serviceType": "Concrete",
+        "jobSubtype": "driveway",
+        "jobSubtypeLabel": "Driveway",
+        "workType": "replace",
+        "fallbackFamily": "flat_hardscape",
+        "surfaceFamily": "flat_hardscape",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 350,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "concrete",
+        "materialSubtype": "standard",
+        "conditionClass": "aged",
+        "severityClass": "major",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 76,
+        "aiConfidenceReasons": [
+          "Customer selected Driveway and Replacement and provided medium size range.",
+          "Satellite imagery shows a driveway-sized hardscape consistent with medium scope."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Use medium replacement assumptions (single residential driveway).",
+          "No explicit dimensions provided; estimate based on questionnaire range and imagery."
+        ],
+        "summary": "Driveway concrete replacement, medium (~350 sqft) with removal and haul-away.",
+        "quotedSurfaces": {
+          "driveway": 350
+        },
+        "surfaceDetections": [
+          {
+            "surface_type": "driveway",
+            "surface_area_sqft": 350,
+            "confidence": 0.82
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 600,
+        "confidence": 0.78
+      },
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 120,
+        "confidence": 0.6
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 600,
+      "walkway": 120
+    },
+    "quotedSurfaces": {
+      "driveway": 350
+    },
+    "surfaceDetectionConfidence": 72,
+    "satelliteClarity": 85,
+    "imageQuality": 60,
+    "scopeMatchConfidence": 84,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1,
+    "luxuryMultiplier": 1,
+    "estateScore": 1432,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers specify driveway replacement and size band.",
+      "Imagery and property context are consistent with a small residential driveway."
+    ]
+  }
+}

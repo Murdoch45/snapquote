@@ -1,0 +1,177 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T19:44:18.254Z",
+  "promptHash": "6d62527c16c112b6dda565ccd230fb3fcc18d08968fd6af75323d9226adf78ae",
+  "keyHash": "8bd405bd0fb82c6e921d86b0d44666b4794ae5021c13a7cbd815140cd6ae0d54",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Pressure Washing"
+    ],
+    "address": "2070 King College Rd, Bristol, TN 37620, USA",
+    "addressPlaceId": "ChIJ32Mu-bV2UIgR8C_BrBTmahI",
+    "lat": 36.5870892,
+    "lng": -82.1329154,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Pressure Washing",
+        "answers": {
+          "pressure_washing_access": "Tight or difficult access",
+          "pressure_washing_condition": "Not sure",
+          "pressure_washing_size": "Not sure",
+          "pressure_washing_target": [
+            "Driveway",
+            "Fence",
+            "House exterior",
+            "Other",
+            "Patio or porch",
+            "Roof"
+          ],
+          "pressure_washing_target_other_text": "site-specific details for pressure washing target 23"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requested pressure washing for multiple exterior surfaces including driveway, patio, fence, house exterior, and roof; access noted as tight.",
+    "condition": "moderate",
+    "access": "difficult",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": true,
+    "materialHint": "concrete",
+    "inferredScope": "driveway, walkways, patio, house exterior, fence, roof",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "multiple_surfaces",
+      "tight_access",
+      "roof_work_possible"
+    ],
+    "estimatorNotes": [
+      "Customer selected many targets including roof and house exterior; photo and satellite confirm large driveway and additional hardscapes. Recommend manual review for roof/house wash scope and safety."
+    ],
+    "serviceSignals": {
+      "Pressure Washing": {
+        "serviceType": "Pressure Washing",
+        "jobSubtype": "mixed_surfaces",
+        "jobSubtypeLabel": "Mixed exterior surfaces",
+        "workType": "clean",
+        "fallbackFamily": "flat_hardscape",
+        "surfaceFamily": "flat_hardscape",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "large",
+        "estimatedQuantity": 1200,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "concrete",
+        "materialSubtype": "standard",
+        "conditionClass": "moderate_soiling",
+        "severityClass": "moderate",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": true,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 68,
+        "aiConfidenceReasons": [
+          "Customer explicitly selected multiple targets including roof and house exterior.",
+          "Satellite imagery shows large driveway and connected hardscape; single photo is a test image.",
+          "Access flagged as tight/difficult by customer."
+        ],
+        "consistencyScore": 76,
+        "notes": [
+          "Quote focuses on driveway and main hardscapes with potential add-ons for house and roof wash pending manual review."
+        ],
+        "summary": "Large mixed-surface pressure washing request emphasizing driveway and exterior surfaces; manual review recommended for roof/house scope.",
+        "quotedSurfaces": {
+          "driveway": 1200,
+          "walkway": 200,
+          "patio": 300
+        },
+        "surfaceDetections": [
+          {
+            "surface_type": "driveway",
+            "surface_area_sqft": 2000,
+            "confidence": 0.84
+          },
+          {
+            "surface_type": "walkway",
+            "surface_area_sqft": 300,
+            "confidence": 0.7
+          },
+          {
+            "surface_type": "patio",
+            "surface_area_sqft": 400,
+            "confidence": 0.66
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2000,
+        "confidence": 0.84
+      },
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 300,
+        "confidence": 0.7
+      },
+      {
+        "surface_type": "patio",
+        "surface_area_sqft": 400,
+        "confidence": 0.66
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2000,
+      "walkway": 300,
+      "patio": 400
+    },
+    "quotedSurfaces": {
+      "driveway": 1200,
+      "walkway": 200,
+      "patio": 300
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 78,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.2,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire selections include multiple complex targets (roof, house exterior) requiring safety and scope review.",
+      "Satellite imagery supports large driveway and additional hardscapes but does not confirm exact contamination levels."
+    ]
+  }
+}

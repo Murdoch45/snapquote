@@ -1,0 +1,123 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T08:09:11.416Z",
+  "promptHash": "e2f838b649457700f6785dafae24d74205caa079d007e27ae00c3240b0735e87",
+  "keyHash": "f4bebd8656e57d33547fc595297a7f743248b3d6d05b2646663d5507a839e859",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Tree Service / Removal"
+    ],
+    "address": "424 NW 29th St, Oklahoma City, OK 73103, USA",
+    "addressPlaceId": "ChIJQ7Rvw1MXsocRLG8Dbk3Y5Yw",
+    "lat": 35.4992706,
+    "lng": -97.5201175,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Tree Service / Removal",
+        "answers": {
+          "tree_access": "Moderate",
+          "tree_haul_away": "No",
+          "tree_location": "Backyard",
+          "tree_size": "Very large",
+          "tree_work_type": "Remove one tree"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests removal of one very large tree in the backyard. Moderate access, no haul-away requested.",
+    "condition": "moderate",
+    "access": "moderate",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "wood",
+    "inferredScope": "Remove one large backyard tree; customer indicated no haul-away",
+    "treeSize": "large",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 78,
+    "pricingDrivers": [
+      "large_tree_size",
+      "backyard_location",
+      "limited_haul_away"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Remove one tree' and indicated 'Very large' size.",
+      "Haul away flagged as 'No' — customer likely will retain debris or handle disposal; confirm at visit.",
+      "Moderate access from questionnaire; satellite shows tree in backyard with surrounding canopy."
+    ],
+    "serviceSignals": {
+      "Tree Service / Removal": {
+        "serviceType": "Tree Service / Removal",
+        "jobSubtype": "remove_tree",
+        "jobSubtypeLabel": "Remove Tree",
+        "workType": "remove",
+        "fallbackFamily": "tree_work",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "tree_work",
+        "sizeBucket": "large",
+        "estimatedQuantity": 1,
+        "quantityUnit": "tree_count",
+        "quantityEvidence": "direct",
+        "materialClass": "wood",
+        "materialSubtype": "mature_deciduous",
+        "conditionClass": "unknown",
+        "severityClass": "major",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "moderate",
+        "heightClass": "three_plus",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 82,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly requests removal of one very large tree.",
+          "Satellite shows mature canopy in backyard consistent with large tree.",
+          "Photo set is limited (1 image) — basic confirmation only."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Confirm tree species, exact size/height, proximity to structures, and disposal preference on site visit.",
+          "Because haul-away was marked 'No', verify whether customer intends contractor to leave wood on site."
+        ],
+        "summary": "Remove one large backyard tree; moderate access; no haul-away requested."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 90,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Satellite imagery supports presence of mature trees in backyard."
+    ]
+  }
+}

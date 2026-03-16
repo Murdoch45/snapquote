@@ -1,0 +1,157 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T02:28:23.710Z",
+  "promptHash": "a9974042d307a4a5fa87128f9abe1bf8299b8bd93486fee3f5aa4966c888c520",
+  "keyHash": "219bc199ad0d3c4dcfe130b7e4effc16b4ac4e8d5f1f383ab318d70f8a5de578",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Concrete"
+    ],
+    "address": "1696 North Pass Trl, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJfeI3GdQ4b4cRiz4wRGjyh-I",
+    "lat": 41.2460767,
+    "lng": -104.7575577,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Concrete",
+        "answers": {
+          "concrete_material": "Brick / stone",
+          "concrete_project_type": [
+            "Driveway",
+            "Patio",
+            "Slab or pad",
+            "Walkway"
+          ],
+          "concrete_scope": "Medium (~200-600 sq ft)",
+          "concrete_site_condition": "Dirt or grading needed",
+          "concrete_work_type": "Replacement"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests medium-scope concrete replacements (driveway, walkway, slab, patio) with grading needed.",
+    "condition": "moderate",
+    "access": "easy",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": true,
+    "materialHint": "brick / stone",
+    "inferredScope": "200-600 sqft per selected feature, consolidated ~400 sqft quoted",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "replacement",
+      "grading_needed",
+      "brick_or_stone_material"
+    ],
+    "estimatorNotes": [
+      "Customer selected multiple concrete project types (driveway, walkway, slab/pad, patio).",
+      "Questionnaire indicates replacement and dirt/grading required; no explicit square footage provided.",
+      "Satellite shows a driveway and small walkway/slab areas; quote uses conservative medium bucket estimates."
+    ],
+    "serviceSignals": {
+      "Concrete": {
+        "serviceType": "Concrete",
+        "jobSubtype": "walkway",
+        "jobSubtypeLabel": "Walkway",
+        "workType": "replace",
+        "fallbackFamily": "flat_hardscape",
+        "surfaceFamily": "flat_hardscape",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "small",
+        "estimatedQuantity": 150,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "brick_stone",
+        "materialSubtype": "brick_or_stone_paver",
+        "conditionClass": "grading_needed",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 68,
+        "aiConfidenceReasons": [
+          "Customer selected walkway in questionnaire.",
+          "Satellite suggests small walkway/slab adjacent to house."
+        ],
+        "consistencyScore": 72,
+        "notes": [
+          "Walkway quoted as small allowance; customer may want separate quote for patio/slab."
+        ],
+        "summary": "Small walkway replacement, grading expected.",
+        "quotedSurfaces": {
+          "walkway": 150
+        },
+        "surfaceDetections": [
+          {
+            "surface_type": "walkway",
+            "surface_area_sqft": 200,
+            "confidence": 0.7
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 800,
+        "confidence": 0.84
+      },
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 200,
+        "confidence": 0.7
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 800,
+      "walkway": 200
+    },
+    "quotedSurfaces": {
+      "driveway": 400,
+      "walkway": 150
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "brick",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1.1,
+    "regionMultiplier": 1,
+    "luxuryMultiplier": 1,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about replacement and grading.",
+      "Satellite imagery supports presence of driveway and small walkways consistent with selections."
+    ]
+  }
+}

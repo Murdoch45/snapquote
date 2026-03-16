@@ -1,0 +1,135 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T00:03:29.755Z",
+  "promptHash": "d02723c1631dabff83d30d954c5dba946861c07435ca21ff042e0aa0637c4872",
+  "keyHash": "338e5227a4fce47a62388720b376ad12f1fa17f020b395aabbe82d00f125fb7f",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Fence Installation / Repair"
+    ],
+    "address": "8260 Oakwood Ave, Los Angeles, CA 90048, USA",
+    "addressPlaceId": "ChIJoyhFqMq-woAR_VBTx51HS3c",
+    "lat": 34.0779676,
+    "lng": -118.3694635,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Fence Installation / Repair",
+        "answers": {
+          "fence_material": "Metal or aluminum",
+          "fence_repair_condition": "Minor",
+          "fence_scope": "Other",
+          "fence_scope_other_text": "custom scope requested for fence scope 22",
+          "fence_site": "Flat and clear",
+          "fence_work_type": "Fence replacement"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests metal/aluminum fence replacement with custom scope.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "metal/aluminum",
+    "inferredScope": "partial perimeter replacement with custom features",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "custom scope",
+      "metal material",
+      "replacement (not repair)",
+      "easy access"
+    ],
+    "estimatorNotes": [
+      "Customer selected fence replacement and specified metal/aluminum and custom scope text.",
+      "No linear footage provided; quantity inferred from typical lot frontage and satellite footprint."
+    ],
+    "serviceSignals": {
+      "Fence Installation / Repair": {
+        "serviceType": "Fence Installation / Repair",
+        "jobSubtype": "perimeter_replacement",
+        "jobSubtypeLabel": "Perimeter fence replacement (custom)",
+        "workType": "replace",
+        "fallbackFamily": "linear_boundary",
+        "surfaceFamily": "linear_boundary",
+        "targetObjectFamily": "fence",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 120,
+        "quantityUnit": "linear_ft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "metal",
+        "materialSubtype": "aluminum",
+        "conditionClass": "minor_damage",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": true,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 68,
+        "aiConfidenceReasons": [
+          "Customer explicitly requested replacement and metal/aluminum material.",
+          "No direct linear footage provided; quantity inferred from lot size and satellite imagery.",
+          "Customer included 'custom scope' text which may require manual review."
+        ],
+        "consistencyScore": 76,
+        "notes": [
+          "Confirm exact linear footage and any gates, decorative panels, or posts in manual review.",
+          "Verify local code or HOA requirements for metal fence replacement."
+        ],
+        "summary": "Medium-size aluminum fence replacement with custom scope; manual review recommended for specifics."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers specify replacement and metal material.",
+      "Satellite and photo evidence support a typical single-family lot; linear footage inferred."
+    ]
+  }
+}

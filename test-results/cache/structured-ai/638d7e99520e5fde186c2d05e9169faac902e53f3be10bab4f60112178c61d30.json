@@ -1,0 +1,133 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T00:08:34.131Z",
+  "promptHash": "7076bac2c82d391e68ecf9c9effa122d6db75dd39e971a73cd2d27174e28ebb1",
+  "keyHash": "638d7e99520e5fde186c2d05e9169faac902e53f3be10bab4f60112178c61d30",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Exterior Painting"
+    ],
+    "address": "1301 E 23rd St, Cheyenne, WY 82001, USA",
+    "addressPlaceId": "ChIJi8RhiOM6b4cRMw7GhSSaufo",
+    "lat": 41.1442781,
+    "lng": -104.8044048,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Exterior Painting",
+        "answers": {
+          "painting_access": "Two-story areas",
+          "painting_condition": "Not sure",
+          "painting_scope": "One side or small area",
+          "painting_surface_type": "Siding",
+          "painting_target": "Fence or detached structure"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Small exterior painting of a fence or detached siding area on one side; customer unsure of condition and mentions two-story access.",
+    "condition": "light",
+    "access": "moderate",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "siding",
+    "inferredScope": "small_area_one_side",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 68,
+    "pricingDrivers": [
+      "two_story_access",
+      "siding_surface",
+      "small_area"
+    ],
+    "estimatorNotes": [
+      "Customer selected fence/detached structure with siding surface and small one-side scope.",
+      "No explicit area dimensions provided; quantity inferred from 'one side or small area' statement."
+    ],
+    "serviceSignals": {
+      "Exterior Painting": {
+        "serviceType": "Exterior Painting",
+        "jobSubtype": "fence_or_detached_structure",
+        "jobSubtypeLabel": "Fence / Detached Structure",
+        "workType": "custom",
+        "fallbackFamily": "exterior_finish_surface",
+        "surfaceFamily": "vertical_exterior_surface",
+        "targetObjectFamily": "structure",
+        "sizeBucket": "small",
+        "estimatedQuantity": 120,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "weak_inference",
+        "materialClass": "siding",
+        "materialSubtype": "siding",
+        "conditionClass": "unknown",
+        "severityClass": "minor",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "two_story",
+        "stories": 2,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": true,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": false,
+        "aiConfidence": 64,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly selected fence/detached structure and siding.",
+          "No direct measurements provided; area estimated conservatively."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Confirm exact area and condition during manual estimate or visit.",
+          "Two-story access may require ladders or lift equipment."
+        ],
+        "summary": "Small painting job on siding of a fence or detached structure; minor prep likely needed."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific to fence/detached structure and siding.",
+      "Satellite and photo imagery show residential property; small scope likely."
+    ]
+  }
+}

@@ -1,0 +1,132 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T19:43:04.424Z",
+  "promptHash": "ece7f32e4e48d0cb67e04f3c09783731b734fd89b17c04749a9ec6b1efc77941",
+  "keyHash": "774b9ffea28e413e5b5c779c5b1288cfc009f5bdd1bb82fc98fb0656703c0f60",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Junk Removal"
+    ],
+    "address": "1216 Norway St, Bristol, VA 24201, USA",
+    "addressPlaceId": "ChIJSQAVgxN2UIgRc62c8VJioW0",
+    "lat": 36.5970084,
+    "lng": -82.1960856,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Junk Removal",
+        "answers": {
+          "junk_amount": "A few items (fits in part of a pickup bed)",
+          "junk_heavy_items": "Not sure",
+          "junk_location": "Backyard or hard-to-reach area",
+          "junk_type": "Furniture"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests removal of a few furniture items from the backyard; fits part of a pickup bed and located in backyard/hard-to-reach area.",
+    "condition": "light",
+    "access": "moderate",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "mixed household furniture",
+    "inferredScope": "single small load from backyard",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": 2,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "backyard_access",
+      "furniture_items",
+      "small_load"
+    ],
+    "estimatorNotes": [
+      "Questionnaire explicitly states 'A few items (fits in part of a pickup bed)'.",
+      "Items located in backyard / hard-to-reach area may require carry-out."
+    ],
+    "serviceSignals": {
+      "Junk Removal": {
+        "serviceType": "Junk Removal",
+        "jobSubtype": "furniture",
+        "jobSubtypeLabel": "Furniture removal",
+        "workType": "remove",
+        "fallbackFamily": "debris_load",
+        "surfaceFamily": "unknown",
+        "targetObjectFamily": "debris",
+        "sizeBucket": "small",
+        "estimatedQuantity": 0.5,
+        "quantityUnit": "load",
+        "quantityEvidence": "direct",
+        "materialClass": "mixed",
+        "materialSubtype": "household_furniture",
+        "conditionClass": "unknown",
+        "severityClass": "minor",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "moderate",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": false,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 78,
+        "aiConfidenceReasons": [
+          "Customer selected junk type and amount explicitly.",
+          "Location specified as backyard / hard-to-reach which affects access."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Estimate assumes items can be carried by two people and loaded into a pickup.",
+          "If heavy items are present or obstructed, additional labor or equipment may be required."
+        ],
+        "summary": "Small backyard furniture removal estimated as half pickup load."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Property context and imagery support the inferred scope."
+    ]
+  }
+}

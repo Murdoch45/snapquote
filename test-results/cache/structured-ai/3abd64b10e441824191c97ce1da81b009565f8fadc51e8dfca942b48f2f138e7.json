@@ -1,0 +1,145 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T08:06:32.018Z",
+  "promptHash": "810e35db404243f2457a0452f48b2ed12e64ea30fb89ccddd2399563477b2dad",
+  "keyHash": "3abd64b10e441824191c97ce1da81b009565f8fadc51e8dfca942b48f2f138e7",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Pressure Washing"
+    ],
+    "address": "424 NW 29th St, Oklahoma City, OK 73103, USA",
+    "addressPlaceId": "ChIJQ7Rvw1MXsocRLG8Dbk3Y5Yw",
+    "lat": 35.4992706,
+    "lng": -97.5201175,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Pressure Washing",
+        "answers": {
+          "pressure_washing_access": "Easy access",
+          "pressure_washing_condition": "Oil, rust, or deep stains",
+          "pressure_washing_size": "Large area (~1,500-3,000 sq ft)",
+          "pressure_washing_target": [
+            "Fence",
+            "Patio or porch"
+          ]
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests pressure washing of large patio/porch area and fence; reports deep stains (oil/rust). Easy access.",
+    "condition": "moderate",
+    "access": "easy",
+    "severity": "major",
+    "debris": "light",
+    "multipleAreas": true,
+    "materialHint": "concrete/wood",
+    "inferredScope": "patio and fence cleaning across backyard/porch area",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "large area (~1500-3000 sqft)",
+      "deep stains / oil or rust present",
+      "includes horizontal hardscape and vertical fence surfaces",
+      "easy access reduces mobilization complexity"
+    ],
+    "estimatorNotes": [
+      "Customer selected patio/porch and fence as targets and indicated large area with deep stains.",
+      "Satellite imagery shows a sizeable rear patio/porch hardscape consistent with a multi-thousand sqft area.",
+      "No exact dimensions provided; quantity inferred from questionnaire band and imagery."
+    ],
+    "serviceSignals": {
+      "Pressure Washing": {
+        "serviceType": "Pressure Washing",
+        "jobSubtype": "fence",
+        "jobSubtypeLabel": "Fence",
+        "workType": "clean",
+        "fallbackFamily": "linear_boundary",
+        "surfaceFamily": "vertical_exterior_surface",
+        "targetObjectFamily": "fence",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 120,
+        "quantityUnit": "linear_ft",
+        "quantityEvidence": "weak_inference",
+        "materialClass": "wood",
+        "materialSubtype": "standard",
+        "conditionClass": "heavy_soiling",
+        "severityClass": "moderate",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": true,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 68,
+        "aiConfidenceReasons": [
+          "Fence was selected by the customer but no linear footage provided.",
+          "Typical residential lot suggests a medium-length perimeter fence along backyard."
+        ],
+        "consistencyScore": 75,
+        "notes": [
+          "Estimate fence linear footage conservatively; confirm during walkthrough.",
+          "Use low-pressure techniques for wood fence to avoid damage."
+        ],
+        "summary": "Fence washing included as accessory vertical cleaning alongside patio."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "patio",
+        "surface_area_sqft": 2000,
+        "confidence": 0.82
+      },
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 200,
+        "confidence": 0.6
+      }
+    ],
+    "detectedSurfaces": {
+      "walkway": 200,
+      "patio": 2000
+    },
+    "quotedSurfaces": {
+      "patio": 2000
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific to patio/porch and fence and indicated a large area and deep stains.",
+      "Imagery and property context support a large hardscape being present in the backyard/porch area."
+    ]
+  }
+}

@@ -52,7 +52,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 Notes:
 - Twilio and Resend are optional. If missing, notifications no-op.
-- `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` enables client autocomplete. If missing, address input still works as plain text.
+- `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` is required for the public address field because leads must be submitted from a Google Places selection.
 
 ## Supabase Setup
 

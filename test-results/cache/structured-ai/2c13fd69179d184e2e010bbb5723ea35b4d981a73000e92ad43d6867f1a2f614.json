@@ -1,0 +1,132 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T08:08:42.710Z",
+  "promptHash": "edb510f44bcfa15de70adaffa5d459062fa1c6bf7e22f36387592d39ff8aa9ee",
+  "keyHash": "2c13fd69179d184e2e010bbb5723ea35b4d981a73000e92ad43d6867f1a2f614",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Landscaping / Installation"
+    ],
+    "address": "424 NW 29th St, Oklahoma City, OK 73103, USA",
+    "addressPlaceId": "ChIJQ7Rvw1MXsocRLG8Dbk3Y5Yw",
+    "lat": 35.4992706,
+    "lng": -97.5201175,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Landscaping / Installation",
+        "answers": {
+          "landscape_access": "Difficult",
+          "landscape_area_size": "Small section (up to ~500 sq ft)",
+          "landscape_job_type": "Refresh existing landscaping",
+          "landscape_materials": [
+            "Mixed materials",
+            "Mostly mulch or rock",
+            "Mostly plants",
+            "Sod or turf"
+          ],
+          "landscape_work_type": [
+            "New plants or garden beds",
+            "Other",
+            "Rock or mulch installation",
+            "Sod or lawn installation"
+          ],
+          "landscape_work_type_other_text": "custom scope requested for landscape work type 24"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Small backyard landscaping refresh with sod, plants, and mulch; custom scope requested.",
+    "condition": "light",
+    "access": "difficult",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "mixed_sod_plants_mulch",
+    "inferredScope": "sod installation, planting beds, rock/mulch refresh",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "access_difficulty",
+      "sod_installation",
+      "custom_scope"
+    ],
+    "estimatorNotes": [
+      "Customer selected multiple landscaping types including sod, plants, and mulch and marked access as difficult.",
+      "Customer provided 'Other' with custom scope text; manual review recommended to confirm specifics and measurements."
+    ],
+    "serviceSignals": {
+      "Landscaping / Installation": {
+        "serviceType": "Landscaping / Installation",
+        "jobSubtype": "sod_installation",
+        "jobSubtypeLabel": "Sod or lawn installation",
+        "workType": "install",
+        "fallbackFamily": "yard_area",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "planting_bed",
+        "sizeBucket": "small",
+        "estimatedQuantity": 400,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "sod_and_plants",
+        "materialSubtype": "mixed",
+        "conditionClass": "existing_landscape",
+        "severityClass": "minor",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "moderate",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 65,
+        "aiConfidenceReasons": [
+          "Customer selected multiple landscaping options and a size band only.",
+          "Custom 'Other' text indicates non-standard scope requiring confirmation."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Estimate quantity is a conservative inference from 'Small section (up to ~500 sq ft)'.",
+          "Verify exact square footage, access constraints, and whether irrigation or edging are required."
+        ],
+        "summary": "Small-area sod and planting refresh with mulch/rock in parts; custom details to be confirmed."
+      }
+    },
+    "surfaceDetectionConfidence": 72,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 78,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers indicate multiple landscape tasks and a small area size band.",
+      "Custom 'Other' text and difficult access increase uncertainty; satellite supports residential yard scope."
+    ]
+  }
+}

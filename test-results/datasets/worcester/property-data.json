@@ -1,0 +1,26 @@
+[
+    {
+        "address":  "22 Bittersweet Blvd, Worcester, MA 01607, USA",
+        "formattedAddress":  "22 Bittersweet Blvd, Worcester, MA 01607, USA",
+        "city":  "Worcester",
+        "google_building_sqft":  1533,
+        "google_lot_sqft":  4945,
+        "travel_distance_miles":  1694.9
+    },
+    {
+        "address":  "577 Grove St, Worcester, MA 01605, USA",
+        "formattedAddress":  "577 Grove St, Worcester, MA 01605, USA",
+        "city":  "Worcester",
+        "google_building_sqft":  2586,
+        "google_lot_sqft":  8280,
+        "travel_distance_miles":  1693.7
+    },
+    {
+        "address":  "31 Lenox St, Worcester, MA 01602, USA",
+        "formattedAddress":  "31 Lenox St, Worcester, MA 01602, USA",
+        "city":  "Worcester",
+        "google_building_sqft":  2878,
+        "google_lot_sqft":  8280,
+        "travel_distance_miles":  1693.1
+    }
+]

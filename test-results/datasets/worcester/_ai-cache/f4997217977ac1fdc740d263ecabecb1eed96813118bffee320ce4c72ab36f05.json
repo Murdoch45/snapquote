@@ -1,0 +1,122 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T21:37:13.025Z",
+  "promptHash": "6cf216865362be94e137d5b1de350489ed85f5f01c7dd5293df01deb7ac0e0fd",
+  "keyHash": "f4997217977ac1fdc740d263ecabecb1eed96813118bffee320ce4c72ab36f05",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Deck Installation / Repair"
+    ],
+    "address": "31 Lenox St, Worcester, MA 01602, USA",
+    "addressPlaceId": "ChIJD1cICMIG5IkRYY1iKGn1gck",
+    "lat": 42.2777158,
+    "lng": -71.8334735,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Deck Installation / Repair",
+        "answers": {
+          "deck_area_type": "Rooftop or specialty area",
+          "deck_material": "Composite",
+          "deck_repair_condition": "Minor issues",
+          "deck_scope": "Medium (~150-350 sq ft)",
+          "deck_work_type": "Stairs or railing work"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests composite deck stairs/railing repair in rooftop/specialty area, medium scope (~150-350 sqft).",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "composite",
+    "inferredScope": "Deck stairs/railing repair ~250 sqft",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "composite material",
+      "stair and railing repair",
+      "rooftop/specialty access"
+    ],
+    "estimatorNotes": [
+      "Questionnaire explicitly indicates stairs/railing work and composite material.",
+      "Scope classified as medium per customer-provided band (~150-350 sqft).",
+      "Rooftop/specialty area may increase access/prep requirements slightly."
+    ],
+    "serviceSignals": {
+      "Deck Installation / Repair": {
+        "serviceType": "Deck Installation / Repair",
+        "jobSubtype": "stairs_or_railing",
+        "jobSubtypeLabel": "Stairs or railing work",
+        "workType": "repair",
+        "fallbackFamily": "repair_section",
+        "surfaceFamily": "unknown",
+        "targetObjectFamily": "deck",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 250,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "direct",
+        "materialClass": "composite",
+        "materialSubtype": "composite_board",
+        "conditionClass": "minor_damage",
+        "severityClass": "minor",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "roof_level",
+        "stories": 2,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": true,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 78,
+        "aiConfidenceReasons": [
+          "Customer explicitly selected stairs/railing and composite in questionnaire.",
+          "Scope band provided by customer allows direct quantity evidence."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Treat as repair of existing composite deck stairs/railing in rooftop/specialty area.",
+          "May require rooftop access precautions; verify during site visit."
+        ],
+        "summary": "Medium-sized composite deck stairs/railing repair (~250 sqft) on rooftop/specialty area."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Property context supports a medium composite deck on the site."
+    ]
+  }
+}

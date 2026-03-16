@@ -1,0 +1,120 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T00:08:27.377Z",
+  "promptHash": "4b1b793755c2a11de2943a69acd093a15a853a70e246e04a9479eaa83bef04c9",
+  "keyHash": "cc68306f1710325ce842eb95eb01fd543a22768114cae447e8addf86cf831ec0",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Lawn Care / Maintenance"
+    ],
+    "address": "935 Burnside Ave, Los Angeles, CA 90036, USA",
+    "addressPlaceId": "ChIJ_1o_zx65woAR28Q5Yc4qZdE",
+    "lat": 34.058076,
+    "lng": -118.3514135,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Lawn Care / Maintenance",
+        "answers": {
+          "lawn_area_size": "Medium yard (~2,000-5,000 sq ft)",
+          "lawn_condition": "Not sure",
+          "lawn_property_type": "Front yard only",
+          "lawn_work_type": "Mowing only"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Front yard mowing only for a medium-sized yard (customer indicated ~2,000-5,000 sqft).",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "grass",
+    "inferredScope": "front yard mowing only",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "yard_size",
+      "front_yard_only",
+      "mowing_frequency_unknown"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Mowing only' and reported medium yard size (~2,000-5,000 sqft).",
+      "Satellite and photo context show turf in front yard and easy access from street."
+    ],
+    "serviceSignals": {
+      "Lawn Care / Maintenance": {
+        "serviceType": "Lawn Care / Maintenance",
+        "jobSubtype": "mowing",
+        "jobSubtypeLabel": "Mowing",
+        "workType": "maintain",
+        "fallbackFamily": "yard_area",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 3000,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "direct",
+        "materialClass": "turf",
+        "materialSubtype": "mixed",
+        "conditionClass": "unknown",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 78,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly selected mowing and provided a yard size range.",
+          "Satellite image shows clear turf area in front yard consistent with customer scope."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Estimate uses midpoint of customer-provided size range for quantity.",
+          "Only front yard selected by customer; backyard not in scope per answers."
+        ],
+        "summary": "Front-yard mowing for an estimated 3,000 sqft of turf."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about service type and yard size range.",
+      "Imagery supports a front turf area with easy access matching the requested mowing."
+    ]
+  }
+}

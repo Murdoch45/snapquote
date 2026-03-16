@@ -1,0 +1,180 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T21:39:46.918Z",
+  "promptHash": "2324fbb1ea67532f7986f5e8d78c17808584e9365f7dd30475969d95fbd98850",
+  "keyHash": "3b841a02b1d52863ec5f029ccce1b3a1e762710b31cf75fbd06a9d8c90c5e359",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Other"
+    ],
+    "address": "31 Lenox St, Worcester, MA 01602, USA",
+    "addressPlaceId": "ChIJD1cICMIG5IkRYY1iKGn1gck",
+    "lat": 42.2777158,
+    "lng": -71.8334735,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Other",
+        "answers": {
+          "other_access": "Very difficult",
+          "other_outdoor_service": "Yes",
+          "other_property_type": "Standard home",
+          "other_size": "Medium",
+          "other_work_type": "Removal"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Automated estimator test - miscellaneous removal request with constrained access",
+    "condition": "light",
+    "access": "difficult",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "mixed",
+    "inferredScope": "removal of medium-sized outdoor items / cleanup",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": 350,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": 6,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "access difficulty",
+      "medium removal volume",
+      "satellite shows pool present"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Other' removal, marked Very difficult access.",
+      "Satellite imagery confirms pool and medium backyard area.",
+      "Photo provided is a placeholder test image; rely on questionnaire and satellite for scope inference."
+    ],
+    "serviceSignals": {
+      "Junk Removal": {
+        "serviceType": "Junk Removal",
+        "jobSubtype": "yard_debris",
+        "jobSubtypeLabel": "Yard debris removal",
+        "workType": "remove",
+        "fallbackFamily": "debris_load",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "debris",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 6,
+        "quantityUnit": "load",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "mixed_debris",
+        "materialSubtype": "green_waste_and_household",
+        "conditionClass": "scattered",
+        "severityClass": "minor",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "moderate",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "some_slope",
+        "removalNeeded": true,
+        "prepNeeded": false,
+        "haulAwayNeeded": true,
+        "poolPresent": true,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 66,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly requested Other removal with Very difficult access.",
+          "No detailed counts provided; inference from lot/backyard size and description."
+        ],
+        "consistencyScore": 72,
+        "notes": [
+          "Mark for manual review due to 'Very difficult' access and ambiguous 'Other' service type."
+        ],
+        "summary": "Medium-volume yard debris removal with haul-away; difficult access."
+      },
+      "Pool Service / Cleaning": {
+        "serviceType": "Pool Service / Cleaning",
+        "jobSubtype": "pool_cleaning",
+        "jobSubtypeLabel": "Pool Cleaning",
+        "workType": "service",
+        "fallbackFamily": "pool_service_event",
+        "surfaceFamily": "pool_service_event",
+        "targetObjectFamily": "pool",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 350,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "vinyl_or_gunite_pool",
+        "materialSubtype": "standard_pool",
+        "conditionClass": "stained",
+        "severityClass": "minor",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": true,
+        "fencePresent": false,
+        "deckPresent": true,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 70,
+        "aiConfidenceReasons": [
+          "Satellite image clearly shows an in-ground pool adjacent to house.",
+          "Customer did not explicitly request pool service but presence suggests potential related scope."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Include pool cleaning as possible added service; confirm with customer."
+        ],
+        "summary": "In-ground pool present; potential cleaning/service of approx 350 sqft water surface."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "quotedSurfaces": {
+      "driveway": 2100
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about 'Other' removal and access difficulty.",
+      "Property context and satellite imagery support inferred pool and backyard scope."
+    ]
+  }
+}

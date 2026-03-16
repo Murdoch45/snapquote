@@ -1,0 +1,135 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T02:23:53.437Z",
+  "promptHash": "e0fe6ffc1cf4a91a2262be9fb903ecf30702bb3ec72ec9cdebd1f2ed043b208f",
+  "keyHash": "eb03950494c422271f0048c869f3ec034154f36103db52306b8311e4585f0105",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Roofing"
+    ],
+    "address": "5618 Dayton Dr, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJj7v2QZo7b4cRO_KLm-GvTKw",
+    "lat": 41.1707669,
+    "lng": -104.7678762,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Roofing",
+        "answers": {
+          "roofing_access": "Not sure",
+          "roofing_problem": "Other",
+          "roofing_problem_other_text": "site-specific details for roofing problem 4",
+          "roofing_scope": "Entire roof",
+          "roofing_type": "Other",
+          "roofing_type_other_text": "site-specific details for roofing type 5",
+          "roofing_work_type": "Other",
+          "roofing_work_type_other_text": "premium material preference for roofing work type 89"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests entire roof work with premium material preference; site-specific details provided; access unknown.",
+    "condition": "moderate",
+    "access": "moderate",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "premium material preference for roofing work type 89",
+    "inferredScope": "Entire roof",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "entire_roof_scope",
+      "premium_material_preference",
+      "removal_and_haul_required"
+    ],
+    "estimatorNotes": [
+      "Customer selected Entire roof and indicated premium materials in free text.",
+      "No explicit roof area provided; area inferred from house sqft and satellite imagery.",
+      "Access listed as 'Not sure' so moderate access difficulty assumed."
+    ],
+    "serviceSignals": {
+      "Roofing": {
+        "serviceType": "Roofing",
+        "jobSubtype": "roof_replacement",
+        "jobSubtypeLabel": "Roof replacement",
+        "workType": "replace",
+        "fallbackFamily": "roof_like_surface",
+        "surfaceFamily": "roof_like_surface",
+        "targetObjectFamily": "roof",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 3000,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "premium_shingles",
+        "materialSubtype": "other",
+        "conditionClass": "unknown",
+        "severityClass": "moderate",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "single_story",
+        "stories": 1,
+        "slopeClass": "some_slope",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": "site-specific details for roofing type 5",
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 62,
+        "aiConfidenceReasons": [
+          "Customer explicitly selected Entire roof and provided premium material preference.",
+          "No direct roof dimensions provided; area inferred from house sqft and satellite imagery."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Customer free-text indicates site-specific issues and premium materials; recommend manual review for material specification and roof pitch verification."
+        ],
+        "summary": "Full roof replacement with premium material preference; manual review recommended to confirm exact materials and roof measurements."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1.2,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about scope and materials.",
+      "Area and roof specifics were inferred from property footprint and imagery; no direct measurements provided."
+    ]
+  }
+}

@@ -1,0 +1,154 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T06:17:23.880Z",
+  "promptHash": "b62f716aff5e7664dff7caa19bf1cd5a97737fbb41151543352d65e69907ed85",
+  "keyHash": "153e8e6e685b45ba9d1efdee728a02fdafba8cbab08550cea1ea2eb29bafa773",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Concrete"
+    ],
+    "address": "2481 Summitridge Dr, Beverly Hills, CA 90210, USA",
+    "addressPlaceId": "ChIJw5RbRLm9woARPFqNmJANwtg",
+    "lat": 34.1199802,
+    "lng": -118.4212831,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Concrete",
+        "answers": {
+          "concrete_material": "Exposed aggregate or specialty finish",
+          "concrete_project_type": [
+            "Driveway",
+            "Slab or pad"
+          ],
+          "concrete_scope": "Small (up to ~200 sq ft)",
+          "concrete_site_condition": "Dirt or grading needed",
+          "concrete_work_type": "New installation"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Small concrete driveway/slab installation (exposed aggregate) requested; grading/dirt work indicated.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "exposed aggregate",
+    "inferredScope": "small_slab_driveway_up_to_200_sqft",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "small_new_concrete_slab",
+      "exposed_aggregate_finish",
+      "dirt_grading_needed"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Slab or pad' and 'Driveway' and specified 'Small (up to ~200 sq ft)'.",
+      "Questionnaire indicates new installation and site grading, so include prep allowance."
+    ],
+    "serviceSignals": {
+      "Concrete": {
+        "serviceType": "Concrete",
+        "jobSubtype": "driveway",
+        "jobSubtypeLabel": "Driveway",
+        "workType": "install",
+        "fallbackFamily": "flat_hardscape",
+        "surfaceFamily": "flat_hardscape",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "small",
+        "estimatedQuantity": 180,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "concrete",
+        "materialSubtype": "exposed_aggregate",
+        "conditionClass": "new",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": true,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": true,
+        "luxuryHardscapeSignal": true,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 78,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly selected small slab/driveway and new installation.",
+          "Customer indicated grading/dirt work needed in site condition."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Use small slab pricing band; include grading/prep line item.",
+          "Satellite shows large property but customer scoped small area."
+        ],
+        "summary": "Install small exposed aggregate concrete driveway/slab (~180 sqft) with site grading prep.",
+        "quotedSurfaces": {
+          "driveway": 180
+        },
+        "surfaceDetections": [
+          {
+            "surface_type": "driveway",
+            "surface_area_sqft": 180,
+            "confidence": 0.78
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      },
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 250,
+        "confidence": 0.6
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "quotedSurfaces": {
+      "driveway": 180
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1.05,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": true,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about job type and size band.",
+      "Imagery confirms large estate but does not contradict small slab scope."
+    ]
+  }
+}

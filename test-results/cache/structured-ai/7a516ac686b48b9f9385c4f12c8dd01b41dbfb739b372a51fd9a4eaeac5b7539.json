@@ -1,0 +1,133 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T08:17:58.376Z",
+  "promptHash": "891ca7d24acc4ff9651085629b71caf5ca9d43526fe26828ca26bd6842cbe354",
+  "keyHash": "7a516ac686b48b9f9385c4f12c8dd01b41dbfb739b372a51fd9a4eaeac5b7539",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Roofing"
+    ],
+    "address": "12924 Cedar Springs Rd, Oklahoma City, OK 73120, USA",
+    "addressPlaceId": "ChIJ_z0yrGIcsocRtUEXpwmzF7E",
+    "lat": 35.6016417,
+    "lng": -97.5676136,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Roofing",
+        "answers": {
+          "roofing_access": "Easy",
+          "roofing_problem": "Leak or water issue",
+          "roofing_scope": "One area or slope",
+          "roofing_type": "Metal",
+          "roofing_work_type": "Full roof replacement"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests a metal full roof replacement for one slope due to a leak; access is reported easy.",
+    "condition": "moderate",
+    "access": "easy",
+    "severity": "moderate",
+    "debris": "moderate",
+    "multipleAreas": false,
+    "materialHint": "metal",
+    "inferredScope": "full_roof_replacement_one_slope",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "roof replacement",
+      "metal roofing",
+      "leak repair",
+      "easy access"
+    ],
+    "estimatorNotes": [
+      "Questionnaire explicitly requests full metal roof replacement for one area/slope due to leak.",
+      "Satellite shows a standard residential roof; driveway and landscaping present but not in roofing scope."
+    ],
+    "serviceSignals": {
+      "Roofing": {
+        "serviceType": "Roofing",
+        "jobSubtype": "full_roof_replacement",
+        "jobSubtypeLabel": "Full roof replacement",
+        "workType": "replace",
+        "fallbackFamily": "roof_like_surface",
+        "surfaceFamily": "roof_like_surface",
+        "targetObjectFamily": "roof",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 1,
+        "quantityUnit": "count",
+        "quantityEvidence": "direct",
+        "materialClass": "metal",
+        "materialSubtype": "metal_panel",
+        "conditionClass": "leak_or_water_issue",
+        "severityClass": "moderate",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "two_story",
+        "stories": 2,
+        "slopeClass": "some_slope",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": "metal",
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": true,
+        "aiConfidence": 78,
+        "aiConfidenceReasons": [
+          "Customer explicitly selected full roof replacement and metal material.",
+          "Satellite imagery supports a single residential roof and easy access."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Confirm number of slopes and exact roof area during manual review and measurement.",
+          "Verify underlying decking condition once removed."
+        ],
+        "summary": "Full metal roof replacement for one area/slope due to leak; likely moderate scope for a single-family residence."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Satellite imagery supports residential roof and easy access, but exact roof area and complexity require manual verification."
+    ]
+  }
+}

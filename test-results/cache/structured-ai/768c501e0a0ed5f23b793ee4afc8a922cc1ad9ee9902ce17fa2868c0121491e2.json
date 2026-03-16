@@ -1,0 +1,123 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T19:36:44.609Z",
+  "promptHash": "23c95cf8b59a25d005647a1115738e717a47aed7782eed6b4aebfdaea0f00736",
+  "keyHash": "768c501e0a0ed5f23b793ee4afc8a922cc1ad9ee9902ce17fa2868c0121491e2",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Junk Removal"
+    ],
+    "address": "1120 Barber Rd, Bristol, TN 37620, USA",
+    "addressPlaceId": "ChIJJ5fNoHydWogRR3gpT3OQN7M",
+    "lat": 36.5614452,
+    "lng": -82.220179,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Junk Removal",
+        "answers": {
+          "junk_amount": "Medium load (about half a trailer or small truck)",
+          "junk_heavy_items": "Yes, many",
+          "junk_location": "Other",
+          "junk_location_other_text": "premium material preference for junk location 78",
+          "junk_type": "Other",
+          "junk_type_other_text": "custom scope requested for junk type 63"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests a medium junk removal (about half a trailer) including many heavy items; haul-away and removal required.",
+    "condition": "moderate",
+    "access": "easy",
+    "severity": "moderate",
+    "debris": "moderate",
+    "multipleAreas": false,
+    "materialHint": "premium material preference noted",
+    "inferredScope": "yard/curbside pickup",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": 5,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "heavy_items",
+      "haul_away_needed",
+      "medium_load"
+    ],
+    "estimatorNotes": [
+      "Customer specified 'Medium load (about half a trailer or small truck)'.",
+      "Customer indicated many heavy items; expect two-person crew and haul-away.",
+      "Location details in other-text mention premium preference for placement."
+    ],
+    "serviceSignals": {
+      "Junk Removal": {
+        "serviceType": "Junk Removal",
+        "jobSubtype": "general_junk",
+        "jobSubtypeLabel": "General Junk Removal",
+        "workType": "remove",
+        "fallbackFamily": "debris_load",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "debris_load",
+        "sizeBucket": "small",
+        "estimatedQuantity": 0.5,
+        "quantityUnit": "load",
+        "quantityEvidence": "direct",
+        "materialClass": "mixed_debris",
+        "materialSubtype": "unknown_mixed",
+        "conditionClass": "n/a",
+        "severityClass": "moderate",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "moderate",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": false,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": false,
+        "aiConfidence": 72,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly provided junk amount and heavy items.",
+          "Other-text indicates custom scope which increases uncertainty."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Medium load (~half trailer) interpreted as 0.5 standard load for scheduling.",
+          "Plan for haul-away and handling heavy items; possible additional labor."
+        ],
+        "summary": "Medium residential junk removal with heavy items, haul-away required."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1,
+    "luxuryMultiplier": 1,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about load size and heavy items.",
+      "Other-text indicates custom scope which affects handling requirements."
+    ]
+  }
+}

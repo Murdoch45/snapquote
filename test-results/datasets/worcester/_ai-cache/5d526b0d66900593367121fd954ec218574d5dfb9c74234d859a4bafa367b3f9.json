@@ -1,0 +1,128 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T21:20:30.470Z",
+  "promptHash": "acc6ed3f90aeb053ac13c46118502ee6dd35b307669414df2489d881bf94d76c",
+  "keyHash": "5d526b0d66900593367121fd954ec218574d5dfb9c74234d859a4bafa367b3f9",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Landscaping / Installation"
+    ],
+    "address": "22 Bittersweet Blvd, Worcester, MA 01607, USA",
+    "addressPlaceId": "ChIJoc9sdbUF5IkRMHNxoI9HMCA",
+    "lat": 42.228719,
+    "lng": -71.8067966,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Landscaping / Installation",
+        "answers": {
+          "landscape_access": "Difficult",
+          "landscape_area_size": "Small section (up to ~500 sq ft)",
+          "landscape_job_type": "Refresh existing landscaping",
+          "landscape_materials": [
+            "Mostly mulch or rock",
+            "Mostly plants",
+            "Sod or turf"
+          ],
+          "landscape_work_type": [
+            "Sod or lawn installation"
+          ]
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Small landscaping refresh including sod/turf, mulch and some plants for a limited area.",
+    "condition": "light",
+    "access": "difficult",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "sod, mulch, plants",
+    "inferredScope": "Small front/back yard section refresh with sod and planting beds",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "sod_installation",
+      "mulch_installation",
+      "planting",
+      "access_difficulty"
+    ],
+    "estimatorNotes": [
+      "Customer selected sod/turf and mulch/plants and indicated a small area up to ~500 sq ft.",
+      "Satellite and photo context show townhome/duplex lot with limited yard area; access may be constrained."
+    ],
+    "serviceSignals": {
+      "Landscaping / Installation": {
+        "serviceType": "Landscaping / Installation",
+        "jobSubtype": "sod_installation",
+        "jobSubtypeLabel": "Sod or turf installation",
+        "workType": "install",
+        "fallbackFamily": "install_area",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "planting_area",
+        "sizeBucket": "small",
+        "estimatedQuantity": 350,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "sod",
+        "materialSubtype": "cool_season_sod",
+        "conditionClass": "existing_lawn_patchy",
+        "severityClass": "minor",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "moderate",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 78,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly selected sod/turf and small area.",
+          "Satellite imagery shows limited yard area consistent with small install."
+        ],
+        "consistencyScore": 80,
+        "notes": [
+          "Recommend on-site measure to confirm exact sq ft and any underlying preparation needs.",
+          "Access flagged as difficult by customer; factor for crew/time."
+        ],
+        "summary": "Install ~350 sq ft of sod with mulch and plant refresh in a small, access-constrained yard area."
+      }
+    },
+    "surfaceDetectionConfidence": 70,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 86,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.15,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1,
+    "estateScore": 2000,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about sod and small area.",
+      "Imagery confirms small yard footprint and potential access constraints."
+    ]
+  }
+}

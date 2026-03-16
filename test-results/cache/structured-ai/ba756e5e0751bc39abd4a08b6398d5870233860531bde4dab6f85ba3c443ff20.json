@@ -1,0 +1,143 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T00:17:19.576Z",
+  "promptHash": "6ee7ad7abbacbb49c3f09169aa55e794d600b173f8bbc30eba08f75d819c7adb",
+  "keyHash": "ba756e5e0751bc39abd4a08b6398d5870233860531bde4dab6f85ba3c443ff20",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Outdoor Lighting Installation"
+    ],
+    "address": "5618 Dayton Dr, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJj7v2QZo7b4cRO_KLm-GvTKw",
+    "lat": 41.1707669,
+    "lng": -104.7678762,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Outdoor Lighting Installation",
+        "answers": {
+          "lighting_install_difficulty": "Some wiring or layout work needed",
+          "lighting_power": "Partly",
+          "lighting_scope": "One large area",
+          "lighting_type": [
+            "Accent or landscape lights",
+            "Pathway lights",
+            "Patio or string lights",
+            "Security or flood lights"
+          ],
+          "lighting_work_type": "Repair existing lighting"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Repair existing outdoor lighting across one large area (pathway/accent/security).",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "landscape lighting fixtures and low-voltage wiring",
+    "inferredScope": "repair and partial rewiring of existing landscape, pathway, accent and security lights across front and patio area",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": 8,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "fixture count",
+      "partial rewiring",
+      "fixture types (pathway, accent, flood/security)"
+    ],
+    "estimatorNotes": [
+      "Customer selected repair for multiple lighting types and indicated 'One large area' with some wiring work needed.",
+      "Satellite and photo show typical suburban lot with driveway and walkways; likely landscape lighting along path and accent areas."
+    ],
+    "serviceSignals": {
+      "Outdoor Lighting Installation": {
+        "serviceType": "Outdoor Lighting Installation",
+        "jobSubtype": "landscape_lighting_repair",
+        "jobSubtypeLabel": "Landscape & Accent Lighting Repair",
+        "workType": "repair",
+        "fallbackFamily": "lighting_system",
+        "surfaceFamily": "linear_boundary",
+        "targetObjectFamily": "lighting_system",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 8,
+        "quantityUnit": "fixture_count",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "low_voltage_electrical",
+        "materialSubtype": "LED_landscape_fixtures",
+        "conditionClass": "aged_malfunctioning",
+        "severityClass": "moderate",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 74,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly selected repair and multiple lighting types.",
+          "Customer indicated some wiring/layout work needed; medium fixture count inferred from typical lot size."
+        ],
+        "consistencyScore": 86,
+        "notes": [
+          "Plan for partial rewiring and fixture replacement/repair for pathway, accent, patio, and security lights.",
+          "Confirm fixture count and access points on-site prior to final quote."
+        ],
+        "summary": "Repair ~8 landscape/pathway/security fixtures; partial wiring work expected."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 520,
+        "confidence": 0.82
+      },
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 180,
+        "confidence": 0.76
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 520,
+      "walkway": 180
+    },
+    "surfaceDetectionConfidence": 78,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about repair and lighting types.",
+      "Property context and imagery support a medium suburban lighting scope."
+    ]
+  }
+}

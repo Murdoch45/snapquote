@@ -1,0 +1,123 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T00:15:10.135Z",
+  "promptHash": "0cc1a0e62956de442f417471c735930eb5fb9f0f318dfdc51d7e71ab2821b519",
+  "keyHash": "1f8757549958acf9a1ead28c6f7aec171901082b48f028061f238fe4ebc11961",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Tree Service / Removal"
+    ],
+    "address": "2481 Summitridge Dr, Beverly Hills, CA 90210, USA",
+    "addressPlaceId": "ChIJw5RbRLm9woARPFqNmJANwtg",
+    "lat": 34.1199802,
+    "lng": -118.4212831,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Tree Service / Removal",
+        "answers": {
+          "tree_access": "Moderate",
+          "tree_haul_away": "No",
+          "tree_location": "Front yard",
+          "tree_size": "Small",
+          "tree_work_type": "Remove multiple trees"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requested removal of multiple small trees in front yard; moderate access and no haul-away requested.",
+    "condition": "moderate",
+    "access": "moderate",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "wood",
+    "inferredScope": "Remove multiple small front-yard trees, stump handling not requested",
+    "treeSize": "small",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 68,
+    "pricingDrivers": [
+      "multiple small trees",
+      "front yard location",
+      "moderate access",
+      "no haul away requested"
+    ],
+    "estimatorNotes": [
+      "Questionnaire explicitly requests removal of multiple small trees in front yard.",
+      "No explicit tree count provided — inferred a small group (conservative estimate).",
+      "Customer indicated no haul-away; may require on-site discussion for disposal."
+    ],
+    "serviceSignals": {
+      "Tree Service / Removal": {
+        "serviceType": "Tree Service / Removal",
+        "jobSubtype": "remove_trees",
+        "jobSubtypeLabel": "Remove Trees",
+        "workType": "remove",
+        "fallbackFamily": "tree_work",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "tree_work",
+        "sizeBucket": "small",
+        "estimatedQuantity": 3,
+        "quantityUnit": "tree_count",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "wood",
+        "materialSubtype": "deciduous_or_evergreen",
+        "conditionClass": "unknown",
+        "severityClass": "moderate",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "moderate",
+        "heightClass": "single_story",
+        "stories": null,
+        "slopeClass": "some_slope",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": true,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": true,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 72,
+        "aiConfidenceReasons": [
+          "Questionnaire specifies removal of multiple trees and small size.",
+          "Satellite shows dense front-yard vegetation consistent with multiple small trees."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Confirm exact tree count and whether stumps should be removed.",
+          "Customer marked haul-away as No; clarify disposal expectations."
+        ],
+        "summary": "Remove multiple small front-yard trees (estimated 3)."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 86,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about tree removal and size.",
+      "Satellite imagery shows vegetation in front yard supporting scope."
+    ]
+  }
+}

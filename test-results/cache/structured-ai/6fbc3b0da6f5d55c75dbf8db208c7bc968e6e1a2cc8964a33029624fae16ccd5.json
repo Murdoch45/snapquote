@@ -1,0 +1,127 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T08:25:46.516Z",
+  "promptHash": "55f190f7f1a5576d1fbb0387ded9918e647b5769e24ea5974c819cf348734bbc",
+  "keyHash": "6fbc3b0da6f5d55c75dbf8db208c7bc968e6e1a2cc8964a33029624fae16ccd5",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Junk Removal"
+    ],
+    "address": "1202 Larchmont Ln, Nichols Hills, OK 73116, USA",
+    "addressPlaceId": "ChIJySjKutIbsocRj8CEoxAlaik",
+    "lat": 35.5497582,
+    "lng": -97.5348305,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Junk Removal",
+        "answers": {
+          "junk_amount": "Small load (about a pickup load)",
+          "junk_heavy_items": "Not sure",
+          "junk_location": "Other",
+          "junk_location_other_text": "custom scope requested for junk location 72",
+          "junk_type": "Yard debris"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests small yard debris pickup (about a pickup load) located at a custom location noted in answers.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "organic yard debris",
+    "inferredScope": "single small load of yard debris to be removed from property; location noted as custom in answers",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": 1.5,
+    "internalConfidence": 78,
+    "pricingDrivers": [
+      "small load",
+      "yard debris",
+      "custom location note"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Yard debris' and 'Small load (about a pickup load)'.",
+      "Location specified as 'Other' with custom text; verify pickup point on-site.",
+      "Photos and satellite imagery do not contradict small yard debris scope."
+    ],
+    "serviceSignals": {
+      "Junk Removal": {
+        "serviceType": "Junk Removal",
+        "jobSubtype": "yard_debris",
+        "jobSubtypeLabel": "Yard debris",
+        "workType": "remove",
+        "fallbackFamily": "debris_load",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "debris",
+        "sizeBucket": "small",
+        "estimatedQuantity": 1.5,
+        "quantityUnit": "load",
+        "quantityEvidence": "direct",
+        "materialClass": "organic",
+        "materialSubtype": "yard_waste",
+        "conditionClass": "fresh",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": false,
+        "haulAwayNeeded": true,
+        "poolPresent": true,
+        "fencePresent": false,
+        "deckPresent": true,
+        "roofType": null,
+        "premiumPropertySignal": true,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": false,
+        "aiConfidence": 76,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly lists yard debris and small pickup load.",
+          "Custom location text indicates nonstandard placement; recommend onsite confirmation."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Confirm whether heavy items are present (answer was 'Not sure').",
+          "Verify exact pickup point due to 'Other' location and custom text."
+        ],
+        "summary": "Remove a small pickup-load of yard debris from a custom location on property."
+      }
+    },
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 90,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": true,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about junk type and amount.",
+      "Imagery shows residential property with accessible yard areas consistent with yard debris removal."
+    ]
+  }
+}

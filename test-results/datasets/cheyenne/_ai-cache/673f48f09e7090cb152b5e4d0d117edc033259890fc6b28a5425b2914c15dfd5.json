@@ -1,0 +1,125 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T02:23:06.840Z",
+  "promptHash": "53255fd31323b543480eef90ae0110126404951adf3dcb9b9a09640a5307721a",
+  "keyHash": "673f48f09e7090cb152b5e4d0d117edc033259890fc6b28a5425b2914c15dfd5",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Deck Installation / Repair"
+    ],
+    "address": "5618 Dayton Dr, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJj7v2QZo7b4cRO_KLm-GvTKw",
+    "lat": 41.1707669,
+    "lng": -104.7678762,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Deck Installation / Repair",
+        "answers": {
+          "deck_area_type": "Ground level",
+          "deck_material": "PVC or premium material",
+          "deck_repair_condition": "Minor issues",
+          "deck_scope": "Multi-level or very large (700+ sq ft)",
+          "deck_work_type": "Replace existing deck"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests replacement of an existing ground-level deck with premium PVC material; large multi-level scope indicated (700+ sq ft).",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "PVC / premium",
+    "inferredScope": "replace existing large deck ~700-800 sqft",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "premium_material",
+      "large_area",
+      "remove_and_haul"
+    ],
+    "estimatorNotes": [
+      "Questionnaire explicitly requests replacement with PVC or premium material and indicates multi-level or very large >700 sqft.",
+      "Satellite and photo count limited; assume ground-level, accessible location at rear."
+    ],
+    "serviceSignals": {
+      "Deck Installation / Repair": {
+        "serviceType": "Deck Installation / Repair",
+        "jobSubtype": "deck_replacement",
+        "jobSubtypeLabel": "Deck replacement",
+        "workType": "replace",
+        "fallbackFamily": "install_area",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "deck",
+        "sizeBucket": "very_large",
+        "estimatedQuantity": 750,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "direct",
+        "materialClass": "PVC",
+        "materialSubtype": "premium",
+        "conditionClass": "minor_issues",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": true,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": true,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": true,
+        "aiConfidence": 78,
+        "aiConfidenceReasons": [
+          "Customer explicitly selected replacement and size band >700 sqft.",
+          "Material preference (PVC/premium) provided by customer."
+        ],
+        "consistencyScore": 82,
+        "notes": [
+          "Large replacement job flagged for manual review due to size and premium material.",
+          "No detailed photos of existing deck provided; confirm site access and levels on visit."
+        ],
+        "summary": "Replace existing ground-level deck with premium PVC; large (~750 sqft) multi-level scope indicated by customer."
+      }
+    },
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1.05,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Customer indicated large multi-level deck and premium material preference."
+    ]
+  }
+}

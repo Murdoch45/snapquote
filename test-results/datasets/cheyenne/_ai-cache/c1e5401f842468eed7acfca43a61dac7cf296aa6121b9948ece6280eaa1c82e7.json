@@ -1,0 +1,167 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T02:19:11.809Z",
+  "promptHash": "d3022abff751998eb7357a0555a5040bba8b8a0df46fdd9390c4341d615ef775",
+  "keyHash": "c1e5401f842468eed7acfca43a61dac7cf296aa6121b9948ece6280eaa1c82e7",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Pressure Washing"
+    ],
+    "address": "5618 Dayton Dr, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJj7v2QZo7b4cRO_KLm-GvTKw",
+    "lat": 41.1707669,
+    "lng": -104.7678762,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Pressure Washing",
+        "answers": {
+          "pressure_washing_access": "Some obstacles",
+          "pressure_washing_condition": "Heavy staining or moss",
+          "pressure_washing_size": "Large area (~1,500-3,000 sq ft)",
+          "pressure_washing_target": [
+            "Driveway",
+            "Fence",
+            "House exterior",
+            "Other",
+            "Patio or porch",
+            "Roof"
+          ],
+          "pressure_washing_target_other_text": "special access needs for pressure washing target 86"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests pressure washing of multiple exterior surfaces (driveway, patio/porch, house exterior, roof, fence) with heavy staining and some access obstacles; special access noted.",
+    "condition": "heavy",
+    "access": "moderate",
+    "severity": "major",
+    "debris": "light",
+    "multipleAreas": true,
+    "materialHint": "mixed (concrete, siding, roof)",
+    "inferredScope": "driveway and multiple vertical and horizontal exterior surfaces including roof and fence",
+    "treeSize": "small",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 68,
+    "pricingDrivers": [
+      "multiple surface types",
+      "roof access required",
+      "heavy staining/moss",
+      "special access noted"
+    ],
+    "estimatorNotes": [
+      "Customer selected many targets including roof; roof work increases safety and prep requirements.",
+      "Questionnaire indicates large area (1,500-3,000 sq ft) which aligns with satellite driveway and hardscape extent.",
+      "Photo set limited (1 image placeholder) so some quantities inferred from satellite and questionnaire."
+    ],
+    "serviceSignals": {
+      "Pressure Washing": {
+        "serviceType": "Pressure Washing",
+        "jobSubtype": "multiple_surfaces",
+        "jobSubtypeLabel": "Multiple exterior surfaces",
+        "workType": "clean",
+        "fallbackFamily": "mixed_custom",
+        "surfaceFamily": "mixed_custom",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "large",
+        "estimatedQuantity": 2000,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "mixed",
+        "materialSubtype": "concrete_siding_roof_fence",
+        "conditionClass": "heavy_soiling",
+        "severityClass": "major",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "moderate",
+        "heightClass": "mixed_height",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": true,
+        "deckPresent": false,
+        "roofType": "asphalt_shingle",
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 64,
+        "aiConfidenceReasons": [
+          "Multiple targets selected including roof which requires manual safety review.",
+          "Size range provided by customer supports large area estimate but exact breakdown across surfaces is inferred."
+        ],
+        "consistencyScore": 72,
+        "notes": [
+          "Customer indicated 'special access needs' in other-text.",
+          "Include ladder/safety and possible soft-wash for roof; confirm roof inclusion on site visit."
+        ],
+        "summary": "Large multi-surface pressure washing job with heavy staining and roof access required; manual review recommended.",
+        "quotedSurfaces": {
+          "driveway": 1400,
+          "walkway": 200,
+          "patio": 400
+        },
+        "surfaceDetections": [
+          {
+            "surface_type": "driveway",
+            "surface_area_sqft": 2100,
+            "confidence": 0.84
+          },
+          {
+            "surface_type": "walkway",
+            "surface_area_sqft": 250,
+            "confidence": 0.75
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      },
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 250,
+        "confidence": 0.75
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "quotedSurfaces": {
+      "driveway": 1400
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 60,
+    "scopeMatchConfidence": 80,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 4200,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers specified targets and large size band.",
+      "Satellite imagery shows substantial driveway/hardscape supporting inference but roof inclusion needs verification."
+    ]
+  }
+}

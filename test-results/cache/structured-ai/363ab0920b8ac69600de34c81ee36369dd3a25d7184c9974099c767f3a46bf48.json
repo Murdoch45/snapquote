@@ -1,0 +1,132 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T00:05:31.063Z",
+  "promptHash": "bc369021def92bfda51a4ee5fa9c1bfc26d0f6ab726810c86325f17629ce0390",
+  "keyHash": "363ab0920b8ac69600de34c81ee36369dd3a25d7184c9974099c767f3a46bf48",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Junk Removal"
+    ],
+    "address": "8260 Oakwood Ave, Los Angeles, CA 90048, USA",
+    "addressPlaceId": "ChIJoyhFqMq-woAR_VBTx51HS3c",
+    "lat": 34.0779676,
+    "lng": -118.3694635,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Junk Removal",
+        "answers": {
+          "junk_amount": "Large load (about a full trailer or truck load+)",
+          "junk_heavy_items": "Not sure",
+          "junk_location": "Garage or driveway",
+          "junk_type": "Yard debris"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests large-load yard debris junk removal from garage/driveway.",
+    "condition": "moderate",
+    "access": "easy",
+    "severity": "moderate",
+    "debris": "heavy",
+    "multipleAreas": false,
+    "materialHint": "yard_debris",
+    "inferredScope": "garage and driveway pickup of yard debris, approximately one truck/trailer load or slightly more",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": 15,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "large volume",
+      "yard debris",
+      "pickup from driveway/garage",
+      "haul-away required"
+    ],
+    "estimatorNotes": [
+      "Questionnaire explicitly indicates 'Large load (about a full trailer or truck load+)' of yard debris located in garage or driveway.",
+      "Satellite and single photo show driveway access and residential lot consistent with curbside/driveway pickup."
+    ],
+    "serviceSignals": {
+      "Junk Removal": {
+        "serviceType": "Junk Removal",
+        "jobSubtype": "yard_debris",
+        "jobSubtypeLabel": "Yard debris removal",
+        "workType": "remove",
+        "fallbackFamily": "debris_load",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "debris_load",
+        "sizeBucket": "large",
+        "estimatedQuantity": 15,
+        "quantityUnit": "load",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "organic",
+        "materialSubtype": "yard_debris",
+        "conditionClass": "loose_debris",
+        "severityClass": "moderate",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": false,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 76,
+        "aiConfidenceReasons": [
+          "Customer selected 'Large load' and specified yard debris in questionnaire.",
+          "Location and imagery support driveway/garage access for pickup."
+        ],
+        "consistencyScore": 90,
+        "notes": [
+          "Treat as single junk removal visit; customer uncertain about heavy items so crew should verify onsite."
+        ],
+        "summary": "Large-volume yard debris removal from garage/driveway; haul-away required."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 250,
+        "confidence": 0.78
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 250,
+      "walkway": 120
+    },
+    "surfaceDetectionConfidence": 78,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about junk type and size.",
+      "Imagery supports driveway/garage access for removal."
+    ]
+  }
+}

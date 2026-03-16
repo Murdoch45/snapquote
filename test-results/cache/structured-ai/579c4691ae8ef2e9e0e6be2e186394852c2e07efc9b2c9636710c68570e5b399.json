@@ -1,0 +1,124 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T19:48:31.217Z",
+  "promptHash": "c7e9ea905f1c0cd087e6a97cd26865c0793deaf0c3e6b5564e00c1e22102edeb",
+  "keyHash": "579c4691ae8ef2e9e0e6be2e186394852c2e07efc9b2c9636710c68570e5b399",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Exterior Painting"
+    ],
+    "address": "2070 King College Rd, Bristol, TN 37620, USA",
+    "addressPlaceId": "ChIJ32Mu-bV2UIgR8C_BrBTmahI",
+    "lat": 36.5870892,
+    "lng": -82.1329154,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Exterior Painting",
+        "answers": {
+          "painting_access": "Not sure",
+          "painting_condition": "Needs prep and repairs",
+          "painting_scope": "Not sure",
+          "painting_surface_type": "Wood",
+          "painting_target": "Full house exterior"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Full-house exterior painting of wood siding; customer indicates needs prep and repairs.",
+    "condition": "moderate",
+    "access": "moderate",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "wood siding",
+    "inferredScope": "full_house_exterior",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 68,
+    "pricingDrivers": [
+      "full_house",
+      "wood_siding",
+      "prep_and_repairs",
+      "two_story_height"
+    ],
+    "estimatorNotes": [
+      "Customer selected full house exterior and wood surface; questionnaire indicates prep and repairs required.",
+      "House ground area available from property data used to infer exterior surface area.",
+      "Satellite shows a detached single residential building with likely two-story elevation."
+    ],
+    "serviceSignals": {
+      "Exterior Painting": {
+        "serviceType": "Exterior Painting",
+        "jobSubtype": "full_house_exterior",
+        "jobSubtypeLabel": "Full house exterior",
+        "workType": "install",
+        "fallbackFamily": "exterior_finish_surface",
+        "surfaceFamily": "vertical_exterior_surface",
+        "targetObjectFamily": "exterior_finish_surface",
+        "sizeBucket": "large",
+        "estimatedQuantity": 4200,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "wood",
+        "materialSubtype": "wood_siding",
+        "conditionClass": "needs_prep",
+        "severityClass": "moderate",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "two_story",
+        "stories": 2,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 66,
+        "aiConfidenceReasons": [
+          "Questionnaire specified full house exterior and wood surface.",
+          "Property data provides building ground area to infer exterior surface.",
+          "Single photo and satellite imagery are consistent with a residential home."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Quantity estimated from house ground area; actual painted surface area may vary based on elevation and trim.",
+          "Prep and repair allowance included in scope signal; recommend manual confirmation during quote."
+        ],
+        "summary": "Large full-house exterior paint on wood siding requiring prep and repairs."
+      }
+    },
+    "surfaceDetectionConfidence": 40,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 82,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 11261,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire identified full house exterior and wood surface.",
+      "Property and satellite imagery support residential single-building scope."
+    ]
+  }
+}

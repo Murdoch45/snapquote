@@ -1,0 +1,122 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T08:13:31.862Z",
+  "promptHash": "49581a2a6d067b7c712a5bf3cb401033d08d339626443b1c714816606e292c8f",
+  "keyHash": "d884a33fa7dbf0d462fcb77c8a187e7f63de80453fb727bfec85f4b1ff51a505",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Gutter Cleaning"
+    ],
+    "address": "12924 Cedar Springs Rd, Oklahoma City, OK 73120, USA",
+    "addressPlaceId": "ChIJ_z0yrGIcsocRtUEXpwmzF7E",
+    "lat": 35.6016417,
+    "lng": -97.5676136,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Gutter Cleaning",
+        "answers": {
+          "gutter_access": "Yes, landscaping or obstacles",
+          "gutter_building_type": "Single-story home",
+          "gutter_fill_level": "Moderate debris",
+          "gutter_work_type": "Clean gutters only"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requested gutter cleaning for a single-story home with moderate debris and landscaping access constraints.",
+    "condition": "moderate",
+    "access": "moderate",
+    "severity": "moderate",
+    "debris": "moderate",
+    "multipleAreas": false,
+    "materialHint": "vinyl/metal",
+    "inferredScope": "full-house gutters",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "single-story",
+      "landscaping access constraints",
+      "moderate debris in gutters"
+    ],
+    "estimatorNotes": [
+      "Questionnaire explicitly requests gutter cleaning only.",
+      "Customer indicates landscaping/obstacles that may limit ladder placement.",
+      "Single-story house reduces access complexity."
+    ],
+    "serviceSignals": {
+      "Gutter Cleaning": {
+        "serviceType": "Gutter Cleaning",
+        "jobSubtype": "gutter_cleaning",
+        "jobSubtypeLabel": "Gutter Cleaning",
+        "workType": "clean",
+        "fallbackFamily": "linear_boundary",
+        "surfaceFamily": "linear_boundary",
+        "targetObjectFamily": "debris_load",
+        "sizeBucket": "small",
+        "estimatedQuantity": 150,
+        "quantityUnit": "linear_ft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "standard",
+        "materialSubtype": "vinyl_metal",
+        "conditionClass": "moderate_soiling",
+        "severityClass": "moderate",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "moderate",
+        "heightClass": "single_story",
+        "stories": 1,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 82,
+        "aiConfidenceReasons": [
+          "Customer provided explicit gutter answers in questionnaire.",
+          "Property is single-story which simplifies scope inference.",
+          "Photo and satellite imagery show surrounding landscaping that may obstruct access."
+        ],
+        "consistencyScore": 92,
+        "notes": [
+          "Recommend verifying linear footage on site if exact pricing needed.",
+          "Expect use of ladder and potential trim of low branches for safe access."
+        ],
+        "summary": "Gutter cleaning only for a single-story home with moderate debris and moderate access obstructions."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Property context and imagery support the inferred scope."
+    ]
+  }
+}

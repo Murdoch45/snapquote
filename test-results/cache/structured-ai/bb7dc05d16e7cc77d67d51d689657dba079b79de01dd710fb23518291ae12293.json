@@ -1,0 +1,133 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T08:20:32.329Z",
+  "promptHash": "74f008aee2e90a38a7bbf611aa6a476fc029093d61fd6efcd583227c2f1866ab",
+  "keyHash": "bb7dc05d16e7cc77d67d51d689657dba079b79de01dd710fb23518291ae12293",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Gutter Cleaning"
+    ],
+    "address": "1202 Larchmont Ln, Nichols Hills, OK 73116, USA",
+    "addressPlaceId": "ChIJySjKutIbsocRj8CEoxAlaik",
+    "lat": 35.5497582,
+    "lng": -97.5348305,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Gutter Cleaning",
+        "answers": {
+          "gutter_access": "Yes, landscaping or obstacles",
+          "gutter_building_type": "Three-story or taller",
+          "gutter_fill_level": "Very full or overflowing",
+          "gutter_work_type": "Gutter guard cleaning"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Gutter guard cleaning on a three-story house with very full gutters and landscape access obstacles; likely requires roof access equipment.",
+    "condition": "moderate",
+    "access": "moderate",
+    "severity": "moderate",
+    "debris": "heavy",
+    "multipleAreas": false,
+    "materialHint": "aluminum/standard",
+    "inferredScope": "Full-house gutter guard cleaning including upper-level runs",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": 850,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 78,
+    "pricingDrivers": [
+      "three_story_height",
+      "gutter_guard_cleaning",
+      "very_full_gutters",
+      "landscape_obstructions"
+    ],
+    "estimatorNotes": [
+      "Customer selected three-story and gutter guard cleaning with very full/overflowing gutters.",
+      "Satellite shows mature trees near roofline and a pool present in backyard which may affect access and staging.",
+      "Photo and questionnaire indicate obstruction from landscaping; expect added time for ladder/boom setup."
+    ],
+    "serviceSignals": {
+      "Gutter Cleaning": {
+        "serviceType": "Gutter Cleaning",
+        "jobSubtype": "gutter_guard_cleaning",
+        "jobSubtypeLabel": "Gutter guard cleaning",
+        "workType": "clean",
+        "fallbackFamily": "linear_boundary",
+        "surfaceFamily": "linear_boundary",
+        "targetObjectFamily": "gutter_system",
+        "sizeBucket": "large",
+        "estimatedQuantity": 200,
+        "quantityUnit": "linear_ft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "metal",
+        "materialSubtype": "aluminum",
+        "conditionClass": "very_full",
+        "severityClass": "major",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "moderate",
+        "heightClass": "three_plus",
+        "stories": 3,
+        "slopeClass": "some_slope",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": true,
+        "fencePresent": false,
+        "deckPresent": true,
+        "roofType": null,
+        "premiumPropertySignal": true,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": true,
+        "aiConfidence": 78,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly states three-story and gutter guard cleaning with very full gutters.",
+          "Satellite imagery shows trees near roofline and residential pool which increase access complexity."
+        ],
+        "consistencyScore": 90,
+        "notes": [
+          "Treat as full-house gutter guard cleaning; confirm linear footage during scheduling.",
+          "Manual review recommended due to three-story height and landscape constraints."
+        ],
+        "summary": "Large gutter guard cleaning on three-story home; heavy debris and landscape obstacles likely increase time and equipment needs."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": true,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Property context and imagery support the inferred scope."
+    ]
+  }
+}

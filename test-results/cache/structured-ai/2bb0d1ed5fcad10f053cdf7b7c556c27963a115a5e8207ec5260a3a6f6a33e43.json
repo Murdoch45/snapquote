@@ -1,0 +1,125 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T06:20:05.669Z",
+  "promptHash": "165dffc208b9ad2105ec7623840bf76f51998c49414f4eac8c336f260ff49bfe",
+  "keyHash": "2bb0d1ed5fcad10f053cdf7b7c556c27963a115a5e8207ec5260a3a6f6a33e43",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Deck Installation / Repair"
+    ],
+    "address": "2481 Summitridge Dr, Beverly Hills, CA 90210, USA",
+    "addressPlaceId": "ChIJw5RbRLm9woARPFqNmJANwtg",
+    "lat": 34.1199802,
+    "lng": -118.4212831,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Deck Installation / Repair",
+        "answers": {
+          "deck_area_type": "Multi-level",
+          "deck_material": "Other",
+          "deck_material_other_text": "special access needs for deck material 34",
+          "deck_repair_condition": "Some damaged boards",
+          "deck_scope": "Medium (~150-350 sq ft)",
+          "deck_work_type": "Stairs or railing work"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests medium-sized multi-level deck stairs/railing repair using non-standard material; some damaged boards reported and special access/material noted.",
+    "condition": "moderate",
+    "access": "moderate",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "special access needs for deck material 34",
+    "inferredScope": "Multi-level deck stairs/railing repair ~250 sqft",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "multi-level deck",
+      "special material / access",
+      "repair of damaged boards"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Stairs or railing work' and 'Medium (~150-350 sq ft)'.",
+      "Material is listed as 'Other' with note about special access/material.",
+      "Property is high-value (Beverly Hills) which may affect logistics and permitting."
+    ],
+    "serviceSignals": {
+      "Deck Installation / Repair": {
+        "serviceType": "Deck Installation / Repair",
+        "jobSubtype": "Stairs or railing work",
+        "jobSubtypeLabel": "Stairs or railing work",
+        "workType": "repair",
+        "fallbackFamily": "repair_section",
+        "surfaceFamily": "deck",
+        "targetObjectFamily": "deck",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 250,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "other",
+        "materialSubtype": "special access needs for deck material 34",
+        "conditionClass": "some damaged boards",
+        "severityClass": "moderate",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "mixed_height",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": true,
+        "roofType": null,
+        "premiumPropertySignal": true,
+        "luxuryHardscapeSignal": true,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 68,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly selected stairs/railing work and medium size band.",
+          "Material listed as 'Other' with free-text note indicating non-standard requirements.",
+          "Satellite and photo confirm multi-level residence but do not provide exact deck dimensions."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Estimate uses mid-point of provided size band (150-350 sqft).",
+          "Manual review recommended for material specifics and access planning."
+        ],
+        "summary": "Medium multi-level deck stairs/railing repair with special material/access requirements."
+      }
+    },
+    "surfaceDetectionConfidence": 40,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 80,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.1,
+    "materialMultiplier": 1.2,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": true,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about work type and size band.",
+      "Free-text material note introduces uncertainty requiring manual review.",
+      "Satellite confirms property scale consistent with medium deck inference."
+    ]
+  }
+}

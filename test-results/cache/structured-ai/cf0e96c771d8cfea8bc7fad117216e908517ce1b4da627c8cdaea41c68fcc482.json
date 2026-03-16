@@ -1,0 +1,121 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T19:38:15.101Z",
+  "promptHash": "e69cab738bef96ce77238cd76c45fea4fd7b476c9493ff488431d05e86048ebb",
+  "keyHash": "cf0e96c771d8cfea8bc7fad117216e908517ce1b4da627c8cdaea41c68fcc482",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Gutter Cleaning"
+    ],
+    "address": "1216 Norway St, Bristol, VA 24201, USA",
+    "addressPlaceId": "ChIJSQAVgxN2UIgRc62c8VJioW0",
+    "lat": 36.5970084,
+    "lng": -82.1960856,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Gutter Cleaning",
+        "answers": {
+          "gutter_access": "No",
+          "gutter_building_type": "Single-story home",
+          "gutter_fill_level": "Very full or overflowing",
+          "gutter_work_type": "Minor gutter repair"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests gutter cleaning with minor repairs; gutters reported very full/overflowing.",
+    "condition": "heavy",
+    "access": "difficult",
+    "severity": "minor",
+    "debris": "moderate",
+    "multipleAreas": false,
+    "materialHint": "aluminum",
+    "inferredScope": "clean_and_repair_gutters",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "overflowing gutters",
+      "minor gutter repair",
+      "single-story but limited access"
+    ],
+    "estimatorNotes": [
+      "Questionnaire explicitly indicates very full/overflowing gutters and minor repair.",
+      "Single-story building reduces safety/access complexity but customer indicated access limitations.",
+      "No explicit linear footage provided; inferred from house footprint."
+    ],
+    "serviceSignals": {
+      "Gutter Cleaning": {
+        "serviceType": "Gutter Cleaning",
+        "jobSubtype": "gutter_cleaning_repair",
+        "jobSubtypeLabel": "Gutter cleaning and minor repair",
+        "workType": "repair",
+        "fallbackFamily": "linear_boundary",
+        "surfaceFamily": "vertical_exterior_surface",
+        "targetObjectFamily": "gutter_system",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 120,
+        "quantityUnit": "linear_ft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "metal",
+        "materialSubtype": "aluminum",
+        "conditionClass": "clogged",
+        "severityClass": "moderate",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "low",
+        "heightClass": "single_story",
+        "stories": 1,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 72,
+        "aiConfidenceReasons": [
+          "Customer selected gutter cleaning with minor repair and reported overflow.",
+          "Property data indicates single-story home consistent with lower height access."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Estimate based on typical perimeter length for a 2383 sqft single-story home footprint.",
+          "Confirm linear footage on site; customer reported access limitations."
+        ],
+        "summary": "Clean and perform minor repairs on approximately 120 linear feet of gutters; gutters are overflowing."
+      }
+    },
+    "surfaceDetectionConfidence": 20,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1,
+    "luxuryMultiplier": 1,
+    "estateScore": 100,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about gutter condition and repair need.",
+      "Property context (single-story, house footprint) supports inferred linear footage."
+    ]
+  }
+}

@@ -1,0 +1,152 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T21:21:52.544Z",
+  "promptHash": "5831664fe5bfb1fd7569cca3658c9ce0a0c7fed92188285fba318c4b5bc76e73",
+  "keyHash": "ce6a721ad58d1169531218f3dbad3e387a78c4c8ecc0ef5f37b358270edcfbfc",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Concrete"
+    ],
+    "address": "22 Bittersweet Blvd, Worcester, MA 01607, USA",
+    "addressPlaceId": "ChIJoc9sdbUF5IkRMHNxoI9HMCA",
+    "lat": 42.228719,
+    "lng": -71.8067966,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Concrete",
+        "answers": {
+          "concrete_material": "Standard concrete",
+          "concrete_project_type": [
+            "Driveway",
+            "Patio",
+            "Slab or pad",
+            "Walkway"
+          ],
+          "concrete_scope": "Medium (~200-600 sq ft)",
+          "concrete_site_condition": "Open and ready",
+          "concrete_work_type": "Replacement"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests medium-sized concrete replacement for driveway/patio/walkway areas. Open site, standard concrete, replacement work.",
+    "condition": "moderate",
+    "access": "easy",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": true,
+    "materialHint": "standard concrete",
+    "inferredScope": "Medium replacement across driveway and small walk/patio pads (~200-600 sq ft total)",
+    "treeSize": "small",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "replacement work",
+      "multiple surface types",
+      "standard concrete material"
+    ],
+    "estimatorNotes": [
+      "Customer selected slab/pad, driveway, patio, and walkway replacement.",
+      "Questionnaire scope specified medium (200-600 sq ft) - use conservative midpoint for quoting.",
+      "Site described as open and ready."
+    ],
+    "serviceSignals": {
+      "Concrete": {
+        "serviceType": "Concrete",
+        "jobSubtype": "driveway",
+        "jobSubtypeLabel": "Driveway",
+        "workType": "replace",
+        "fallbackFamily": "flat_hardscape",
+        "surfaceFamily": "flat_hardscape",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 400,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "direct",
+        "materialClass": "concrete",
+        "materialSubtype": "standard",
+        "conditionClass": "aged",
+        "severityClass": "major",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 78,
+        "aiConfidenceReasons": [
+          "Customer explicitly selected driveway/patio/walkway replacement and medium scope.",
+          "Satellite imagery and property size support a modest driveway/walk area."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Use midpoint estimate from questionnaire (200-600 sq ft).",
+          "Include removal and haul-away for replacement."
+        ],
+        "summary": "Medium concrete replacement for driveway and small connected hardscape areas.",
+        "quotedSurfaces": {
+          "driveway": 400
+        },
+        "surfaceDetections": [
+          {
+            "surface_type": "driveway",
+            "surface_area_sqft": 400,
+            "confidence": 0.86
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 420,
+        "confidence": 0.82
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 420,
+      "walkway": 80
+    },
+    "quotedSurfaces": {
+      "driveway": 400
+    },
+    "surfaceDetectionConfidence": 80,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Property context and imagery support the inferred scope."
+    ]
+  }
+}

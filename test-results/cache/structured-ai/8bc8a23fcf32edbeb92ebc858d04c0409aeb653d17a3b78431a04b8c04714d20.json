@@ -1,0 +1,142 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T00:09:57.332Z",
+  "promptHash": "dad4bff9798e79b14eea1bed8f87c9316bad70280e2869c9da635d0b672361eb",
+  "keyHash": "8bc8a23fcf32edbeb92ebc858d04c0409aeb653d17a3b78431a04b8c04714d20",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Outdoor Lighting Installation"
+    ],
+    "address": "1301 E 23rd St, Cheyenne, WY 82001, USA",
+    "addressPlaceId": "ChIJi8RhiOM6b4cRMw7GhSSaufo",
+    "lat": 41.1442781,
+    "lng": -104.8044048,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Outdoor Lighting Installation",
+        "answers": {
+          "lighting_install_difficulty": "Some wiring or layout work needed",
+          "lighting_power": "No",
+          "lighting_scope": "One small area",
+          "lighting_type": [
+            "Accent or landscape lights",
+            "Driveway lights",
+            "Other",
+            "Patio or string lights"
+          ],
+          "lighting_type_other_text": "site-specific details for lighting type 96",
+          "lighting_work_type": "Install a full new lighting system"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Install new low-voltage landscape and driveway lighting in one small area near front driveway/patio.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "outdoor lighting low-voltage, landscape fixtures",
+    "inferredScope": "small front-yard landscape and driveway accent lighting system",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": 8,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "fixture_count",
+      "trenching/wiring",
+      "accessibility",
+      "site-specific layout"
+    ],
+    "estimatorNotes": [
+      "Customer selected full new lighting system for one small area and indicated some wiring/layout work needed.",
+      "Satellite shows a modest front yard and driveway suitable for driveway and accent lighting.",
+      "No explicit fixture count provided; assumed small system (~8 fixtures)."
+    ],
+    "serviceSignals": {
+      "Outdoor Lighting Installation": {
+        "serviceType": "Outdoor Lighting Installation",
+        "jobSubtype": "landscape_lighting",
+        "jobSubtypeLabel": "Landscape / Driveway Lighting System",
+        "workType": "install",
+        "fallbackFamily": "lighting_system",
+        "surfaceFamily": "mixed_custom",
+        "targetObjectFamily": "lighting_system",
+        "sizeBucket": "small",
+        "estimatedQuantity": 8,
+        "quantityUnit": "fixture_count",
+        "quantityEvidence": "weak_inference",
+        "materialClass": "electrical_low_voltage",
+        "materialSubtype": "landscape_fixture",
+        "conditionClass": "new_install",
+        "severityClass": "minor",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": false,
+        "aiConfidence": 70,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly requests full new lighting system and small area scope.",
+          "Customer indicated some wiring/layout work needed.",
+          "No direct fixture count provided; quantity inferred from 'one small area' and property size."
+        ],
+        "consistencyScore": 82,
+        "notes": [
+          "Multiple lighting types selected (driveway, accent, patio/string) — assume primary focus on driveway/landscape accent near front.",
+          "Site-specific details provided in other-text but not quantified."
+        ],
+        "summary": "Install small low-voltage landscape/driveway lighting system (~8 fixtures) with trenching/wiring work."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 350,
+        "confidence": 0.8
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 350,
+      "walkway": 150
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Property context and imagery support a small front-yard lighting scope."
+    ]
+  }
+}

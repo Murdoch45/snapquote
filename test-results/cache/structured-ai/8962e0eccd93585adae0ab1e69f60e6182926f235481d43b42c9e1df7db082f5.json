@@ -1,0 +1,124 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T00:06:54.428Z",
+  "promptHash": "0654d8e75c09c79033eba907539da6b8037b1b6662e847e9393788e83b7f3611",
+  "keyHash": "8962e0eccd93585adae0ab1e69f60e6182926f235481d43b42c9e1df7db082f5",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Tree Service / Removal"
+    ],
+    "address": "1301 E 23rd St, Cheyenne, WY 82001, USA",
+    "addressPlaceId": "ChIJi8RhiOM6b4cRMw7GhSSaufo",
+    "lat": 41.1442781,
+    "lng": -104.8044048,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Tree Service / Removal",
+        "answers": {
+          "tree_access": "Difficult",
+          "tree_haul_away": "Not sure",
+          "tree_location": "Front yard",
+          "tree_size": "Small",
+          "tree_work_type": "Remove multiple trees"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Request to remove multiple small front-yard trees; access reported difficult and haul-away undecided.",
+    "condition": "light",
+    "access": "difficult",
+    "severity": "moderate",
+    "debris": "moderate",
+    "multipleAreas": false,
+    "materialHint": "wood",
+    "inferredScope": "Remove multiple small trees in front yard; customer unsure about haul-away",
+    "treeSize": "small",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 68,
+    "pricingDrivers": [
+      "multiple_trees",
+      "difficult_access",
+      "haul_away_possibility"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Remove multiple trees' and identified front yard location.",
+      "Photo is a generic test image; satellite shows small front-yard trees near driveway.",
+      "Haul-away preference not confirmed—flag for follow-up."
+    ],
+    "serviceSignals": {
+      "Tree Service / Removal": {
+        "serviceType": "Tree Service / Removal",
+        "jobSubtype": "remove_multiple_trees",
+        "jobSubtypeLabel": "Remove multiple trees",
+        "workType": "remove",
+        "fallbackFamily": "tree_work",
+        "surfaceFamily": null,
+        "targetObjectFamily": "tree_work",
+        "sizeBucket": "small",
+        "estimatedQuantity": 2,
+        "quantityUnit": "tree_count",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "wood",
+        "materialSubtype": "unknown",
+        "conditionClass": "live",
+        "severityClass": "moderate",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "moderate",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": false,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": true,
+        "aiConfidence": 64,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly requests tree removal (multiple trees).",
+          "Satellite imagery shows small front-yard tree presence but no precise counts.",
+          "Photo provided is a test image; lack of detailed site photos reduces certainty."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Confirm exact tree count and whether haul-away is desired.",
+          "Difficult access may require additional equipment or labor—verify on-site."
+        ],
+        "summary": "Removal of ~2 small front-yard trees with difficult access; haul-away uncertain."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 40,
+    "scopeMatchConfidence": 72,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.2,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 0,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about removal.",
+      "Satellite imagery suggests trees in the front yard but lacks detail.",
+      "Photo supplied is generic test image; follow-up recommended."
+    ]
+  }
+}

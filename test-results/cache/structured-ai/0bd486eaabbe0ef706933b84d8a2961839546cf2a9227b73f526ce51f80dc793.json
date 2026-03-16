@@ -1,0 +1,157 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T00:04:03.669Z",
+  "promptHash": "24524ae6288bc68de8bad3c1beb01377cf896b7f1d493c2fb2f2905f6f8035ec",
+  "keyHash": "0bd486eaabbe0ef706933b84d8a2961839546cf2a9227b73f526ce51f80dc793",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Pressure Washing"
+    ],
+    "address": "1301 E 23rd St, Cheyenne, WY 82001, USA",
+    "addressPlaceId": "ChIJi8RhiOM6b4cRMw7GhSSaufo",
+    "lat": 41.1442781,
+    "lng": -104.8044048,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Pressure Washing",
+        "answers": {
+          "pressure_washing_access": "Tight or difficult access",
+          "pressure_washing_condition": "Oil, rust, or deep stains",
+          "pressure_washing_size": "Whole property / very large area (3,000+ sq ft)",
+          "pressure_washing_target": [
+            "Driveway",
+            "Fence",
+            "House exterior",
+            "Other",
+            "Patio or porch",
+            "Roof"
+          ],
+          "pressure_washing_target_other_text": "premium material preference for pressure washing target 34"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests whole-property pressure washing including house exterior, driveway, roof, patio, and fence; expects heavy staining (oil/rust) and access may be tight.",
+    "condition": "moderate",
+    "access": "difficult",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": true,
+    "materialHint": "premium material preference for pressure washing target 34",
+    "inferredScope": "whole_property_including_hardscapes_and_exterior_surfaces",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 68,
+    "pricingDrivers": [
+      "whole_property_area",
+      "multiple_surface_types",
+      "heavy_stains_oil_or_rust",
+      "difficult_access"
+    ],
+    "estimatorNotes": [
+      "Questionnaire selects multiple targets including driveway, house exterior, roof, patio, and fence.",
+      "Customer indicated whole property / very large area (3,000+ sq ft).",
+      "Satellite shows sizable driveway and walkways; photo is a test image but property context supports multi-surface scope."
+    ],
+    "serviceSignals": {
+      "Pressure Washing": {
+        "serviceType": "Pressure Washing",
+        "jobSubtype": "mixed_surfaces",
+        "jobSubtypeLabel": "Mixed surfaces (driveway, house exterior, patio, fence, roof)",
+        "workType": "clean",
+        "fallbackFamily": "mixed_custom",
+        "surfaceFamily": "flat_hardscape",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "very_large",
+        "estimatedQuantity": 3000,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "mixed",
+        "materialSubtype": "premium_preference",
+        "conditionClass": "heavy_soiling",
+        "severityClass": "major",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "moderate",
+        "heightClass": "mixed_height",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": true,
+        "deckPresent": false,
+        "roofType": "unknown",
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 64,
+        "aiConfidenceReasons": [
+          "Customer explicitly selected many targets and large whole-property size.",
+          "Quantity inferred from questionnaire size plus lot and building area; photos limited.",
+          "Access reported as tight which increases uncertainty for roof and fence work."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Treat as multi-surface whole-property pressure wash; separate line items for roof and house exterior may be needed upon manual review.",
+          "Confirm roof cleaning method and materials due to safety and access concerns."
+        ],
+        "summary": "Large multi-surface pressure washing request covering hardscapes and exterior surfaces with heavy staining and difficult access.",
+        "quotedSurfaces": {
+          "driveway": 2100
+        },
+        "surfaceDetections": [
+          {
+            "surface_type": "driveway",
+            "surface_area_sqft": 2100,
+            "confidence": 0.84
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "quotedSurfaces": {
+      "driveway": 2100
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 80,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.2,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about targets and size.",
+      "Satellite supports large driveway and multiple surfaces but photo set is limited.",
+      "Roof and fence work require confirmation due to safety/access."
+    ]
+  }
+}

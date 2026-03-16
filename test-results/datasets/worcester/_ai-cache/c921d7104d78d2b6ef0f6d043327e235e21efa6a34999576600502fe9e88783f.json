@@ -1,0 +1,146 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T21:22:23.314Z",
+  "promptHash": "25164d5cdff83ffabfc5430b6165f4a634cbf56c3429b196ec7e81da81526b60",
+  "keyHash": "c921d7104d78d2b6ef0f6d043327e235e21efa6a34999576600502fe9e88783f",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Deck Installation / Repair"
+    ],
+    "address": "22 Bittersweet Blvd, Worcester, MA 01607, USA",
+    "addressPlaceId": "ChIJoc9sdbUF5IkRMHNxoI9HMCA",
+    "lat": 42.228719,
+    "lng": -71.8067966,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Deck Installation / Repair",
+        "answers": {
+          "deck_area_type": "Multi-level",
+          "deck_material": "Wood",
+          "deck_repair_condition": "Minor issues",
+          "deck_scope": "Medium (~150-350 sq ft)",
+          "deck_work_type": "Replace existing deck"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests replacement of an existing multi-level wood deck (medium size ~150-350 sqft).",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "wood",
+    "inferredScope": "replace existing deck, medium size",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "deck_replacement",
+      "wood_material",
+      "multi-level"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Replace existing deck' and provided a medium area band.",
+      "Assume existing deck removal and haul-away required.",
+      "Photos and satellite confirm typical suburban single-family lot and rear deck location."
+    ],
+    "serviceSignals": {
+      "Deck Installation / Repair": {
+        "serviceType": "Deck Installation / Repair",
+        "jobSubtype": "deck_replacement",
+        "jobSubtypeLabel": "Replace existing deck",
+        "workType": "replace",
+        "fallbackFamily": "install_area",
+        "surfaceFamily": "flat_hardscape",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 250,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "direct",
+        "materialClass": "wood",
+        "materialSubtype": "treated_wood",
+        "conditionClass": "minor_issues",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "mixed_height",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": true,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 76,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly specified replace and medium area band.",
+          "Property imagery supports residential single-family context and rear deck presence."
+        ],
+        "consistencyScore": 90,
+        "notes": [
+          "Use mid-point of provided medium band for sizing when exact sqft not given.",
+          "Assume standard deck removal and site prep included."
+        ],
+        "summary": "Medium-sized wood deck replacement with removal and haul-away.",
+        "quotedSurfaces": {
+          "patio": 250
+        },
+        "surfaceDetections": [
+          {
+            "surface_type": "patio",
+            "surface_area_sqft": 250,
+            "confidence": 0.7
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 200,
+        "confidence": 0.6
+      }
+    ],
+    "detectedSurfaces": {
+      "walkway": 200,
+      "patio": 250
+    },
+    "quotedSurfaces": {
+      "patio": 250
+    },
+    "surfaceDetectionConfidence": 72,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Property context and imagery support the inferred scope."
+    ]
+  }
+}

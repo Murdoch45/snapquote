@@ -1,0 +1,142 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T19:40:01.504Z",
+  "promptHash": "37da1e21991313fb4f1fd410069d64e606184d2c81eabbb086e68823a033eded",
+  "keyHash": "e4704fadc4de46f968d6ecde803572eb4614e95ebc12aedcd4993b59f3250e1f",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Landscaping / Installation"
+    ],
+    "address": "1216 Norway St, Bristol, VA 24201, USA",
+    "addressPlaceId": "ChIJSQAVgxN2UIgRc62c8VJioW0",
+    "lat": 36.5970084,
+    "lng": -82.1960856,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Landscaping / Installation",
+        "answers": {
+          "landscape_access": "Not sure",
+          "landscape_area_size": "One side of yard (~500-1,500 sq ft)",
+          "landscape_job_type": "Replace old landscaping",
+          "landscape_materials": [
+            "Mostly mulch or rock",
+            "Sod or turf"
+          ],
+          "landscape_work_type": [
+            "New plants or garden beds",
+            "Other",
+            "Rock or mulch installation",
+            "Sod or lawn installation",
+            "Yard makeover"
+          ],
+          "landscape_work_type_other_text": "site-specific details for landscape work type 93"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Landscape replacement and installation focused on one side yard; mulch/rock and sod work indicated.",
+    "condition": "moderate",
+    "access": "moderate",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "mulch/rock and sod",
+    "inferredScope": "replace existing beds, install mulch/rock and sod over one side yard area",
+    "treeSize": "small",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "area_size",
+      "material_type_mix",
+      "access"
+    ],
+    "estimatorNotes": [
+      "Customer indicated one side of yard ~500-1,500 sqft.",
+      "Scope includes new plants/beds, mulch/rock, and sod replacement."
+    ],
+    "serviceSignals": {
+      "Landscaping / Installation": {
+        "serviceType": "Landscaping / Installation",
+        "jobSubtype": "yard_makeover",
+        "jobSubtypeLabel": "Yard makeover",
+        "workType": "replace",
+        "fallbackFamily": "yard_area",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "landscape_area",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 1000,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "direct",
+        "materialClass": "organic_inorganic_mix",
+        "materialSubtype": "mulch_rock_sod",
+        "conditionClass": "existing_landscape_to_replace",
+        "severityClass": "moderate",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "some_slope",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 74,
+        "aiConfidenceReasons": [
+          "Customer provided area range and specified materials.",
+          "Satellite and property context indicate single-side yard available for work."
+        ],
+        "consistencyScore": 86,
+        "notes": [
+          "Blend of mulch/rock and sod indicated; plan for removal of old materials and minor grading.",
+          "Access uncertain per questionnaire but appears standard side-yard access from satellite."
+        ],
+        "summary": "Replace landscape on one side yard (~500-1,500 sqft) with new plantings, mulch/rock, and sod."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 250,
+        "confidence": 0.74
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 72,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Property context and imagery support the inferred scope."
+    ]
+  }
+}

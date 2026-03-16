@@ -1,0 +1,157 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T21:31:16.559Z",
+  "promptHash": "eee68f99c645e507453338b0d4f01bd507f955d66fa75fa559528ed08aa89f90",
+  "keyHash": "5ec40170ba7c1cecac61b9712ba4b3995af3c92d5f6e3b69412705056f9499f9",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Outdoor Lighting Installation"
+    ],
+    "address": "577 Grove St, Worcester, MA 01605, USA",
+    "addressPlaceId": "ChIJCeltdQQH5IkRUt0eMJ6IxbA",
+    "lat": 42.2936121,
+    "lng": -71.8172553,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Outdoor Lighting Installation",
+        "answers": {
+          "lighting_install_difficulty": "Some wiring or layout work needed",
+          "lighting_power": "No",
+          "lighting_scope": "One large area",
+          "lighting_type": [
+            "Accent or landscape lights",
+            "Driveway lights",
+            "Pathway lights",
+            "Patio or string lights",
+            "Security or flood lights"
+          ],
+          "lighting_work_type": "Install lights I already have"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests installation of existing landscape and security lighting across one large area (front yard/driveway/patio); some wiring/layout work expected.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "low_voltage",
+    "inferredScope": "front_yard_and_driveway_pathway",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": 10,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "fixture_count",
+      "wiring_complexity",
+      "access_to_transformer",
+      "number_of_zones"
+    ],
+    "estimatorNotes": [
+      "Customer will provide fixtures.",
+      "Questionnaire indicates multiple fixture types (pathway, accent, driveway, patio, security).",
+      "Satellite and photo show clear front yard, driveway and walkway areas suitable for pathway/driveway lighting."
+    ],
+    "serviceSignals": {
+      "Outdoor Lighting Installation": {
+        "serviceType": "Outdoor Lighting Installation",
+        "jobSubtype": "landscape_and_security_lighting",
+        "jobSubtypeLabel": "Landscape & Security Lighting",
+        "workType": "install",
+        "fallbackFamily": "lighting_system",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "fixture",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 10,
+        "quantityUnit": "fixture_count",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "electrical",
+        "materialSubtype": "low_voltage",
+        "conditionClass": "new_install",
+        "severityClass": "minor",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 76,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly states installing customer-provided lights and lists multiple fixture types.",
+          "Satellite imagery shows front yard, driveway and walkway consistent with pathway/driveway lighting scope."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Plan for low-voltage transformer location and trenching/conduit where needed.",
+          "Multiple fixture types may require varied mounting and spacing."
+        ],
+        "summary": "Install customer-provided low-voltage landscape and security lighting across front yard, driveway, and patio/entry walkway. Some wiring and layout work expected.",
+        "surfaceDetections": [
+          {
+            "surface_type": "driveway",
+            "surface_area_sqft": 300,
+            "confidence": 0.85
+          },
+          {
+            "surface_type": "walkway",
+            "surface_area_sqft": 150,
+            "confidence": 0.8
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 300,
+        "confidence": 0.85
+      },
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 150,
+        "confidence": 0.8
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 300,
+      "walkway": 150
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about scope and fixture ownership.",
+      "Property context and imagery support front-yard/driveway pathway lighting inference."
+    ]
+  }
+}

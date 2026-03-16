@@ -1,0 +1,150 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T19:50:23.582Z",
+  "promptHash": "f23c1af6db846809b028b8bb1eedf2f2c8bd5ca5d625ef51664b999f3bbe8bde",
+  "keyHash": "519b9ef1c21c0fd0ecff8482a24e60b0e8ce6c4a1531380a86e42f6ec683f5e6",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Other"
+    ],
+    "address": "2070 King College Rd, Bristol, TN 37620, USA",
+    "addressPlaceId": "ChIJ32Mu-bV2UIgR8C_BrBTmahI",
+    "lat": 36.5870892,
+    "lng": -82.1329154,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Other",
+        "answers": {
+          "other_access": "Not sure",
+          "other_property_type": "Multi-unit property",
+          "other_size": "Large",
+          "other_work_type": "Repair"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Automated estimator test indicates driveway and walkways detected; customer selected Other (Repair) on a large multi-unit property, scope likely exterior hardscape work.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": true,
+    "materialHint": "concrete",
+    "inferredScope": "clean/repair of driveway and walkways",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "large_surface_area",
+      "multi-unit_property",
+      "concrete_material"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Other' with Repair intent and Large size; imagery shows a sizeable concrete driveway and connected walkways.",
+      "No explicit measurements provided; surface quantities inferred from satellite imagery."
+    ],
+    "serviceSignals": {
+      "Pressure Washing": {
+        "serviceType": "Pressure Washing",
+        "jobSubtype": "walkway",
+        "jobSubtypeLabel": "Walkway",
+        "workType": "clean",
+        "fallbackFamily": "flat_hardscape",
+        "surfaceFamily": "flat_hardscape",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "small",
+        "estimatedQuantity": 250,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "concrete",
+        "materialSubtype": "standard",
+        "conditionClass": "light_soiling",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": false,
+        "aiConfidence": 74,
+        "aiConfidenceReasons": [
+          "Satellite shows connecting walkways and small paths.",
+          "No conflicting evidence in questionnaire."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Walkways included as complementary cleaning scope to driveway."
+        ],
+        "summary": "Small walkways detected; include in cleaning scope.",
+        "quotedSurfaces": {
+          "walkway": 250
+        },
+        "surfaceDetections": [
+          {
+            "surface_type": "walkway",
+            "surface_area_sqft": 250,
+            "confidence": 0.72
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      },
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 250,
+        "confidence": 0.72
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "quotedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about Other/Repair and size.",
+      "Property context and imagery support the inferred scope."
+    ]
+  }
+}

@@ -1,0 +1,154 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T00:10:56.759Z",
+  "promptHash": "d3022abff751998eb7357a0555a5040bba8b8a0df46fdd9390c4341d615ef775",
+  "keyHash": "c1e5401f842468eed7acfca43a61dac7cf296aa6121b9948ece6280eaa1c82e7",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Pressure Washing"
+    ],
+    "address": "5618 Dayton Dr, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJj7v2QZo7b4cRO_KLm-GvTKw",
+    "lat": 41.1707669,
+    "lng": -104.7678762,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Pressure Washing",
+        "answers": {
+          "pressure_washing_access": "Some obstacles",
+          "pressure_washing_condition": "Heavy staining or moss",
+          "pressure_washing_size": "Large area (~1,500-3,000 sq ft)",
+          "pressure_washing_target": [
+            "Driveway",
+            "Fence",
+            "House exterior",
+            "Other",
+            "Patio or porch",
+            "Roof"
+          ],
+          "pressure_washing_target_other_text": "special access needs for pressure washing target 86"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Moderate driveway cleaning request covering multiple exterior targets; primary focus on driveway and other washable surfaces.",
+    "condition": "moderate",
+    "access": "moderate",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": true,
+    "materialHint": "concrete",
+    "inferredScope": "driveway plus surrounding hardscape and patio/porch areas",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "large_area",
+      "heavy_staining",
+      "access_obstacles"
+    ],
+    "estimatorNotes": [
+      "Customer selected multiple targets including driveway, house exterior, patio/porch, fence, and roof.",
+      "Questionnaire indicates heavy staining/moss and large area (1,500-3,000 sq ft).",
+      "Satellite shows a sizable driveway and walkways; photo count is limited to illustrative image."
+    ],
+    "serviceSignals": {
+      "Pressure Washing": {
+        "serviceType": "Pressure Washing",
+        "jobSubtype": "driveway",
+        "jobSubtypeLabel": "Driveway",
+        "workType": "clean",
+        "fallbackFamily": "flat_hardscape",
+        "surfaceFamily": "flat_hardscape",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 950,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "concrete",
+        "materialSubtype": "standard",
+        "conditionClass": "moderate_soiling",
+        "severityClass": "moderate",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "moderate",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": true,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": true,
+        "aiConfidence": 76,
+        "aiConfidenceReasons": [
+          "Driveway was explicitly selected.",
+          "Questionnaire specifies large area and heavy staining.",
+          "Satellite supports presence of sizable driveway but exact square footage is inferred."
+        ],
+        "consistencyScore": 84,
+        "notes": [
+          "Scope includes multiple exterior targets per customer selection; may need manual review to price roof and house exterior cleaning separately."
+        ],
+        "summary": "Driveway cleaning as part of a larger exterior pressure wash request; heavy staining and some access obstacles reported.",
+        "quotedSurfaces": {
+          "driveway": 950
+        },
+        "surfaceDetections": [
+          {
+            "surface_type": "driveway",
+            "surface_area_sqft": 950,
+            "confidence": 0.86
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "quotedSurfaces": {
+      "driveway": 2100
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Property context and imagery support the inferred scope."
+    ]
+  }
+}

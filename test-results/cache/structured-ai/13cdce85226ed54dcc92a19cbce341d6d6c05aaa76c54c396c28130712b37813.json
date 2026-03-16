@@ -1,0 +1,121 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T00:09:38.545Z",
+  "promptHash": "c022f2dbe7518fad8bd7a5263c7fdd2b7773286cd33dca66a518dff5aa27713b",
+  "keyHash": "13cdce85226ed54dcc92a19cbce341d6d6c05aaa76c54c396c28130712b37813",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Fence Installation / Repair"
+    ],
+    "address": "935 Burnside Ave, Los Angeles, CA 90036, USA",
+    "addressPlaceId": "ChIJ_1o_zx65woAR28Q5Yc4qZdE",
+    "lat": 34.058076,
+    "lng": -118.3514135,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Fence Installation / Repair",
+        "answers": {
+          "fence_material": "Vinyl",
+          "fence_repair_condition": "Not applicable / not a repair",
+          "fence_scope": "Full yard (200+ linear ft)",
+          "fence_site": "Flat and clear",
+          "fence_work_type": "New fence installation"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "New vinyl fence installation around full yard (customer indicated 200+ linear ft).",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "vinyl",
+    "inferredScope": "full yard fence installation ~200-250 linear ft",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 85,
+    "pricingDrivers": [
+      "linear footage",
+      "vinyl material",
+      "full yard perimeter access"
+    ],
+    "estimatorNotes": [
+      "Customer selected New fence installation, Vinyl, Full yard (200+ linear ft).",
+      "Satellite imagery shows a rectangular lot with clear perimeter suitable for a continuous fence run."
+    ],
+    "serviceSignals": {
+      "Fence Installation / Repair": {
+        "serviceType": "Fence Installation / Repair",
+        "jobSubtype": "new_fence",
+        "jobSubtypeLabel": "Vinyl fence - full yard",
+        "workType": "install",
+        "fallbackFamily": "linear_boundary",
+        "surfaceFamily": null,
+        "targetObjectFamily": "fence",
+        "sizeBucket": "large",
+        "estimatedQuantity": 220,
+        "quantityUnit": "linear_ft",
+        "quantityEvidence": "direct",
+        "materialClass": "vinyl",
+        "materialSubtype": "vinyl_standard",
+        "conditionClass": null,
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 88,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly specified new vinyl full-yard installation and 200+ linear ft.",
+          "Satellite imagery supports a continuous perimeter with accessible installation conditions."
+        ],
+        "consistencyScore": 92,
+        "notes": [
+          "Use 200+ linear ft as basis; estimator should verify exact property line and gate locations on site.",
+          "Prep likely includes minor grade and stake setting; no major demolition indicated."
+        ],
+        "summary": "Install new vinyl fence around full yard (~200-250 linear ft)."
+      }
+    },
+    "surfaceDetectionConfidence": 70,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 90,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1,
+    "estateScore": 8168,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about scope and material.",
+      "Satellite imagery and lot data corroborate a full-yard fence run and accessible conditions."
+    ]
+  }
+}

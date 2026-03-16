@@ -1,4 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import { type ServiceType } from "@/lib/services";
 import { randomSuffix, slugify } from "@/lib/utils";
 
 async function isSlugAvailable(slug: string): Promise<boolean> {
@@ -26,6 +27,7 @@ export async function ensureUserHasOrganization(opts: {
   email?: string | null;
   businessName: string;
   phone?: string | null;
+  services: ServiceType[];
 }): Promise<{ orgId: string; slug: string }> {
   const admin = createAdminClient();
 
@@ -41,6 +43,19 @@ export async function ensureUserHasOrganization(opts: {
       .select("public_slug")
       .eq("org_id", member.org_id)
       .single();
+
+    const { error: updateProfileError } = await admin
+      .from("contractor_profile")
+      .update({
+        business_name: opts.businessName,
+        phone: opts.phone ?? null,
+        email: opts.email ?? null,
+        services: opts.services,
+        notification_lead_email: Boolean(opts.email)
+      })
+      .eq("org_id", member.org_id);
+    if (updateProfileError) throw updateProfileError;
+
     return { orgId: member.org_id as string, slug: profile?.public_slug as string };
   }
 
@@ -71,6 +86,7 @@ export async function ensureUserHasOrganization(opts: {
     public_slug: slug,
     phone: opts.phone,
     email: opts.email,
+    services: opts.services,
     notification_lead_email: Boolean(opts.email)
   });
   if (profileError) throw profileError;

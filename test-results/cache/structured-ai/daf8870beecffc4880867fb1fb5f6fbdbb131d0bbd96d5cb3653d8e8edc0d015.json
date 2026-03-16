@@ -1,0 +1,139 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T00:09:29.307Z",
+  "promptHash": "bea110afab4dba0370ba971ae2f15a95a846106feece8f5294e557a9f6ff969d",
+  "keyHash": "daf8870beecffc4880867fb1fb5f6fbdbb131d0bbd96d5cb3653d8e8edc0d015",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Junk Removal"
+    ],
+    "address": "1301 E 23rd St, Cheyenne, WY 82001, USA",
+    "addressPlaceId": "ChIJi8RhiOM6b4cRMw7GhSSaufo",
+    "lat": 41.1442781,
+    "lng": -104.8044048,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Junk Removal",
+        "answers": {
+          "junk_amount": "A few items (fits in part of a pickup bed)",
+          "junk_heavy_items": "Yes, a few",
+          "junk_location": "Other",
+          "junk_location_other_text": "premium material preference for junk location 28",
+          "junk_type": "Other",
+          "junk_type_other_text": "premium material preference for junk type 7"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests small junk removal: a few items including some heavy pieces; fits part of a pickup bed. Scope likely front yard/driveway and curbside pickup.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "premium material preference for junk type 7",
+    "inferredScope": "front yard/driveway and curbside pickup",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": 0.5,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "small_load",
+      "heavy_items_present",
+      "curbside_access"
+    ],
+    "estimatorNotes": [
+      "Customer indicated 'A few items (fits in part of a pickup bed)' — treated as a small load.",
+      "Customer answered 'Yes, a few' for heavy items; plan for manual handling.",
+      "Location listed as 'Other' with other-text noting premium material preference; no specific structures noted."
+    ],
+    "serviceSignals": {
+      "Junk Removal": {
+        "serviceType": "Junk Removal",
+        "jobSubtype": "debris_load",
+        "jobSubtypeLabel": "Small load / debris",
+        "workType": "remove",
+        "fallbackFamily": "debris_load",
+        "surfaceFamily": "mixed_custom",
+        "targetObjectFamily": "debris",
+        "sizeBucket": "small",
+        "estimatedQuantity": 0.5,
+        "quantityUnit": "load",
+        "quantityEvidence": "direct",
+        "materialClass": "mixed",
+        "materialSubtype": "other",
+        "conditionClass": "n_a",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": false,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 78,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly states 'A few items (fits in part of a pickup bed)'.",
+          "Customer confirms a few heavy items present.",
+          "Photo and satellite show standard residential driveway/curb access."
+        ],
+        "consistencyScore": 90,
+        "notes": [
+          "Plan for curbside pickup; may need 1 crew with hand loading for heavy items.",
+          "Confirm any hazardous materials before pickup."
+        ],
+        "summary": "Small curbside junk removal: few mixed items, some heavy pieces; haul-away required."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "quotedSurfaces": {
+      "driveway": 2100
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Property context and imagery support curbside/front-yard scope."
+    ]
+  }
+}

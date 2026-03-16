@@ -1,0 +1,120 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T21:25:37.159Z",
+  "promptHash": "4a8125ff055dd90f9d890b04106d384116e5d33fbb08a9240d32688764657651",
+  "keyHash": "52f252a8b87f239d26a0d1c107e5a57b81bac86740031180590762b984fd0521",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Window Cleaning"
+    ],
+    "address": "577 Grove St, Worcester, MA 01605, USA",
+    "addressPlaceId": "ChIJCeltdQQH5IkRUt0eMJ6IxbA",
+    "lat": 42.2936121,
+    "lng": -71.8172553,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Window Cleaning",
+        "answers": {
+          "window_access": "Hard-to-reach areas",
+          "window_count": "26-50",
+          "window_property_type": "Three-story or taller",
+          "window_target_type": "Second-story or hard-to-reach windows"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requested second-story / hard-to-reach window cleaning for a three-story property with 26-50 windows.",
+    "condition": "light",
+    "access": "moderate",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "glass",
+    "inferredScope": "exterior windows, second-story and above",
+    "treeSize": "medium",
+    "estimatedWindowCount": 38,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "hard-to-reach windows",
+      "multi-story access"
+    ],
+    "estimatorNotes": [
+      "Customer selected 26-50 windows and indicated second-story or hard-to-reach windows.",
+      "Property is three stories or taller per questionnaire; satellite confirms multi-story footprint."
+    ],
+    "serviceSignals": {
+      "Window Cleaning": {
+        "serviceType": "Window Cleaning",
+        "jobSubtype": "second_story_windows",
+        "jobSubtypeLabel": "Second-story or hard-to-reach windows",
+        "workType": "clean",
+        "fallbackFamily": "window_group",
+        "surfaceFamily": "vertical_exterior_surface",
+        "targetObjectFamily": "window_group",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 38,
+        "quantityUnit": "count",
+        "quantityEvidence": "direct",
+        "materialClass": "glass",
+        "materialSubtype": "standard",
+        "conditionClass": "light_soiling",
+        "severityClass": "minor",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "low",
+        "heightClass": "three_plus",
+        "stories": 3,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 78,
+        "aiConfidenceReasons": [
+          "Customer explicitly provided window count and selected second-story/hard-to-reach.",
+          "Property height from questionnaire and satellite image supports multi-story access complexity."
+        ],
+        "consistencyScore": 90,
+        "notes": [
+          "Plan for ladders or lift access for second-story windows.",
+          "Clarify if interior cleaning or screen removal required during scheduling."
+        ],
+        "summary": "Exterior cleaning of approximately 38 windows, including hard-to-reach second-story windows."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Property context and imagery support the inferred scope."
+    ]
+  }
+}

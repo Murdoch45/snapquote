@@ -1,0 +1,144 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T19:37:25.150Z",
+  "promptHash": "05f86653617313cbdd95210985adccd004702d902ab38f3810a684442dc9be66",
+  "keyHash": "2bafe0a028fd50e038baa1767d616e64b35a86c7c89ba969cb92d7df3f19ece2",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Other"
+    ],
+    "address": "1120 Barber Rd, Bristol, TN 37620, USA",
+    "addressPlaceId": "ChIJJ5fNoHydWogRR3gpT3OQN7M",
+    "lat": 36.5614452,
+    "lng": -82.220179,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Other",
+        "answers": {
+          "other_access": "Very difficult",
+          "other_property_type": "Large home",
+          "other_size": "Not sure",
+          "other_work_type": "Cleaning"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requested general cleaning (Other) on a residential property; likely exterior hardscape cleaning (driveway/walkway) from imagery and context. Access noted as difficult which may increase effort. Scope not precisely specified—manual review recommended.",
+    "condition": "light",
+    "access": "difficult",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "concrete",
+    "inferredScope": "exterior hardscape cleaning (driveway and small walkways)",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 68,
+    "pricingDrivers": [
+      "access_difficulty",
+      "driveway_area",
+      "walkway_cleaning"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Other' cleaning and indicated very difficult access — confirm gated/blocked entry or narrow drive on site visit.",
+      "Satellite shows a modest driveway and short walkways; no large patio or pool visible."
+    ],
+    "serviceSignals": {
+      "Pressure Washing": {
+        "serviceType": "Pressure Washing",
+        "jobSubtype": "driveway",
+        "jobSubtypeLabel": "Driveway",
+        "workType": "clean",
+        "fallbackFamily": "flat_hardscape",
+        "surfaceFamily": "flat_hardscape",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "small",
+        "estimatedQuantity": 600,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "concrete",
+        "materialSubtype": "standard",
+        "conditionClass": "light_soiling",
+        "severityClass": "minor",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 64,
+        "aiConfidenceReasons": [
+          "Questionnaire was non-specific and marked access 'Very difficult'.",
+          "Satellite imagery shows driveway but no explicit dimensions; estimate inferred from lot and house footprint."
+        ],
+        "consistencyScore": 72,
+        "notes": [
+          "Treat as small driveway pressure wash with potential access constraints; confirm gate/entrance details and any required permits or parking restrictions."
+        ],
+        "summary": "Small driveway cleaning with difficult access; manual review recommended.",
+        "quotedSurfaces": {
+          "driveway": 600
+        },
+        "surfaceDetections": [
+          {
+            "surface_type": "driveway",
+            "surface_area_sqft": 600,
+            "confidence": 0.8
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 600,
+        "confidence": 0.8
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 600,
+      "walkway": 150
+    },
+    "quotedSurfaces": {
+      "driveway": 600
+    },
+    "surfaceDetectionConfidence": 70,
+    "satelliteClarity": 85,
+    "imageQuality": 72,
+    "scopeMatchConfidence": 66,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.2,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1,
+    "luxuryMultiplier": 1,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were sparse ('Other' cleaning) and indicated very difficult access.",
+      "Imagery supports small residential driveway and walkways but lacks detail for precise sqft; conservative inference used."
+    ]
+  }
+}

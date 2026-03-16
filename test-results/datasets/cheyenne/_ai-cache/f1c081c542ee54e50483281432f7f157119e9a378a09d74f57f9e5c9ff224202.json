@@ -1,0 +1,133 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T02:23:28.578Z",
+  "promptHash": "8b2bf26dbb0e656135c506ba985cf2b39ca192254291e38009373beb62a5716c",
+  "keyHash": "f1c081c542ee54e50483281432f7f157119e9a378a09d74f57f9e5c9ff224202",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Exterior Painting"
+    ],
+    "address": "5618 Dayton Dr, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJj7v2QZo7b4cRO_KLm-GvTKw",
+    "lat": 41.1707669,
+    "lng": -104.7678762,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Exterior Painting",
+        "answers": {
+          "painting_access": "Not sure",
+          "painting_condition": "Heavy peeling or damage",
+          "painting_scope": "Most of exterior",
+          "painting_surface_type": "Stucco",
+          "painting_target": "Fence or detached structure"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests exterior painting primarily for fence/detached stucco surfaces with heavy peeling across most of exterior.",
+    "condition": "heavy",
+    "access": "moderate",
+    "severity": "major",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "stucco",
+    "inferredScope": "detached_structure_or_fence",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "extensive surface prep due to heavy peeling",
+      "stucco substrate",
+      "most of exterior in scope"
+    ],
+    "estimatorNotes": [
+      "Questionnaire indicates 'Fence or detached structure' and 'Most of exterior' with 'Heavy peeling or damage'.",
+      "No explicit square footage provided; quantity estimated from typical detached structure/fence area and house size."
+    ],
+    "serviceSignals": {
+      "Exterior Painting": {
+        "serviceType": "Exterior Painting",
+        "jobSubtype": "fence_or_detached_structure",
+        "jobSubtypeLabel": "Fence / Detached Structure",
+        "workType": "replace",
+        "fallbackFamily": "exterior_finish_surface",
+        "surfaceFamily": "vertical_exterior_surface",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "small",
+        "estimatedQuantity": 350,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "stucco",
+        "materialSubtype": "stucco",
+        "conditionClass": "heavy_peeling",
+        "severityClass": "major",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "single_story",
+        "stories": 1,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": true,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": true,
+        "aiConfidence": 68,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly selected fence/detached structure and heavy peeling.",
+          "No direct area measurements provided; inference based on property size and typical detached structure area."
+        ],
+        "consistencyScore": 70,
+        "notes": [
+          "Confirm whether 'most of exterior' refers to house siding or just detached structure/fence.",
+          "Recommend on-site measurement for accurate paint quantity and prep time."
+        ],
+        "summary": "Paint stucco fence/detached structure with heavy peeling; prep and repaint required."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 80,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers specify stucco and heavy peeling.",
+      "No direct quantity provided; inference from property footprint and described scope."
+    ]
+  }
+}

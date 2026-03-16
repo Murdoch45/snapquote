@@ -1,0 +1,178 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T08:16:42.637Z",
+  "promptHash": "3de5f21879bf3cd5d1af4af39c568608a1ce15e80f23701fa8fec2f6b517c076",
+  "keyHash": "bd90ab62e33dd24e8923685c9c47c670b998c80661fa966d98164eb0562e6952",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Concrete"
+    ],
+    "address": "12924 Cedar Springs Rd, Oklahoma City, OK 73120, USA",
+    "addressPlaceId": "ChIJ_z0yrGIcsocRtUEXpwmzF7E",
+    "lat": 35.6016417,
+    "lng": -97.5676136,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Concrete",
+        "answers": {
+          "concrete_material": "Standard concrete",
+          "concrete_project_type": [
+            "Driveway",
+            "Other",
+            "Patio",
+            "Slab or pad"
+          ],
+          "concrete_project_type_other_text": "site-specific details for concrete project type 21",
+          "concrete_scope": "Large (~600-1,500 sq ft)",
+          "concrete_site_condition": "Dirt or grading needed",
+          "concrete_work_type": "Repair or resurfacing"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests concrete repair/resurfacing for driveway and patio, grading/dirt work required. Large scope (~600-1500 sq ft) indicated.",
+    "condition": "moderate",
+    "access": "easy",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": true,
+    "materialHint": "standard concrete",
+    "inferredScope": "600-1500 sqft combined driveway and patio/slab areas; grading needed",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "area_size",
+      "grading_needed",
+      "repair_resurface",
+      "driveway_and_patio"
+    ],
+    "estimatorNotes": [
+      "Questionnaire explicitly lists Driveway, Patio, Slab/pad and 'Other' with large scope 600-1500 sq ft.",
+      "Customer indicated dirt/grading needed which increases prep work.",
+      "Satellite imagery shows a sizeable driveway and adjacent hardscape; conservative quoted area used."
+    ],
+    "serviceSignals": {
+      "Concrete": {
+        "serviceType": "Concrete",
+        "jobSubtype": "driveway",
+        "jobSubtypeLabel": "Driveway",
+        "workType": "repair",
+        "fallbackFamily": "flat_hardscape",
+        "surfaceFamily": "flat_hardscape",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 1000,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "direct",
+        "materialClass": "concrete",
+        "materialSubtype": "standard",
+        "conditionClass": "degraded",
+        "severityClass": "moderate",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 78,
+        "aiConfidenceReasons": [
+          "Customer provided explicit scope band (~600-1,500 sqft).",
+          "Questionnaire lists multiple concrete elements (driveway, patio, slab/pad).",
+          "Satellite supports presence of large driveway and additional hardscape."
+        ],
+        "consistencyScore": 82,
+        "notes": [
+          "Use medium size bucket (1000 sqft) representing combined driveway/patio work within provided band.",
+          "Grading/dirt work flagged as prep and may require manual review for soil removal/permit needs."
+        ],
+        "summary": "Repair/resurface standard concrete driveway/patio totaling about 1000 sqft with grading prep.",
+        "quotedSurfaces": {
+          "driveway": 850,
+          "patio": 150
+        },
+        "surfaceDetections": [
+          {
+            "surface_type": "driveway",
+            "surface_area_sqft": 1400,
+            "confidence": 0.86
+          },
+          {
+            "surface_type": "walkway",
+            "surface_area_sqft": 200,
+            "confidence": 0.68
+          },
+          {
+            "surface_type": "patio",
+            "surface_area_sqft": 300,
+            "confidence": 0.72
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 1400,
+        "confidence": 0.86
+      },
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 200,
+        "confidence": 0.68
+      },
+      {
+        "surface_type": "patio",
+        "surface_area_sqft": 300,
+        "confidence": 0.72
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 1400,
+      "walkway": 200,
+      "patio": 300
+    },
+    "quotedSurfaces": {
+      "driveway": 850,
+      "patio": 150
+    },
+    "surfaceDetectionConfidence": 80,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about project types and scope band.",
+      "Satellite imagery confirms large driveway and additional hardscape areas; grading note increases complexity."
+    ]
+  }
+}

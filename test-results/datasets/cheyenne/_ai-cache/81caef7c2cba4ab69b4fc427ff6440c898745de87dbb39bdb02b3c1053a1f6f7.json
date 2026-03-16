@@ -1,0 +1,134 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T02:29:48.666Z",
+  "promptHash": "9d7d7f9efa33a2b11171bf02b0b01282f1dbe5e65938168f72976338c025bffb",
+  "keyHash": "81caef7c2cba4ab69b4fc427ff6440c898745de87dbb39bdb02b3c1053a1f6f7",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Junk Removal"
+    ],
+    "address": "1696 North Pass Trl, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJfeI3GdQ4b4cRiz4wRGjyh-I",
+    "lat": 41.2460767,
+    "lng": -104.7575577,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Junk Removal",
+        "answers": {
+          "junk_amount": "Large load (about a full trailer or truck load+)",
+          "junk_heavy_items": "Not sure",
+          "junk_location": "Other",
+          "junk_location_other_text": "premium material preference for junk location 35",
+          "junk_type": "Other",
+          "junk_type_other_text": "site-specific details for junk type 81"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests large junk removal (full truck/trailer load) with mixed debris; pickup and haul-away from property.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "heavy",
+    "multipleAreas": false,
+    "materialHint": "mixed",
+    "inferredScope": "haul_away_large_load",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": 15,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "large_volume",
+      "haul_away",
+      "mixed_materials"
+    ],
+    "estimatorNotes": [
+      "Customer selected Large load (~full trailer or truck+).",
+      "Location other text indicates site-specific placement details; verify on-site for heavy/bulky items."
+    ],
+    "serviceSignals": {
+      "Junk Removal": {
+        "serviceType": "Junk Removal",
+        "jobSubtype": "large_load",
+        "jobSubtypeLabel": "Large load",
+        "workType": "remove",
+        "fallbackFamily": "debris_load",
+        "surfaceFamily": "unknown",
+        "targetObjectFamily": "debris",
+        "sizeBucket": "large",
+        "estimatedQuantity": 1,
+        "quantityUnit": "load",
+        "quantityEvidence": "direct",
+        "materialClass": "mixed",
+        "materialSubtype": "other",
+        "conditionClass": "unknown",
+        "severityClass": "major",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "moderate",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": false,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 60,
+        "aiConfidenceReasons": [
+          "Customer explicitly selected a large load.",
+          "No detailed inventory provided; size inferred from customer selection rather than itemized list."
+        ],
+        "consistencyScore": 70,
+        "notes": [
+          "Verify heavy items and access point (customer listed 'Other' location).",
+          "Expect single-visit haul-away for a full trailer/truck load."
+        ],
+        "summary": "Large mixed-material junk removal, haul-away included."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answer explicitly indicates large junk load.",
+      "Satellite imagery confirms driveway and easy access for pickup."
+    ]
+  }
+}

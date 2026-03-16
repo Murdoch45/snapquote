@@ -1,0 +1,121 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T19:36:19.009Z",
+  "promptHash": "30e47bb6b7479429a465fde9ed4388b89188699da70dbbbc17c358b251b7911d",
+  "keyHash": "7d3f9c6cd0fa6892423866fd4009ce9d31d92fbdf6b4f5cd3e0578889e073beb",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Roofing"
+    ],
+    "address": "1120 Barber Rd, Bristol, TN 37620, USA",
+    "addressPlaceId": "ChIJJ5fNoHydWogRR3gpT3OQN7M",
+    "lat": 36.5614452,
+    "lng": -82.220179,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Roofing",
+        "answers": {
+          "roofing_access": "Moderate",
+          "roofing_problem": "Missing or damaged area",
+          "roofing_scope": "Small section",
+          "roofing_type": "Tile",
+          "roofing_work_type": "Minor repair"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Small tile roof repair (minor missing/damaged area) on a single-story residence. Access moderate; repair scope limited to a small section.",
+    "condition": "light",
+    "access": "moderate",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "tile",
+    "inferredScope": "small_section_repair",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "roofing_material_tile",
+      "access_height_single_story",
+      "small_section_repair"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Minor repair' for tile roof with missing/damaged area over a small section.",
+      "Satellite imagery confirms single-story home with tile-like roof footprint; no large roof replacement indicated."
+    ],
+    "serviceSignals": {
+      "Roofing": {
+        "serviceType": "Roofing",
+        "jobSubtype": "roof_repair",
+        "jobSubtypeLabel": "Roof repair",
+        "workType": "repair",
+        "fallbackFamily": "roof_like_surface",
+        "surfaceFamily": "roof_like_surface",
+        "targetObjectFamily": "roof",
+        "sizeBucket": "small",
+        "estimatedQuantity": 1,
+        "quantityUnit": "section",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "tile",
+        "materialSubtype": "clay_or_concrete_tile",
+        "conditionClass": "damaged",
+        "severityClass": "minor",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "single_story",
+        "stories": 1,
+        "slopeClass": "some_slope",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": "tile",
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 74,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly states minor repair to tile roof and small section scope.",
+          "Satellite imagery shows single-story roof compatible with described scope."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "No measurements provided; recommended on-site inspection to confirm exact tile count and flashing condition.",
+          "Assume minor localized tile replacement and associated fastening/underlayment checks."
+        ],
+        "summary": "Minor repair to a small section of tile roof on a single-story house. Moderate access."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about repair type and material.",
+      "Imagery supports single-story tile roof and small localized issue."
+    ]
+  }
+}

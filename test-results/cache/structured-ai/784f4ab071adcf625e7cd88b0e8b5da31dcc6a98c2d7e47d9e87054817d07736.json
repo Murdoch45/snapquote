@@ -1,0 +1,140 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T19:49:51.786Z",
+  "promptHash": "7dc20d4788ee548bba949d3a4abb09eb3d56685064e29a396d515b151e8c68af",
+  "keyHash": "784f4ab071adcf625e7cd88b0e8b5da31dcc6a98c2d7e47d9e87054817d07736",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Outdoor Lighting Installation"
+    ],
+    "address": "2070 King College Rd, Bristol, TN 37620, USA",
+    "addressPlaceId": "ChIJ32Mu-bV2UIgR8C_BrBTmahI",
+    "lat": 36.5870892,
+    "lng": -82.1329154,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Outdoor Lighting Installation",
+        "answers": {
+          "lighting_install_difficulty": "Easy access, simple install",
+          "lighting_power": "No",
+          "lighting_scope": "One medium-sized area",
+          "lighting_type": [
+            "Accent or landscape lights",
+            "Other",
+            "Pathway lights"
+          ],
+          "lighting_type_other_text": "site-specific details for lighting type 91",
+          "lighting_work_type": "Repair existing lighting"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Repair of existing landscape/pathway lighting in one medium area; easy access.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "landscape lighting, low-voltage LED fixtures",
+    "inferredScope": "Repair/replace ~medium group of pathway and accent fixtures",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": 8,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "Existing lighting repair",
+      "Fixture count and accessibility",
+      "Low-voltage LED components"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Repair existing lighting' and indicated pathway and accent lights plus 'Other'.",
+      "Scope described as one medium-sized area with easy access.",
+      "Satellite and photo show a residential yard with perimeter fence and landscape areas where fixtures likely located."
+    ],
+    "serviceSignals": {
+      "Outdoor Lighting Installation": {
+        "serviceType": "Outdoor Lighting Installation",
+        "jobSubtype": "lighting_repair",
+        "jobSubtypeLabel": "Landscape lighting repair",
+        "workType": "repair",
+        "fallbackFamily": "lighting_system",
+        "surfaceFamily": "linear_boundary",
+        "targetObjectFamily": "fixture",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 8,
+        "quantityUnit": "fixture_count",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "low_voltage",
+        "materialSubtype": "LED",
+        "conditionClass": "damaged",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": true,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 78,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly requests repair of existing lighting.",
+          "Customer indicated pathway and accent fixtures.",
+          "Property imagery supports typical residential landscape lighting layout."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Customer-provided scope aligns with a medium fixture count estimate.",
+          "No explicit fixture count provided; estimate inferred from 'one medium-sized area' and typical property size."
+        ],
+        "summary": "Repair/replace approximately 8 low-voltage landscape/ pathway fixtures in one medium area; easy access."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Property context and imagery support the inferred scope."
+    ]
+  }
+}

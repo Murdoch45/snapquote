@@ -1,0 +1,154 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T21:31:52.967Z",
+  "promptHash": "c3a50fbaeb80298b78b5b75a8b3b9af3a3f79fa982d07d5fb35ab038d6958d5f",
+  "keyHash": "227a9a0f2a1cf463354aafc754696b4d6dc4e3c493a07cbaa7a719f25d481c5d",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Pressure Washing"
+    ],
+    "address": "31 Lenox St, Worcester, MA 01602, USA",
+    "addressPlaceId": "ChIJD1cICMIG5IkRYY1iKGn1gck",
+    "lat": 42.2777158,
+    "lng": -71.8334735,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Pressure Washing",
+        "answers": {
+          "pressure_washing_access": "Tight or difficult access",
+          "pressure_washing_condition": "Heavy staining or moss",
+          "pressure_washing_size": "Whole property / very large area (3,000+ sq ft)",
+          "pressure_washing_target": [
+            "Driveway",
+            "House exterior",
+            "Patio or porch",
+            "Roof"
+          ]
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests whole-property pressure washing including driveway, house exterior, roof, and patio; heavy staining reported and access is tight.",
+    "condition": "heavy",
+    "access": "difficult",
+    "severity": "major",
+    "debris": "moderate",
+    "multipleAreas": true,
+    "materialHint": "mixed (concrete, roof shingles)",
+    "inferredScope": "driveway, house exterior, roof, patio",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "large overall area",
+      "heavy staining/moss",
+      "tight access",
+      "multiple surface types"
+    ],
+    "estimatorNotes": [
+      "Questionnaire lists multiple targets (driveway, roof, house exterior, patio).",
+      "Satellite imagery shows driveway ~2100 sqft and multiple exterior surfaces; photo is a test image so limited direct visual detail.",
+      "Access flagged as tight by customer which may increase labor/rigging needs."
+    ],
+    "serviceSignals": {
+      "Pressure Washing": {
+        "serviceType": "Pressure Washing",
+        "jobSubtype": "driveway",
+        "jobSubtypeLabel": "Driveway",
+        "workType": "clean",
+        "fallbackFamily": "flat_hardscape",
+        "surfaceFamily": "flat_hardscape",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "very_large",
+        "estimatedQuantity": 2100,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "concrete",
+        "materialSubtype": "standard",
+        "conditionClass": "heavy_soiling",
+        "severityClass": "major",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "moderate",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": true,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": "asphalt_shingle",
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": true,
+        "aiConfidence": 68,
+        "aiConfidenceReasons": [
+          "Multiple targets selected in questionnaire (driveway, roof, house, patio).",
+          "Satellite supports large driveway detection but photo is not diagnostic (test image).",
+          "Access marked as tight which increases uncertainty for equipment needs."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Primary quoted surface is driveway per questionnaire and satellite detection.",
+          "Roof and house exterior included in scope but require manual review for story count, pitch, and surface area before quoting."
+        ],
+        "summary": "Large driveway cleaning requested with additional building/roof cleaning indicated.",
+        "quotedSurfaces": {
+          "driveway": 2100
+        },
+        "surfaceDetections": [
+          {
+            "surface_type": "driveway",
+            "surface_area_sqft": 2100,
+            "confidence": 0.84
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "quotedSurfaces": {
+      "driveway": 2100
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.2,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about targets and condition.",
+      "Satellite imagery supports large driveway and multiple exterior surfaces.",
+      "Limited diagnostic detail from uploaded photo (test image) increases need for manual review."
+    ]
+  }
+}

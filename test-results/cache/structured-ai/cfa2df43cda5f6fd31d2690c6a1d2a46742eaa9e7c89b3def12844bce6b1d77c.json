@@ -1,0 +1,135 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T19:48:01.603Z",
+  "promptHash": "51cea3a193519cfae0046ff6e4919a1c5c9acc58a281b151368a2f7a2efa2acd",
+  "keyHash": "cfa2df43cda5f6fd31d2690c6a1d2a46742eaa9e7c89b3def12844bce6b1d77c",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Deck Installation / Repair"
+    ],
+    "address": "2070 King College Rd, Bristol, TN 37620, USA",
+    "addressPlaceId": "ChIJ32Mu-bV2UIgR8C_BrBTmahI",
+    "lat": 36.5870892,
+    "lng": -82.1329154,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Deck Installation / Repair",
+        "answers": {
+          "deck_area_type": "Rooftop or specialty area",
+          "deck_material": "Other",
+          "deck_material_other_text": "premium material preference for deck material 75",
+          "deck_repair_condition": "Not sure",
+          "deck_scope": "Small (up to ~150 sq ft)",
+          "deck_work_type": "Repair existing deck"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Small rooftop deck repair requested with premium material preference.",
+    "condition": "moderate",
+    "access": "moderate",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "premium material preference for deck material 75",
+    "inferredScope": "small_rooftop_deck_repair",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "rooftop access",
+      "premium material preference",
+      "small footprint"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Repair existing deck' and 'Small (up to ~150 sq ft)'.",
+      "Area specified as rooftop or specialty area; requires rooftop access handling.",
+      "Photos and satellite imagery show a flat roof-adjacent deck structure."
+    ],
+    "serviceSignals": {
+      "Deck Installation / Repair": {
+        "serviceType": "Deck Installation / Repair",
+        "jobSubtype": "rooftop_deck",
+        "jobSubtypeLabel": "Rooftop deck",
+        "workType": "repair",
+        "fallbackFamily": "repair_section",
+        "surfaceFamily": "deck",
+        "targetObjectFamily": "deck",
+        "sizeBucket": "small",
+        "estimatedQuantity": 120,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "direct",
+        "materialClass": "other",
+        "materialSubtype": "premium_material_75",
+        "conditionClass": "unknown",
+        "severityClass": "minor",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "roof_level",
+        "stories": 2,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": true,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 68,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly indicates small rooftop deck repair and premium material.",
+          "Rooftop/specialty area increases complexity and requires manual review."
+        ],
+        "consistencyScore": 70,
+        "notes": [
+          "Use premium-grade materials per customer preference.",
+          "Confirm exact square footage on site and roof access details."
+        ],
+        "summary": "Repair small rooftop deck (~120 sqft) with premium material preference."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 1200,
+        "confidence": 0.8
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 1200,
+      "walkway": 200
+    },
+    "surfaceDetectionConfidence": 80,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about deck type, scope, and material preference.",
+      "Satellite and photo evidence support a rooftop/specialty deck at the property."
+    ]
+  }
+}

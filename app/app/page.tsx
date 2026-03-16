@@ -1,16 +1,21 @@
 import Link from "next/link";
 import { MetricCard } from "@/components/MetricCard";
 import { RequestPageCard } from "@/components/RequestPageCard";
+import { SubscriptionStatusCard } from "@/components/SubscriptionStatusCard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getAnalytics } from "@/lib/db";
 import { requireAuth } from "@/lib/auth/requireAuth";
+import { getOrganizationSubscriptionStatus } from "@/lib/subscription";
 import { getAppUrl, toCurrency } from "@/lib/utils";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export default async function DashboardPage() {
   const auth = await requireAuth();
-  const analytics = await getAnalytics(auth.orgId);
+  const [analytics, subscription] = await Promise.all([
+    getAnalytics(auth.orgId),
+    getOrganizationSubscriptionStatus(auth.orgId)
+  ]);
 
   const supabase = await createServerSupabaseClient();
   const [{ data: latestLeads }, { data: profile }] = await Promise.all([
@@ -18,6 +23,7 @@ export default async function DashboardPage() {
       .from("leads")
       .select("id,address_full,submitted_at,services,status")
       .eq("org_id", auth.orgId)
+      .eq("ai_status", "ready")
       .order("submitted_at", { ascending: false })
       .limit(5),
     supabase
@@ -33,6 +39,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
+      <SubscriptionStatusCard subscription={subscription} />
       <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         <MetricCard title="Total leads (30d)" value={String(analytics.totals.totalLeads)} />
         <MetricCard title="Quotes sent (30d)" value={String(analytics.totals.quotesSent)} />

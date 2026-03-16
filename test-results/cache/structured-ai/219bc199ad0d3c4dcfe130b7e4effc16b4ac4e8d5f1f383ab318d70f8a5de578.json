@@ -1,0 +1,179 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T23:49:51.699Z",
+  "promptHash": "a9974042d307a4a5fa87128f9abe1bf8299b8bd93486fee3f5aa4966c888c520",
+  "keyHash": "219bc199ad0d3c4dcfe130b7e4effc16b4ac4e8d5f1f383ab318d70f8a5de578",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Concrete"
+    ],
+    "address": "1696 North Pass Trl, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJfeI3GdQ4b4cRiz4wRGjyh-I",
+    "lat": 41.2460767,
+    "lng": -104.7575577,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Concrete",
+        "answers": {
+          "concrete_material": "Brick / stone",
+          "concrete_project_type": [
+            "Driveway",
+            "Patio",
+            "Slab or pad",
+            "Walkway"
+          ],
+          "concrete_scope": "Medium (~200-600 sq ft)",
+          "concrete_site_condition": "Dirt or grading needed",
+          "concrete_work_type": "Replacement"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Replacement of multiple flat hardscape elements (driveway, walkway, slab/pad, patio) in medium scope (~200-600 sqft). Dirt/grading required.",
+    "condition": "moderate",
+    "access": "easy",
+    "severity": "moderate",
+    "debris": "moderate",
+    "multipleAreas": true,
+    "materialHint": "brick / stone",
+    "inferredScope": "multiple_flat_areas_replacement",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "replacement_of_multiple_flat_surfaces",
+      "dirt_grading_needed",
+      "masonry material (brick/stone)"
+    ],
+    "estimatorNotes": [
+      "Customer selected multiple concrete project types including driveway, walkway, slab/pad, and patio.",
+      "Scope indicated medium (~200-600 sqft); assume combined area in middle of band for quoting.",
+      "Site grading/dirt work flagged and will increase prep and excavation requirements."
+    ],
+    "serviceSignals": {
+      "Concrete": {
+        "serviceType": "Concrete",
+        "jobSubtype": "mixed_flat_surfaces",
+        "jobSubtypeLabel": "Driveway / Walkway / Patio / Slab",
+        "workType": "replace",
+        "fallbackFamily": "flat_hardscape",
+        "surfaceFamily": "flat_hardscape",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 400,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "masonry",
+        "materialSubtype": "brick_or_stone_finish",
+        "conditionClass": "deteriorated",
+        "severityClass": "moderate",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": true,
+        "aiConfidence": 70,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly selected multiple concrete project types and replacement work.",
+          "Customer indicated dirt/grading needed which implies excavation and prep.",
+          "No explicit square footage provided; mid-band inference used."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Allocate combined area ~400 sqft across selected elements for initial scope.",
+          "Expect additional review for grading extent and exact material finish details."
+        ],
+        "summary": "Medium replacement of driveway/walkway/patio/slab with masonry finish; grading required.",
+        "quotedSurfaces": {
+          "driveway": 250,
+          "walkway": 75,
+          "patio": 75
+        },
+        "surfaceDetections": [
+          {
+            "surface_type": "driveway",
+            "surface_area_sqft": 450,
+            "confidence": 0.78
+          },
+          {
+            "surface_type": "walkway",
+            "surface_area_sqft": 120,
+            "confidence": 0.6
+          },
+          {
+            "surface_type": "patio",
+            "surface_area_sqft": 100,
+            "confidence": 0.55
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 450,
+        "confidence": 0.78
+      },
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 120,
+        "confidence": 0.6
+      },
+      {
+        "surface_type": "patio",
+        "surface_area_sqft": 100,
+        "confidence": 0.55
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 450,
+      "walkway": 120,
+      "patio": 100
+    },
+    "quotedSurfaces": {
+      "driveway": 250,
+      "walkway": 75,
+      "patio": 75
+    },
+    "surfaceDetectionConfidence": 72,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 80,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "brick",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1.1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1,
+    "estateScore": 1200,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire responses are specific about project types and replacement work.",
+      "No exact square footage provided; used mid-band inference for quantities.",
+      "Grading/dirt work noted requires manual review for earthwork scope."
+    ]
+  }
+}

@@ -1,0 +1,140 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T02:21:12.843Z",
+  "promptHash": "44fd5a05555f58efad647c7dd68cee6035addde057e9ed794162dfe0e7c924ca",
+  "keyHash": "6c09dfef719a88baaf93f89dfba720e64d7b280bdf1050c26b23b23d8b9f1f63",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Landscaping / Installation"
+    ],
+    "address": "5618 Dayton Dr, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJj7v2QZo7b4cRO_KLm-GvTKw",
+    "lat": 41.1707669,
+    "lng": -104.7678762,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Landscaping / Installation",
+        "answers": {
+          "landscape_access": "Difficult",
+          "landscape_area_size": "Not sure",
+          "landscape_job_type": "Not sure",
+          "landscape_materials": [
+            "Not sure"
+          ],
+          "landscape_work_type": [
+            "Rock or mulch installation",
+            "Sod or lawn installation",
+            "Yard makeover"
+          ]
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests landscaping/installation including sod, yard makeover, and rock/mulch installation with difficult access; scope uncertain but likely full backyard renovation.",
+    "condition": "moderate",
+    "access": "difficult",
+    "severity": "moderate",
+    "debris": "moderate",
+    "multipleAreas": false,
+    "materialHint": "soil/mulch/sod",
+    "inferredScope": "backyard renovation (sod + mulch/rock)",
+    "treeSize": "small",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 60,
+    "pricingDrivers": [
+      "backyard area size",
+      "difficult access",
+      "multiple material types (sod + rock/mulch)"
+    ],
+    "estimatorNotes": [
+      "Customer selected sod installation, yard makeover, and rock/mulch install but indicated they are not sure of exact size.",
+      "Satellite and property data indicate a typical single-family backyard ~5500 sqft; likely majority of backyard could be in-scope.",
+      "Access flagged as difficult by customer; may increase labor/logistics. Manual review recommended if customer confirms large full-yard scope."
+    ],
+    "serviceSignals": {
+      "Landscaping / Installation": {
+        "serviceType": "Landscaping / Installation",
+        "jobSubtype": "yard_makeover",
+        "jobSubtypeLabel": "Yard makeover (sod / mulch / rock)",
+        "workType": "install",
+        "fallbackFamily": "yard_area",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "yard",
+        "sizeBucket": "large",
+        "estimatedQuantity": 5538,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "organic_inorganic_mix",
+        "materialSubtype": "sod_and_mulch_rock",
+        "conditionClass": "existing_lawn_patchy",
+        "severityClass": "moderate",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "moderate",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": true,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 58,
+        "aiConfidenceReasons": [
+          "Questionnaire selections indicate multiple landscape work types but customer wrote 'Not sure' for size.",
+          "Satellite indicates backyard area ~5538 sqft used to infer scope.",
+          "Single photo is generic test image; no closeup of yard condition."
+        ],
+        "consistencyScore": 72,
+        "notes": [
+          "Treat as full backyard renovation estimate candidate; verify scope and materials with customer before quoting.",
+          "Access difficulty may require crew planning for material staging."
+        ],
+        "summary": "Probable full-backyard landscaping: sod installation plus rock/mulch areas; customer uncertainty requires confirmation."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 250,
+        "confidence": 0.42
+      }
+    ],
+    "detectedSurfaces": {
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 40,
+    "satelliteClarity": 85,
+    "imageQuality": 20,
+    "scopeMatchConfidence": 64,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.2,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1,
+    "luxuryMultiplier": 1,
+    "estateScore": 8200,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire selections present but size unspecified by customer.",
+      "Satellite-derived backyard area used to infer likely scope.",
+      "Photo provided is a placeholder test image, lowering confidence."
+    ]
+  }
+}

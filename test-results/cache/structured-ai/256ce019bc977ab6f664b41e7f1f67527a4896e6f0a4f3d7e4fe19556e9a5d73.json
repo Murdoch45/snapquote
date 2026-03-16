@@ -1,0 +1,127 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T00:14:46.464Z",
+  "promptHash": "571d56e9ab877e93f93de14a5176c99ad41cc5b62837e1d602b4e933a7e4fd85",
+  "keyHash": "256ce019bc977ab6f664b41e7f1f67527a4896e6f0a4f3d7e4fe19556e9a5d73",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Landscaping / Installation"
+    ],
+    "address": "2481 Summitridge Dr, Beverly Hills, CA 90210, USA",
+    "addressPlaceId": "ChIJw5RbRLm9woARPFqNmJANwtg",
+    "lat": 34.1199802,
+    "lng": -118.4212831,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Landscaping / Installation",
+        "answers": {
+          "landscape_access": "Easy",
+          "landscape_area_size": "Most of front or backyard (~1,500-4,000 sq ft)",
+          "landscape_job_type": "New installation on bare area",
+          "landscape_materials": [
+            "Not sure"
+          ],
+          "landscape_work_type": [
+            "New plants or garden beds",
+            "Sod or lawn installation"
+          ]
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "New landscape installation including sod and plantings over a large front/back area.",
+    "condition": "moderate",
+    "access": "easy",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "not_sure",
+    "inferredScope": "sod_and_new_plants_entire_lawn_area",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "large_area_sod_installation",
+      "new_plants_and_beds",
+      "easy_access"
+    ],
+    "estimatorNotes": [
+      "Customer selected new plants/garden beds and sod installation for most of yard (1,500-4,000 sqft).",
+      "Satellite and property data indicate large backyard; assume majority of front or backyard to be reworked.",
+      "Materials not specified by customer; recommend follow-up to confirm plant palette and soil prep needs."
+    ],
+    "serviceSignals": {
+      "Landscaping / Installation": {
+        "serviceType": "Landscaping / Installation",
+        "jobSubtype": "sod_installation",
+        "jobSubtypeLabel": "Sod or Lawn Installation",
+        "workType": "install",
+        "fallbackFamily": "yard_area",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "turf_area",
+        "sizeBucket": "large",
+        "estimatedQuantity": 3000,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "organic",
+        "materialSubtype": "sod",
+        "conditionClass": "bare_area",
+        "severityClass": "moderate",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": true,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": true,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 72,
+        "aiConfidenceReasons": [
+          "Customer explicitly selected sod and new plants and provided an area band.",
+          "Property imagery and lot area support a multi-thousand sqft landscape scope."
+        ],
+        "consistencyScore": 82,
+        "notes": [
+          "Estimate uses mid-point of provided area band for conservative planning.",
+          "Follow-up required to confirm irrigation, grading, and soil amendment scope."
+        ],
+        "summary": "Install sod and new plantings across a large portion of the yard (approx 3,000 sqft)."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": true,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about work types.",
+      "Property context and imagery support a large residential installation scope."
+    ]
+  }
+}

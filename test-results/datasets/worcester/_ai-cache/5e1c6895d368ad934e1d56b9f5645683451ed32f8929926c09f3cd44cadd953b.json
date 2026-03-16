@@ -1,0 +1,128 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T21:33:06.819Z",
+  "promptHash": "c06c367aa194ca3e2921d5a0c326c524d916c7597b20295b67b475b998b03301",
+  "keyHash": "5e1c6895d368ad934e1d56b9f5645683451ed32f8929926c09f3cd44cadd953b",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Gutter Cleaning"
+    ],
+    "address": "31 Lenox St, Worcester, MA 01602, USA",
+    "addressPlaceId": "ChIJD1cICMIG5IkRYY1iKGn1gck",
+    "lat": 42.2777158,
+    "lng": -71.8334735,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Gutter Cleaning",
+        "answers": {
+          "gutter_access": "Yes, landscaping or obstacles",
+          "gutter_building_type": "Detached garage or shed",
+          "gutter_fill_level": "Moderate debris",
+          "gutter_work_type": "Clean gutters only"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Gutter cleaning for detached building (garage/shed) and primary residence gutters; moderate debris, landscaping access constraints.",
+    "condition": "moderate",
+    "access": "moderate",
+    "severity": "minor",
+    "debris": "moderate",
+    "multipleAreas": false,
+    "materialHint": "metal_or_vinyl",
+    "inferredScope": "clean gutters only for main house and detached garage/shed",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": 400,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "gutter linear footage",
+      "access obstruction from landscaping",
+      "moderate debris"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Clean gutters only' for detached garage/shed and likely main house.",
+      "Satellite shows pool and moderate tree cover which can increase debris.",
+      "Access limited by landscaping; may require care around plantings."
+    ],
+    "serviceSignals": {
+      "Gutter Cleaning": {
+        "serviceType": "Gutter Cleaning",
+        "jobSubtype": "gutters",
+        "jobSubtypeLabel": "Gutter Cleaning",
+        "workType": "clean",
+        "fallbackFamily": "vertical_exterior_surface",
+        "surfaceFamily": "vertical_exterior_surface",
+        "targetObjectFamily": "gutter_system",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 160,
+        "quantityUnit": "linear_ft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "metal_or_vinyl",
+        "materialSubtype": "unknown",
+        "conditionClass": "moderate_soiling",
+        "severityClass": "moderate",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "moderate",
+        "heightClass": "two_story",
+        "stories": 2,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": true,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": "asphalt_shingle",
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 74,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly requested gutter cleaning for detached building.",
+          "Satellite imagery shows tree coverage and typical residential gutter lengths consistent with estimate."
+        ],
+        "consistencyScore": 80,
+        "notes": [
+          "Assumed main house gutters included though questionnaire explicitly listed detached garage/shed; inferred from service selection and property context.",
+          "Estimated linear footage based on building perimeter inferred from satellite and house sqft."
+        ],
+        "summary": "Clean gutters (approx 160 lf) on two-story house and detached garage; moderate debris and landscaping access."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 0,
+        "confidence": 0
+      }
+    ],
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Property context and imagery support the inferred scope."
+    ]
+  }
+}

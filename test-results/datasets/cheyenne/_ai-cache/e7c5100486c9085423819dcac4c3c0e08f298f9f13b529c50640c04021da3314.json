@@ -1,0 +1,123 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T02:26:36.573Z",
+  "promptHash": "6eb1175c9eb8a2794f73f12b95b2071221eeb2b0e108fdb41d342712c428b39d",
+  "keyHash": "e7c5100486c9085423819dcac4c3c0e08f298f9f13b529c50640c04021da3314",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Pool Service / Cleaning"
+    ],
+    "address": "1696 North Pass Trl, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJfeI3GdQ4b4cRiz4wRGjyh-I",
+    "lat": 41.2460767,
+    "lng": -104.7575577,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Pool Service / Cleaning",
+        "answers": {
+          "pool_access": "Yes",
+          "pool_condition": "Green or neglected",
+          "pool_size": "Large",
+          "pool_type": "Pool and spa",
+          "pool_work_type": "Green or dirty pool cleanup"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests green/neglected pool and spa cleanup; access available. Likely a large combined pool and spa requiring initial remediation and regular service thereafter.",
+    "condition": "heavy",
+    "access": "easy",
+    "severity": "major",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "vinyl or plaster (unknown)",
+    "inferredScope": "full pool and spa remediation plus start-up balancing and equipment check",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": 800,
+    "estimatedFixtureCount": 2,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "Green pool remediation",
+      "Pool and spa combined",
+      "Large pool size",
+      "Equipment start-up and chemical balancing"
+    ],
+    "estimatorNotes": [
+      "Questionnaire explicitly indicates green/neglected pool and spa and large size.",
+      "No direct dimensions provided; pool sqft estimated from 'Large' classification.",
+      "Access available per questionnaire."
+    ],
+    "serviceSignals": {
+      "Pool Service / Cleaning": {
+        "serviceType": "Pool Service / Cleaning",
+        "jobSubtype": "green_pool_cleanup",
+        "jobSubtypeLabel": "Green pool cleanup (pool + spa)",
+        "workType": "service",
+        "fallbackFamily": "pool_service_event",
+        "surfaceFamily": "pool_service_event",
+        "targetObjectFamily": "pool_system",
+        "sizeBucket": "large",
+        "estimatedQuantity": 800,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "unknown",
+        "materialSubtype": "unknown",
+        "conditionClass": "neglected",
+        "severityClass": "major",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": true,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 78,
+        "aiConfidenceReasons": [
+          "Customer selected green pool cleanup and pool+spa in questionnaire.",
+          "No explicit dimensions provided; size inferred from 'Large' selection."
+        ],
+        "consistencyScore": 92,
+        "notes": [
+          "Recommend initial shock, vacuum, filter cleaning, and chemical balancing.",
+          "Spa included in scope per customer selection."
+        ],
+        "summary": "Large green pool and spa remediation with equipment check and start-up balancing."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1,
+    "luxuryMultiplier": 1,
+    "estateScore": 0,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about pool condition and type.",
+      "No conflicting evidence from photos or satellite; size inferred from 'Large' answer."
+    ]
+  }
+}

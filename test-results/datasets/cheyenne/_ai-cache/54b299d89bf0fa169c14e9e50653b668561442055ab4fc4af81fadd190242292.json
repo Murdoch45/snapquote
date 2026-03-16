@@ -1,0 +1,125 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T02:28:44.443Z",
+  "promptHash": "9cb7fa1519020ffcc55282e47574839332771e80e0298ac8d392cf075888314e",
+  "keyHash": "54b299d89bf0fa169c14e9e50653b668561442055ab4fc4af81fadd190242292",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Deck Installation / Repair"
+    ],
+    "address": "1696 North Pass Trl, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJfeI3GdQ4b4cRiz4wRGjyh-I",
+    "lat": 41.2460767,
+    "lng": -104.7575577,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Deck Installation / Repair",
+        "answers": {
+          "deck_area_type": "Rooftop or specialty area",
+          "deck_material": "Other",
+          "deck_material_other_text": "site-specific details for deck material 38",
+          "deck_repair_condition": "Minor issues",
+          "deck_scope": "Not sure",
+          "deck_work_type": "New deck"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requested a new rooftop/specialty deck; scope uncertain and material noted as custom.",
+    "condition": "light",
+    "access": "moderate",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "site-specific details for deck material 38",
+    "inferredScope": "New rooftop or specialty area deck; customer selected 'Not sure' for scope.",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 60,
+    "pricingDrivers": [
+      "Rooftop/specialty deck",
+      "Custom material specified",
+      "Access and height complexity"
+    ],
+    "estimatorNotes": [
+      "Customer selected New deck and Rooftop or specialty area but marked scope as Not sure.",
+      "Photos and satellite confirm roof-level area and limited surrounding hardscapes.",
+      "Requires manual review for structural, permit, and material specifics."
+    ],
+    "serviceSignals": {
+      "Deck Installation / Repair": {
+        "serviceType": "Deck Installation / Repair",
+        "jobSubtype": "rooftop_deck",
+        "jobSubtypeLabel": "Rooftop deck",
+        "workType": "install",
+        "fallbackFamily": "install_area",
+        "surfaceFamily": "deck_surface",
+        "targetObjectFamily": "deck",
+        "sizeBucket": "small",
+        "estimatedQuantity": 200,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "weak_inference",
+        "materialClass": "other",
+        "materialSubtype": "site-specific details for deck material 38",
+        "conditionClass": "new_install",
+        "severityClass": "minor",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "low",
+        "heightClass": "roof_level",
+        "stories": 2,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": "flat_roof",
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 58,
+        "aiConfidenceReasons": [
+          "Questionnaire indicates new rooftop deck but scope is uncertain.",
+          "Material explicitly provided as 'Other' with custom text.",
+          "Satellite imagery shows roof area consistent with rooftop deck possibility but no direct dimensions."
+        ],
+        "consistencyScore": 62,
+        "notes": [
+          "Confirm structural capacity and permit requirements for rooftop deck.",
+          "Obtain exact deck dimensions and preferred finish/material before quoting."
+        ],
+        "summary": "Probable small rooftop deck installation; customer provided custom material note and uncertain scope — manual review needed."
+      }
+    },
+    "surfaceDetectionConfidence": 70,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 65,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.2,
+    "materialMultiplier": 1.1,
+    "regionMultiplier": 1,
+    "luxuryMultiplier": 1,
+    "estateScore": 10000,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire indicates a new rooftop deck but scope uncertain.",
+      "Custom material specified in free-text.",
+      "Imagery consistent with roof-level work but lacks direct measurements."
+    ]
+  }
+}

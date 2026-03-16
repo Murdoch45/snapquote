@@ -1,0 +1,123 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T02:27:39.863Z",
+  "promptHash": "85412636eab7b8016e5d3b7d6bb8ee0fade4e9e7f148964e93a7f2fdf267507d",
+  "keyHash": "5927892b030552c69c5fe1c3bcad9c8d8fdcf7605ffd4215c5808063eb5354fd",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Tree Service / Removal"
+    ],
+    "address": "1696 North Pass Trl, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJfeI3GdQ4b4cRiz4wRGjyh-I",
+    "lat": 41.2460767,
+    "lng": -104.7575577,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Tree Service / Removal",
+        "answers": {
+          "tree_access": "Easy",
+          "tree_haul_away": "Yes",
+          "tree_location": "Front yard",
+          "tree_size": "Medium",
+          "tree_work_type": "Remove multiple trees"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requested removal of multiple medium trees in the front yard with haul-away.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "moderate",
+    "multipleAreas": false,
+    "materialHint": "wood",
+    "inferredScope": "Remove multiple medium trees in front yard and haul away debris.",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "tree_removal_count",
+      "medium_tree_size",
+      "haul_away_required",
+      "easy_access_front_yard"
+    ],
+    "estimatorNotes": [
+      "Questionnaire indicates 'Remove multiple trees' and 'haul away: Yes'.",
+      "No explicit tree count provided; quantity inferred from customer wording and property context."
+    ],
+    "serviceSignals": {
+      "Tree Service / Removal": {
+        "serviceType": "Tree Service / Removal",
+        "jobSubtype": "remove_multiple_trees",
+        "jobSubtypeLabel": "Remove multiple trees",
+        "workType": "remove",
+        "fallbackFamily": "tree_work",
+        "surfaceFamily": null,
+        "targetObjectFamily": "tree",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 3,
+        "quantityUnit": "tree_count",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "wood",
+        "materialSubtype": "generic_tree",
+        "conditionClass": "standing_live",
+        "severityClass": "moderate",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "single_story",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": false,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 68,
+        "aiConfidenceReasons": [
+          "Customer selected 'Remove multiple trees' in questionnaire.",
+          "Haul-away explicitly requested.",
+          "No explicit tree count provided; quantity estimated conservatively."
+        ],
+        "consistencyScore": 80,
+        "notes": [
+          "Front yard location specified; access listed as easy.",
+          "Recommend on-site assessment for exact tree count and stump handling."
+        ],
+        "summary": "Remove multiple medium trees in front yard with haul-away."
+      }
+    },
+    "surfaceDetectionConfidence": 50,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 0,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about removal and haul-away.",
+      "Property context supports front-yard tree presence but lacks exact count."
+    ]
+  }
+}

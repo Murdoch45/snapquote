@@ -1,0 +1,151 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T06:34:31.842Z",
+  "promptHash": "9fd70e7af542a7c522ba28ea368e4fe3636ffa689bd16207920147390448288f",
+  "keyHash": "d52c54f592c3e14ee105b6ceb90594fca59b7206597fbb75d25f39fe9f775492",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Pressure Washing"
+    ],
+    "address": "2481 Summitridge Dr, Beverly Hills, CA 90210, USA",
+    "addressPlaceId": "ChIJw5RbRLm9woARPFqNmJANwtg",
+    "lat": 34.1199802,
+    "lng": -118.4212831,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Pressure Washing",
+        "answers": {
+          "pressure_washing_access": "Tight or difficult access",
+          "pressure_washing_condition": "Heavy staining or moss",
+          "pressure_washing_size": "Small area (up to ~500 sq ft)",
+          "pressure_washing_target": [
+            "Fence",
+            "Patio or porch",
+            "Roof"
+          ]
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests pressure washing for small patio/porch, fence, and roof areas with heavy staining and tight access.",
+    "condition": "heavy",
+    "access": "difficult",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": true,
+    "materialHint": "mixed (wood, tile, stone)",
+    "inferredScope": "patio, fence, roof cleaning; small total area",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": 1200,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 68,
+    "pricingDrivers": [
+      "tight_access",
+      "roof_cleaning",
+      "heavy_staining",
+      "multiple_surface_types"
+    ],
+    "estimatorNotes": [
+      "Customer explicitly selected patio/porch, fence, and roof.",
+      "Size reported as small (up to ~500 sq ft) — use that as primary quantity.",
+      "Roof work may require soft-wash approach and manual review for safety/insurance."
+    ],
+    "serviceSignals": {
+      "Pressure Washing": {
+        "serviceType": "Pressure Washing",
+        "jobSubtype": "roof",
+        "jobSubtypeLabel": "Roof",
+        "workType": "clean",
+        "fallbackFamily": "roof_like_surface",
+        "surfaceFamily": "roof_like_surface",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "small",
+        "estimatedQuantity": 500,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "direct",
+        "materialClass": "tile",
+        "materialSubtype": "clay_tile",
+        "conditionClass": "heavy_soiling",
+        "severityClass": "major",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "moderate",
+        "heightClass": "two_story",
+        "stories": 2,
+        "slopeClass": "some_slope",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": true,
+        "fencePresent": true,
+        "deckPresent": false,
+        "roofType": "tile",
+        "premiumPropertySignal": true,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 66,
+        "aiConfidenceReasons": [
+          "Customer selected roof which triggers safety review.",
+          "Satellite shows multi-story tile roof common in area."
+        ],
+        "consistencyScore": 70,
+        "notes": [
+          "Roof cleaning often requires soft-wash and fall-protection; confirm scope and safety requirements.",
+          "Estimate area conservatively within small-size band."
+        ],
+        "summary": "Small-area roof cleaning (~500 sqft) with heavy moss/staining; requires soft-wash and safety precautions."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      },
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 250,
+        "confidence": 0.72
+      },
+      {
+        "surface_type": "patio",
+        "surface_area_sqft": 800,
+        "confidence": 0.6
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250,
+      "patio": 800
+    },
+    "quotedSurfaces": {
+      "patio": 300
+    },
+    "surfaceDetectionConfidence": 74,
+    "satelliteClarity": 85,
+    "imageQuality": 60,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.2,
+    "materialMultiplier": 1.1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": true,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific and list multiple delicate surfaces.",
+      "Property context and imagery support small-scale multi-surface work but roof presence requires manual safety review."
+    ]
+  }
+}

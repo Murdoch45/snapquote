@@ -1,0 +1,121 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T00:08:58.829Z",
+  "promptHash": "787e568e2f1665e7dc8638b55bf275f1245094dd9720e2c0d2d9150fbcf3c1b6",
+  "keyHash": "d2364acea69a9a3dd566b63d308db9afa1bc61150e13d182547d5a357632a33f",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Roofing"
+    ],
+    "address": "1301 E 23rd St, Cheyenne, WY 82001, USA",
+    "addressPlaceId": "ChIJi8RhiOM6b4cRMw7GhSSaufo",
+    "lat": 41.1442781,
+    "lng": -104.8044048,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Roofing",
+        "answers": {
+          "roofing_access": "Moderate",
+          "roofing_problem": "Storm or major damage",
+          "roofing_scope": "Entire roof",
+          "roofing_type": "Tile",
+          "roofing_work_type": "Minor repair"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Minor tile roof repair for entire roof after storm damage; accessible with moderate difficulty.",
+    "condition": "moderate",
+    "access": "moderate",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "tile",
+    "inferredScope": "entire_roof",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "roofing_material_tile",
+      "storm_damage",
+      "entire_roof_scope"
+    ],
+    "estimatorNotes": [
+      "Customer selected minor repair and entire roof scope in questionnaire.",
+      "Satellite and photo imagery support single-story rectangular roof; no major access obstructions visible."
+    ],
+    "serviceSignals": {
+      "Roofing": {
+        "serviceType": "Roofing",
+        "jobSubtype": "roof_repair",
+        "jobSubtypeLabel": "Tile roof repair",
+        "workType": "repair",
+        "fallbackFamily": "roof_like_surface",
+        "surfaceFamily": "roof_like_surface",
+        "targetObjectFamily": "roof",
+        "sizeBucket": "small",
+        "estimatedQuantity": 13,
+        "quantityUnit": "roof_square",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "tile",
+        "materialSubtype": "concrete_tile",
+        "conditionClass": "storm_damage",
+        "severityClass": "moderate",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "single_story",
+        "stories": 1,
+        "slopeClass": "some_slope",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": "tile",
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 76,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly indicates minor repair, tile, and entire roof.",
+          "Satellite imagery shows single-story residence consistent with inferred roof area."
+        ],
+        "consistencyScore": 82,
+        "notes": [
+          "Use tile-appropriate repair methods and disposal for damaged material.",
+          "Confirm pitch and exact square footage on-site before final quote."
+        ],
+        "summary": "Minor tile roof repair for whole roof due to storm damage; accessible with moderate difficulty."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 70,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Property context and imagery support the inferred scope."
+    ]
+  }
+}

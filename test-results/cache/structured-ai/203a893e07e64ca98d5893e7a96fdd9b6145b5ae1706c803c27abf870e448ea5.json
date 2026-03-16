@@ -1,0 +1,131 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T19:35:54.994Z",
+  "promptHash": "63fd168d0ab3aaae9382775a6a3365244afc55ad156e7e2dccf32b40c2e36ccd",
+  "keyHash": "203a893e07e64ca98d5893e7a96fdd9b6145b5ae1706c803c27abf870e448ea5",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Exterior Painting"
+    ],
+    "address": "1120 Barber Rd, Bristol, TN 37620, USA",
+    "addressPlaceId": "ChIJJ5fNoHydWogRR3gpT3OQN7M",
+    "lat": 36.5614452,
+    "lng": -82.220179,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Exterior Painting",
+        "answers": {
+          "painting_access": "Steep or hard-to-reach areas",
+          "painting_condition": "Not sure",
+          "painting_scope": "Not sure",
+          "painting_surface_type": "Other",
+          "painting_surface_type_other_text": "site-specific details for painting surface type 95",
+          "painting_target": "Trim, doors, or garage only"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requested painting of trim, doors or garage only; site-specific surface noted. Access may be steep or hard-to-reach.",
+    "condition": "light",
+    "access": "difficult",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "site-specific details for painting surface type 95",
+    "inferredScope": "trim/doors/garage only",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 68,
+    "pricingDrivers": [
+      "access_difficulty",
+      "small_scope_trim_and_doors",
+      "site-specific_surface"
+    ],
+    "estimatorNotes": [
+      "Customer selected trim/doors/garage only.",
+      "Surface type is listed as Other with additional text; manual review may be required to determine substrate and prep needs.",
+      "Access flagged as steep or hard-to-reach which may increase labor or require specialty equipment."
+    ],
+    "serviceSignals": {
+      "Exterior Painting": {
+        "serviceType": "Exterior Painting",
+        "jobSubtype": "trim_doors_garage",
+        "jobSubtypeLabel": "Trim/Doors/Garage",
+        "workType": "service",
+        "fallbackFamily": "exterior_finish_surface",
+        "surfaceFamily": "exterior_finish_surface",
+        "targetObjectFamily": "exterior_finish_surface",
+        "sizeBucket": "small",
+        "estimatedQuantity": 12,
+        "quantityUnit": "component_count",
+        "quantityEvidence": "direct",
+        "materialClass": "other",
+        "materialSubtype": "site-specific",
+        "conditionClass": "unknown",
+        "severityClass": "minor",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "low",
+        "heightClass": "two_story",
+        "stories": 2,
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 60,
+        "aiConfidenceReasons": [
+          "Customer explicitly selected trim/doors/garage only.",
+          "Painting surface type was specified as Other with additional text, requiring substrate identification.",
+          "Access flagged as steep or hard-to-reach increases uncertainty on equipment needs."
+        ],
+        "consistencyScore": 70,
+        "notes": [
+          "Confirm substrate (wood/metal/vinyl) from photos or customer before finalizing paint materials.",
+          "Likely requires ladder or lift for elevated trim/garage areas."
+        ],
+        "summary": "Small exterior painting job focused on trim/doors/garage; access limited, substrate unspecified."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 0,
+        "confidence": 0
+      }
+    ],
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 78,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answer explicitly targets trim/doors/garage.",
+      "Surface type marked Other with free-text requires human review to identify substrate and confirm scope.",
+      "Access difficulty flag increases uncertainty on staging and equipment."
+    ]
+  }
+}

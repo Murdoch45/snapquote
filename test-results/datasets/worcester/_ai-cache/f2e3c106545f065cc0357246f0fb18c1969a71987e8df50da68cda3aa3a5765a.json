@@ -1,0 +1,128 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T21:35:10.009Z",
+  "promptHash": "49aee3c398b068d7bf9c18137197303b1e95bdc1b961e18a91b384b5377a5fa8",
+  "keyHash": "f2e3c106545f065cc0357246f0fb18c1969a71987e8df50da68cda3aa3a5765a",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Landscaping / Installation"
+    ],
+    "address": "31 Lenox St, Worcester, MA 01602, USA",
+    "addressPlaceId": "ChIJD1cICMIG5IkRYY1iKGn1gck",
+    "lat": 42.2777158,
+    "lng": -71.8334735,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Landscaping / Installation",
+        "answers": {
+          "landscape_access": "Easy",
+          "landscape_area_size": "One side of yard (~500-1,500 sq ft)",
+          "landscape_job_type": "Replace old landscaping",
+          "landscape_materials": [
+            "Mixed materials",
+            "Mostly mulch or rock",
+            "Mostly plants"
+          ],
+          "landscape_work_type": [
+            "Yard makeover"
+          ]
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests a yard makeover replacing old landscaping on one side of the yard (mulch/rock and plants).",
+    "condition": "moderate",
+    "access": "easy",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "mulch/rock and plants",
+    "inferredScope": "One side of backyard, customer indicated ~500-1500 sq ft",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "area size",
+      "materials (mulch/rock and plants)",
+      "remove and replace existing landscape"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Yard makeover' and 'Replace old landscaping'.",
+      "Customer indicated area ~500-1,500 sq ft; use midpoint for qty estimation.",
+      "Access described as easy; standard equipment access expected."
+    ],
+    "serviceSignals": {
+      "Landscaping / Installation": {
+        "serviceType": "Landscaping / Installation",
+        "jobSubtype": "yard_makeover",
+        "jobSubtypeLabel": "Yard makeover",
+        "workType": "replace",
+        "fallbackFamily": "yard_area",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "yard_area",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 1000,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "direct",
+        "materialClass": "mulch_rock_and_plants",
+        "materialSubtype": "mixed_mixed",
+        "conditionClass": "aged_landscape",
+        "severityClass": "moderate",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 74,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly requested yard makeover and gave area range.",
+          "Materials selection (mulch/rock/plants) listed by customer."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Estimate uses midpoint of customer-provided range as conservative planning quantity.",
+          "Expect removal of old material and haul-away based on 'replace' job type."
+        ],
+        "summary": "Replace landscaping on one side of yard (~1000 sqft) with mulch/rock and plant work."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 80,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about scope and materials.",
+      "Satellite and property data support a sizable backyard area on the parcel."
+    ]
+  }
+}

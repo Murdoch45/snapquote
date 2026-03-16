@@ -1,0 +1,131 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T00:06:18.513Z",
+  "promptHash": "1f0f134eb4c953d926b130f0e6904f766ea5a12df8e5f2f7131085bdc8c208e5",
+  "keyHash": "4bc8a1ef15f426704bf91db8d583cb81d28350f9b0371c3a249f06a37f6c09c4",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Landscaping / Installation"
+    ],
+    "address": "1301 E 23rd St, Cheyenne, WY 82001, USA",
+    "addressPlaceId": "ChIJi8RhiOM6b4cRMw7GhSSaufo",
+    "lat": 41.1442781,
+    "lng": -104.8044048,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Landscaping / Installation",
+        "answers": {
+          "landscape_access": "Difficult",
+          "landscape_area_size": "One side of yard (~500-1,500 sq ft)",
+          "landscape_job_type": "Replace old landscaping",
+          "landscape_materials": [
+            "Mixed materials",
+            "Mostly plants",
+            "Sod or turf"
+          ],
+          "landscape_work_type": [
+            "Other",
+            "Rock or mulch installation",
+            "Yard makeover"
+          ],
+          "landscape_work_type_other_text": "premium material preference for landscape work type 43"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Yard makeover with mixed materials (sod, plants, rock/mulch) on one side yard",
+    "condition": "light",
+    "access": "difficult",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "mixed (sod, plants, rock/mulch)",
+    "inferredScope": "Replace existing landscaping on one side yard (~500-1500 sqft)",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "access_difficulty",
+      "material_choice",
+      "area_size"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'One side of yard (~500-1,500 sq ft)' and multiple materials including sod, plants, and mixed materials.",
+      "Access marked difficult; may impact crew/haul logistics.",
+      "Customer indicated replacement of old landscaping and preference for premium materials."
+    ],
+    "serviceSignals": {
+      "Landscaping / Installation": {
+        "serviceType": "Landscaping / Installation",
+        "jobSubtype": "yard_makeover",
+        "jobSubtypeLabel": "Yard Makeover",
+        "workType": "replace",
+        "fallbackFamily": "yard_area",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "landscape",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 1000,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "direct",
+        "materialClass": "mixed",
+        "materialSubtype": "sod_plants_rock",
+        "conditionClass": "aged_landscape",
+        "severityClass": "minor",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "moderate",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": false,
+        "aiConfidence": 72,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly indicates yard size band and materials.",
+          "Satellite and property sizes support a one-side yard scope in the 500-1500 sqft range."
+        ],
+        "consistencyScore": 82,
+        "notes": [
+          "Plan for sod/turf, plants, and rock/mulch per customer selections.",
+          "Account for extra time/crew for difficult access and haul-away."
+        ],
+        "summary": "Replace landscaping on one side yard (~1,000 sqft) with sod, plants, and rock/mulch; difficult access may increase labor."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 60,
+    "scopeMatchConfidence": 86,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.15,
+    "materialMultiplier": 1.2,
+    "regionMultiplier": 1,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 3000,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about area band and materials.",
+      "Property and satellite data support residential single-family lot and available side yard area."
+    ]
+  }
+}

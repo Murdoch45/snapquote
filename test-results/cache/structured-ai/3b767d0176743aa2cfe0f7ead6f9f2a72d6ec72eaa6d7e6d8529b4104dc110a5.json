@@ -1,0 +1,122 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T19:45:12.233Z",
+  "promptHash": "e4e7c771d0bed07a19e825611c76811a05bfcc1f964fd70f58c3c3a63ad4f4bc",
+  "keyHash": "3b767d0176743aa2cfe0f7ead6f9f2a72d6ec72eaa6d7e6d8529b4104dc110a5",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Window Cleaning"
+    ],
+    "address": "2070 King College Rd, Bristol, TN 37620, USA",
+    "addressPlaceId": "ChIJ32Mu-bV2UIgR8C_BrBTmahI",
+    "lat": 36.5870892,
+    "lng": -82.1329154,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Window Cleaning",
+        "answers": {
+          "window_access": "Hard-to-reach areas",
+          "window_count": "50+",
+          "window_property_type": "Single-story home",
+          "window_target_type": "Second-story or hard-to-reach windows"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Window cleaning request for approximately 50+ windows, includes hard-to-reach/second-story access.",
+    "condition": "light",
+    "access": "difficult",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": null,
+    "inferredScope": "Full window cleaning of all exterior windows; includes second-story or hard-to-reach locations",
+    "treeSize": "medium",
+    "estimatedWindowCount": 50,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "second_story_access",
+      "window_count",
+      "hard_to_reach_windows"
+    ],
+    "estimatorNotes": [
+      "Customer indicated 50+ windows and second-story/hard-to-reach areas.",
+      "Property imagery shows a large single-family home; satellite confirms multi-roof geometry suggesting varied window heights.",
+      "Confirm conflicting questionnaire entry: 'Single-story home' vs 'Second-story or hard-to-reach windows' — manual review recommended."
+    ],
+    "serviceSignals": {
+      "Window Cleaning": {
+        "serviceType": "Window Cleaning",
+        "jobSubtype": "second_story_windows",
+        "jobSubtypeLabel": "Second-story windows",
+        "workType": "clean",
+        "fallbackFamily": "window_group",
+        "surfaceFamily": "window_group",
+        "targetObjectFamily": "window_group",
+        "sizeBucket": "large",
+        "estimatedQuantity": 50,
+        "quantityUnit": "count",
+        "quantityEvidence": "direct",
+        "materialClass": "glass",
+        "materialSubtype": "standard",
+        "conditionClass": "light_soiling",
+        "severityClass": "minor",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "low",
+        "heightClass": "mixed_height",
+        "stories": 1,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": true,
+        "aiConfidence": 64,
+        "aiConfidenceReasons": [
+          "Customer explicitly provided window count as '50+'.",
+          "Customer indicated second-story/hard-to-reach windows.",
+          "Property photos and satellite show a large residential building consistent with many windows but conflicting story data requires review."
+        ],
+        "consistencyScore": 60,
+        "notes": [
+          "Verify number of windows and whether interior cleaning is requested.",
+          "Confirm ladder or water-fed pole access and any gated/locked areas."
+        ],
+        "summary": "Exterior window cleaning for ~50 windows including hard-to-reach/second-story locations."
+      }
+    },
+    "surfaceDetectionConfidence": 40,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 70,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1,
+    "luxuryMultiplier": 1,
+    "estateScore": 1000,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire provided explicit window count and noted hard-to-reach areas.",
+      "Satellite and photo imagery align with a large single-family residence but contain conflicting story information."
+    ]
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "client": "Thunder Client",
+  "collectionName": "SnapQuote Public API",
+  "dateExported": "2026-03-08T00:00:00.000Z",
+  "version": "1.0",
+  "folders": [],
+  "requests": [
+    {
+      "_id": "req_public_lead_submit",
+      "colId": "snapquote-public-api",
+      "containerId": "",
+      "name": "Public Lead Submit",
+      "url": "http://localhost:3001/api/public/lead-submit",
+      "method": "POST",
+      "sortNum": 10000,
+      "created": "2026-03-08T00:00:00.000Z",
+      "modified": "2026-03-08T00:00:00.000Z",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/x-www-form-urlencoded"
+        }
+      ],
+      "params": [],
+      "body": {
+        "type": "form",
+        "raw": "",
+        "form": [
+          {
+            "name": "contractorSlug",
+            "value": "replace-with-real-public-slug"
+          },
+          {
+            "name": "customerName",
+            "value": "John Test"
+          },
+          {
+            "name": "customerEmail",
+            "value": "john@test.com"
+          },
+          {
+            "name": "customerPhone",
+            "value": "5551112222"
+          },
+          {
+            "name": "addressFull",
+            "value": "123 Main St"
+          },
+          {
+            "name": "services[]",
+            "value": "Roofing"
+          },
+          {
+            "name": "description",
+            "value": "Customer needs a roof repair estimate"
+          }
+        ]
+      },
+      "tests": []
+    }
+  ]
+}

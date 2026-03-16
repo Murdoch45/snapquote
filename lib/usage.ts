@@ -1,3 +1,4 @@
+import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ORG_PLANS, type OrgPlan, type PlanUsageLimit } from "@/lib/types";
 

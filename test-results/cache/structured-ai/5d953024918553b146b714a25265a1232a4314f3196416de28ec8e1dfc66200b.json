@@ -1,0 +1,134 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T00:13:09.478Z",
+  "promptHash": "278b15860027671556f948c8bc4634281775113208a30a26ba3549b282d64005",
+  "keyHash": "5d953024918553b146b714a25265a1232a4314f3196416de28ec8e1dfc66200b",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Gutter Cleaning"
+    ],
+    "address": "2481 Summitridge Dr, Beverly Hills, CA 90210, USA",
+    "addressPlaceId": "ChIJw5RbRLm9woARPFqNmJANwtg",
+    "lat": 34.1199802,
+    "lng": -118.4212831,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Gutter Cleaning",
+        "answers": {
+          "gutter_access": "Yes, steep roof or hard access",
+          "gutter_building_type": "Single-story home",
+          "gutter_fill_level": "Light debris",
+          "gutter_work_type": "Clean gutters only"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requested gutter cleaning only for a single-story home with light debris and steep/hard roof access.",
+    "condition": "light",
+    "access": "difficult",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "metal/tile roof gutters",
+    "inferredScope": "clean gutters only, no repairs",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "steep roof / hard access",
+      "single-story large footprint",
+      "light debris (no heavy removal)"
+    ],
+    "estimatorNotes": [
+      "Questionnaire explicitly requests gutters cleaned only.",
+      "Customer indicated steep roof / hard access; ladder or rope access may be required.",
+      "No dimensions provided; linear footage inferred from building footprint."
+    ],
+    "serviceSignals": {
+      "Gutter Cleaning": {
+        "serviceType": "Gutter Cleaning",
+        "jobSubtype": "gutters",
+        "jobSubtypeLabel": "Gutter Cleaning",
+        "workType": "clean",
+        "fallbackFamily": "linear_boundary",
+        "surfaceFamily": "linear_boundary",
+        "targetObjectFamily": "gutter_system",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 220,
+        "quantityUnit": "linear_ft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "metal",
+        "materialSubtype": "standard",
+        "conditionClass": "light_debris",
+        "severityClass": "minor",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "low",
+        "heightClass": "single_story",
+        "stories": 1,
+        "slopeClass": "steep",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": true,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": "tile",
+        "premiumPropertySignal": true,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 78,
+        "aiConfidenceReasons": [
+          "Customer explicitly selected gutter cleaning and indicated access difficulty.",
+          "Property footprint and single-story height inferred from satellite imagery.",
+          "No direct linear footage provided; footage estimated from building perimeter."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Estimate uses building perimeter to infer gutter linear feet.",
+          "Expect ladder and safety gear due to steep roof access."
+        ],
+        "summary": "Gutter cleaning for single-story tile roof with steep access; light debris only."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.2,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": true,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about service and access.",
+      "Satellite and property data indicate a single-story, high-value property consistent with inferred gutter footage."
+    ]
+  }
+}

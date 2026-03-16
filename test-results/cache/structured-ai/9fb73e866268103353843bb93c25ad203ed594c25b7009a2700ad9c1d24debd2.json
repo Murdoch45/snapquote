@@ -1,0 +1,121 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T06:13:47.398Z",
+  "promptHash": "fce54648fc078a50b9612b29fd3e3e5cb592bd409a79229d4bb4973959e74e2d",
+  "keyHash": "9fb73e866268103353843bb93c25ad203ed594c25b7009a2700ad9c1d24debd2",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Exterior Painting"
+    ],
+    "address": "8260 Oakwood Ave, Los Angeles, CA 90048, USA",
+    "addressPlaceId": "ChIJoyhFqMq-woAR_VBTx51HS3c",
+    "lat": 34.0779676,
+    "lng": -118.3694635,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Exterior Painting",
+        "answers": {
+          "painting_access": "Two-story areas",
+          "painting_condition": "Not sure",
+          "painting_scope": "Small touch-up",
+          "painting_surface_type": "Siding",
+          "painting_target": "Full house exterior"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Small exterior painting touch-up on siding, two-story access required",
+    "condition": "light",
+    "access": "moderate",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "siding",
+    "inferredScope": "small_touch_up_full_house",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "two_story_access",
+      "siding_surface",
+      "small_scope_touch-up"
+    ],
+    "estimatorNotes": [
+      "Customer selected full house exterior but also indicated small touch-up; treat as limited touch-up across exterior siding.",
+      "Two-story access present — ladders or lift may be needed for upper areas."
+    ],
+    "serviceSignals": {
+      "Exterior Painting": {
+        "serviceType": "Exterior Painting",
+        "jobSubtype": "siding",
+        "jobSubtypeLabel": "Siding",
+        "workType": "repair",
+        "fallbackFamily": "exterior_finish_surface",
+        "surfaceFamily": "vertical_exterior_surface",
+        "targetObjectFamily": "exterior_wall",
+        "sizeBucket": "small",
+        "estimatedQuantity": 1,
+        "quantityUnit": "service_event",
+        "quantityEvidence": "direct",
+        "materialClass": "siding",
+        "materialSubtype": "unknown",
+        "conditionClass": "unknown",
+        "severityClass": "minor",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "two_story",
+        "stories": 2,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 70,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly requests exterior painting and specifies siding and small touch-up.",
+          "Property is a two-story residential building per property data; access implications are clear."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Treat as touch-up event rather than full repaint despite 'Full house exterior' selection due to 'Small touch-up' scope answer.",
+          "Verify areas to be touched up and color match during visit."
+        ],
+        "summary": "Small touch-up painting on siding across the exterior; two-story access required."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 76,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.05,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about painting target and scope.",
+      "Property context supports residential two-story access considerations."
+    ]
+  }
+}

@@ -1,35 +1,22 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ArrowRight, MapPin, Wrench, X } from "lucide-react";
+import { ArrowRight, MapPin, X } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { ServiceMultiSelectField } from "@/components/ServiceMultiSelectField";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
-const suggestedWorkTypes = [
-  "Lawn care",
-  "Landscaping",
-  "Hardscaping",
-  "Painting",
-  "Roofing",
-  "Pressure washing",
-  "Tree services",
-  "Decks",
-  "Concrete",
-  "Other"
-];
+import { type ServiceType } from "@/lib/services";
 
 export function GetStartedFlow() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
-  const [selectedWorkTypes, setSelectedWorkTypes] = useState<string[]>([]);
-  const [otherWorkType, setOtherWorkType] = useState("");
+  const [selectedWorkTypes, setSelectedWorkTypes] = useState<ServiceType[]>([]);
   const [areaInput, setAreaInput] = useState("");
   const [areas, setAreas] = useState<string[]>([]);
 
-  const trimmedOtherWorkType = otherWorkType.trim();
   const canContinue = step === 0 ? selectedWorkTypes.length > 0 : areas.length > 0;
 
   const subtitle = useMemo(() => {
@@ -43,10 +30,12 @@ export function GetStartedFlow() {
   const reset = () => {
     setOpen(false);
     setStep(0);
+    setSelectedWorkTypes([]);
     setAreaInput("");
+    setAreas([]);
   };
 
-  const toggleWorkType = (value: string) => {
+  const toggleWorkType = (value: ServiceType) => {
     setSelectedWorkTypes((current) =>
       current.includes(value) ? current.filter((item) => item !== value) : [...current, value]
     );
@@ -68,7 +57,6 @@ export function GetStartedFlow() {
   const goToSignup = () => {
     const params = new URLSearchParams();
     if (selectedWorkTypes.length > 0) params.set("workTypes", selectedWorkTypes.join("|"));
-    if (trimmedOtherWorkType) params.set("otherWorkType", trimmedOtherWorkType);
     if (areas.length > 0) params.set("areas", areas.join("|"));
     router.push(`/signup?${params.toString()}`);
   };
@@ -117,40 +105,15 @@ export function GetStartedFlow() {
               <div className="mt-6 space-y-5">
                 <div className="rounded-xl border border-blue-100 bg-blue-50/40 p-3">
                   <p className="text-sm text-gray-600">
-                    Choose all that apply. You can select more than one.
+                    Choose the services you want SnapQuote to match to your business profile.
                   </p>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  {suggestedWorkTypes.map((suggestion) => (
-                    <button
-                      key={suggestion}
-                      type="button"
-                      className={`rounded-full border px-3 py-1.5 text-sm transition-colors ${
-                        selectedWorkTypes.includes(suggestion)
-                          ? "border-blue-600 bg-blue-50 text-blue-700"
-                          : "border-gray-200 bg-white text-gray-700 hover:border-blue-300 hover:bg-blue-50"
-                      }`}
-                      onClick={() => toggleWorkType(suggestion)}
-                    >
-                      {suggestion}
-                    </button>
-                  ))}
-                </div>
-                {selectedWorkTypes.includes("Other") ? (
-                  <div className="space-y-2">
-                    <Label htmlFor="other-work-type">Other business type</Label>
-                    <div className="relative">
-                      <Wrench className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                      <Input
-                        id="other-work-type"
-                        value={otherWorkType}
-                        onChange={(event) => setOtherWorkType(event.target.value)}
-                        placeholder="Enter your specialty"
-                        className="pl-9"
-                      />
-                    </div>
-                  </div>
-                ) : null}
+                <ServiceMultiSelectField
+                  legend="Services offered"
+                  helperText="Choose every service your business wants to receive leads for."
+                  selectedServices={selectedWorkTypes}
+                  onToggle={toggleWorkType}
+                />
               </div>
             ) : (
               <div className="mt-6 space-y-5">

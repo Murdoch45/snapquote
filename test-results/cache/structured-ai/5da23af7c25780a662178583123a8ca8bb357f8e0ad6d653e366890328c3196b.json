@@ -1,0 +1,131 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T08:20:56.471Z",
+  "promptHash": "e4463ad3245f2676a40d9fe1f358bc6b20502b7a97e577001bf2ab610ce12ce8",
+  "keyHash": "5da23af7c25780a662178583123a8ca8bb357f8e0ad6d653e366890328c3196b",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Window Cleaning"
+    ],
+    "address": "1202 Larchmont Ln, Nichols Hills, OK 73116, USA",
+    "addressPlaceId": "ChIJySjKutIbsocRj8CEoxAlaik",
+    "lat": 35.5497582,
+    "lng": -97.5348305,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Window Cleaning",
+        "answers": {
+          "window_access": "Not sure",
+          "window_count": "11-25",
+          "window_property_type": "Two-story home",
+          "window_target_type": "Skylights"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests skylight window cleaning for a two-story home, estimated mid-range window count based on questionnaire.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": null,
+    "inferredScope": "skylights_only",
+    "treeSize": "medium",
+    "estimatedWindowCount": 18,
+    "estimatedPoolSqft": 400,
+    "estimatedFixtureCount": 0,
+    "estimatedJunkCubicYards": 0,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "skylight_access",
+      "two_story_access"
+    ],
+    "estimatorNotes": [
+      "Customer selected skylights and 11-25 windows in questionnaire.",
+      "Photos and satellite show two-story property with roof-level skylight area."
+    ],
+    "serviceSignals": {
+      "Window Cleaning": {
+        "serviceType": "Window Cleaning",
+        "jobSubtype": "skylights",
+        "jobSubtypeLabel": "Skylights",
+        "workType": "clean",
+        "fallbackFamily": "window_group",
+        "surfaceFamily": "window_group",
+        "targetObjectFamily": "window_group",
+        "sizeBucket": "small",
+        "estimatedQuantity": 18,
+        "quantityUnit": "count",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "glass",
+        "materialSubtype": "skylight_glass",
+        "conditionClass": "light_soiling",
+        "severityClass": "minor",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "two_story",
+        "stories": 2,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": true,
+        "fencePresent": false,
+        "deckPresent": true,
+        "roofType": "hip",
+        "premiumPropertySignal": true,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 74,
+        "aiConfidenceReasons": [
+          "Questionnaire specifically selected skylights and a two-story home.",
+          "Satellite imagery shows roof area consistent with skylight presence."
+        ],
+        "consistencyScore": 82,
+        "notes": [
+          "Confirm exact skylight count on-site; customer selected range 11-25 windows.",
+          "Access method may require ladder or roof access for skylights."
+        ],
+        "summary": "Skylight cleaning on a two-story residential property; mid-range window count from questionnaire."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": true,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about skylights and window count range.",
+      "Satellite imagery supports two-story roof and skylight presence."
+    ]
+  }
+}

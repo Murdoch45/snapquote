@@ -1,0 +1,153 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T08:13:08.830Z",
+  "promptHash": "60aa6772e16a70eea4459f18e60eaaad99017a27fa3e497d246cca8b96258720",
+  "keyHash": "d5c1858b8210a234ff368154d854719fe7ff6484e777bb305593d95b6514cac5",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Pressure Washing"
+    ],
+    "address": "12924 Cedar Springs Rd, Oklahoma City, OK 73120, USA",
+    "addressPlaceId": "ChIJ_z0yrGIcsocRtUEXpwmzF7E",
+    "lat": 35.6016417,
+    "lng": -97.5676136,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Pressure Washing",
+        "answers": {
+          "pressure_washing_access": "Easy access",
+          "pressure_washing_condition": "Heavy staining or moss",
+          "pressure_washing_size": "Large area (~1,500-3,000 sq ft)",
+          "pressure_washing_target": [
+            "Driveway",
+            "Fence",
+            "House exterior",
+            "Other",
+            "Patio or porch",
+            "Roof"
+          ],
+          "pressure_washing_target_other_text": "custom scope requested for pressure washing target 15"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requested pressure washing across multiple exterior surfaces (roof, house, fence, driveway, patio) with heavy staining. Large overall area (~1500-3000 sqft) inferred; satellite and photo support substantial driveway and walkway hardscapes.",
+    "condition": "moderate",
+    "access": "easy",
+    "severity": "major",
+    "debris": "light",
+    "multipleAreas": true,
+    "materialHint": "mixed (concrete, siding, wood fence, roof)",
+    "inferredScope": "multi-surface exterior clean including driveway, house exterior, roof cleaning, fence, and patio/porch",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "large_area",
+      "multiple_surface_types",
+      "heavy_soiling"
+    ],
+    "estimatorNotes": [
+      "Customer selected multiple targets including roof, house exterior, fence, driveway, patio and provided 'custom scope' text.",
+      "Satellite shows large driveway footprint and walkways; photos are limited but consistent with questionnaire."
+    ],
+    "serviceSignals": {
+      "Pressure Washing": {
+        "serviceType": "Pressure Washing",
+        "jobSubtype": "mixed_custom",
+        "jobSubtypeLabel": "Custom / Multiple Surfaces",
+        "workType": "clean",
+        "fallbackFamily": "mixed_custom",
+        "surfaceFamily": "mixed_custom",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "large",
+        "estimatedQuantity": 2000,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "mixed",
+        "materialSubtype": "mixed_surfaces",
+        "conditionClass": "heavy_soiling",
+        "severityClass": "major",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "moderate",
+        "heightClass": "mixed_height",
+        "stories": 2,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": true,
+        "fencePresent": true,
+        "deckPresent": false,
+        "roofType": "asphalt_shingle",
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 74,
+        "aiConfidenceReasons": [
+          "Questionnaire lists multiple targets and large area band.",
+          "Satellite imagery shows a large driveway and walkways consistent with multi-surface work."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Scope is broad (roof, exterior, driveway, fence, patio) — recommend manual review to confirm roof washing and fence materials.",
+          "Satellite driveway area used to infer overall sqft; customer gave large area band but no exact sqft."
+        ],
+        "summary": "Large multi-surface exterior pressure washing request covering driveway, house exterior, roof, fence, and patio.",
+        "quotedSurfaces": {
+          "driveway": 2100
+        },
+        "surfaceDetections": [
+          {
+            "surface_type": "driveway",
+            "surface_area_sqft": 2100,
+            "confidence": 0.84
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "quotedSurfaces": {
+      "driveway": 2100
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 85,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific and selected multiple surfaces.",
+      "Satellite imagery supports large driveway and additional walkways but roof/fence details require onsite confirmation."
+    ]
+  }
+}

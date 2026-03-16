@@ -1,0 +1,121 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T21:37:43.250Z",
+  "promptHash": "60363927812368c0bd4e918186344c008eb4c201f64e793d7c72dd7f85bf1ebe",
+  "keyHash": "aa30483706f805d0b6b21f982e9fa1e0f7f009fb1fa0108b28bec460d2bef94e",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Exterior Painting"
+    ],
+    "address": "31 Lenox St, Worcester, MA 01602, USA",
+    "addressPlaceId": "ChIJD1cICMIG5IkRYY1iKGn1gck",
+    "lat": 42.2777158,
+    "lng": -71.8334735,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Exterior Painting",
+        "answers": {
+          "painting_access": "Easy",
+          "painting_condition": "Needs prep and repairs",
+          "painting_scope": "Full exterior",
+          "painting_surface_type": "Brick or masonry",
+          "painting_target": "Fence or detached structure"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests full exterior painting of a fence/detached masonry structure; needs prep and repairs.",
+    "condition": "moderate",
+    "access": "easy",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "brick/masonry",
+    "inferredScope": "Full exterior of fence or detached masonry structure",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "prep_and_repairs",
+      "masonry_surface",
+      "access_easy"
+    ],
+    "estimatorNotes": [
+      "Questionnaire specifies fence/detached structure and brick masonry.",
+      "Customer indicated needs prep and repairs; allow for masonry patching and surface prep."
+    ],
+    "serviceSignals": {
+      "Exterior Painting": {
+        "serviceType": "Exterior Painting",
+        "jobSubtype": "fence_or_detached_structure",
+        "jobSubtypeLabel": "Fence or detached structure",
+        "workType": "repair",
+        "fallbackFamily": "exterior_finish_surface",
+        "surfaceFamily": "vertical_exterior_surface",
+        "targetObjectFamily": "fence",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 1,
+        "quantityUnit": "count",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "masonry",
+        "materialSubtype": "brick",
+        "conditionClass": "needs_prep",
+        "severityClass": "moderate",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "single_story",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": true,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 68,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly selects fence/detached structure and brick masonry.",
+          "No dimensions provided so quantity is inferred as a single structure."
+        ],
+        "consistencyScore": 80,
+        "notes": [
+          "Scope: full exterior of the listed fence/detached masonry structure.",
+          "Prep and minor repairs expected per customer selection."
+        ],
+        "summary": "Exterior painting of one brick fence/detached structure; requires prep and repairs."
+      }
+    },
+    "surfaceDetectionConfidence": 50,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about target and material.",
+      "Imagery and property context do not contradict the requested detached/masonry structure scope."
+    ]
+  }
+}

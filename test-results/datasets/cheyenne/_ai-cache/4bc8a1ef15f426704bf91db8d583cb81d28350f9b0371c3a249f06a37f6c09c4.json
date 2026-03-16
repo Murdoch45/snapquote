@@ -1,0 +1,149 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T02:14:42.421Z",
+  "promptHash": "1f0f134eb4c953d926b130f0e6904f766ea5a12df8e5f2f7131085bdc8c208e5",
+  "keyHash": "4bc8a1ef15f426704bf91db8d583cb81d28350f9b0371c3a249f06a37f6c09c4",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Landscaping / Installation"
+    ],
+    "address": "1301 E 23rd St, Cheyenne, WY 82001, USA",
+    "addressPlaceId": "ChIJi8RhiOM6b4cRMw7GhSSaufo",
+    "lat": 41.1442781,
+    "lng": -104.8044048,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Landscaping / Installation",
+        "answers": {
+          "landscape_access": "Difficult",
+          "landscape_area_size": "One side of yard (~500-1,500 sq ft)",
+          "landscape_job_type": "Replace old landscaping",
+          "landscape_materials": [
+            "Mixed materials",
+            "Mostly plants",
+            "Sod or turf"
+          ],
+          "landscape_work_type": [
+            "Other",
+            "Rock or mulch installation",
+            "Yard makeover"
+          ],
+          "landscape_work_type_other_text": "premium material preference for landscape work type 43"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Backyard/side yard makeover replacing existing landscaping with mixed materials (sod, plants, rock); estimated ~1,000 sqft on one side of yard. Access reported difficult.",
+    "condition": "moderate",
+    "access": "difficult",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "sod/plants/rock",
+    "inferredScope": "Replace landscaping on one side of backyard (~500-1,500 sqft)",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "landscape removal and haul-away",
+      "new sod and plant installation",
+      "rock/mulch material selection",
+      "difficult access"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Yard makeover' and 'Replace old landscaping'.",
+      "Customer indicated one side of yard approx 500-1,500 sq ft; use conservative mid-band for estimating.",
+      "Access marked difficult which may increase labor and equipment handling costs."
+    ],
+    "serviceSignals": {
+      "Landscaping / Installation": {
+        "serviceType": "Landscaping / Installation",
+        "jobSubtype": "yard_makeover",
+        "jobSubtypeLabel": "Yard makeover",
+        "workType": "replace",
+        "fallbackFamily": "yard_area",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "yard_area",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 1000,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "mixed",
+        "materialSubtype": "sod_plants_rock",
+        "conditionClass": "worn_landscaping",
+        "severityClass": "moderate",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "moderate",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": false,
+        "aiConfidence": 68,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly selected yard makeover and replace old landscaping.",
+          "Customer provided size band (~500-1,500 sq ft) which anchors quantity.",
+          "Photo and satellite imagery support a residential yard scope and moderate size."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Use mid-point of provided size band for quantity until exact dimensions provided.",
+          "Confirm material preferences (premium materials noted in other-text)."
+        ],
+        "summary": "Replace existing landscaping on one side of yard (~1,000 sqft) with a mix of sod, plants, and rock/mulch. Access is difficult; removal and haul-away expected."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 400,
+        "confidence": 0.76
+      },
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 200,
+        "confidence": 0.68
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 400,
+      "walkway": 200
+    },
+    "surfaceDetectionConfidence": 72,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 86,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.1,
+    "materialMultiplier": 1.05,
+    "regionMultiplier": 1,
+    "luxuryMultiplier": 1.02,
+    "estateScore": 5000,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers specify yard makeover, materials, and access difficulty.",
+      "Satellite and photo imagery are consistent with a residential yard scope and size band."
+    ]
+  }
+}

@@ -1,0 +1,151 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T21:24:10.607Z",
+  "promptHash": "78624c58c0ba395bbad96c5490724a29d84fbc2043da639f6838668a46a447bf",
+  "keyHash": "8d6b7396b7eb608513bfd38a4fcf04b793a5b8cd2da2ec715e96d5b27d76e531",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Outdoor Lighting Installation"
+    ],
+    "address": "22 Bittersweet Blvd, Worcester, MA 01607, USA",
+    "addressPlaceId": "ChIJoc9sdbUF5IkRMHNxoI9HMCA",
+    "lat": 42.228719,
+    "lng": -71.8067966,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Outdoor Lighting Installation",
+        "answers": {
+          "lighting_install_difficulty": "New wiring or trenching likely needed",
+          "lighting_power": "Partly",
+          "lighting_scope": "One small area",
+          "lighting_type": [
+            "Pathway lights"
+          ],
+          "lighting_work_type": "Install a basic new lighting setup"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests a small pathway lighting installation; likely low-voltage pathway fixtures with some new wiring/trenching needed in a limited front/side yard area.",
+    "condition": "light",
+    "access": "moderate",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "low_voltage_lighting",
+    "inferredScope": "pathway lighting for one small area (front/side yard)",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": 6,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "fixture_count",
+      "new_wiring_or_trenching",
+      "access_difficulty"
+    ],
+    "estimatorNotes": [
+      "Customer selected pathway lights and indicated new wiring/trenching likely needed.",
+      "Scope described as one small area; inferred ~4-8 pathway fixtures."
+    ],
+    "serviceSignals": {
+      "Outdoor Lighting Installation": {
+        "serviceType": "Outdoor Lighting Installation",
+        "jobSubtype": "pathway_lighting",
+        "jobSubtypeLabel": "Pathway Lighting",
+        "workType": "install",
+        "fallbackFamily": "lighting_system",
+        "surfaceFamily": "linear_boundary",
+        "targetObjectFamily": "fixture",
+        "sizeBucket": "small",
+        "estimatedQuantity": 6,
+        "quantityUnit": "fixture_count",
+        "quantityEvidence": "weak_inference",
+        "materialClass": "low_voltage",
+        "materialSubtype": "landscape_pathway",
+        "conditionClass": "new_install",
+        "severityClass": "minor",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 72,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly requests pathway lighting and indicates new wiring likely.",
+          "Scope described as one small area; no fixture count provided so quantity inferred conservatively."
+        ],
+        "consistencyScore": 82,
+        "notes": [
+          "Recommend contractor confirm fixture count and routing for trenching on visit."
+        ],
+        "summary": "Install ~6 low-voltage pathway fixtures in one small area; new wiring/trenching likely required.",
+        "surfaceDetections": [
+          {
+            "surface_type": "walkway",
+            "surface_area_sqft": 150,
+            "confidence": 0.72
+          },
+          {
+            "surface_type": "driveway",
+            "surface_area_sqft": 400,
+            "confidence": 0.78
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 400,
+        "confidence": 0.78
+      },
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 150,
+        "confidence": 0.72
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 400,
+      "walkway": 150
+    },
+    "surfaceDetectionConfidence": 75,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 86,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.05,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about lighting type and scope.",
+      "Satellite imagery shows accessible front/side yard and walkway areas consistent with pathway lighting."
+    ]
+  }
+}

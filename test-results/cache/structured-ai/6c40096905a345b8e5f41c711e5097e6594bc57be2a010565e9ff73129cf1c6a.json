@@ -1,0 +1,121 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T00:02:02.048Z",
+  "promptHash": "1546a14604c3430156a90e39429f9f5f63b0ef846ea0d985067115031585d43f",
+  "keyHash": "6c40096905a345b8e5f41c711e5097e6594bc57be2a010565e9ff73129cf1c6a",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Pool Service / Cleaning"
+    ],
+    "address": "8260 Oakwood Ave, Los Angeles, CA 90048, USA",
+    "addressPlaceId": "ChIJoyhFqMq-woAR_VBTx51HS3c",
+    "lat": 34.0779676,
+    "lng": -118.3694635,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Pool Service / Cleaning",
+        "answers": {
+          "pool_access": "Not sure",
+          "pool_condition": "Needs normal cleaning",
+          "pool_size": "Small",
+          "pool_type": "In-ground pool",
+          "pool_work_type": "Green or dirty pool cleanup"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Small in-ground pool cleaning for green/dirty pool; standard access uncertain.",
+    "condition": "moderate",
+    "access": "moderate",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "pool finish (plaster/pebble) unknown",
+    "inferredScope": "Full pool cleaning, chemical balancing, skimming and vacuuming",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": 250,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "green_pool_cleanup",
+      "pool_size",
+      "access_uncertain"
+    ],
+    "estimatorNotes": [
+      "Customer selected green or dirty pool cleanup and small pool size.",
+      "No explicit sqft provided; pool area inferred from property context and typical small in-ground pools."
+    ],
+    "serviceSignals": {
+      "Pool Service / Cleaning": {
+        "serviceType": "Pool Service / Cleaning",
+        "jobSubtype": "green_pool_cleanup",
+        "jobSubtypeLabel": "Green or Dirty Pool Cleanup",
+        "workType": "service",
+        "fallbackFamily": "pool_service_event",
+        "surfaceFamily": "pool_service_event",
+        "targetObjectFamily": "pool",
+        "sizeBucket": "small",
+        "estimatedQuantity": 250,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "pool_finish",
+        "materialSubtype": "unknown",
+        "conditionClass": "dirty_green",
+        "severityClass": "moderate",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": true,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 76,
+        "aiConfidenceReasons": [
+          "Questionnaire indicates green/dirty pool cleanup and small pool.",
+          "Property aerial context supports presence of small in-ground pool area."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Recommend chemical treatment, skimming, vacuuming, filter check.",
+          "Access details unknown; may affect time if gate or tight access present."
+        ],
+        "summary": "Small in-ground green pool cleanup inferred from questionnaire; service includes cleaning and chemical balancing."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Property context and imagery support the inferred pool presence and small size."
+    ]
+  }
+}

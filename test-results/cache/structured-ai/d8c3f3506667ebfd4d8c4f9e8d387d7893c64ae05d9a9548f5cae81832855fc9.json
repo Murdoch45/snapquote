@@ -1,0 +1,181 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T06:33:57.692Z",
+  "promptHash": "7c6218d9bcb5eb776ab1cf916a7aafec9c509aefb4cb716344a3c0c512b41c94",
+  "keyHash": "d8c3f3506667ebfd4d8c4f9e8d387d7893c64ae05d9a9548f5cae81832855fc9",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Pressure Washing"
+    ],
+    "address": "935 Burnside Ave, Los Angeles, CA 90036, USA",
+    "addressPlaceId": "ChIJ_1o_zx65woAR28Q5Yc4qZdE",
+    "lat": 34.058076,
+    "lng": -118.3514135,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Pressure Washing",
+        "answers": {
+          "pressure_washing_access": "Not sure",
+          "pressure_washing_condition": "Light dirt or dust",
+          "pressure_washing_size": "Large area (~1,500-3,000 sq ft)",
+          "pressure_washing_target": [
+            "Driveway",
+            "Fence",
+            "House exterior",
+            "Other",
+            "Patio or porch",
+            "Roof"
+          ],
+          "pressure_washing_target_other_text": "site-specific details for pressure washing target 29"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests pressure washing of multiple exterior surfaces (house, driveway, roof, patio, fence). Scope estimated as a large mixed-area cleaning with light soiling.",
+    "condition": "light",
+    "access": "moderate",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": true,
+    "materialHint": "mixed (concrete, siding, roof)",
+    "inferredScope": "house exterior plus associated hardscapes (driveway, patio, walkways) and fence/roof rinse",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "mixed surfaces (house exterior + hardscape + roof)",
+      "large total area",
+      "multiple work types (vertical and flat surfaces)"
+    ],
+    "estimatorNotes": [
+      "Customer selected several targets including house exterior, driveway, roof, patio, and fence.",
+      "Size given as Large (~1,500-3,000 sqft) so use conservative middle estimate for total quoted area.",
+      "Light dirt reported; likely simple cleaning without heavy remediation."
+    ],
+    "serviceSignals": {
+      "Pressure Washing": {
+        "serviceType": "Pressure Washing",
+        "jobSubtype": "mixed_custom",
+        "jobSubtypeLabel": "Mixed exterior (house + hardscape + roof + fence)",
+        "workType": "clean",
+        "fallbackFamily": "mixed_custom",
+        "surfaceFamily": "mixed_custom",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "large",
+        "estimatedQuantity": 1800,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "mixed",
+        "materialSubtype": "unknown",
+        "conditionClass": "light_soiling",
+        "severityClass": "minor",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "mixed_height",
+        "stories": 2,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": true,
+        "deckPresent": false,
+        "roofType": "unknown",
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": false,
+        "aiConfidence": 70,
+        "aiConfidenceReasons": [
+          "Customer selected multiple targets including house exterior and driveway.",
+          "Size band provided (Large) allows a strong inferred total area but not exact measurements.",
+          "Satellite and photo confirm presence of hardscapes and typical residential roof."
+        ],
+        "consistencyScore": 80,
+        "notes": [
+          "Use combined approach: house wash, driveway and patio cleaning, fence rinse, and light roof soft-wash if requested.",
+          "Confirm roof access and material before scheduling roof work."
+        ],
+        "summary": "Large mixed exterior cleaning (house, driveway, patio, fence, optional roof) with light soiling.",
+        "quotedSurfaces": {
+          "driveway": 500,
+          "walkway": 200,
+          "patio": 400
+        },
+        "surfaceDetections": [
+          {
+            "surface_type": "driveway",
+            "surface_area_sqft": 500,
+            "confidence": 0.8
+          },
+          {
+            "surface_type": "walkway",
+            "surface_area_sqft": 200,
+            "confidence": 0.7
+          },
+          {
+            "surface_type": "patio",
+            "surface_area_sqft": 400,
+            "confidence": 0.72
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 500,
+        "confidence": 0.8
+      },
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 200,
+        "confidence": 0.7
+      },
+      {
+        "surface_type": "patio",
+        "surface_area_sqft": 400,
+        "confidence": 0.72
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 500,
+      "walkway": 200,
+      "patio": 400
+    },
+    "quotedSurfaces": {
+      "driveway": 500,
+      "walkway": 200,
+      "patio": 400
+    },
+    "surfaceDetectionConfidence": 78,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 85,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about targets and size band.",
+      "Imagery and property data support presence of hardscapes and typical residential roof.",
+      "No conflicting inputs found."
+    ]
+  }
+}

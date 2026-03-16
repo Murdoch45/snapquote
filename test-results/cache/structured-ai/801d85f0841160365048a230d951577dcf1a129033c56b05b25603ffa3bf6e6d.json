@@ -1,0 +1,140 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T00:08:06.980Z",
+  "promptHash": "ff35da212735900d3e647f9398972d94d1864a13c80afee41a47b782d0c5b8aa",
+  "keyHash": "801d85f0841160365048a230d951577dcf1a129033c56b05b25603ffa3bf6e6d",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Deck Installation / Repair"
+    ],
+    "address": "1301 E 23rd St, Cheyenne, WY 82001, USA",
+    "addressPlaceId": "ChIJi8RhiOM6b4cRMw7GhSSaufo",
+    "lat": 41.1442781,
+    "lng": -104.8044048,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Deck Installation / Repair",
+        "answers": {
+          "deck_area_type": "Not sure",
+          "deck_material": "Composite",
+          "deck_repair_condition": "Structural concerns",
+          "deck_scope": "Multi-level or very large (700+ sq ft)",
+          "deck_work_type": "New deck"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests new composite multi-level deck installation (large footprint, structural concerns noted).",
+    "condition": "moderate",
+    "access": "easy",
+    "severity": "major",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "composite",
+    "inferredScope": "new_multi_level_deck_700_plus_sqft",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "large multi-level deck",
+      "composite material",
+      "structural work required"
+    ],
+    "estimatorNotes": [
+      "Customer selected New deck, Composite, Multi-level or very large (700+ sq ft).",
+      "Photos and satellite support residential rear-yard deck feasibility but do not provide exact dimensions."
+    ],
+    "serviceSignals": {
+      "Deck Installation / Repair": {
+        "serviceType": "Deck Installation / Repair",
+        "jobSubtype": "deck",
+        "jobSubtypeLabel": "Deck",
+        "workType": "install",
+        "fallbackFamily": "install_area",
+        "surfaceFamily": "deck",
+        "targetObjectFamily": "deck",
+        "sizeBucket": "very_large",
+        "estimatedQuantity": 800,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "direct",
+        "materialClass": "composite",
+        "materialSubtype": "standard_composite",
+        "conditionClass": "structural_concern",
+        "severityClass": "major",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": true,
+        "aiConfidence": 72,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly requests a new multi-level composite deck 700+ sq ft.",
+          "Satellite and photo imagery show a rear yard suitable for a large deck but lack precise measurements."
+        ],
+        "consistencyScore": 76,
+        "notes": [
+          "Customer indicated structural concerns; plan for inspection of footings and ledger attachment.",
+          "Quantity based on questionnaire selection of 700+ sq ft (treated as direct evidence)."
+        ],
+        "summary": "New large composite multi-level deck installation with structural considerations.",
+        "surfaceDetections": [
+          {
+            "surface_type": "patio",
+            "surface_area_sqft": 0,
+            "confidence": 0
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about deck size and material.",
+      "Imagery supports a rear yard build area but lacks precise deck footprint measurements."
+    ]
+  }
+}

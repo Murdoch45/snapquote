@@ -1,0 +1,145 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T08:19:04.345Z",
+  "promptHash": "35168f64930a52e58809392b920e266725eee8cb1580c5e13091ba4647d7f60c",
+  "keyHash": "062fea581e48631558fb9c64f39af2e464f201614c8e125840479852ea4196c2",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Outdoor Lighting Installation"
+    ],
+    "address": "12924 Cedar Springs Rd, Oklahoma City, OK 73120, USA",
+    "addressPlaceId": "ChIJ_z0yrGIcsocRtUEXpwmzF7E",
+    "lat": 35.6016417,
+    "lng": -97.5676136,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Outdoor Lighting Installation",
+        "answers": {
+          "lighting_install_difficulty": "Some wiring or layout work needed",
+          "lighting_power": "Partly",
+          "lighting_scope": "One small area",
+          "lighting_type": [
+            "Accent or landscape lights",
+            "Driveway lights",
+            "Other",
+            "Pathway lights",
+            "Patio or string lights",
+            "Security or flood lights"
+          ],
+          "lighting_type_other_text": "site-specific details for lighting type 5",
+          "lighting_work_type": "Add to an existing system"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Outdoor lighting addition to a small area including drive and landscape fixtures; partial power available, some wiring work needed.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": null,
+    "inferredScope": "single_small_area_driveway_and_landscape",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "fixture_count",
+      "partial_power_available",
+      "site-specific design notes"
+    ],
+    "estimatorNotes": [
+      "Customer selected multiple fixture types including driveway, pathway, accent, security, and patio/string lights.",
+      "Questionnaire indicates adding to existing system with partial power and some wiring required; expect low-voltage landscape lighting install scope."
+    ],
+    "serviceSignals": {
+      "Outdoor Lighting Installation": {
+        "serviceType": "Outdoor Lighting Installation",
+        "jobSubtype": "landscape_lighting",
+        "jobSubtypeLabel": "Landscape / Accent Lighting",
+        "workType": "install",
+        "fallbackFamily": "lighting_system",
+        "surfaceFamily": "linear_boundary",
+        "targetObjectFamily": "lighting_system",
+        "sizeBucket": "small",
+        "estimatedQuantity": 6,
+        "quantityUnit": "fixture_count",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "electrical",
+        "materialSubtype": "low_voltage",
+        "conditionClass": null,
+        "severityClass": null,
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": false,
+        "aiConfidence": 68,
+        "aiConfidenceReasons": [
+          "Customer explicitly requested adding to an existing system and listed fixture types.",
+          "Partial power availability and wiring difficulty noted in questionnaire.",
+          "No explicit fixture count provided; quantity inferred conservatively."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Customer selected 'Other' with site-specific details; confirm exact fixture types and locations during visit.",
+          "Plan for low-voltage transformer check and potential new wiring runs."
+        ],
+        "summary": "Install approximately six low-voltage landscape and driveway fixtures; add to existing system, partial power present, some wiring required."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "quotedSurfaces": {
+      "driveway": 2100
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Property context and imagery support the inferred scope."
+    ]
+  }
+}

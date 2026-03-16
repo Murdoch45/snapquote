@@ -1,0 +1,127 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T21:20:57.914Z",
+  "promptHash": "7d44c0c67b3fc283a30b183e41a4dcc8b4941bb9ab83ad725761508d19eeca85",
+  "keyHash": "18c788f59a1580d365c0585731c3ab8744365a7b12d4f1d227313ac819de3d7f",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Tree Service / Removal"
+    ],
+    "address": "22 Bittersweet Blvd, Worcester, MA 01607, USA",
+    "addressPlaceId": "ChIJoc9sdbUF5IkRMHNxoI9HMCA",
+    "lat": 42.228719,
+    "lng": -71.8067966,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Tree Service / Removal",
+        "answers": {
+          "tree_access": "Easy",
+          "tree_haul_away": "Yes",
+          "tree_location": "Near power lines",
+          "tree_size": "Medium",
+          "tree_work_type": "Remove multiple trees"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests removal of multiple medium trees near power lines with haul-away.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "moderate",
+    "debris": "moderate",
+    "multipleAreas": false,
+    "materialHint": null,
+    "inferredScope": "Remove multiple medium trees adjacent to property and near utility lines; include limb removal and haul-away.",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "proximity_to_power_lines",
+      "haul_away",
+      "tree_count",
+      "access"
+    ],
+    "estimatorNotes": [
+      "Questionnaire indicates removal of multiple medium trees and requests haul-away.",
+      "Photos and satellite show trees adjacent to house and near overhead utilities; manual review recommended for line clearance and utility coordination."
+    ],
+    "serviceSignals": {
+      "Tree Service / Removal": {
+        "serviceType": "Tree Service / Removal",
+        "jobSubtype": "remove_multiple_trees",
+        "jobSubtypeLabel": "Remove multiple trees",
+        "workType": "remove",
+        "fallbackFamily": "tree_work",
+        "surfaceFamily": null,
+        "targetObjectFamily": "tree",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 3,
+        "quantityUnit": "tree_count",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "unknown",
+        "materialSubtype": null,
+        "conditionClass": "live",
+        "severityClass": "moderate",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "moderate",
+        "heightClass": "two_story",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": true,
+        "aiConfidence": 78,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly requests removal of multiple medium trees.",
+          "Satellite imagery shows trees adjacent to the property and near utilities, increasing risk and need for coordination."
+        ],
+        "consistencyScore": 85,
+        "notes": [
+          "Verify exact tree count and species on site.",
+          "Confirm utility company coordination for trees near power lines.",
+          "Include stump removal only if requested; assumed not included."
+        ],
+        "summary": "Remove approximately three medium trees near power lines with haul-away; manual review required for utility coordination."
+      }
+    },
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about tree removal and haul-away.",
+      "Imagery shows trees near utilities increasing complexity; manual review flagged."
+    ]
+  }
+}

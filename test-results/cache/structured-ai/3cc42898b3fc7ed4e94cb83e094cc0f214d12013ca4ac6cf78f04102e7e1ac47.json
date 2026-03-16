@@ -1,0 +1,181 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T06:33:22.805Z",
+  "promptHash": "06cd7a977e3dd1722b9b32cb117b1c10136cfddb626ad9ad4f7e7785849f263d",
+  "keyHash": "3cc42898b3fc7ed4e94cb83e094cc0f214d12013ca4ac6cf78f04102e7e1ac47",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Pressure Washing"
+    ],
+    "address": "8260 Oakwood Ave, Los Angeles, CA 90048, USA",
+    "addressPlaceId": "ChIJoyhFqMq-woAR_VBTx51HS3c",
+    "lat": 34.0779676,
+    "lng": -118.3694635,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Pressure Washing",
+        "answers": {
+          "pressure_washing_access": "Not sure",
+          "pressure_washing_condition": "Oil, rust, or deep stains",
+          "pressure_washing_size": "Large area (~1,500-3,000 sq ft)",
+          "pressure_washing_target": [
+            "Driveway",
+            "Fence",
+            "House exterior",
+            "Other",
+            "Patio or porch",
+            "Roof"
+          ],
+          "pressure_washing_target_other_text": "special access needs for pressure washing target 47"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Multi-surface pressure washing request covering roof, house exterior, driveway, fence, and patio; customer indicates large area with deep stains.",
+    "condition": "moderate",
+    "access": "moderate",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": true,
+    "materialHint": "mixed (concrete, roof, wood/metal fence, pavers)",
+    "inferredScope": "whole-property exterior wash including hardscapes and building surfaces",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 68,
+    "pricingDrivers": [
+      "large total square footage",
+      "multiple surface types (roof, siding, concrete, fence, patio)",
+      "deep stains/oil or rust",
+      "special access needs (customer noted)"
+    ],
+    "estimatorNotes": [
+      "Customer selected multiple targets including roof and building exterior along with hardscapes—treat as combined exterior wash.",
+      "Customer indicated large area (~1,500-3,000 sqft) and deep stains; use conservative mid-range quantity inference.",
+      "Access uncertain and customer mentioned special access needs; plan for potential manual review on access."
+    ],
+    "serviceSignals": {
+      "Pressure Washing": {
+        "serviceType": "Pressure Washing",
+        "jobSubtype": "mixed_custom",
+        "jobSubtypeLabel": "Mixed exterior surfaces",
+        "workType": "clean",
+        "fallbackFamily": "mixed_custom",
+        "surfaceFamily": "mixed_custom",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "large",
+        "estimatedQuantity": 2000,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "mixed",
+        "materialSubtype": "concrete_roof_siding_fence",
+        "conditionClass": "heavy_soiling",
+        "severityClass": "moderate",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "moderate",
+        "heightClass": "mixed_height",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": true,
+        "deckPresent": false,
+        "roofType": "flat_and_tiled_mixed",
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 70,
+        "aiConfidenceReasons": [
+          "Customer selected multiple targets including roof and house exterior.",
+          "Size band provided by customer (1,500-3,000 sqft) supports large bucket but not exact sqft.",
+          "Photos and satellite show driveway and paved patio areas consistent with multi-surface scope."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Allocate work across hardscape and building surfaces; roof work may need specialized crew.",
+          "Customer flagged special access; confirm before scheduling."
+        ],
+        "summary": "Large multi-surface exterior cleaning including driveway, patio, roof, fence, and house exterior; heavy staining reported.",
+        "quotedSurfaces": {
+          "driveway": 900,
+          "walkway": 200,
+          "patio": 900
+        },
+        "surfaceDetections": [
+          {
+            "surface_type": "driveway",
+            "surface_area_sqft": 900,
+            "confidence": 0.8
+          },
+          {
+            "surface_type": "walkway",
+            "surface_area_sqft": 200,
+            "confidence": 0.75
+          },
+          {
+            "surface_type": "patio",
+            "surface_area_sqft": 500,
+            "confidence": 0.7
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 1200,
+        "confidence": 0.8
+      },
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 250,
+        "confidence": 0.76
+      },
+      {
+        "surface_type": "patio",
+        "surface_area_sqft": 600,
+        "confidence": 0.7
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 1200,
+      "walkway": 250,
+      "patio": 600
+    },
+    "quotedSurfaces": {
+      "driveway": 900,
+      "patio": 900
+    },
+    "surfaceDetectionConfidence": 78,
+    "satelliteClarity": 85,
+    "imageQuality": 60,
+    "scopeMatchConfidence": 82,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire indicates multiple targets and a large area.",
+      "Satellite imagery supports presence of driveway and patio hardscapes.",
+      "Customer noted special access needs which increases uncertainty."
+    ]
+  }
+}

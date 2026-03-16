@@ -1,0 +1,133 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T00:04:28.304Z",
+  "promptHash": "7c2164357d32aaee1f807ed329c82ef26ab4a546878566e21667ce51126f8c36",
+  "keyHash": "24dbcbac8f177d99b9146f5faebc3db97522209d1c301a8473558933b29ad1b1",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Gutter Cleaning"
+    ],
+    "address": "1301 E 23rd St, Cheyenne, WY 82001, USA",
+    "addressPlaceId": "ChIJi8RhiOM6b4cRMw7GhSSaufo",
+    "lat": 41.1442781,
+    "lng": -104.8044048,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Gutter Cleaning",
+        "answers": {
+          "gutter_access": "Not sure",
+          "gutter_building_type": "Two-story home",
+          "gutter_fill_level": "Not sure",
+          "gutter_work_type": "Clean gutters only"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requested gutter cleaning for a two-story home; scope likely full-house gutter clean.",
+    "condition": "light",
+    "access": "moderate",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "aluminum",
+    "inferredScope": "full perimeter gutter cleaning",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "two_story",
+      "linear_length",
+      "light_debris"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Two-story home' and 'Clean gutters only'.",
+      "No fill level or access details provided; assume standard downspouts and accessible perimeter.",
+      "Satellite imagery shows a single building footprint consistent with a small/medium roof perimeter."
+    ],
+    "serviceSignals": {
+      "Gutter Cleaning": {
+        "serviceType": "Gutter Cleaning",
+        "jobSubtype": "gutter_clean",
+        "jobSubtypeLabel": "Gutter Cleaning",
+        "workType": "clean",
+        "fallbackFamily": "linear_boundary",
+        "surfaceFamily": "linear_boundary",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "small",
+        "estimatedQuantity": 160,
+        "quantityUnit": "linear_ft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "metal",
+        "materialSubtype": "aluminum",
+        "conditionClass": "light_debris",
+        "severityClass": "minor",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "two_story",
+        "stories": 2,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": "asphalt_shingle",
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 70,
+        "aiConfidenceReasons": [
+          "Customer explicitly selected two-story and clean-only in questionnaire.",
+          "No measurements provided; length inferred from house footprint and typical perimeter."
+        ],
+        "consistencyScore": 86,
+        "notes": [
+          "Recommend confirmation of gutter fill level and access (ladders/obstructions) prior to scheduling.",
+          "Assumed downspouts present and no major repairs required."
+        ],
+        "summary": "Gutter cleaning for a two-story residence estimated at ~160 linear ft."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "asphalt",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about building height and clean-only work.",
+      "Satellite imagery and property footprints support inferred gutter linear footage."
+    ]
+  }
+}

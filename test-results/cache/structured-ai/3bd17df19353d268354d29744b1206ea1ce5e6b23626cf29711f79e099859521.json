@@ -1,0 +1,125 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T08:24:16.549Z",
+  "promptHash": "ba4e7bcbd3d86c5a6e7817403751b44709804389387e09c79efd635cb39e2991",
+  "keyHash": "3bd17df19353d268354d29744b1206ea1ce5e6b23626cf29711f79e099859521",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Deck Installation / Repair"
+    ],
+    "address": "1202 Larchmont Ln, Nichols Hills, OK 73116, USA",
+    "addressPlaceId": "ChIJySjKutIbsocRj8CEoxAlaik",
+    "lat": 35.5497582,
+    "lng": -97.5348305,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Deck Installation / Repair",
+        "answers": {
+          "deck_area_type": "Not sure",
+          "deck_material": "Other",
+          "deck_material_other_text": "special access needs for deck material 49",
+          "deck_repair_condition": "Not sure",
+          "deck_scope": "Medium (~150-350 sq ft)",
+          "deck_work_type": "Repair existing deck"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Repair existing deck, medium scope (~150-350 sq ft). Customer notes special material and access needs.",
+    "condition": "moderate",
+    "access": "moderate",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "special access needs for deck material 49",
+    "inferredScope": "medium_deck_repair",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 68,
+    "pricingDrivers": [
+      "special_material_requirements",
+      "access_difficulty",
+      "medium_size_deck_repair"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Repair existing deck' and specified medium scope in questionnaire.",
+      "Other-text indicates special material/access needs which may increase labor or equipment requirements.",
+      "Satellite and photo show backyard with pool nearby; deck likely adjacent to house and pool."
+    ],
+    "serviceSignals": {
+      "Deck Installation / Repair": {
+        "serviceType": "Deck Installation / Repair",
+        "jobSubtype": "deck_repair",
+        "jobSubtypeLabel": "Deck Repair",
+        "workType": "repair",
+        "fallbackFamily": "install_area",
+        "surfaceFamily": "deck",
+        "targetObjectFamily": "deck",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 200,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "direct",
+        "materialClass": "other",
+        "materialSubtype": "special access needs for deck material 49",
+        "conditionClass": "unknown",
+        "severityClass": "minor",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "moderate",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": true,
+        "fencePresent": false,
+        "deckPresent": true,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 64,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly selected repair and medium scope (~150-350 sq ft).",
+          "Other-text mentions special material/access increasing uncertainty.",
+          "Imagery shows backyard and pool consistent with deck adjacent to house."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Verify exact deck footprint and material type on-site.",
+          "Confirm any structural repairs vs cosmetic; special access may require lift or tight-angle work."
+        ],
+        "summary": "Medium deck repair (~200 sqft) with special material/access considerations."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 82,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.1,
+    "materialMultiplier": 1.2,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about deck repair and size band.",
+      "Other-text indicates unusual material/access which increases uncertainty.",
+      "Imagery supports backyard deck presence but does not detail material."
+    ]
+  }
+}

@@ -1,0 +1,137 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T08:12:47.039Z",
+  "promptHash": "db9b77f21638bff5302d69c3fa7c5f9b2d1c9b18ab5243ce19c94b7b5427eebe",
+  "keyHash": "6eae44f9ae5abd9e557582e75f4100e9ac3b2163b2c3513ce3f50d8031827815",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Other"
+    ],
+    "address": "424 NW 29th St, Oklahoma City, OK 73103, USA",
+    "addressPlaceId": "ChIJQ7Rvw1MXsocRLG8Dbk3Y5Yw",
+    "lat": 35.4992706,
+    "lng": -97.5201175,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Other",
+        "answers": {
+          "other_access": "Very difficult",
+          "other_property_type": "Commercial property",
+          "other_size": "Small",
+          "other_work_type": "Installation"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Small installation requested for a commercial property with very difficult access; scope unclear from photo.",
+    "condition": "light",
+    "access": "difficult",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "concrete",
+    "inferredScope": "small installation on exterior hardscape or site feature",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 60,
+    "pricingDrivers": [
+      "very difficult access",
+      "commercial property",
+      "small installation"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Other' with Installation, Small, Commercial, Very difficult access.",
+      "Satellite shows driveway and walkway hardscapes; single photo is a placeholder test image.",
+      "Scope not explicitly quantified; manual follow-up recommended if pricing is required."
+    ],
+    "serviceSignals": {
+      "Other": {
+        "serviceType": "Other",
+        "jobSubtype": "installation",
+        "jobSubtypeLabel": "Installation",
+        "workType": "install",
+        "fallbackFamily": "install_area",
+        "surfaceFamily": "flat_hardscape",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "small",
+        "estimatedQuantity": 1,
+        "quantityUnit": "count",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "concrete",
+        "materialSubtype": "standard",
+        "conditionClass": "light_use",
+        "severityClass": "minor",
+        "accessDifficulty": "very_difficult",
+        "obstructionLevel": "moderate",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": true,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 48,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly indicates an 'Other' installation with very difficult access.",
+          "No explicit size/quantity dimensions provided; inference based on 'Small' selection and imagery."
+        ],
+        "consistencyScore": 60,
+        "notes": [
+          "Treat as custom small installation on exterior surface; recommend manual review for exact scope and access planning."
+        ],
+        "summary": "Small exterior installation on a commercial property with very difficult access; custom job requires follow-up."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 400,
+        "confidence": 0.72
+      },
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 120,
+        "confidence": 0.68
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 400,
+      "walkway": 120
+    },
+    "surfaceDetectionConfidence": 70,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 70,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.2,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1,
+    "luxuryMultiplier": 1,
+    "estateScore": 0,
+    "premiumPropertySignal": false,
+    "commercialSignal": true,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about type and access difficulty.",
+      "Imagery shows hardscape but does not confirm exact installation scope or count."
+    ]
+  }
+}

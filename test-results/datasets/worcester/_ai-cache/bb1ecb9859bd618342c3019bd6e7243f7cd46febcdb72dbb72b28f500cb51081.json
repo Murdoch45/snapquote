@@ -1,0 +1,121 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T21:27:35.478Z",
+  "promptHash": "1b1629c13097c17dbf0c54a016081104395b3ebb294a7ba3fa4aefdd42545927",
+  "keyHash": "bb1ecb9859bd618342c3019bd6e7243f7cd46febcdb72dbb72b28f500cb51081",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Tree Service / Removal"
+    ],
+    "address": "577 Grove St, Worcester, MA 01605, USA",
+    "addressPlaceId": "ChIJCeltdQQH5IkRUt0eMJ6IxbA",
+    "lat": 42.2936121,
+    "lng": -71.8172553,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Tree Service / Removal",
+        "answers": {
+          "tree_access": "Moderate",
+          "tree_haul_away": "No",
+          "tree_location": "Front yard",
+          "tree_size": "Medium",
+          "tree_work_type": "Trim or cut back branches"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests trimming/cutting back medium tree in front yard; moderate access, no haul away.",
+    "condition": "light",
+    "access": "moderate",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "wood",
+    "inferredScope": "trim branches on one medium front-yard tree",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "tree_size",
+      "access_difficulty",
+      "no_haul_away"
+    ],
+    "estimatorNotes": [
+      "Questionnaire indicates trim/cut back branches for a medium tree in front yard.",
+      "Customer selected no haul away; assume homeowner will handle small debris or leave on site."
+    ],
+    "serviceSignals": {
+      "Tree Service / Removal": {
+        "serviceType": "Tree Service / Removal",
+        "jobSubtype": "trim_or_cut_back_branches",
+        "jobSubtypeLabel": "Trim or cut back branches",
+        "workType": "service",
+        "fallbackFamily": "tree_work",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "tree",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 1,
+        "quantityUnit": "tree_count",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "wood",
+        "materialSubtype": "deciduous",
+        "conditionClass": "typical",
+        "severityClass": "minor",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "single_story",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 78,
+        "aiConfidenceReasons": [
+          "Customer explicitly selected 'Trim or cut back branches' and tree size.",
+          "Satellite imagery and property context indicate a single medium front-yard tree and normal access."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "No haul-away requested; include disposal option as add-on.",
+          "Moderate access from street; likely one-crew job."
+        ],
+        "summary": "Trim medium front-yard tree; no removal or haul-away requested."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 86,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1,
+    "luxuryMultiplier": 1,
+    "estateScore": 0,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Imagery supports single-medium front yard tree and accessible site."
+    ]
+  }
+}

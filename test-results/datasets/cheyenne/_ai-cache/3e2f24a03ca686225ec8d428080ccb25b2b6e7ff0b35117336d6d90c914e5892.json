@@ -1,0 +1,121 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T02:29:29.272Z",
+  "promptHash": "ded0591d7e4e1a6e62b934cf4be7e06b934e18a86946799d2271d8772196594f",
+  "keyHash": "3e2f24a03ca686225ec8d428080ccb25b2b6e7ff0b35117336d6d90c914e5892",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Roofing"
+    ],
+    "address": "1696 North Pass Trl, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJfeI3GdQ4b4cRiz4wRGjyh-I",
+    "lat": 41.2460767,
+    "lng": -104.7575577,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Roofing",
+        "answers": {
+          "roofing_access": "Not sure",
+          "roofing_problem": "Old roof needing replacement",
+          "roofing_scope": "One area or slope",
+          "roofing_type": "Flat roof",
+          "roofing_work_type": "Full roof replacement"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests a full replacement of a flat roof on the property; scope appears to be one main roof area.",
+    "condition": "heavy",
+    "access": "moderate",
+    "severity": "major",
+    "debris": "moderate",
+    "multipleAreas": false,
+    "materialHint": "flat roof membrane",
+    "inferredScope": "full roof replacement of primary structure",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "roof_area",
+      "flat_roof_replacement",
+      "haul_away"
+    ],
+    "estimatorNotes": [
+      "Questionnaire explicitly indicates full roof replacement and flat roof type.",
+      "Satellite imagery confirms a predominantly flat roof footprint; no pool detected."
+    ],
+    "serviceSignals": {
+      "Roofing": {
+        "serviceType": "Roofing",
+        "jobSubtype": "full_roof_replacement",
+        "jobSubtypeLabel": "Full roof replacement",
+        "workType": "replace",
+        "fallbackFamily": "roof_like_surface",
+        "surfaceFamily": "roof_like_surface",
+        "targetObjectFamily": "roof",
+        "sizeBucket": "large",
+        "estimatedQuantity": 3800,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "flat_roof_membrane",
+        "materialSubtype": "single_ply",
+        "conditionClass": "aged",
+        "severityClass": "major",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "single_story",
+        "stories": 1,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": "flat",
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": true,
+        "aiConfidence": 68,
+        "aiConfidenceReasons": [
+          "Customer explicitly selected full roof replacement and flat roof in questionnaire.",
+          "Roof area inferred from building footprint (houseSqft) and satellite imagery rather than explicit dimension."
+        ],
+        "consistencyScore": 70,
+        "notes": [
+          "Recommend manual measurement confirmation prior to quoting due to replacement scope.",
+          "Haul-away and tear-off will be required for membrane removal."
+        ],
+        "summary": "Full replacement of flat roof across primary residence; inferred large roof area."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were explicit about roofing scope.",
+      "Satellite imagery supports a flat roof footprint but exact area not provided."
+    ]
+  }
+}

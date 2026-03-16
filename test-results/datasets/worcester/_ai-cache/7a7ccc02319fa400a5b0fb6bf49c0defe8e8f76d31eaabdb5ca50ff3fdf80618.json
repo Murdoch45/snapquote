@@ -1,0 +1,149 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T21:24:46.425Z",
+  "promptHash": "912d7573a3b6b6beff56146e79e5804c4ea613e624c63891ee9c705338733526",
+  "keyHash": "7a7ccc02319fa400a5b0fb6bf49c0defe8e8f76d31eaabdb5ca50ff3fdf80618",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Pressure Washing"
+    ],
+    "address": "577 Grove St, Worcester, MA 01605, USA",
+    "addressPlaceId": "ChIJCeltdQQH5IkRUt0eMJ6IxbA",
+    "lat": 42.2936121,
+    "lng": -71.8172553,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Pressure Washing",
+        "answers": {
+          "pressure_washing_access": "Easy access",
+          "pressure_washing_condition": "Moderate buildup",
+          "pressure_washing_size": "Medium area (~500-1,500 sq ft)",
+          "pressure_washing_target": [
+            "Driveway",
+            "Fence",
+            "Patio or porch",
+            "Roof"
+          ]
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Automated estimator test: customer requested pressure washing for multiple targets including patio/porch, fence, roof, and driveway. Primary confirmed scope is driveway cleaning inferred from questionnaire and imagery.",
+    "condition": "moderate",
+    "access": "easy",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": true,
+    "materialHint": "concrete",
+    "inferredScope": "driveway_primary_with_additional_components_possible",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "driveway_area",
+      "multiple_targets_selected",
+      "moderate_soiling"
+    ],
+    "estimatorNotes": [
+      "Customer selected multiple pressure washing targets; imagery and lot data indicate a substantial driveway and walkways.",
+      "Primary quoted surface set to driveway based on questionnaire focus and strong satellite detection."
+    ],
+    "serviceSignals": {
+      "Pressure Washing": {
+        "serviceType": "Pressure Washing",
+        "jobSubtype": "driveway",
+        "jobSubtypeLabel": "Driveway",
+        "workType": "clean",
+        "fallbackFamily": "flat_hardscape",
+        "surfaceFamily": "flat_hardscape",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 950,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "concrete",
+        "materialSubtype": "standard",
+        "conditionClass": "moderate_soiling",
+        "severityClass": "moderate",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": true,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 76,
+        "aiConfidenceReasons": [
+          "Driveway was explicitly selected.",
+          "Photos show a moderate-size flat hardscape."
+        ],
+        "consistencyScore": 84,
+        "notes": [
+          "Questionnaire and photo evidence agree on driveway cleaning scope."
+        ],
+        "summary": "Moderate driveway cleaning request.",
+        "quotedSurfaces": {
+          "driveway": 950
+        },
+        "surfaceDetections": [
+          {
+            "surface_type": "driveway",
+            "surface_area_sqft": 950,
+            "confidence": 0.86
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "quotedSurfaces": {
+      "driveway": 2100
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Property context and imagery support the inferred scope."
+    ]
+  }
+}

@@ -1,0 +1,145 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T06:19:03.042Z",
+  "promptHash": "b13210fbd956f6f91ff52eebb556f029796d813b3996a1158bbc340dd72de8e0",
+  "keyHash": "be2279cb19e594228ec64c85fd65b4091040e2cc1a41b61bd7121c373f618498",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Outdoor Lighting Installation"
+    ],
+    "address": "2481 Summitridge Dr, Beverly Hills, CA 90210, USA",
+    "addressPlaceId": "ChIJw5RbRLm9woARPFqNmJANwtg",
+    "lat": 34.1199802,
+    "lng": -118.4212831,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Outdoor Lighting Installation",
+        "answers": {
+          "lighting_install_difficulty": "Easy access, simple install",
+          "lighting_power": "Not sure",
+          "lighting_scope": "Multiple areas",
+          "lighting_type": [
+            "Accent or landscape lights",
+            "Driveway lights",
+            "Other",
+            "Pathway lights",
+            "Patio or string lights",
+            "Security or flood lights"
+          ],
+          "lighting_type_other_text": "site-specific details for lighting type 91",
+          "lighting_work_type": "Add to an existing system"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests additions to an existing outdoor lighting system across multiple areas (pathway, driveway, patio, accent, security). Easy access install expected; likely LED low-voltage fixtures.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": true,
+    "materialHint": "low_voltage_lighting",
+    "inferredScope": "multi-zone landscape and security lighting additions",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": 12,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "multiple_areas",
+      "adds_to_existing_system",
+      "premium_property_location"
+    ],
+    "estimatorNotes": [
+      "Customer selected multiple lighting types and indicated adding to existing system.",
+      "Property is large with pool present; expect multiple lighting zones and trenching or low-voltage wiring runs."
+    ],
+    "serviceSignals": {
+      "Outdoor Lighting Installation": {
+        "serviceType": "Outdoor Lighting Installation",
+        "jobSubtype": "landscape_and_security_lighting",
+        "jobSubtypeLabel": "Landscape & Security Lighting",
+        "workType": "install",
+        "fallbackFamily": "lighting_system",
+        "surfaceFamily": "linear_boundary",
+        "targetObjectFamily": "fixture",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 12,
+        "quantityUnit": "fixture_count",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "low_voltage",
+        "materialSubtype": "LED",
+        "conditionClass": "existing_system",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": true,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": true,
+        "luxuryHardscapeSignal": true,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 78,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly states adding to existing system and multiple lighting types.",
+          "Property aerial imagery shows large estate lot and pool, consistent with multi-zone lighting.",
+          "Photo count limited but user answers provide clear scope."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Recommend site visit to confirm exact fixture count, transformer location, and required trenching.",
+          "Customer provided 'Other' lighting type text; expect site-specific custom fixtures."
+        ],
+        "summary": "Install approximately 12 LED low-voltage fixtures (pathway, accent, patio, security) across multiple areas; tie into existing system."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "quotedSurfaces": {
+      "driveway": 2100
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": true,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Property context and imagery support the inferred scope."
+    ]
+  }
+}

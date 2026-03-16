@@ -1,0 +1,139 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T00:12:33.375Z",
+  "promptHash": "a24c7c1e7103fb55cf7d480a62ff3fca6f90dd6b97b3a13f9332a7b7c2dc1cb1",
+  "keyHash": "eef615d445d42cabe5737ffd3c0a4718ec8a6c1c915d180e7c7be666e60472f6",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Pool Service / Cleaning"
+    ],
+    "address": "5618 Dayton Dr, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJj7v2QZo7b4cRO_KLm-GvTKw",
+    "lat": 41.1707669,
+    "lng": -104.7678762,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Pool Service / Cleaning",
+        "answers": {
+          "pool_access": "Yes",
+          "pool_condition": "Needs normal cleaning",
+          "pool_size": "Extra large / resort-style",
+          "pool_type": "Above-ground pool",
+          "pool_work_type": "Green or dirty pool cleanup"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Above-ground pool green cleanup, large resort-style estimate inferred from questionnaire and imagery.",
+    "condition": "moderate",
+    "access": "easy",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "above_ground",
+    "inferredScope": "Full green pool remediation and return to service (vacuum, chemical treat, filter run, skimming).",
+    "treeSize": "small",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": 800,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "pool size",
+      "above-ground pool",
+      "green cleanup",
+      "access available"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Green or dirty pool cleanup' and indicated above-ground, extra large/resort-style.",
+      "No explicit sqft provided; pool area inferred from 'extra large' and property context.",
+      "Photos limited; satellite shows backyard space consistent with large above-ground pool placement."
+    ],
+    "serviceSignals": {
+      "Pool Service / Cleaning": {
+        "serviceType": "Pool Service / Cleaning",
+        "jobSubtype": "green_cleanup",
+        "jobSubtypeLabel": "Green Pool Cleanup",
+        "workType": "service",
+        "fallbackFamily": "pool_service_event",
+        "surfaceFamily": "pool_service_event",
+        "targetObjectFamily": "pool",
+        "sizeBucket": "large",
+        "estimatedQuantity": 800,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "above_ground",
+        "materialSubtype": "vinyl_or_above_ground",
+        "conditionClass": "dirty_green",
+        "severityClass": "moderate",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": true,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 78,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly requests green pool cleanup and specifies above-ground and extra-large.",
+          "No direct measurements provided; size inferred conservatively from lot/backyard area."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Recommend standard green-to-clear protocol: vacuuming, filtration, chemical shock, algaecide, skimming, and filter maintenance.",
+          "Confirm pool liner material and access details during booking."
+        ],
+        "summary": "Service request for cleaning a large above-ground pool with green/dirty condition."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 420,
+        "confidence": 0.82
+      },
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 140,
+        "confidence": 0.76
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 420,
+      "walkway": 140
+    },
+    "surfaceDetectionConfidence": 78,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 86,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about pool condition and type.",
+      "Imagery and property context support inferred pool size and backyard access."
+    ]
+  }
+}

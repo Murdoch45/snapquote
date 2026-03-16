@@ -1,0 +1,145 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T08:17:34.447Z",
+  "promptHash": "1968008edb385c77e7a7fa535b539d62e5f1dcaa44179f4b25502a81da708b54",
+  "keyHash": "4d4f30a022485b05dc994a79b0a443f0d9b4a023cc112506cac9d8015d31921c",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Exterior Painting"
+    ],
+    "address": "12924 Cedar Springs Rd, Oklahoma City, OK 73120, USA",
+    "addressPlaceId": "ChIJ_z0yrGIcsocRtUEXpwmzF7E",
+    "lat": 35.6016417,
+    "lng": -97.5676136,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Exterior Painting",
+        "answers": {
+          "painting_access": "Tight access",
+          "painting_condition": "Heavy peeling or damage",
+          "painting_scope": "Full exterior",
+          "painting_surface_type": "Brick or masonry",
+          "painting_target": "Fence or detached structure"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests full exterior painting of a detached fence/structure with heavy peeling; tight access noted.",
+    "condition": "heavy",
+    "access": "difficult",
+    "severity": "major",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "brick/masonry",
+    "inferredScope": "full_exterior_of_detached_structure",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "heavy_paint_peeling",
+      "tight_access",
+      "masonry_surface"
+    ],
+    "estimatorNotes": [
+      "Questionnaire indicates fence or detached structure made of brick/masonry with heavy peeling and full exterior scope.",
+      "Photos and satellite confirm a detached structure on property and constrained access on one side of the lot."
+    ],
+    "serviceSignals": {
+      "Exterior Painting": {
+        "serviceType": "Exterior Painting",
+        "jobSubtype": "fence",
+        "jobSubtypeLabel": "Fence or detached structure",
+        "workType": "repair",
+        "fallbackFamily": "exterior_finish_surface",
+        "surfaceFamily": "vertical_exterior_surface",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "small",
+        "estimatedQuantity": 220,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "masonry",
+        "materialSubtype": "brick_or_stucco",
+        "conditionClass": "heavy_peeling",
+        "severityClass": "major",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "moderate",
+        "heightClass": "single_story",
+        "stories": 1,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": true,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 68,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly selected fence/detached structure and heavy peeling.",
+          "No direct square footage provided; area estimated from property size and typical fence/structure footprint."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Recommend manual review for exact square footage and confirm extent of masonry repair vs. paint.",
+          "Tight access may increase labor and equipment needs."
+        ],
+        "summary": "Full exterior repaint and prep of a brick/stucco detached structure with heavy peeling; tight access.",
+        "surfaceDetections": [
+          {
+            "surface_type": "walkway",
+            "surface_area_sqft": 120,
+            "confidence": 0.42
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      },
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 250,
+        "confidence": 0.65
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 80,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "materialType": "brick",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.15,
+    "materialMultiplier": 1.1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about target and condition.",
+      "No explicit area provided so quantities are inferred from context."
+    ]
+  }
+}

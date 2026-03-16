@@ -1,0 +1,135 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T08:23:20.352Z",
+  "promptHash": "42de959cb27e390d514ce7a1e5d572dcc095161f5d348fb94504a026f21d90c0",
+  "keyHash": "b4d6d3aba65b2da02f99e168edceeb282871118f426d26f45f17f279595ff3a7",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Fence Installation / Repair"
+    ],
+    "address": "1202 Larchmont Ln, Nichols Hills, OK 73116, USA",
+    "addressPlaceId": "ChIJySjKutIbsocRj8CEoxAlaik",
+    "lat": 35.5497582,
+    "lng": -97.5348305,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Fence Installation / Repair",
+        "answers": {
+          "fence_material": "Other",
+          "fence_material_other_text": "premium material preference for fence material 12",
+          "fence_repair_condition": "Moderate",
+          "fence_scope": "Full yard (200+ linear ft)",
+          "fence_site": "Some slope",
+          "fence_work_type": "Fence repair"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests full-yard fence repair (200+ lf) with premium material preference; moderate condition on a sloped site. Manual review recommended for material specification and large scope.",
+    "condition": "moderate",
+    "access": "moderate",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "premium material preference for fence material 12",
+    "inferredScope": "full_perimeter_repair",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": 350,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": 5,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "linear_footage",
+      "premium_material",
+      "slope_access",
+      "haul_away"
+    ],
+    "estimatorNotes": [
+      "Customer explicitly requested fence repair for full yard: 200+ linear ft (direct).",
+      "Site shows some slope and a pool in backyard; access and protection considerations apply.",
+      "Premium/other material specified in free text; requires manual material confirmation."
+    ],
+    "serviceSignals": {
+      "Fence Installation / Repair": {
+        "serviceType": "Fence Installation / Repair",
+        "jobSubtype": "fence_repair",
+        "jobSubtypeLabel": "Fence Repair",
+        "workType": "repair",
+        "fallbackFamily": "linear_boundary",
+        "surfaceFamily": "linear_boundary",
+        "targetObjectFamily": "fence",
+        "sizeBucket": "large",
+        "estimatedQuantity": 200,
+        "quantityUnit": "linear_ft",
+        "quantityEvidence": "direct",
+        "materialClass": "other",
+        "materialSubtype": "premium material preference for fence material 12",
+        "conditionClass": "moderate",
+        "severityClass": "moderate",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "some_slope",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": true,
+        "fencePresent": true,
+        "deckPresent": true,
+        "roofType": null,
+        "premiumPropertySignal": true,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 68,
+        "aiConfidenceReasons": [
+          "Customer provided explicit full-yard linear footage in questionnaire.",
+          "Photo and satellite support backyard pool and sloped site but material is nonstandard."
+        ],
+        "consistencyScore": 82,
+        "notes": [
+          "Confirm exact linear footage and gate locations during manual review.",
+          "Verify material choice and any HOA requirements."
+        ],
+        "summary": "Full-yard fence repair ~200+ lf, premium material requested, sloped yard access, haul-away likely."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 1200,
+        "confidence": 0.8
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 1200,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 78,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 90,
+    "terrainType": "moderate_slope",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1.1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1.25,
+    "regionMultiplier": 1,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": true,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about fence scope and material preference.",
+      "Satellite imagery shows backyard features (pool) and slope supporting access considerations."
+    ]
+  }
+}

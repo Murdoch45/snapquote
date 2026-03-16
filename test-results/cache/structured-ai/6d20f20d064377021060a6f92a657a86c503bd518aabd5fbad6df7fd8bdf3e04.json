@@ -1,0 +1,132 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T19:42:08.885Z",
+  "promptHash": "b64279ef0d0d574c63f679471f0836614c026ec2b390491a7c9fde96bf64ff99",
+  "keyHash": "6d20f20d064377021060a6f92a657a86c503bd518aabd5fbad6df7fd8bdf3e04",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Exterior Painting"
+    ],
+    "address": "1216 Norway St, Bristol, VA 24201, USA",
+    "addressPlaceId": "ChIJSQAVgxN2UIgRc62c8VJioW0",
+    "lat": 36.5970084,
+    "lng": -82.1960856,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Exterior Painting",
+        "answers": {
+          "painting_access": "Easy",
+          "painting_condition": "Not sure",
+          "painting_scope": "Small touch-up",
+          "painting_surface_type": "Stucco",
+          "painting_target": "Trim, doors, or garage only"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Small touch-up painting of trim/doors/garage on stucco exterior; easy access, minor scope.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "stucco",
+    "inferredScope": "trim/doors/garage small touch-up",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "small_area_trim_paint",
+      "stucco_surface"
+    ],
+    "estimatorNotes": [
+      "Customer selected trim/doors/garage only and small touch-up; no dimensions provided.",
+      "Satellite imagery shows residential property with accessible exterior; no large scale painting inferred."
+    ],
+    "serviceSignals": {
+      "Exterior Painting": {
+        "serviceType": "Exterior Painting",
+        "jobSubtype": "trim_doors_garage",
+        "jobSubtypeLabel": "Trim / Doors / Garage",
+        "workType": "service",
+        "fallbackFamily": "exterior_finish_surface",
+        "surfaceFamily": "vertical_exterior_surface",
+        "targetObjectFamily": "exterior_finish",
+        "sizeBucket": "small",
+        "estimatedQuantity": 1,
+        "quantityUnit": "count",
+        "quantityEvidence": "direct",
+        "materialClass": "stucco",
+        "materialSubtype": "stucco_finish",
+        "conditionClass": "unknown",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "single_story",
+        "stories": 1,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 78,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly selected trim/doors/garage and small touch-up.",
+          "Photos and satellite show a residential single-story structure with easy access."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Treat as a localized exterior painting service focused on trim/doors/garage; assume minor prep (sanding, masking).",
+          "No full-wall repaint inferred from customer answers."
+        ],
+        "summary": "Localized exterior painting (trim/doors/garage) on stucco, small touch-up."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Property context and imagery support the inferred scope."
+    ]
+  }
+}

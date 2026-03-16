@@ -1,0 +1,125 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T08:10:33.385Z",
+  "promptHash": "28ffc4fff51f8655bf8661696c79695782854385e0bdc33e05dbbe3b9fe43d06",
+  "keyHash": "84b9dcc38d3a4b0b00f2f595146f4a5db2b6dbc478821d0b9914687f75d375a4",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Deck Installation / Repair"
+    ],
+    "address": "424 NW 29th St, Oklahoma City, OK 73103, USA",
+    "addressPlaceId": "ChIJQ7Rvw1MXsocRLG8Dbk3Y5Yw",
+    "lat": 35.4992706,
+    "lng": -97.5201175,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Deck Installation / Repair",
+        "answers": {
+          "deck_area_type": "Not sure",
+          "deck_material": "Other",
+          "deck_material_other_text": "premium material preference for deck material 24",
+          "deck_repair_condition": "Structural concerns",
+          "deck_scope": "Small (up to ~150 sq ft)",
+          "deck_work_type": "Replace existing deck"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Replace small deck with premium material; structural concerns noted.",
+    "condition": "moderate",
+    "access": "easy",
+    "severity": "major",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "premium material preference for deck material 24",
+    "inferredScope": "Replace existing deck up to ~150 sqft with premium material; structural repair and removal of old deck required.",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "structural repairs",
+      "premium material",
+      "haul away of existing deck"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Replace existing deck' and 'Small (up to ~150 sq ft)'.",
+      "Other-text indicates a premium material preference.",
+      "Structural concerns flagged — include framing replacement and inspection."
+    ],
+    "serviceSignals": {
+      "Deck Installation / Repair": {
+        "serviceType": "Deck Installation / Repair",
+        "jobSubtype": "deck_replace",
+        "jobSubtypeLabel": "Replace Deck",
+        "workType": "replace",
+        "fallbackFamily": "install_area",
+        "surfaceFamily": "deck",
+        "targetObjectFamily": "deck",
+        "sizeBucket": "small",
+        "estimatedQuantity": 120,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "other",
+        "materialSubtype": "premium material preference for deck material 24",
+        "conditionClass": "structural_damage",
+        "severityClass": "major",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "single_story",
+        "stories": 1,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": true,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 70,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly requests replacement and small size band.",
+          "Other-text indicates non-standard premium material requiring manual review.",
+          "Photos and satellite show typical backyard deck footprint but no precise dimensions."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Recommend onsite measurement to confirm exact square footage and structural extent.",
+          "Include disposal of existing deck and full framing replacement allowance."
+        ],
+        "summary": "Small deck replacement (~120 sqft) with premium material; structural repairs expected."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 84,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1.05,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about replacement and size band.",
+      "Other-text specifies premium materials which raises complexity.",
+      "Imagery confirms backyard deck presence but not exact dimensions."
+    ]
+  }
+}

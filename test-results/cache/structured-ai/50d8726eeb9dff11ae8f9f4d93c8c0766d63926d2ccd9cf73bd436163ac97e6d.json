@@ -1,0 +1,123 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T06:14:14.392Z",
+  "promptHash": "51788a47254b4d683f3dbfb564e0b75a07657ed3f7a747c36143f5574237b928",
+  "keyHash": "50d8726eeb9dff11ae8f9f4d93c8c0766d63926d2ccd9cf73bd436163ac97e6d",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Deck Installation / Repair"
+    ],
+    "address": "8260 Oakwood Ave, Los Angeles, CA 90048, USA",
+    "addressPlaceId": "ChIJoyhFqMq-woAR_VBTx51HS3c",
+    "lat": 34.0779676,
+    "lng": -118.3694635,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Deck Installation / Repair",
+        "answers": {
+          "deck_area_type": "Ground level",
+          "deck_material": "Wood",
+          "deck_repair_condition": "Not sure",
+          "deck_scope": "Large (~350-700 sq ft)",
+          "deck_work_type": "Other",
+          "deck_work_type_other_text": "premium material preference for deck work type 80"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests large ground-level wood deck installation or repair with premium material preference.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "Wood, premium",
+    "inferredScope": "Large deck ~350-700 sqft (customer provided band)",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 68,
+    "pricingDrivers": [
+      "premium_materials",
+      "large_deck_area",
+      "ground_level_access"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Other' for deck work type and noted premium material preference.",
+      "Deck scope provided as a band; area estimated conservatively within that band.",
+      "Photos and satellite show a compact urban lot with likely constrained staging area but ground-level access."
+    ],
+    "serviceSignals": {
+      "Deck Installation / Repair": {
+        "serviceType": "Deck Installation / Repair",
+        "jobSubtype": "deck_install",
+        "jobSubtypeLabel": "Deck Install / Repair",
+        "workType": "install",
+        "fallbackFamily": "install_area",
+        "surfaceFamily": "install_area",
+        "targetObjectFamily": "deck",
+        "sizeBucket": "large",
+        "estimatedQuantity": 500,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "wood",
+        "materialSubtype": "premium",
+        "conditionClass": "unknown",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "moderate",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": true,
+        "roofType": null,
+        "premiumPropertySignal": true,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 66,
+        "aiConfidenceReasons": [
+          "Customer explicitly selected large deck band and noted premium materials.",
+          "No exact square footage provided; quantity inferred from provided band and lot/building footprint."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Customer indicated 'Large (~350-700 sq ft)'; estimator used midpoint 500 sqft for planning.",
+          "Manual review recommended for material selection, structural considerations, and exact layout."
+        ],
+        "summary": "Install large premium wood deck (~500 sqft) at ground level; access appears straightforward but staging may be constrained."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 60,
+    "scopeMatchConfidence": 80,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1.1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": true,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire provided a clear deck scope band and material preference.",
+      "Imagery and property context support a ground-level deck installation but lack exact footprint."
+    ]
+  }
+}

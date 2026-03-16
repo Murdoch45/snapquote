@@ -1,0 +1,123 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T08:22:55.438Z",
+  "promptHash": "038658374ecc233fa02c28de6708e541833e0448a212a73cdc158c32e21485b0",
+  "keyHash": "3ad5fe1ad36c6bc3fe788d4a8136c6162cafd50fc2d6f84110cf355132c41cb1",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Tree Service / Removal"
+    ],
+    "address": "1202 Larchmont Ln, Nichols Hills, OK 73116, USA",
+    "addressPlaceId": "ChIJySjKutIbsocRj8CEoxAlaik",
+    "lat": 35.5497582,
+    "lng": -97.5348305,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Tree Service / Removal",
+        "answers": {
+          "tree_access": "Difficult",
+          "tree_haul_away": "No",
+          "tree_location": "Backyard",
+          "tree_size": "Not sure",
+          "tree_work_type": "Other",
+          "tree_work_type_other_text": "custom scope requested for tree work type 14"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Custom tree work requested for backyard; access reported as difficult and haul-away not requested.",
+    "condition": "moderate",
+    "access": "difficult",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": null,
+    "inferredScope": "custom tree work in backyard (unspecified count)",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 48,
+    "pricingDrivers": [
+      "access_difficulty",
+      "custom_scope",
+      "premium_property"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Other' for tree work type and provided custom text; scope unclear.",
+      "Haul-away set to 'No' in questionnaire; assume customer will retain debris unless instructed.",
+      "Backyard location with difficult access increases time and risk."
+    ],
+    "serviceSignals": {
+      "Tree Service / Removal": {
+        "serviceType": "Tree Service / Removal",
+        "jobSubtype": "custom_tree_work",
+        "jobSubtypeLabel": "Custom tree work",
+        "workType": "remove",
+        "fallbackFamily": "tree_work",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "tree_work",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 1,
+        "quantityUnit": "tree_count",
+        "quantityEvidence": "weak_inference",
+        "materialClass": "wood",
+        "materialSubtype": "unknown",
+        "conditionClass": "unknown",
+        "severityClass": "moderate",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "moderate",
+        "heightClass": "two_story",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": true,
+        "fencePresent": true,
+        "deckPresent": true,
+        "roofType": null,
+        "premiumPropertySignal": true,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 40,
+        "aiConfidenceReasons": [
+          "Questionnaire uses 'Other' with custom text but gives no count or dimensions.",
+          "Photos and satellite confirm backyard trees and nearby pool, but do not show exact tree count or condition."
+        ],
+        "consistencyScore": 42,
+        "notes": [
+          "Confirm exact number of trees, desired work (trim vs remove vs stump), and haul-away preference before quoting.",
+          "Difficult access may require special equipment or permit depending on proximity to pool and neighbor properties."
+        ],
+        "summary": "Custom backyard tree removal/maintenance with difficult access; haul-away not requested per customer."
+      }
+    },
+    "surfaceDetectionConfidence": 20,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 62,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.15,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": true,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire provides custom scope text but no quantities.",
+      "Satellite imagery shows trees in backyard and proximity to pool which affects access and risk."
+    ]
+  }
+}

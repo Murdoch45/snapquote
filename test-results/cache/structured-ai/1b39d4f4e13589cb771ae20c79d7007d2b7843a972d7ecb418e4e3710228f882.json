@@ -1,0 +1,127 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T19:33:15.089Z",
+  "promptHash": "b47d1ac8a28ccef680faa8ea19ee1174a7feaf0ed31b498deb90d5fd9dd996d7",
+  "keyHash": "1b39d4f4e13589cb771ae20c79d7007d2b7843a972d7ecb418e4e3710228f882",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Pool Service / Cleaning"
+    ],
+    "address": "1120 Barber Rd, Bristol, TN 37620, USA",
+    "addressPlaceId": "ChIJJ5fNoHydWogRR3gpT3OQN7M",
+    "lat": 36.5614452,
+    "lng": -82.220179,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Pool Service / Cleaning",
+        "answers": {
+          "pool_access": "Yes",
+          "pool_condition": "Not sure",
+          "pool_size": "Small",
+          "pool_type": "Spa only",
+          "pool_work_type": "Routine cleaning"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Routine spa-only pool cleaning requested (small spa)",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": null,
+    "inferredScope": "spa only, routine service",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": 50,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "spa_only",
+      "routine_cleaning"
+    ],
+    "estimatorNotes": [
+      "Customer selected routine spa cleaning; spa-only and small size indicated in questionnaire.",
+      "Access indicated as available."
+    ],
+    "serviceSignals": {
+      "Pool Service / Cleaning": {
+        "serviceType": "Pool Service / Cleaning",
+        "jobSubtype": "spa",
+        "jobSubtypeLabel": "Spa",
+        "workType": "service",
+        "fallbackFamily": "pool_service_event",
+        "surfaceFamily": "pool_like",
+        "targetObjectFamily": "pool",
+        "sizeBucket": "small",
+        "estimatedQuantity": 1,
+        "quantityUnit": "service_event",
+        "quantityEvidence": "direct",
+        "materialClass": "unknown",
+        "materialSubtype": null,
+        "conditionClass": "unknown",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": true,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 78,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly states spa-only and small size.",
+          "Photo and satellite show a residential property with likely small pool/spa scale."
+        ],
+        "consistencyScore": 92,
+        "notes": [
+          "Scope limited to spa; routine cleaning/service.",
+          "No evidence of additional pool features from images or description."
+        ],
+        "summary": "Routine cleaning/service for a small spa (spa-only)."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 0,
+        "confidence": 0.1
+      }
+    ],
+    "surfaceDetectionConfidence": 10,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 92,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific (spa only, small, routine).",
+      "Imagery and property context are consistent with a small residential spa and simple service scope."
+    ]
+  }
+}

@@ -1,0 +1,122 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T21:19:33.857Z",
+  "promptHash": "a65c3d569c612564351c073a3496d6f38b2c8fdee5138ad04c2932cb191d1495",
+  "keyHash": "2e549872be50e38194b100204c73926ea55ce5568ac1e5e23dce6c2c3f636f38",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Pool Service / Cleaning"
+    ],
+    "address": "22 Bittersweet Blvd, Worcester, MA 01607, USA",
+    "addressPlaceId": "ChIJoc9sdbUF5IkRMHNxoI9HMCA",
+    "lat": 42.228719,
+    "lng": -71.8067966,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Pool Service / Cleaning",
+        "answers": {
+          "pool_access": "Yes",
+          "pool_condition": "Needs normal cleaning",
+          "pool_size": "Medium",
+          "pool_type": "Pool and spa",
+          "pool_work_type": "Green or dirty pool cleanup"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requested a green/dirty pool cleanup for a medium pool with attached spa. Access is available; scope appears to be a standard pool service visit to restore water clarity and perform normal cleaning protocols.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": null,
+    "inferredScope": "full_pool_and_spa_clean",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": 400,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "green_pool_cleanup",
+      "pool_and_spa",
+      "medium_pool_size",
+      "access_on_site"
+    ],
+    "estimatorNotes": [
+      "Questionnaire indicates green or dirty pool cleanup for a pool+spa of medium size.",
+      "No exact pool dimensions provided; sqft is a conservative inference based on 'Medium' size selection."
+    ],
+    "serviceSignals": {
+      "Pool Service / Cleaning": {
+        "serviceType": "Pool Service / Cleaning",
+        "jobSubtype": "green_cleanup",
+        "jobSubtypeLabel": "Green or dirty pool cleanup",
+        "workType": "clean",
+        "fallbackFamily": "pool_service_event",
+        "surfaceFamily": "pool_service_event",
+        "targetObjectFamily": "pool",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 1,
+        "quantityUnit": "service_event",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "vinyl_or_gunite_or_fiberglass",
+        "materialSubtype": "unknown",
+        "conditionClass": "algae_contamination",
+        "severityClass": "moderate",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": true,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 84,
+        "aiConfidenceReasons": [
+          "Customer explicitly selected 'Green or dirty pool cleanup' and pool type 'Pool and spa'.",
+          "Satellite and property context show a residential lot consistent with a single pool service event."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Recommend chemical treatment, filtration run, vacuuming, and standard balancing for pool and spa.",
+          "No dimensions supplied; assumed one medium pool with attached spa."
+        ],
+        "summary": "Single medium pool and spa green cleanup service event."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific for pool service type and condition.",
+      "Imagery and property context support a single residential pool service event."
+    ]
+  }
+}

@@ -1,0 +1,123 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T00:07:42.549Z",
+  "promptHash": "2376fe62c732f00a3788422f30406f2ba4ab953a9965ce53d4b558ff6483b66c",
+  "keyHash": "9dfbcf2e5ae36287c740eac4825eb0fdb4e3792f3b0590b2dde1657ebaec4ff0",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Window Cleaning"
+    ],
+    "address": "935 Burnside Ave, Los Angeles, CA 90036, USA",
+    "addressPlaceId": "ChIJ_1o_zx65woAR28Q5Yc4qZdE",
+    "lat": 34.058076,
+    "lng": -118.3514135,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Window Cleaning",
+        "answers": {
+          "window_access": "Some ladders needed",
+          "window_count": "50+",
+          "window_property_type": "Small commercial building",
+          "window_target_type": "Other",
+          "window_target_type_other_text": "site-specific details for window target type 36"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Exterior window cleaning for a small commercial building; customer indicates 50+ windows and some ladder access required.",
+    "condition": "light",
+    "access": "moderate",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": null,
+    "inferredScope": "Exterior window cleaning, multi-window group across a two-story small commercial property; ladders to reach some windows.",
+    "treeSize": "medium",
+    "estimatedWindowCount": 50,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "window_count",
+      "ladder_access",
+      "commercial_property",
+      "multi-story_access"
+    ],
+    "estimatorNotes": [
+      "Customer selected Window Cleaning for a small commercial building and entered '50+' windows.",
+      "Questionnaire explicitly notes ladder access; assume some windows require ladders or extension poles.",
+      "No interior service requested; treat as exterior-only by default."
+    ],
+    "serviceSignals": {
+      "Window Cleaning": {
+        "serviceType": "Window Cleaning",
+        "jobSubtype": "commercial_window_cleaning",
+        "jobSubtypeLabel": "Commercial Window Cleaning",
+        "workType": "clean",
+        "fallbackFamily": "window_group",
+        "surfaceFamily": "vertical_exterior_surface",
+        "targetObjectFamily": "window_group",
+        "sizeBucket": "large",
+        "estimatedQuantity": 50,
+        "quantityUnit": "count",
+        "quantityEvidence": "direct",
+        "materialClass": "glass",
+        "materialSubtype": "standard",
+        "conditionClass": "light_soiling",
+        "severityClass": "minor",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "two_story",
+        "stories": 2,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": true,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 78,
+        "aiConfidenceReasons": [
+          "Customer-provided count of 50+ windows in questionnaire.",
+          "Customer-specified 'Small commercial building' and 'Some ladders needed' which map to moderate access difficulty."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Assume exterior-only cleaning unless interior requested separately.",
+          "Plan for ladder or extension pole access to reach higher windows on two-story sections."
+        ],
+        "summary": "Exterior cleaning of approximately 50 windows for a small commercial property; ladders required for some windows."
+      }
+    },
+    "surfaceDetectionConfidence": 70,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1,
+    "estateScore": 1200,
+    "premiumPropertySignal": false,
+    "commercialSignal": true,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about window count and access.",
+      "Property context (small commercial) supports inferred service scope and access assumptions."
+    ]
+  }
+}

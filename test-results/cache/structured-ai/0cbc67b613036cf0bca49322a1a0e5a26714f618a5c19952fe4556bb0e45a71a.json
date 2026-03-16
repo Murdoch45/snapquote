@@ -1,0 +1,134 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T00:11:26.278Z",
+  "promptHash": "dfe2cfd7519be1ab3c3b45c0e227ed4d51c015adf4ecb300fa65eb4dda3299d9",
+  "keyHash": "0cbc67b613036cf0bca49322a1a0e5a26714f618a5c19952fe4556bb0e45a71a",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Gutter Cleaning"
+    ],
+    "address": "5618 Dayton Dr, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJj7v2QZo7b4cRO_KLm-GvTKw",
+    "lat": 41.1707669,
+    "lng": -104.7678762,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Gutter Cleaning",
+        "answers": {
+          "gutter_access": "No",
+          "gutter_building_type": "Single-story home",
+          "gutter_fill_level": "Plants or heavy buildup",
+          "gutter_work_type": "Gutter guard cleaning"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Gutter guard cleaning requested due to heavy plant buildup; single-story home.",
+    "condition": "heavy",
+    "access": "moderate",
+    "severity": "major",
+    "debris": "heavy",
+    "multipleAreas": false,
+    "materialHint": "metal",
+    "inferredScope": "clean gutter guards and downspouts, remove plants and heavy organic buildup",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "gutter guards present",
+      "heavy plant/organic buildup",
+      "single-story but guards increase labor"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Gutter guard cleaning' and 'Plants or heavy buildup'.",
+      "Single-story building type provided; assume standard residential gutter length equal to house perimeter.",
+      "Access not explicitly allowed, assume moderate setup needed for ladders and minor prep."
+    ],
+    "serviceSignals": {
+      "Gutter Cleaning": {
+        "serviceType": "Gutter Cleaning",
+        "jobSubtype": "gutter_guard_cleaning",
+        "jobSubtypeLabel": "Gutter guard cleaning",
+        "workType": "clean",
+        "fallbackFamily": "debris_load",
+        "surfaceFamily": "linear_boundary",
+        "targetObjectFamily": "gutter",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 160,
+        "quantityUnit": "linear_ft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "metal",
+        "materialSubtype": "guarded_gutters",
+        "conditionClass": "heavy_buildup",
+        "severityClass": "major",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "high",
+        "heightClass": "single_story",
+        "stories": 1,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 68,
+        "aiConfidenceReasons": [
+          "Customer explicitly selected gutter guard cleaning and heavy buildup.",
+          "Property is single-story per questionnaire, reducing height uncertainty.",
+          "No direct gutter footage provided; length inferred from house footprint and typical perimeter."
+        ],
+        "consistencyScore": 80,
+        "notes": [
+          "Estimate uses inferred linear footage based on house ground area and typical residential perimeter.",
+          "Expect extra labor to clear guards and flush downspouts; include haul away for organic debris."
+        ],
+        "summary": "Clean guarded gutters and downspouts on a single-story home with heavy organic buildup."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Property context and imagery support a typical single-story residential gutter system."
+    ]
+  }
+}

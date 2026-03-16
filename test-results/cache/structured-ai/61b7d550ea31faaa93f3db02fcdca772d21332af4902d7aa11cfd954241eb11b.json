@@ -1,0 +1,149 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T00:07:43.262Z",
+  "promptHash": "c2b4e4b0a4e9c583b53b3ee1f6c1c13b62146b21f071c8fef98630b053d26e8b",
+  "keyHash": "61b7d550ea31faaa93f3db02fcdca772d21332af4902d7aa11cfd954241eb11b",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Concrete"
+    ],
+    "address": "1301 E 23rd St, Cheyenne, WY 82001, USA",
+    "addressPlaceId": "ChIJi8RhiOM6b4cRMw7GhSSaufo",
+    "lat": 41.1442781,
+    "lng": -104.8044048,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Concrete",
+        "answers": {
+          "concrete_material": "Not sure",
+          "concrete_project_type": [
+            "Slab or pad",
+            "Walkway"
+          ],
+          "concrete_scope": "Medium (~200-600 sq ft)",
+          "concrete_site_condition": "Existing concrete needs removal",
+          "concrete_work_type": "Replacement"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests replacement of an existing medium-size concrete slab/walkway (~200-600 sqft).",
+    "condition": "moderate",
+    "access": "easy",
+    "severity": "moderate",
+    "debris": "moderate",
+    "multipleAreas": false,
+    "materialHint": "concrete",
+    "inferredScope": "replacement of existing concrete slab and walkway, removal + new pour",
+    "treeSize": "small",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": 4,
+    "internalConfidence": 68,
+    "pricingDrivers": [
+      "Removal of existing concrete",
+      "Replacement pour",
+      "Moderate debris haul-away"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Slab or pad' and 'Walkway' with scope 'Medium (200-600 sq ft)'.",
+      "Questionnaire indicates existing concrete needs removal; assume haul-away and prep required.",
+      "Satellite imagery shows a small walkway and front slab consistent with medium scope."
+    ],
+    "serviceSignals": {
+      "Concrete": {
+        "serviceType": "Concrete",
+        "jobSubtype": "walkway",
+        "jobSubtypeLabel": "Walkway",
+        "workType": "replace",
+        "fallbackFamily": "flat_hardscape",
+        "surfaceFamily": "flat_hardscape",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 350,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "concrete",
+        "materialSubtype": "standard",
+        "conditionClass": "deteriorated",
+        "severityClass": "moderate",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 72,
+        "aiConfidenceReasons": [
+          "Customer selected medium scope (200-600 sq ft) and specified removal.",
+          "Satellite and photo evidence support a small front walkway/slab rather than large driveway."
+        ],
+        "consistencyScore": 82,
+        "notes": [
+          "Use medium-sized replacement pricing band; confirm exact dimensions on site.",
+          "Expect debris removal and minor subgrade prep."
+        ],
+        "summary": "Replace existing medium concrete walkway/slab (~350 sqft) including removal and haul-away.",
+        "quotedSurfaces": {
+          "walkway": 350
+        },
+        "surfaceDetections": [
+          {
+            "surface_type": "walkway",
+            "surface_area_sqft": 250,
+            "confidence": 0.78
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 250,
+        "confidence": 0.78
+      }
+    ],
+    "detectedSurfaces": {
+      "walkway": 250
+    },
+    "quotedSurfaces": {
+      "walkway": 350
+    },
+    "surfaceDetectionConfidence": 74,
+    "satelliteClarity": 85,
+    "imageQuality": 72,
+    "scopeMatchConfidence": 86,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1,
+    "estateScore": 1200,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about scope and removal.",
+      "Imagery supports presence of a small slab/walkway consistent with medium scope."
+    ]
+  }
+}

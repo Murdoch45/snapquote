@@ -1,0 +1,136 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T21:39:23.209Z",
+  "promptHash": "c628f2dd6102a9e91de580ad3df13da047e04ad09e858693e3b60a97f9ac07fb",
+  "keyHash": "90236d7ac7292f7d2dac48aaf77687d55184edad442fbfffb29b4fd8589f1f60",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Outdoor Lighting Installation"
+    ],
+    "address": "31 Lenox St, Worcester, MA 01602, USA",
+    "addressPlaceId": "ChIJD1cICMIG5IkRYY1iKGn1gck",
+    "lat": 42.2777158,
+    "lng": -71.8334735,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Outdoor Lighting Installation",
+        "answers": {
+          "lighting_install_difficulty": "Some wiring or layout work needed",
+          "lighting_power": "Partly",
+          "lighting_scope": "One small area",
+          "lighting_type": [
+            "Driveway lights",
+            "Security or flood lights"
+          ],
+          "lighting_work_type": "Install a basic new lighting setup"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Small driveway and security lighting installation in one area; partial power access available, some wiring work expected.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "low_voltage",
+    "inferredScope": "driveway and one perimeter/security fixture",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "fixture_count",
+      "wiring_complexity",
+      "access"
+    ],
+    "estimatorNotes": [
+      "Customer requested a basic new lighting setup for a small area including driveway and security/flood lights.",
+      "Partial power onsite — electrician/wiring prep likely required."
+    ],
+    "serviceSignals": {
+      "Outdoor Lighting Installation": {
+        "serviceType": "Outdoor Lighting Installation",
+        "jobSubtype": "driveway_lighting",
+        "jobSubtypeLabel": "Driveway lights",
+        "workType": "install",
+        "fallbackFamily": "lighting_system",
+        "surfaceFamily": "linear_boundary",
+        "targetObjectFamily": "fixture",
+        "sizeBucket": "small",
+        "estimatedQuantity": 6,
+        "quantityUnit": "fixture_count",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "low_voltage",
+        "materialSubtype": "led_landscape",
+        "conditionClass": "new_install",
+        "severityClass": "minor",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 68,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly requests new lighting installation and identifies driveway and security/flood types.",
+          "Customer indicates partial power which implies wiring work."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Plan for low-voltage LED landscape fixtures and at least one hardwired security light.",
+          "Estimate assumes one small area and typical single-run wiring; complex conduit runs not anticipated."
+        ],
+        "summary": "Install ~6 low-voltage LED fixtures for driveway and one security light; wiring prep required."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Property context and imagery support a small driveway lighting scope."
+    ]
+  }
+}

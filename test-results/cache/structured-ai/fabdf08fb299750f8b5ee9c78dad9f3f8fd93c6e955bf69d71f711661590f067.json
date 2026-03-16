@@ -1,0 +1,141 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T08:26:13.028Z",
+  "promptHash": "bfb2177f75314a44fa661bcdd0763d97c2e0bb3970a4b4f81559fb5f90a0ac0a",
+  "keyHash": "fabdf08fb299750f8b5ee9c78dad9f3f8fd93c6e955bf69d71f711661590f067",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Outdoor Lighting Installation"
+    ],
+    "address": "1202 Larchmont Ln, Nichols Hills, OK 73116, USA",
+    "addressPlaceId": "ChIJySjKutIbsocRj8CEoxAlaik",
+    "lat": 35.5497582,
+    "lng": -97.5348305,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Outdoor Lighting Installation",
+        "answers": {
+          "lighting_install_difficulty": "Complex or large-property installation",
+          "lighting_power": "Not sure",
+          "lighting_scope": "One large area",
+          "lighting_type": [
+            "Accent or landscape lights",
+            "Driveway lights",
+            "Other",
+            "Patio or string lights",
+            "Security or flood lights"
+          ],
+          "lighting_type_other_text": "premium material preference for lighting type 33",
+          "lighting_work_type": "Install a basic new lighting setup"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests a new outdoor lighting installation covering driveway, landscape, patio and security lights; premium materials requested and property is large.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "premium metal/low-voltage fixtures",
+    "inferredScope": "landscape + driveway + security + patio lighting across one large property area",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": 400,
+    "estimatedFixtureCount": 20,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "large property",
+      "premium fixture preference",
+      "complex/large-property installation"
+    ],
+    "estimatorNotes": [
+      "Customer selected multiple lighting types including driveway, accent, security and patio; counts not provided.",
+      "Satellite shows pool and significant landscape which increases fixture needs and trenching complexity.",
+      "Recommend manual review to scope trenching, transformer location, and power availability."
+    ],
+    "serviceSignals": {
+      "Outdoor Lighting Installation": {
+        "serviceType": "Outdoor Lighting Installation",
+        "jobSubtype": "landscape_driveway_security",
+        "jobSubtypeLabel": "Landscape, Driveway & Security Lighting",
+        "workType": "install",
+        "fallbackFamily": "lighting_system",
+        "surfaceFamily": "linear_boundary",
+        "targetObjectFamily": "fixture",
+        "sizeBucket": "large",
+        "estimatedQuantity": 20,
+        "quantityUnit": "fixture_count",
+        "quantityEvidence": "weak_inference",
+        "materialClass": "metal",
+        "materialSubtype": "premium",
+        "conditionClass": "new_install",
+        "severityClass": "minor",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": true,
+        "fencePresent": false,
+        "deckPresent": true,
+        "roofType": null,
+        "premiumPropertySignal": true,
+        "luxuryHardscapeSignal": true,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 64,
+        "aiConfidenceReasons": [
+          "Questionnaire indicates multiple lighting types and premium material preference.",
+          "No direct fixture counts or power details were provided; quantities inferred from property size and satellite imagery."
+        ],
+        "consistencyScore": 70,
+        "notes": [
+          "Customer wrote 'premium material preference for lighting type 33' indicating higher-end fixtures.",
+          "Power/source location unknown—on-site assessment required for transformer and trenching plan."
+        ],
+        "summary": "Large-property outdoor lighting install with mixed fixture types; premium materials requested. Manual review recommended."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": true,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about lighting types and premium material preference.",
+      "Property context and imagery support a large, complex installation but lack direct fixture counts or power details."
+    ]
+  }
+}

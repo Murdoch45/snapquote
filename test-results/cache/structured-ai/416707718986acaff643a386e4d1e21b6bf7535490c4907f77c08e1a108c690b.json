@@ -1,0 +1,148 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T19:47:34.352Z",
+  "promptHash": "365f5d6eb148d19766889a336ddefb7a3591ccf120e554ecce0a2b246cbeb6fe",
+  "keyHash": "416707718986acaff643a386e4d1e21b6bf7535490c4907f77c08e1a108c690b",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Concrete"
+    ],
+    "address": "2070 King College Rd, Bristol, TN 37620, USA",
+    "addressPlaceId": "ChIJ32Mu-bV2UIgR8C_BrBTmahI",
+    "lat": 36.5870892,
+    "lng": -82.1329154,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Concrete",
+        "answers": {
+          "concrete_material": "Standard concrete",
+          "concrete_project_type": [
+            "Driveway",
+            "Slab or pad"
+          ],
+          "concrete_scope": "Small (up to ~200 sq ft)",
+          "concrete_site_condition": "Open and ready",
+          "concrete_work_type": "Extension or addition"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests a small concrete driveway extension/pad (~up to 200 sqft). Satellite shows a larger driveway but customer specified small scope.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "standard concrete",
+    "inferredScope": "small_extension",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "small concrete extension",
+      "driveway pad"
+    ],
+    "estimatorNotes": [
+      "Questionnaire explicitly selected Driveway and Slab or pad with 'Small (up to ~200 sq ft)'.",
+      "Satellite indicates a larger existing driveway; confirmed scope limited to small addition/pad."
+    ],
+    "serviceSignals": {
+      "Concrete": {
+        "serviceType": "Concrete",
+        "jobSubtype": "driveway",
+        "jobSubtypeLabel": "Driveway",
+        "workType": "install",
+        "fallbackFamily": "flat_hardscape",
+        "surfaceFamily": "flat_hardscape",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "small",
+        "estimatedQuantity": 180,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "direct",
+        "materialClass": "concrete",
+        "materialSubtype": "standard",
+        "conditionClass": "existing_good",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 78,
+        "aiConfidenceReasons": [
+          "Customer explicitly selected project type and size band.",
+          "Satellite imagery confirms driveway presence but not required for small pad sizing."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Use customer-provided scope (small, up to ~200 sqft) over satellite driveway footprint for quoted area.",
+          "Prepare for standard site prep for small concrete pad/extension."
+        ],
+        "summary": "Small concrete driveway extension/pad installation (~180 sqft).",
+        "quotedSurfaces": {
+          "driveway": 180
+        },
+        "surfaceDetections": [
+          {
+            "surface_type": "driveway",
+            "surface_area_sqft": 2100,
+            "confidence": 0.84
+          }
+        ]
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "quotedSurfaces": {
+      "driveway": 180
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Property context and imagery support the inferred scope."
+    ]
+  }
+}

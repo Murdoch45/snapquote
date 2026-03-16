@@ -1,4 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
+import { enforceServerOnly } from "@/lib/serverOnlyGuard";
+
+enforceServerOnly();
 
 let adminClient: ReturnType<typeof createClient<any>> | null = null;
 

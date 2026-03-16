@@ -1,0 +1,121 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T21:17:50.351Z",
+  "promptHash": "2a911279e65417fa1fde43c513007f0cc73fcab9d066440d22286ad5f5700fcf",
+  "keyHash": "7fcfcdfdd25e93b09566d24162c59095298cae1f34f7227b4d2f5dc787038f15",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Pressure Washing"
+    ],
+    "address": "22 Bittersweet Blvd, Worcester, MA 01607, USA",
+    "addressPlaceId": "ChIJoc9sdbUF5IkRMHNxoI9HMCA",
+    "lat": 42.228719,
+    "lng": -71.8067966,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Pressure Washing",
+        "answers": {
+          "pressure_washing_access": "Some obstacles",
+          "pressure_washing_condition": "Light dirt or dust",
+          "pressure_washing_size": "Medium area (~500-1,500 sq ft)",
+          "pressure_washing_target": [
+            "Roof"
+          ]
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests pressure washing of the roof; light dirt, medium roof area, some obstacles to access.",
+    "condition": "light",
+    "access": "moderate",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "asphalt",
+    "inferredScope": "roof pressure washing",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "roof_area",
+      "access_difficulty"
+    ],
+    "estimatorNotes": [
+      "Questionnaire specifies roof as target and medium size range (~500-1,500 sq ft).",
+      "Light soiling reported; photo and satellite show typical townhouse roof with neighboring vegetation."
+    ],
+    "serviceSignals": {
+      "Pressure Washing": {
+        "serviceType": "Pressure Washing",
+        "jobSubtype": "roof",
+        "jobSubtypeLabel": "Roof",
+        "workType": "clean",
+        "fallbackFamily": "roof_like_surface",
+        "surfaceFamily": "roof_like_surface",
+        "targetObjectFamily": "roof",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 900,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "asphalt",
+        "materialSubtype": "shingle",
+        "conditionClass": "light_soiling",
+        "severityClass": "minor",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "roof_level",
+        "stories": 2,
+        "slopeClass": "some_slope",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": "asphalt_shingle",
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 76,
+        "aiConfidenceReasons": [
+          "Customer explicitly selected Roof in questionnaire.",
+          "Size band provided narrows quantity to medium range; satellite confirms typical townhouse roof footprint."
+        ],
+        "consistencyScore": 85,
+        "notes": [
+          "Use soft-wash methods recommended for asphalt shingles; confirm access and roof condition on site."
+        ],
+        "summary": "Medium roof cleaning, light dirt, moderate access constraints."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "asphalt",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Property context and imagery support the inferred roof cleaning scope."
+    ]
+  }
+}

@@ -1,0 +1,143 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T06:16:05.064Z",
+  "promptHash": "05c750505b7636ee014513771189cfb0f15d855f488d347aa64ba007c048f950",
+  "keyHash": "6ace1d7154851d17e515fcb376632b6285a3b5701a89db84fb5bc0c85f8e523a",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Outdoor Lighting Installation"
+    ],
+    "address": "935 Burnside Ave, Los Angeles, CA 90036, USA",
+    "addressPlaceId": "ChIJ_1o_zx65woAR28Q5Yc4qZdE",
+    "lat": 34.058076,
+    "lng": -118.3514135,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Outdoor Lighting Installation",
+        "answers": {
+          "lighting_install_difficulty": "Complex or large-property installation",
+          "lighting_power": "Not sure",
+          "lighting_scope": "Multiple areas",
+          "lighting_type": [
+            "Accent or landscape lights",
+            "Driveway lights",
+            "Other",
+            "Pathway lights",
+            "Patio or string lights",
+            "Security or flood lights"
+          ],
+          "lighting_type_other_text": "custom scope requested for lighting type 63",
+          "lighting_work_type": "Install a basic new lighting setup"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Multiple-area outdoor lighting installation request covering patio, pathway, driveway, accent and security lights; customer requested custom scope.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": true,
+    "materialHint": "landscape",
+    "inferredScope": "multiple_areas_lighting",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 68,
+    "pricingDrivers": [
+      "Multiple-area installation",
+      "Mix of fixture types (path, accent, security, patio, driveway)",
+      "Complex / large-property installation"
+    ],
+    "estimatorNotes": [
+      "Customer selected multiple lighting types and requested a custom scope.",
+      "Satellite imagery shows defined patios, walkways and driveway areas suitable for landscape lighting.",
+      "No explicit fixture counts provided; quantity inferred conservatively."
+    ],
+    "serviceSignals": {
+      "Outdoor Lighting Installation": {
+        "serviceType": "Outdoor Lighting Installation",
+        "jobSubtype": "landscape_lighting",
+        "jobSubtypeLabel": "Outdoor Lighting",
+        "workType": "install",
+        "fallbackFamily": "lighting_system",
+        "surfaceFamily": "linear_boundary",
+        "targetObjectFamily": "lighting_system",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 20,
+        "quantityUnit": "fixture_count",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "electrical",
+        "materialSubtype": "low_voltage",
+        "conditionClass": "new_install",
+        "severityClass": "minor",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "moderate",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": true,
+        "deckPresent": true,
+        "roofType": null,
+        "premiumPropertySignal": true,
+        "luxuryHardscapeSignal": true,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 72,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly requested multiple lighting types and custom scope.",
+          "Satellite and photo show multiple landscape zones appropriate for lighting.",
+          "No exact fixture counts provided; quantity estimated conservatively."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Customer indicated complex or large-property installation; allow for trenching, conduit, and transformer placements.",
+          "Recommend manual review to confirm fixture count, power availability, and exact layout."
+        ],
+        "summary": "Install low-voltage landscape lighting across multiple property areas (patio, pathways, driveway, accent, security)."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": true,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific and indicated custom multi-area lighting.",
+      "Property context and imagery support multiple landscape zones for lighting placement."
+    ]
+  }
+}

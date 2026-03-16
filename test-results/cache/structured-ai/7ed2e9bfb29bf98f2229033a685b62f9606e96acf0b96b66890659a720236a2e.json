@@ -1,0 +1,132 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T19:34:03.426Z",
+  "promptHash": "35b88c7546563b6d3d71df32579ef8a53c312368ef3bae2d7c23216aa9f399bb",
+  "keyHash": "7ed2e9bfb29bf98f2229033a685b62f9606e96acf0b96b66890659a720236a2e",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Landscaping / Installation"
+    ],
+    "address": "1120 Barber Rd, Bristol, TN 37620, USA",
+    "addressPlaceId": "ChIJJ5fNoHydWogRR3gpT3OQN7M",
+    "lat": 36.5614452,
+    "lng": -82.220179,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Landscaping / Installation",
+        "answers": {
+          "landscape_access": "Somewhat difficult",
+          "landscape_area_size": "Full property (4,000+ sq ft)",
+          "landscape_job_type": "Replace old landscaping",
+          "landscape_materials": [
+            "Not sure"
+          ],
+          "landscape_work_type": [
+            "Other",
+            "Rock or mulch installation",
+            "Sod or lawn installation"
+          ],
+          "landscape_work_type_other_text": "custom scope requested for landscape work type 90"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Full-property landscape replacement with sod and rock/mulch installation; custom scope requested.",
+    "condition": "moderate",
+    "access": "moderate",
+    "severity": "moderate",
+    "debris": "moderate",
+    "multipleAreas": true,
+    "materialHint": "sod, mulch, rock",
+    "inferredScope": "replace existing landscaping across most of lot including sod installation and rock/mulch beds",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "large_area",
+      "sod_installation",
+      "landscape_removal",
+      "access_difficulty",
+      "custom_scope"
+    ],
+    "estimatorNotes": [
+      "Customer selected full property (4,000+ sq ft) and indicated sod/rock/mulch installation with custom scope text.",
+      "Satellite and lot size support a large yard area (~3200 sqft backyard + front lawn included in full property).",
+      "Recommend manual review for custom scope details and exact material choices and quantities."
+    ],
+    "serviceSignals": {
+      "Landscaping / Installation": {
+        "serviceType": "Landscaping / Installation",
+        "jobSubtype": "sod_and_mulch_installation",
+        "jobSubtypeLabel": "Sod and Mulch Installation",
+        "workType": "install",
+        "fallbackFamily": "yard_area",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "yard",
+        "sizeBucket": "very_large",
+        "estimatedQuantity": 4000,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "direct",
+        "materialClass": "sod_and_mulch",
+        "materialSubtype": "sod_and_rock_mulch",
+        "conditionClass": "existing_landscape_to_replace",
+        "severityClass": "moderate",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 68,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly requests full property and multiple landscaping types.",
+          "Customer provided custom 'other' text indicating non-standard scope.",
+          "Satellite confirms large contiguous yard area but does not show fine material details."
+        ],
+        "consistencyScore": 70,
+        "notes": [
+          "Treat as full-property landscape replace: sod installation plus rock/mulch beds.",
+          "Confirm exact areas for sod vs. rock/mulch and any plantings during manual review."
+        ],
+        "summary": "Large-scale sod and rock/mulch installation replacing existing landscaping across most of the property."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 86,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Questionnaire answers specify full-property landscaping and include 'Other' custom text.",
+      "Satellite and property data support a large yard area consistent with requested scope."
+    ]
+  }
+}

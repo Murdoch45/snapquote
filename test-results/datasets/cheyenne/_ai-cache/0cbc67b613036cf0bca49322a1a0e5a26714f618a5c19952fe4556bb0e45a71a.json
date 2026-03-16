@@ -1,0 +1,128 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T02:19:36.100Z",
+  "promptHash": "dfe2cfd7519be1ab3c3b45c0e227ed4d51c015adf4ecb300fa65eb4dda3299d9",
+  "keyHash": "0cbc67b613036cf0bca49322a1a0e5a26714f618a5c19952fe4556bb0e45a71a",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Gutter Cleaning"
+    ],
+    "address": "5618 Dayton Dr, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJj7v2QZo7b4cRO_KLm-GvTKw",
+    "lat": 41.1707669,
+    "lng": -104.7678762,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Gutter Cleaning",
+        "answers": {
+          "gutter_access": "No",
+          "gutter_building_type": "Single-story home",
+          "gutter_fill_level": "Plants or heavy buildup",
+          "gutter_work_type": "Gutter guard cleaning"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Gutter guard cleaning requested with heavy plant/build-up in gutters on a single-story home; likely full-perimeter guard cleaning and debris removal.",
+    "condition": "moderate",
+    "access": "difficult",
+    "severity": "moderate",
+    "debris": "heavy",
+    "multipleAreas": false,
+    "materialHint": "metal",
+    "inferredScope": "full-perimeter gutters with guards",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "gutter guards present",
+      "heavy plant buildup",
+      "single-story ladder access"
+    ],
+    "estimatorNotes": [
+      "Customer selected gutter guard cleaning and indicated heavy plant/build-up.",
+      "Property is single-story which reduces height risk but guards increase labor time.",
+      "No linear footage provided; quantity inferred from house footprint and typical gutter perimeter."
+    ],
+    "serviceSignals": {
+      "Gutter Cleaning": {
+        "serviceType": "Gutter Cleaning",
+        "jobSubtype": "gutter_guard_cleaning",
+        "jobSubtypeLabel": "Gutter guard cleaning",
+        "workType": "clean",
+        "fallbackFamily": "linear_boundary",
+        "surfaceFamily": "linear_boundary",
+        "targetObjectFamily": "gutter",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 170,
+        "quantityUnit": "linear_ft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "metal",
+        "materialSubtype": "guarded",
+        "conditionClass": "heavy_debris",
+        "severityClass": "major",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "moderate",
+        "heightClass": "single_story",
+        "stories": 1,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": "asphalt_shingle",
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 68,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly selected guard cleaning and heavy buildup.",
+          "Property imagery confirms typical single-family footprint supporting inferred gutter length."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Recommend plan for guard cleaning, hand-debris removal, flush and minor downspout clearing.",
+          "No customer-provided footage; linear footage estimated from building area."
+        ],
+        "summary": "Gutter guard cleaning on single-story home with heavy plant buildup across full perimeter."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 0,
+        "confidence": 0
+      }
+    ],
+    "surfaceDetectionConfidence": 40,
+    "satelliteClarity": 85,
+    "imageQuality": 60,
+    "scopeMatchConfidence": 86,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Property context and imagery support the inferred scope."
+    ]
+  }
+}

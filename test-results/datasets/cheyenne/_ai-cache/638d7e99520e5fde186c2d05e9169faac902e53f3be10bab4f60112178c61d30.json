@@ -1,0 +1,121 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T02:16:59.564Z",
+  "promptHash": "7076bac2c82d391e68ecf9c9effa122d6db75dd39e971a73cd2d27174e28ebb1",
+  "keyHash": "638d7e99520e5fde186c2d05e9169faac902e53f3be10bab4f60112178c61d30",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Exterior Painting"
+    ],
+    "address": "1301 E 23rd St, Cheyenne, WY 82001, USA",
+    "addressPlaceId": "ChIJi8RhiOM6b4cRMw7GhSSaufo",
+    "lat": 41.1442781,
+    "lng": -104.8044048,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Exterior Painting",
+        "answers": {
+          "painting_access": "Two-story areas",
+          "painting_condition": "Not sure",
+          "painting_scope": "One side or small area",
+          "painting_surface_type": "Siding",
+          "painting_target": "Fence or detached structure"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Small exterior painting of a fence/detached siding area (one side or small section); two-story access noted.",
+    "condition": "light",
+    "access": "moderate",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "siding",
+    "inferredScope": "one side or small area of a detached structure/fence",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "small area",
+      "two-story access",
+      "siding material"
+    ],
+    "estimatorNotes": [
+      "Customer selected fence/detached structure and siding; scope described as one side or small area.",
+      "No explicit area provided; estimate uses conservative inferred small quantity."
+    ],
+    "serviceSignals": {
+      "Exterior Painting": {
+        "serviceType": "Exterior Painting",
+        "jobSubtype": "fence_or_detached_structure",
+        "jobSubtypeLabel": "Fence or Detached Structure",
+        "workType": "replace",
+        "fallbackFamily": "exterior_finish_surface",
+        "surfaceFamily": "vertical_exterior_surface",
+        "targetObjectFamily": "surface",
+        "sizeBucket": "small",
+        "estimatedQuantity": 60,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "siding",
+        "materialSubtype": "siding",
+        "conditionClass": "unknown",
+        "severityClass": "minor",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "two_story",
+        "stories": 2,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": true,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": true,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 68,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly selected fence/detached structure and siding.",
+          "Scope described as one side or small area; no dimensions provided."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Customer said 'Not sure' on condition; assume standard prep required.",
+          "Two-story areas may need ladder or lift access; factor into access difficulty."
+        ],
+        "summary": "Small exterior paint job on siding of fence/detached structure; prep likely required, two-story access noted."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 80,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.05,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers identify target and surface.",
+      "No explicit dimensions—quantity inferred conservatively from 'one side or small area'."
+    ]
+  }
+}

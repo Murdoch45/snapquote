@@ -1,0 +1,122 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-16T02:22:15.701Z",
+  "promptHash": "185f24c52f7156651ae54dfb827da2798a36a9c30a1641c86610d5da08585d21",
+  "keyHash": "96592f24cce001f0646b4e2233e4f4c940b549016e109d6ec7a99ba4b5e13f8a",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Fence Installation / Repair"
+    ],
+    "address": "5618 Dayton Dr, Cheyenne, WY 82009, USA",
+    "addressPlaceId": "ChIJj7v2QZo7b4cRO_KLm-GvTKw",
+    "lat": 41.1707669,
+    "lng": -104.7678762,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Fence Installation / Repair",
+        "answers": {
+          "fence_material": "Vinyl",
+          "fence_repair_condition": "Not sure",
+          "fence_scope": "Small section (up to ~25 linear ft)",
+          "fence_site": "Some slope",
+          "fence_work_type": "Fence replacement"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requests replacement of a small vinyl fence section (up to ~25 linear feet) on a sloped backyard.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "none",
+    "multipleAreas": false,
+    "materialHint": "vinyl",
+    "inferredScope": "Replace single small section up to 25 linear ft",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "material: vinyl",
+      "small linear replacement",
+      "slope/site access"
+    ],
+    "estimatorNotes": [
+      "Questionnaire explicitly requests vinyl fence replacement for a small section (up to ~25 lf).",
+      "Satellite and single photo show typical suburban lot with sloped backyard access; no major obstructions visible."
+    ],
+    "serviceSignals": {
+      "Fence Installation / Repair": {
+        "serviceType": "Fence Installation / Repair",
+        "jobSubtype": "fence_replacement",
+        "jobSubtypeLabel": "Vinyl fence replacement",
+        "workType": "replace",
+        "fallbackFamily": "linear_boundary",
+        "surfaceFamily": "linear_boundary",
+        "targetObjectFamily": "fence",
+        "sizeBucket": "small",
+        "estimatedQuantity": 25,
+        "quantityUnit": "linear_ft",
+        "quantityEvidence": "direct",
+        "materialClass": "vinyl",
+        "materialSubtype": "vinyl",
+        "conditionClass": "unknown",
+        "severityClass": "minor",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "some_slope",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": true,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 84,
+        "aiConfidenceReasons": [
+          "Customer-selected fence replacement and vinyl material in questionnaire.",
+          "Scope explicitly given as 'Small section (up to ~25 linear ft)'.",
+          "Satellite imagery shows a standard residential backyard with slope consistent with answer."
+        ],
+        "consistencyScore": 92,
+        "notes": [
+          "Plan for removing existing damaged section and installing matching vinyl panels/posts.",
+          "Slope may require short post excavation adjustments."
+        ],
+        "summary": "Replace up to 25 lf of vinyl fence; remove old panels and install new, haul away debris."
+      }
+    },
+    "surfaceDetectionConfidence": 50,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "moderate_slope",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 10000,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about scope and material.",
+      "Imagery supports residential context and small-scale linear fence work."
+    ]
+  }
+}

@@ -1,0 +1,131 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T19:39:37.238Z",
+  "promptHash": "a4f3d58295cef5dbf267a486b65bb30192d45dbef4a0fbdb6469abdae53f2874",
+  "keyHash": "c1cde3bc816be844634aad2de4ecaa389ed6db18580ab0fd717a196abd9a84a8",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Lawn Care / Maintenance"
+    ],
+    "address": "1216 Norway St, Bristol, VA 24201, USA",
+    "addressPlaceId": "ChIJSQAVgxN2UIgRc62c8VJioW0",
+    "lat": 36.5970084,
+    "lng": -82.1960856,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Lawn Care / Maintenance",
+        "answers": {
+          "lawn_area_size": "Small yard (up to ~2,000 sq ft)",
+          "lawn_condition": "Slightly overgrown",
+          "lawn_property_type": "Front yard only",
+          "lawn_work_type": "Full lawn maintenance"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Front yard maintenance for a small, slightly overgrown lawn; basic mowing, edging, and debris tidy-up.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": "turf",
+    "inferredScope": "front yard mowing and edging",
+    "treeSize": "small",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "lawn_area_size",
+      "slightly_overgrown_condition",
+      "front_yard_only"
+    ],
+    "estimatorNotes": [
+      "Customer selected full lawn maintenance for a small front yard.",
+      "Backyard not requested; satellite indicates limited turf in front."
+    ],
+    "serviceSignals": {
+      "Lawn Care / Maintenance": {
+        "serviceType": "Lawn Care / Maintenance",
+        "jobSubtype": "full_lawn_maintenance",
+        "jobSubtypeLabel": "Full lawn maintenance",
+        "workType": "maintain",
+        "fallbackFamily": "yard_area",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "turf",
+        "sizeBucket": "small",
+        "estimatedQuantity": 1200,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "turf",
+        "materialSubtype": "cool_season",
+        "conditionClass": "slightly_overgrown",
+        "severityClass": "minor",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 78,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly requested full lawn maintenance and small yard size.",
+          "Satellite and property data indicate modest front turf consistent with selection."
+        ],
+        "consistencyScore": 86,
+        "notes": [
+          "Scope limited to front yard per customer answer.",
+          "Estimate uses conservative small-yard sqft within provided category."
+        ],
+        "summary": "Maintain front yard (~1200 sqft): mow, edge, and basic tidy."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "walkway",
+        "surface_area_sqft": 250,
+        "confidence": 0.74
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 1500,
+      "walkway": 250
+    },
+    "surfaceDetectionConfidence": 72,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Property context and imagery support the inferred scope."
+    ]
+  }
+}

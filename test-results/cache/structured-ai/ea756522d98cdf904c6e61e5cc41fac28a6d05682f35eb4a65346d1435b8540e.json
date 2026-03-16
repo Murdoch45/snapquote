@@ -1,0 +1,132 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T00:02:47.936Z",
+  "promptHash": "a4606aa7e0298d888db71502dea12a9fba29932cd65112edb436a438b5b8c359",
+  "keyHash": "ea756522d98cdf904c6e61e5cc41fac28a6d05682f35eb4a65346d1435b8540e",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Landscaping / Installation"
+    ],
+    "address": "8260 Oakwood Ave, Los Angeles, CA 90048, USA",
+    "addressPlaceId": "ChIJoyhFqMq-woAR_VBTx51HS3c",
+    "lat": 34.0779676,
+    "lng": -118.3694635,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Landscaping / Installation",
+        "answers": {
+          "landscape_access": "Difficult",
+          "landscape_area_size": "Full property (4,000+ sq ft)",
+          "landscape_job_type": "Not sure",
+          "landscape_materials": [
+            "Mostly mulch or rock",
+            "Sod or turf"
+          ],
+          "landscape_work_type": [
+            "Other"
+          ],
+          "landscape_work_type_other_text": "site-specific details for landscape work type 22"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Full-property landscaping/installation requested: turf and mulch over most of yard; access reported difficult.",
+    "condition": "moderate",
+    "access": "difficult",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": true,
+    "materialHint": "sod and mulch/rock",
+    "inferredScope": "full_property_landscape_install",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 70,
+    "pricingDrivers": [
+      "full_property_scope",
+      "difficult_access",
+      "turf_installation",
+      "mulch/rock_materials"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Full property (4,000+ sq ft)' and specified sod/turf plus mulch/rock.",
+      "Lot size and backyard sqft from property data used to infer quantity.",
+      "Access flagged as difficult; may increase labor/time and equipment logistics.",
+      "Needs manual review for final scope confirmation and staging plan."
+    ],
+    "serviceSignals": {
+      "Landscaping / Installation": {
+        "serviceType": "Landscaping / Installation",
+        "jobSubtype": "landscape_install",
+        "jobSubtypeLabel": "Landscape Installation",
+        "workType": "install",
+        "fallbackFamily": "yard_area",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "yard_area",
+        "sizeBucket": "very_large",
+        "estimatedQuantity": 3500,
+        "quantityUnit": "sqft",
+        "quantityEvidence": "strong_inference",
+        "materialClass": "sod_and_organic",
+        "materialSubtype": "sod_turf_and_mulch_mix",
+        "conditionClass": "existing_landscape_varied",
+        "severityClass": "moderate",
+        "accessDifficulty": "difficult",
+        "obstructionLevel": "moderate",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": true,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": true,
+        "needsManualReview": true,
+        "aiConfidence": 72,
+        "aiConfidenceReasons": [
+          "Questionnaire indicates full-property work and materials.",
+          "Property lot/backyard area supports large-area installation.",
+          "Access marked as difficult increases uncertainty about staging."
+        ],
+        "consistencyScore": 78,
+        "notes": [
+          "Use lot and estimated backyard sqft (3528) to set turf/mulch area ~3500 sqft.",
+          "Plan for removal of existing material, soil prep, and haul-away of debris."
+        ],
+        "summary": "Install sod/turf and mulch/rock across most of the property (approx 3500 sqft)."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 60,
+    "scopeMatchConfidence": 84,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.15,
+    "materialMultiplier": 1.05,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1,
+    "estateScore": 7200,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": true,
+    "needsManualReview": true,
+    "aiConfidenceReasons": [
+      "Customer explicitly chose full-property scope and materials.",
+      "Property and backyard sqft support large-area landscaping inference.",
+      "Single photo is a placeholder; limited on-site detail increases need for review."
+    ]
+  }
+}

@@ -1,0 +1,121 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T19:34:26.924Z",
+  "promptHash": "23122c4c66ab9b60c2a12b2b18fa0b9f01c7cdb7dbb8a3b3db133d468efc1c60",
+  "keyHash": "6ec05507a820c341c78e7dbe4eb9f9494aa9d55aba65bd22cfc1e20537be610e",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Tree Service / Removal"
+    ],
+    "address": "1120 Barber Rd, Bristol, TN 37620, USA",
+    "addressPlaceId": "ChIJJ5fNoHydWogRR3gpT3OQN7M",
+    "lat": 36.5614452,
+    "lng": -82.220179,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Tree Service / Removal",
+        "answers": {
+          "tree_access": "Easy",
+          "tree_haul_away": "Not sure",
+          "tree_location": "Front yard",
+          "tree_size": "Large",
+          "tree_work_type": "Remove one tree"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Remove one large front-yard tree; access is easy.",
+    "condition": "light",
+    "access": "easy",
+    "severity": "moderate",
+    "debris": "light",
+    "multipleAreas": false,
+    "materialHint": null,
+    "inferredScope": "Remove one large tree in the front yard",
+    "treeSize": "large",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "tree_removal_large",
+      "front_yard_access"
+    ],
+    "estimatorNotes": [
+      "Customer selected 'Remove one tree' in questionnaire.",
+      "Customer indicated tree is large and located in front yard.",
+      "Customer unsure about haul-away; confirm during quoting."
+    ],
+    "serviceSignals": {
+      "Tree Service / Removal": {
+        "serviceType": "Tree Service / Removal",
+        "jobSubtype": "remove_one_tree",
+        "jobSubtypeLabel": "Remove one tree",
+        "workType": "remove",
+        "fallbackFamily": "tree_work",
+        "surfaceFamily": "tree_work",
+        "targetObjectFamily": "tree",
+        "sizeBucket": "large",
+        "estimatedQuantity": 1,
+        "quantityUnit": "tree_count",
+        "quantityEvidence": "direct",
+        "materialClass": "wood",
+        "materialSubtype": "unknown",
+        "conditionClass": "unknown",
+        "severityClass": "moderate",
+        "accessDifficulty": "easy",
+        "obstructionLevel": "low",
+        "heightClass": "two_story",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 86,
+        "aiConfidenceReasons": [
+          "Questionnaire explicitly requests removal of one tree.",
+          "Satellite imagery and photo show tree in front yard with clear access."
+        ],
+        "consistencyScore": 92,
+        "notes": [
+          "Confirm whether stump removal and haul-away are required.",
+          "Verify exact tree species and proximity to structures on-site visit."
+        ],
+        "summary": "Remove one large front-yard tree; easy access. Confirm stump and haul-away preferences."
+      }
+    },
+    "surfaceDetectionConfidence": 0,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific.",
+      "Satellite imagery shows clear front-yard access and a large tree."
+    ]
+  }
+}

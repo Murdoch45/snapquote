@@ -1,0 +1,137 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T08:19:58.736Z",
+  "promptHash": "8d9ba5276eeb73facdb95567e8f78b0b776a39916c3a9f55fe92db3f936e2593",
+  "keyHash": "6c0591987f8d4fb1cb7ebaa7d53c0e8f45e032f285e40b9d593679262a23f258",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Pressure Washing"
+    ],
+    "address": "1202 Larchmont Ln, Nichols Hills, OK 73116, USA",
+    "addressPlaceId": "ChIJySjKutIbsocRj8CEoxAlaik",
+    "lat": 35.5497582,
+    "lng": -97.5348305,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Pressure Washing",
+        "answers": {
+          "pressure_washing_access": "Not sure",
+          "pressure_washing_condition": "Not sure",
+          "pressure_washing_size": "Medium area (~500-1,500 sq ft)",
+          "pressure_washing_target": [
+            "Driveway",
+            "House exterior",
+            "Other"
+          ],
+          "pressure_washing_target_other_text": "special access needs for pressure washing target 76"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Customer requested pressure washing for driveway and house exterior; medium driveway area inferred from questionnaire and imagery.",
+    "condition": "moderate",
+    "access": "easy",
+    "severity": "minor",
+    "debris": "light",
+    "multipleAreas": true,
+    "materialHint": "concrete",
+    "inferredScope": "Driveway cleaning plus house exterior wash (customer selected both).",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": null,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "driveway_area",
+      "house_exterior",
+      "access_requirements"
+    ],
+    "estimatorNotes": [
+      "Customer selected driveway and house exterior; photo and satellite support driveway as primary flat hardscape.",
+      "Size provided as medium in questionnaire so quantity uses conservative inference within that band."
+    ],
+    "serviceSignals": {
+      "Pressure Washing": {
+        "serviceType": "Pressure Washing",
+        "jobSubtype": "exterior_wall",
+        "jobSubtypeLabel": "House exterior",
+        "workType": "clean",
+        "fallbackFamily": "vertical_exterior_surface",
+        "surfaceFamily": "vertical_exterior_surface",
+        "targetObjectFamily": "surface",
+        "estimatedQuantity": null,
+        "quantityEvidence": "weak_inference",
+        "materialClass": "mixed",
+        "materialSubtype": "unknown",
+        "conditionClass": "unknown",
+        "severityClass": "minor",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "moderate",
+        "heightClass": "mixed_height",
+        "stories": 2,
+        "slopeClass": "flat",
+        "removalNeeded": false,
+        "prepNeeded": false,
+        "haulAwayNeeded": false,
+        "poolPresent": true,
+        "fencePresent": false,
+        "deckPresent": true,
+        "roofType": null,
+        "premiumPropertySignal": true,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 62,
+        "aiConfidenceReasons": [
+          "Customer selected house exterior but provided no dimensions.",
+          "Photo count low; satellite supports residential two-story structure."
+        ],
+        "consistencyScore": 70,
+        "notes": [
+          "Customer other_text mentions special access needs; may require ladder or lift for full exterior service."
+        ],
+        "summary": "House exterior wash requested; size unspecified by customer."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 2100,
+        "confidence": 0.84
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 2100,
+      "walkway": 250
+    },
+    "quotedSurfaces": {
+      "driveway": 950
+    },
+    "surfaceDetectionConfidence": 82,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 88,
+    "terrainType": "flat",
+    "accessType": "easy_access",
+    "materialType": "concrete",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": true,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers were specific about driveway.",
+      "Property context and imagery support the inferred scope."
+    ]
+  }
+}

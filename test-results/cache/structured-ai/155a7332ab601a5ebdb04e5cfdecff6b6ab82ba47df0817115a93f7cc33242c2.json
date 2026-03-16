@@ -1,0 +1,131 @@
+{
+  "version": 1,
+  "createdAt": "2026-03-15T08:11:55.307Z",
+  "promptHash": "db5ba7b9c692c70db4ad8bcc11051c8445181eb24b8dedc368acec0492c93390",
+  "keyHash": "155a7332ab601a5ebdb04e5cfdecff6b6ab82ba47df0817115a93f7cc33242c2",
+  "requestSummary": {
+    "businessName": "falcon",
+    "services": [
+      "Junk Removal"
+    ],
+    "address": "424 NW 29th St, Oklahoma City, OK 73103, USA",
+    "addressPlaceId": "ChIJQ7Rvw1MXsocRLG8Dbk3Y5Yw",
+    "lat": 35.4992706,
+    "lng": -97.5201175,
+    "description": "Automated estimator test",
+    "serviceQuestionAnswers": [
+      {
+        "service": "Junk Removal",
+        "answers": {
+          "junk_amount": "Medium load (about half a trailer or small truck)",
+          "junk_heavy_items": "Not sure",
+          "junk_location": "Backyard or hard-to-reach area",
+          "junk_type": "Yard debris"
+        }
+      }
+    ]
+  },
+  "signals": {
+    "summary": "Yard debris medium load to be removed from backyard; customer reports access to backyard/hard-to-reach area.",
+    "condition": "moderate",
+    "access": "moderate",
+    "severity": "minor",
+    "debris": "moderate",
+    "multipleAreas": false,
+    "materialHint": "yard_debris",
+    "inferredScope": "backyard debris removal and haul-away",
+    "treeSize": "medium",
+    "estimatedWindowCount": null,
+    "estimatedPoolSqft": null,
+    "estimatedFixtureCount": null,
+    "estimatedJunkCubicYards": 3,
+    "internalConfidence": 72,
+    "pricingDrivers": [
+      "haul_away",
+      "backyard_access",
+      "yard_debris_volume"
+    ],
+    "estimatorNotes": [
+      "Customer selected Junk Removal and described a medium load (about half a trailer or small truck).",
+      "Photos and satellite show mature trees and backyard access; location likely requires manual carry to truck."
+    ],
+    "serviceSignals": {
+      "Junk Removal": {
+        "serviceType": "Junk Removal",
+        "jobSubtype": "debris_load",
+        "jobSubtypeLabel": "Yard Debris Removal",
+        "workType": "remove",
+        "fallbackFamily": "debris_load",
+        "surfaceFamily": "yard_area",
+        "targetObjectFamily": "debris_load",
+        "sizeBucket": "medium",
+        "estimatedQuantity": 0.5,
+        "quantityUnit": "load",
+        "quantityEvidence": "direct",
+        "materialClass": "yard_debris",
+        "materialSubtype": "mixed_green_woody",
+        "conditionClass": "loose_debris",
+        "severityClass": "minor",
+        "accessDifficulty": "moderate",
+        "obstructionLevel": "moderate",
+        "heightClass": "ground_level",
+        "stories": null,
+        "slopeClass": "flat",
+        "removalNeeded": true,
+        "prepNeeded": false,
+        "haulAwayNeeded": true,
+        "poolPresent": false,
+        "fencePresent": false,
+        "deckPresent": false,
+        "roofType": null,
+        "premiumPropertySignal": false,
+        "luxuryHardscapeSignal": false,
+        "commercialSignal": false,
+        "customJobSignal": false,
+        "needsManualReview": false,
+        "aiConfidence": 72,
+        "aiConfidenceReasons": [
+          "Customer explicitly described junk type and approximate amount.",
+          "Satellite and photo context support backyard location and typical residential access."
+        ],
+        "consistencyScore": 88,
+        "notes": [
+          "Estimate assumes typical small truck/trailer half-load for mixed yard debris.",
+          "Confirm presence of heavy items during scheduling."
+        ],
+        "summary": "Remove and haul away a medium (half-trailer) load of yard debris from backyard."
+      }
+    },
+    "surfaceDetections": [
+      {
+        "surface_type": "driveway",
+        "surface_area_sqft": 400,
+        "confidence": 0.75
+      }
+    ],
+    "detectedSurfaces": {
+      "driveway": 400,
+      "walkway": 150
+    },
+    "surfaceDetectionConfidence": 72,
+    "satelliteClarity": 85,
+    "imageQuality": 74,
+    "scopeMatchConfidence": 86,
+    "terrainType": "flat",
+    "accessType": "tight_access",
+    "terrainMultiplier": 1,
+    "accessTypeMultiplier": 1.1,
+    "materialMultiplier": 1,
+    "regionMultiplier": 1.2,
+    "luxuryMultiplier": 1.05,
+    "estateScore": 14300,
+    "premiumPropertySignal": false,
+    "commercialSignal": false,
+    "customJobSignal": false,
+    "needsManualReview": false,
+    "aiConfidenceReasons": [
+      "Questionnaire answers provided a clear junk type and approximate amount.",
+      "Imagery supports residential backyard access and typical debris load."
+    ]
+  }
+}
