@@ -15,6 +15,10 @@
 
 # local env files
 .env*.local
+.env
+.env.local
+.env.*
+*.env
 
 # test
 /coverage
