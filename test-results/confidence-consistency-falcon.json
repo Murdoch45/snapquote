@@ -1,0 +1,367 @@
+{
+  "contractorSlug": "falcon-vhnf",
+  "contractorBusinessName": "falcon",
+  "runsPerJob": 5,
+  "results": [
+    {
+      "jobName": "Job 1",
+      "runNumber": 1,
+      "address": "4700 King Arthur Way, Cheyenne, WY 82009",
+      "service": "Concrete",
+      "questionnaireAnswers": {
+        "concrete_project_type": [
+          "Driveway",
+          "Walkway"
+        ],
+        "concrete_work_type": "Replacement",
+        "concrete_material": "Stamped or decorative concrete",
+        "concrete_scope": "Large (~600-1,500 sq ft)",
+        "concrete_site_condition": "Existing concrete needs removal"
+      },
+      "photoCount": 5,
+      "serviceTier": "3",
+      "serviceBaseline": 70,
+      "vagueAnswerCount": 0,
+      "nonVagueAnswerCount": 6,
+      "photoAdjustment": 3,
+      "capsOrFloorsTriggered": [
+        "none"
+      ],
+      "finalConfidence": 79
+    },
+    {
+      "jobName": "Job 1",
+      "runNumber": 2,
+      "address": "4700 King Arthur Way, Cheyenne, WY 82009",
+      "service": "Concrete",
+      "questionnaireAnswers": {
+        "concrete_project_type": [
+          "Driveway",
+          "Walkway"
+        ],
+        "concrete_work_type": "Replacement",
+        "concrete_material": "Stamped or decorative concrete",
+        "concrete_scope": "Large (~600-1,500 sq ft)",
+        "concrete_site_condition": "Existing concrete needs removal"
+      },
+      "photoCount": 5,
+      "serviceTier": "3",
+      "serviceBaseline": 70,
+      "vagueAnswerCount": 0,
+      "nonVagueAnswerCount": 6,
+      "photoAdjustment": 3,
+      "capsOrFloorsTriggered": [
+        "none"
+      ],
+      "finalConfidence": 79
+    },
+    {
+      "jobName": "Job 1",
+      "runNumber": 3,
+      "address": "4700 King Arthur Way, Cheyenne, WY 82009",
+      "service": "Concrete",
+      "questionnaireAnswers": {
+        "concrete_project_type": [
+          "Driveway",
+          "Walkway"
+        ],
+        "concrete_work_type": "Replacement",
+        "concrete_material": "Stamped or decorative concrete",
+        "concrete_scope": "Large (~600-1,500 sq ft)",
+        "concrete_site_condition": "Existing concrete needs removal"
+      },
+      "photoCount": 5,
+      "serviceTier": "3",
+      "serviceBaseline": 70,
+      "vagueAnswerCount": 0,
+      "nonVagueAnswerCount": 6,
+      "photoAdjustment": 3,
+      "capsOrFloorsTriggered": [
+        "none"
+      ],
+      "finalConfidence": 79
+    },
+    {
+      "jobName": "Job 1",
+      "runNumber": 4,
+      "address": "4700 King Arthur Way, Cheyenne, WY 82009",
+      "service": "Concrete",
+      "questionnaireAnswers": {
+        "concrete_project_type": [
+          "Driveway",
+          "Walkway"
+        ],
+        "concrete_work_type": "Replacement",
+        "concrete_material": "Stamped or decorative concrete",
+        "concrete_scope": "Large (~600-1,500 sq ft)",
+        "concrete_site_condition": "Existing concrete needs removal"
+      },
+      "photoCount": 5,
+      "serviceTier": "3",
+      "serviceBaseline": 70,
+      "vagueAnswerCount": 0,
+      "nonVagueAnswerCount": 6,
+      "photoAdjustment": 3,
+      "capsOrFloorsTriggered": [
+        "none"
+      ],
+      "finalConfidence": 79
+    },
+    {
+      "jobName": "Job 1",
+      "runNumber": 5,
+      "address": "4700 King Arthur Way, Cheyenne, WY 82009",
+      "service": "Concrete",
+      "questionnaireAnswers": {
+        "concrete_project_type": [
+          "Driveway",
+          "Walkway"
+        ],
+        "concrete_work_type": "Replacement",
+        "concrete_material": "Stamped or decorative concrete",
+        "concrete_scope": "Large (~600-1,500 sq ft)",
+        "concrete_site_condition": "Existing concrete needs removal"
+      },
+      "photoCount": 5,
+      "serviceTier": "3",
+      "serviceBaseline": 70,
+      "vagueAnswerCount": 0,
+      "nonVagueAnswerCount": 6,
+      "photoAdjustment": 3,
+      "capsOrFloorsTriggered": [
+        "none"
+      ],
+      "finalConfidence": 79
+    },
+    {
+      "jobName": "Job 2",
+      "runNumber": 1,
+      "address": "5417 Gateway Dr, Cheyenne, WY 82009",
+      "service": "Roofing",
+      "questionnaireAnswers": {
+        "roofing_work_type": "Partial replacement",
+        "roofing_type": "Other",
+        "roofing_problem": "Storm or major damage",
+        "roofing_scope": "One area or slope",
+        "roofing_access": "Moderate"
+      },
+      "photoCount": 1,
+      "serviceTier": "3",
+      "serviceBaseline": 70,
+      "vagueAnswerCount": 1,
+      "nonVagueAnswerCount": 4,
+      "photoAdjustment": -5,
+      "capsOrFloorsTriggered": [
+        "none"
+      ],
+      "finalConfidence": 59
+    },
+    {
+      "jobName": "Job 2",
+      "runNumber": 2,
+      "address": "5417 Gateway Dr, Cheyenne, WY 82009",
+      "service": "Roofing",
+      "questionnaireAnswers": {
+        "roofing_work_type": "Partial replacement",
+        "roofing_type": "Other",
+        "roofing_problem": "Storm or major damage",
+        "roofing_scope": "One area or slope",
+        "roofing_access": "Moderate"
+      },
+      "photoCount": 1,
+      "serviceTier": "3",
+      "serviceBaseline": 70,
+      "vagueAnswerCount": 1,
+      "nonVagueAnswerCount": 4,
+      "photoAdjustment": -5,
+      "capsOrFloorsTriggered": [
+        "none"
+      ],
+      "finalConfidence": 59
+    },
+    {
+      "jobName": "Job 2",
+      "runNumber": 3,
+      "address": "5417 Gateway Dr, Cheyenne, WY 82009",
+      "service": "Roofing",
+      "questionnaireAnswers": {
+        "roofing_work_type": "Partial replacement",
+        "roofing_type": "Other",
+        "roofing_problem": "Storm or major damage",
+        "roofing_scope": "One area or slope",
+        "roofing_access": "Moderate"
+      },
+      "photoCount": 1,
+      "serviceTier": "3",
+      "serviceBaseline": 70,
+      "vagueAnswerCount": 1,
+      "nonVagueAnswerCount": 4,
+      "photoAdjustment": -5,
+      "capsOrFloorsTriggered": [
+        "none"
+      ],
+      "finalConfidence": 59
+    },
+    {
+      "jobName": "Job 2",
+      "runNumber": 4,
+      "address": "5417 Gateway Dr, Cheyenne, WY 82009",
+      "service": "Roofing",
+      "questionnaireAnswers": {
+        "roofing_work_type": "Partial replacement",
+        "roofing_type": "Other",
+        "roofing_problem": "Storm or major damage",
+        "roofing_scope": "One area or slope",
+        "roofing_access": "Moderate"
+      },
+      "photoCount": 1,
+      "serviceTier": "3",
+      "serviceBaseline": 70,
+      "vagueAnswerCount": 1,
+      "nonVagueAnswerCount": 4,
+      "photoAdjustment": -5,
+      "capsOrFloorsTriggered": [
+        "none"
+      ],
+      "finalConfidence": 59
+    },
+    {
+      "jobName": "Job 2",
+      "runNumber": 5,
+      "address": "5417 Gateway Dr, Cheyenne, WY 82009",
+      "service": "Roofing",
+      "questionnaireAnswers": {
+        "roofing_work_type": "Partial replacement",
+        "roofing_type": "Other",
+        "roofing_problem": "Storm or major damage",
+        "roofing_scope": "One area or slope",
+        "roofing_access": "Moderate"
+      },
+      "photoCount": 1,
+      "serviceTier": "3",
+      "serviceBaseline": 70,
+      "vagueAnswerCount": 1,
+      "nonVagueAnswerCount": 4,
+      "photoAdjustment": -5,
+      "capsOrFloorsTriggered": [
+        "none"
+      ],
+      "finalConfidence": 59
+    },
+    {
+      "jobName": "Job 3",
+      "runNumber": 1,
+      "address": "2139 Iron Mountain Rd, Cheyenne, WY 82009",
+      "service": "Other",
+      "questionnaireAnswers": {
+        "other_outdoor_service": "Yes",
+        "other_work_type": "Cleaning",
+        "other_size": "Large",
+        "other_property_type": "Not sure",
+        "other_access": "Moderate"
+      },
+      "photoCount": 1,
+      "serviceTier": "other",
+      "serviceBaseline": 60,
+      "vagueAnswerCount": 1,
+      "nonVagueAnswerCount": 4,
+      "photoAdjustment": -5,
+      "capsOrFloorsTriggered": [
+        "none"
+      ],
+      "finalConfidence": 49
+    },
+    {
+      "jobName": "Job 3",
+      "runNumber": 2,
+      "address": "2139 Iron Mountain Rd, Cheyenne, WY 82009",
+      "service": "Other",
+      "questionnaireAnswers": {
+        "other_outdoor_service": "Yes",
+        "other_work_type": "Cleaning",
+        "other_size": "Large",
+        "other_property_type": "Not sure",
+        "other_access": "Moderate"
+      },
+      "photoCount": 1,
+      "serviceTier": "other",
+      "serviceBaseline": 60,
+      "vagueAnswerCount": 1,
+      "nonVagueAnswerCount": 4,
+      "photoAdjustment": -5,
+      "capsOrFloorsTriggered": [
+        "none"
+      ],
+      "finalConfidence": 49
+    },
+    {
+      "jobName": "Job 3",
+      "runNumber": 3,
+      "address": "2139 Iron Mountain Rd, Cheyenne, WY 82009",
+      "service": "Other",
+      "questionnaireAnswers": {
+        "other_outdoor_service": "Yes",
+        "other_work_type": "Cleaning",
+        "other_size": "Large",
+        "other_property_type": "Not sure",
+        "other_access": "Moderate"
+      },
+      "photoCount": 1,
+      "serviceTier": "other",
+      "serviceBaseline": 60,
+      "vagueAnswerCount": 1,
+      "nonVagueAnswerCount": 4,
+      "photoAdjustment": -5,
+      "capsOrFloorsTriggered": [
+        "none"
+      ],
+      "finalConfidence": 49
+    },
+    {
+      "jobName": "Job 3",
+      "runNumber": 4,
+      "address": "2139 Iron Mountain Rd, Cheyenne, WY 82009",
+      "service": "Other",
+      "questionnaireAnswers": {
+        "other_outdoor_service": "Yes",
+        "other_work_type": "Cleaning",
+        "other_size": "Large",
+        "other_property_type": "Not sure",
+        "other_access": "Moderate"
+      },
+      "photoCount": 1,
+      "serviceTier": "other",
+      "serviceBaseline": 60,
+      "vagueAnswerCount": 1,
+      "nonVagueAnswerCount": 4,
+      "photoAdjustment": -5,
+      "capsOrFloorsTriggered": [
+        "none"
+      ],
+      "finalConfidence": 49
+    },
+    {
+      "jobName": "Job 3",
+      "runNumber": 5,
+      "address": "2139 Iron Mountain Rd, Cheyenne, WY 82009",
+      "service": "Other",
+      "questionnaireAnswers": {
+        "other_outdoor_service": "Yes",
+        "other_work_type": "Cleaning",
+        "other_size": "Large",
+        "other_property_type": "Not sure",
+        "other_access": "Moderate"
+      },
+      "photoCount": 1,
+      "serviceTier": "other",
+      "serviceBaseline": 60,
+      "vagueAnswerCount": 1,
+      "nonVagueAnswerCount": 4,
+      "photoAdjustment": -5,
+      "capsOrFloorsTriggered": [
+        "none"
+      ],
+      "finalConfidence": 49
+    }
+  ]
+}

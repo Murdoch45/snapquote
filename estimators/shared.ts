@@ -182,6 +182,42 @@ export type ConfidenceFactorTrace = {
   notes: string[];
 };
 
+const LISTED_SERVICE_BASE_TIERS = [55, 65, 75, 85, 92] as const;
+const OTHER_SERVICE_BASE_TIERS = [50, 58, 66, 74, 82] as const;
+const VAGUE_CONFIDENCE_SELECTIONS = new Set(["other", "not sure"]);
+const MAX_PHOTO_CONFIDENCE_BONUS = 8;
+
+type DeterministicConfidenceTier = 1 | 2 | 3 | "other";
+
+type DeterministicConfidenceServiceConfig = {
+  tier: DeterministicConfidenceTier;
+  baseline: number;
+  floor: number;
+  cap?: number;
+};
+
+const DETERMINISTIC_CONFIDENCE_SERVICE_CONFIG: Record<CanonicalService, DeterministicConfidenceServiceConfig> = {
+  "Pressure Washing": { tier: 1, baseline: 80, floor: 47 },
+  "Gutter Cleaning": { tier: 1, baseline: 80, floor: 47 },
+  "Window Cleaning": { tier: 1, baseline: 80, floor: 47 },
+  "Pool Service / Cleaning": { tier: 1, baseline: 80, floor: 47 },
+  "Lawn Care / Maintenance": { tier: 1, baseline: 80, floor: 47 },
+  "Junk Removal": { tier: 1, baseline: 80, floor: 47 },
+  "Landscaping / Installation": { tier: 2, baseline: 75, floor: 42 },
+  "Tree Service / Removal": { tier: 2, baseline: 75, floor: 42 },
+  "Fence Installation / Repair": { tier: 2, baseline: 75, floor: 42 },
+  "Exterior Painting": { tier: 2, baseline: 75, floor: 42 },
+  "Outdoor Lighting Installation": { tier: 2, baseline: 75, floor: 42 },
+  "Concrete": { tier: 3, baseline: 70, floor: 37 },
+  "Deck Installation / Repair": { tier: 3, baseline: 70, floor: 37 },
+  "Roofing": { tier: 3, baseline: 70, floor: 37 },
+  "Other": { tier: "other", baseline: 60, floor: 15, cap: 70 }
+};
+
+export type JobStandardness = "standard" | "somewhat_unusual" | "unusual";
+export type ScopeClarity = "clear" | "moderate" | "ambiguous";
+export type RemainingUncertainty = "low" | "medium" | "high";
+
 export type NormalizedServiceSignal = {
   serviceType: CanonicalService;
   jobSubtype?: string | null;
@@ -221,6 +257,9 @@ export type NormalizedServiceSignal = {
   commercialSignal?: boolean | null;
   customJobSignal?: boolean | null;
   needsManualReview?: boolean | null;
+  jobStandardness?: JobStandardness | null;
+  scopeClarity?: ScopeClarity | null;
+  remainingUncertainty?: RemainingUncertainty | null;
   aiConfidence?: number | null;
   aiConfidenceReasons?: string[];
   consistencyScore?: number | null;
@@ -528,73 +567,19 @@ export function progressiveTieredBase(scope: number, tiers: TieredRate[]): numbe
   return total;
 }
 
-function topBandSignalCount(trace: ConfidenceFactorTrace): number {
-  return [
-    trace.requiredInputs >= 4,
-    trace.photoEvidence >= 8,
-    trace.descriptionUsefulness >= 7,
-    trace.propertyEvidence >= 7,
-    trace.crossInputAgreement >= 8,
-    trace.quantityEvidence >= 5.5,
-    trace.estimatorPath >= 5,
-    trace.reconciliation >= 5,
-    trace.ambiguityPenalty >= 0
-  ].filter(Boolean).length;
-}
-
 function qualifiesForMaxConfidence(trace: ConfidenceFactorTrace): boolean {
-  return (
-    trace.finalScore >= 92 &&
-    trace.requiredInputs >= 4 &&
-    trace.photoEvidence >= 8 &&
-    trace.propertyEvidence >= 7 &&
-    trace.crossInputAgreement >= 8 &&
-    trace.quantityEvidence >= 5.5 &&
-    trace.estimatorPath >= 5 &&
-    trace.reconciliation >= 5 &&
-    trace.ambiguityPenalty >= 0 &&
-    topBandSignalCount(trace) >= 8
-  );
+  return trace.finalScore >= 92;
 }
 
-function calibratedDisplayScore(rawScore: number, trace?: ConfidenceFactorTrace | null): number {
-  const raw = clamp(rawScore, 48, 92);
-  let score = raw;
-
-  if (raw > 80) {
-    score = 80 + (raw - 80) * 0.88;
-  }
-  if (raw > 86) {
-    score = 85.28 + (raw - 86) * 0.72;
-  }
-  if (raw > 90) {
-    score = 88.16 + (raw - 90) * 0.62;
-  }
-
-  if (trace) {
-    const corroborationBoost =
-      raw >= 88 && trace.ambiguityPenalty >= 0
-        ? Math.min(Math.max(topBandSignalCount(trace) - 5, 0) * 0.3, 1.2)
-        : 0;
-    score += corroborationBoost;
-
-    if (qualifiesForMaxConfidence(trace)) {
-      return 92;
-    }
-
-    if (raw >= 90) {
-      score = Math.min(score, 90.5);
-    }
-  }
-
-  return clamp(score, 48, 92);
+function calibratedDisplayScore(rawScore: number): number {
+  return clamp(rawScore, 0, 100);
 }
 
 export function smoothDisplayConfidence(
   internalConfidence: number,
-  confidenceTrace?: ConfidenceFactorTrace | null
+  _confidenceTrace?: ConfidenceFactorTrace | null
 ): number {
-  return calibratedDisplayScore(internalConfidence, confidenceTrace) / 100;
+  return calibratedDisplayScore(internalConfidence) / 100;
 }
 
 export function confidenceLabel(score: number): LeadConfidence {
@@ -809,27 +794,191 @@ export function estimateMowableArea(propertyData: PropertyData, landscapeBedPct 
 function hasSubstantiveAnswer(answer: ServiceQuestionAnswerValue | undefined): boolean {
   const selections = parseQuestionAnswer(answer);
   if (selections.length === 0) return false;
-  return selections.some((selection) => !/^not sure$/i.test(selection));
+  return selections.some((selection) => !VAGUE_CONFIDENCE_SELECTIONS.has(selection.trim().toLowerCase()));
+}
+
+function hasAnyAnswer(answer: ServiceQuestionAnswerValue | undefined): boolean {
+  return parseQuestionAnswer(answer).length > 0;
+}
+
+function isVagueQuestionAnswer(answer: ServiceQuestionAnswerValue | undefined): boolean {
+  const selections = parseQuestionAnswer(answer);
+  return selections.some((selection) => VAGUE_CONFIDENCE_SELECTIONS.has(selection.trim().toLowerCase()));
+}
+
+type ConfidenceQuestionStats = {
+  answeredQuestions: number;
+  substantiveAnsweredQuestions: number;
+  totalQuestions: number;
+  vagueAnswers: number;
+  nonVagueSelections: number;
+};
+
+function confidenceQuestionStats(request: ServiceRequest): ConfidenceQuestionStats {
+  const questions = serviceQuestions[request.service as ServiceType] ?? [];
+
+  return questions.reduce<ConfidenceQuestionStats>(
+    (totals, question) => {
+      const answer = request.answers[question.key];
+      return {
+        answeredQuestions: totals.answeredQuestions + (hasAnyAnswer(answer) ? 1 : 0),
+        substantiveAnsweredQuestions: totals.substantiveAnsweredQuestions + (hasSubstantiveAnswer(answer) ? 1 : 0),
+        totalQuestions: totals.totalQuestions + 1,
+        vagueAnswers: totals.vagueAnswers + parseQuestionAnswer(answer).filter((selection) => VAGUE_CONFIDENCE_SELECTIONS.has(selection.trim().toLowerCase())).length,
+        nonVagueSelections:
+          totals.nonVagueSelections +
+          parseQuestionAnswer(answer).filter((selection) => !VAGUE_CONFIDENCE_SELECTIONS.has(selection.trim().toLowerCase())).length
+      };
+    },
+    {
+      answeredQuestions: 0,
+      substantiveAnsweredQuestions: 0,
+      totalQuestions: 0,
+      vagueAnswers: 0,
+      nonVagueSelections: 0
+    }
+  );
+}
+
+export function getDeterministicConfidenceServiceConfig(service: CanonicalService): DeterministicConfidenceServiceConfig {
+  return DETERMINISTIC_CONFIDENCE_SERVICE_CONFIG[service];
+}
+
+export function deterministicPhotoConfidenceAdjustment(photoCount: number): number {
+  if (photoCount === 1) return -5;
+  if (photoCount === 2) return 0;
+  if (photoCount >= 3) return Math.min(photoCount - 2, MAX_PHOTO_CONFIDENCE_BONUS);
+  return 0;
+}
+
+function allowedBaseTiersForService(service: CanonicalService): readonly number[] {
+  return service === "Other" ? OTHER_SERVICE_BASE_TIERS : LISTED_SERVICE_BASE_TIERS;
+}
+
+export function normalizeConfidenceBaseTier(service: CanonicalService, rawScore: number | null | undefined): number {
+  const tiers = allowedBaseTiersForService(service);
+  const fallbackTier = service === "Other" ? 58 : 65;
+  if (rawScore == null || !Number.isFinite(rawScore)) return fallbackTier;
+
+  let closestTier = tiers[0];
+  let closestDistance = Math.abs(rawScore - closestTier);
+
+  for (const tier of tiers.slice(1)) {
+    const distance = Math.abs(rawScore - tier);
+    if (distance < closestDistance) {
+      closestTier = tier;
+      closestDistance = distance;
+    }
+  }
+
+  return closestTier;
+}
+
+export function mapConfidenceClarityToBaseTier(
+  service: CanonicalService,
+  signal: Pick<
+    NormalizedServiceSignal,
+    "jobStandardness" | "scopeClarity" | "remainingUncertainty" | "customJobSignal" | "needsManualReview" | "fallbackFamily"
+  > | null | undefined
+): number {
+  const jobStandardness = signal?.jobStandardness ?? "somewhat_unusual";
+  const scopeClarity = signal?.scopeClarity ?? "moderate";
+  const remainingUncertainty = signal?.remainingUncertainty ?? "medium";
+  const flaggedCustom =
+    Boolean(signal?.customJobSignal) ||
+    Boolean(signal?.needsManualReview) ||
+    signal?.fallbackFamily === "mixed_custom";
+
+  if (service === "Other") {
+    if (scopeClarity === "ambiguous" && (jobStandardness === "unusual" || remainingUncertainty === "high")) {
+      return 50;
+    }
+    if (remainingUncertainty === "high" || scopeClarity === "ambiguous" || jobStandardness === "unusual") {
+      return 58;
+    }
+    if (scopeClarity === "clear" && remainingUncertainty === "low" && jobStandardness === "standard" && !flaggedCustom) {
+      return 82;
+    }
+    if (
+      scopeClarity === "clear" &&
+      remainingUncertainty === "low" &&
+      (jobStandardness === "standard" || jobStandardness === "somewhat_unusual")
+    ) {
+      return 74;
+    }
+    return 66;
+  }
+
+  if (scopeClarity === "ambiguous" && (jobStandardness === "unusual" || remainingUncertainty === "high")) {
+    return 55;
+  }
+  if (remainingUncertainty === "high" || scopeClarity === "ambiguous" || jobStandardness === "unusual") {
+    return 65;
+  }
+  if (scopeClarity === "clear" && remainingUncertainty === "low" && jobStandardness === "standard" && !flaggedCustom) {
+    return 92;
+  }
+  if (
+    scopeClarity === "clear" &&
+    remainingUncertainty === "low" &&
+    (jobStandardness === "standard" || jobStandardness === "somewhat_unusual")
+  ) {
+    return 85;
+  }
+  return 75;
+}
+
+type RuleBasedConfidenceInput = {
+  service: CanonicalService;
+  photoCount: number;
+  vagueAnswers: number;
+  nonVagueSelections: number;
+};
+
+export function computeRuleBasedConfidence(input: RuleBasedConfidenceInput): {
+  serviceTier: DeterministicConfidenceTier;
+  serviceBaseline: number;
+  photoAdjustment: number;
+  vaguePenalty: number;
+  nonVagueBonus: number;
+  rawScore: number;
+  finalScore: number;
+  floor: number;
+  cap: number | null;
+} {
+  const serviceConfig = getDeterministicConfidenceServiceConfig(input.service);
+  const vaguePenalty = input.vagueAnswers * -10;
+  const nonVagueBonus = input.nonVagueSelections;
+  const photoAdjustment = deterministicPhotoConfidenceAdjustment(input.photoCount);
+  const rawScore = serviceConfig.baseline + vaguePenalty + nonVagueBonus + photoAdjustment;
+  let finalScore = Math.max(rawScore, serviceConfig.floor);
+  if (serviceConfig.cap != null) {
+    finalScore = Math.min(finalScore, serviceConfig.cap);
+  }
+  finalScore = clamp(finalScore, 0, 100);
+
+  return {
+    serviceTier: serviceConfig.tier,
+    serviceBaseline: serviceConfig.baseline,
+    photoAdjustment,
+    vaguePenalty,
+    nonVagueBonus,
+    rawScore,
+    finalScore,
+    floor: serviceConfig.floor,
+    cap: serviceConfig.cap ?? null
+  };
 }
 
 function answeredQuestionStats(services: ServiceRequest[]) {
   return services.reduce(
     (totals, request) => {
-      const questions = serviceQuestions[request.service as ServiceType] ?? [];
-      const answeredQuestions = questions.reduce((count, question) => {
-        const answer = getAnswer(request.answers, question.key).trim();
-        return count + (hasSubstantiveAnswer(answer) ? 1 : 0);
-      }, 0);
-
-      const usefulOtherText = questions.reduce((count, question) => {
-        const otherText = getOtherText(request.answers, question.key).trim();
-        return count + (otherText.length >= 8 ? 1 : 0);
-      }, 0);
+      const stats = confidenceQuestionStats(request);
 
       return {
-        answeredQuestions: totals.answeredQuestions + answeredQuestions,
-        totalQuestions: totals.totalQuestions + questions.length,
-        usefulOtherText: totals.usefulOtherText + usefulOtherText
+        answeredQuestions: totals.answeredQuestions + stats.answeredQuestions,
+        totalQuestions: totals.totalQuestions + stats.totalQuestions,
+        usefulOtherText: totals.usefulOtherText
       };
     },
     { answeredQuestions: 0, totalQuestions: 0, usefulOtherText: 0 }
@@ -987,8 +1136,11 @@ function reconciliationConfidenceImpact(
 }
 
 function confidenceTraceFromInputs(input: {
+  service: CanonicalService;
   answeredQuestions: number;
   totalQuestions: number;
+  vagueAnswers: number;
+  nonVagueSelections: number;
   usefulOtherText: number;
   description: string;
   photoCount: number;
@@ -997,84 +1149,50 @@ function confidenceTraceFromInputs(input: {
   signal?: NormalizedServiceSignal;
   options?: EvidenceConfidenceOptions;
 }): ConfidenceFactorTrace {
-  const { answeredQuestions, totalQuestions, usefulOtherText, description, photoCount, propertyData, signals } = input;
-  const signal = input.signal;
-  const options = input.options ?? {};
-  const questionCompletion = totalQuestions > 0 ? answeredQuestions / totalQuestions : 0;
-  const completenessBoost =
-    questionCompletion >= 1 ? 4 : questionCompletion >= 0.75 ? 2.5 : questionCompletion > 0 ? 1 : 0;
-  const otherTextBoost = Math.min(usefulOtherText * 1.25, 3);
-  const quantityEvidence = options.quantityEvidence ?? signal?.quantityEvidence ?? "fallback";
-  const consistencyScore = clamp(
-    options.consistencyScore ?? signal?.consistencyScore ?? signals.scopeMatchConfidence ?? 60,
-    0,
-    100
-  );
-  const { score: ambiguity, notes: ambiguityNotes } = ambiguityPenalty(
-    { description, photoCount },
-    signal,
-    options
-  );
+  const { answeredQuestions, totalQuestions, photoCount } = input;
+  const service = input.service;
+  const confidence = computeRuleBasedConfidence({
+    service,
+    photoCount,
+    vagueAnswers: input.vagueAnswers,
+    nonVagueSelections: input.nonVagueSelections
+  });
+  const answerCoverage = totalQuestions > 0 ? answeredQuestions / totalQuestions : 0;
 
   const trace: ConfidenceFactorTrace = {
-    baseFloor: 50,
-    requiredInputs: completenessBoost + otherTextBoost,
-    photoEvidence: photoEvidenceScore(photoCount, signals),
-    descriptionUsefulness: descriptionEvidenceScore(description),
-    propertyEvidence: propertyEvidenceScore(propertyData),
-    crossInputAgreement: agreementScore(consistencyScore),
-    quantityEvidence: quantityEvidenceWeight(quantityEvidence),
-    estimatorPath: pathStrengthScore(signal, options),
-    reconciliation: reconciliationConfidenceImpact(signal?.scopeReconciliation),
-    ambiguityPenalty: ambiguity,
-    finalScore: 50,
-    displayScore: 50,
+    baseFloor: confidence.serviceBaseline,
+    requiredInputs: Number((answerCoverage * 10).toFixed(1)),
+    photoEvidence: confidence.photoAdjustment,
+    descriptionUsefulness: 0,
+    propertyEvidence: 0,
+    crossInputAgreement: 0,
+    quantityEvidence: 0,
+    estimatorPath: 0,
+    reconciliation: 0,
+    ambiguityPenalty: confidence.vaguePenalty,
+    finalScore: confidence.finalScore,
+    displayScore: confidence.finalScore,
     maxScoreEligible: false,
     notes: []
   };
 
-  trace.finalScore = clamp(
-    trace.baseFloor +
-      trace.requiredInputs +
-      trace.photoEvidence +
-      trace.descriptionUsefulness +
-      trace.propertyEvidence +
-      trace.crossInputAgreement +
-      trace.quantityEvidence +
-      trace.estimatorPath +
-      trace.reconciliation +
-      trace.ambiguityPenalty,
-    50,
-    92
-  );
-
   trace.maxScoreEligible = qualifiesForMaxConfidence(trace);
-  trace.displayScore = calibratedDisplayScore(trace.finalScore, trace);
+  trace.displayScore = calibratedDisplayScore(trace.finalScore);
 
   trace.notes = [
-    questionCompletion >= 1
-      ? "Required questionnaire inputs were complete."
-      : "Partial questionnaire completion limited confidence.",
-    photoCount > 0
-      ? `Photo evidence contributed ${trace.photoEvidence.toFixed(1)} points.`
-      : "No photo evidence was available.",
-    description.trim().length >= 20
-      ? "Description provided usable scope detail."
-      : "Description added limited scope detail.",
-    propertyData.locationSource !== "unavailable"
-      ? "Property and location data contributed corroboration."
-      : "Property context was weak.",
-    quantityEvidence === "direct"
-      ? "Quantity evidence was direct."
-      : quantityEvidence === "strong_inference"
-        ? "Quantity evidence was inferred but fairly well supported."
-        : "Quantity evidence was mostly inferred.",
-    trace.maxScoreEligible
-      ? "Exceptional corroboration unlocked the top confidence band."
-      : trace.finalScore >= 90
-        ? "Top-end confidence was compressed until corroboration cleared the exceptional-confidence gate."
-        : "Confidence stayed within the standard evidence band.",
-    ...ambiguityNotes
+    `Deterministic service baseline: ${confidence.serviceBaseline}.`,
+    answeredQuestions >= totalQuestions && totalQuestions > 0
+      ? "All questionnaire questions were answered."
+      : "Some questionnaire questions were left unanswered.",
+    confidence.vaguePenalty !== 0
+      ? `Vague-answer penalty applied: ${confidence.vaguePenalty}.`
+      : "No vague-answer penalty applied.",
+    confidence.nonVagueBonus !== 0
+      ? `Non-vague selection bonus applied: +${confidence.nonVagueBonus}.`
+      : "No non-vague selection bonus applied.",
+    `Photo adjustment applied: ${confidence.photoAdjustment >= 0 ? "+" : ""}${confidence.photoAdjustment}.`,
+    `Service floor applied at ${confidence.floor} when needed.`,
+    confidence.cap != null ? `Service cap applied at ${confidence.cap} when needed.` : "No service cap applied."
   ];
 
   return trace;
@@ -1086,27 +1204,32 @@ function defaultConsistency(signals: AiEstimatorSignals): number {
 }
 
 export function computeGlobalConfidenceScore(input: ConfidenceScoreInput): number {
-  const { answeredQuestions, totalQuestions, usefulOtherText } = answeredQuestionStats(input.services);
-  const serviceSignals = Object.values(input.signals.serviceSignals ?? {}).filter(Boolean) as NormalizedServiceSignal[];
   const traces =
-    serviceSignals.length > 0
-      ? serviceSignals.map((signal) =>
-          confidenceTraceFromInputs({
-            answeredQuestions,
-            totalQuestions,
-            usefulOtherText,
+    input.services.length > 0
+      ? input.services.map((request) => {
+          const stats = confidenceQuestionStats(request);
+          return confidenceTraceFromInputs({
+            service: request.service,
+            answeredQuestions: stats.answeredQuestions,
+            totalQuestions: stats.totalQuestions,
+            vagueAnswers: stats.vagueAnswers,
+            nonVagueSelections: stats.nonVagueSelections,
+            usefulOtherText: 0,
             description: input.description,
             photoCount: input.photoCount,
             propertyData: input.propertyData,
             signals: input.signals,
-            signal
-          })
-        )
+            signal: getServiceSignal(input.signals, request.service)
+          });
+        })
       : [
           confidenceTraceFromInputs({
-            answeredQuestions,
-            totalQuestions,
-            usefulOtherText,
+            service: "Other",
+            answeredQuestions: 0,
+            totalQuestions: 0,
+            vagueAnswers: 0,
+            nonVagueSelections: 0,
+            usefulOtherText: 0,
             description: input.description,
             photoCount: input.photoCount,
             propertyData: input.propertyData,
@@ -1118,27 +1241,22 @@ export function computeGlobalConfidenceScore(input: ConfidenceScoreInput): numbe
         ];
 
   const average = traces.reduce((sum, trace) => sum + trace.displayScore, 0) / Math.max(traces.length, 1);
-  return clamp(average, 48, 92) / 100;
+  return clamp(average, 0, 100) / 100;
 }
 
 export function buildConfidenceTrace(
   context: EstimatorContext,
   options: EvidenceConfidenceOptions = {}
 ): ConfidenceFactorTrace {
-  const questions = serviceQuestions[context.request.service as ServiceType] ?? [];
-  const answeredCount = questions.reduce(
-    (count, question) => count + (hasSubstantiveAnswer(context.request.answers[question.key]) ? 1 : 0),
-    0
-  );
-  const usefulOtherTextCount = questions.reduce((count, question) => {
-    const otherText = getOtherText(context.request.answers, question.key).trim();
-    return count + (otherText.length >= 8 ? 1 : 0);
-  }, 0);
+  const stats = confidenceQuestionStats(context.request);
 
   return confidenceTraceFromInputs({
-    answeredQuestions: answeredCount,
-    totalQuestions: questions.length,
-    usefulOtherText: usefulOtherTextCount,
+    service: context.request.service,
+    answeredQuestions: stats.answeredQuestions,
+    totalQuestions: stats.totalQuestions,
+    vagueAnswers: stats.vagueAnswers,
+    nonVagueSelections: stats.nonVagueSelections,
+    usefulOtherText: 0,
     description: context.description.trim(),
     photoCount: context.photoCount,
     propertyData: context.propertyData,
@@ -1331,7 +1449,7 @@ export function aggregateEngineEstimate(
         });
   const confidenceScore = outOfServiceArea
     ? 0
-    : clamp((serviceConfidenceAverage * 0.55 + evidenceConfidence * 0.45) * 100, 48, 92) / 100;
+    : clamp(evidenceConfidence * 100, 0, 100) / 100;
 
   return {
     service:

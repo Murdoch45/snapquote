@@ -81,11 +81,13 @@ describe("estimator repeatability", () => {
           jobSubtype: "driveway",
           workType: "replace",
           fallbackFamily: "flat_hardscape",
+          jobStandardness: "standard",
+          scopeClarity: "moderate",
+          remainingUncertainty: "medium",
           estimatedQuantity: quantity,
           quantityUnit: "sqft",
           quantityEvidence: "strong_inference",
-          consistencyScore: 79,
-          aiConfidence: 77
+          consistencyScore: 79
         })
       )
     );
@@ -143,11 +145,13 @@ describe("estimator repeatability", () => {
           jobSubtype: "patio",
           workType: "install",
           fallbackFamily: "flat_hardscape",
+          jobStandardness: "standard",
+          scopeClarity: "moderate",
+          remainingUncertainty: "medium",
           estimatedQuantity: quantity,
           quantityUnit: "sqft",
           quantityEvidence: "direct",
-          consistencyScore: 82,
-          aiConfidence: 81
+          consistencyScore: 82
         })
       )
     );

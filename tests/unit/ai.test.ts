@@ -35,6 +35,9 @@ describe("ai estimate parsing", () => {
             jobSubtype: "driveway",
             workType: "clean",
             fallbackFamily: "flat_hardscape",
+            jobStandardness: "standard",
+            scopeClarity: "moderate",
+            remainingUncertainty: "medium",
             estimatedQuantity: 900,
             quantityUnit: "sqft",
             quantityEvidence: "strong_inference"
@@ -401,10 +404,12 @@ describe("ai estimate parsing", () => {
           jobSubtype: "holiday_lighting",
           workType: "install" as const,
           fallbackFamily: "lighting_system" as const,
+          jobStandardness: "standard" as const,
+          scopeClarity: "moderate" as const,
+          remainingUncertainty: "medium" as const,
           estimatedQuantity: 30,
           quantityUnit: "fixture_count" as const,
-          quantityEvidence,
-          aiConfidence: 80
+          quantityEvidence
         }
       }
     });
@@ -477,10 +482,12 @@ describe("ai estimate parsing", () => {
           jobSubtype: "holiday_lighting",
           workType: "install",
           fallbackFamily: "lighting_system",
+          jobStandardness: "standard",
+          scopeClarity: "moderate",
+          remainingUncertainty: "medium",
           estimatedQuantity: 30,
           quantityUnit: "fixture_count",
-          quantityEvidence: "strong_inference",
-          aiConfidence: 80
+          quantityEvidence: "strong_inference"
         }
       }
     };
@@ -837,8 +844,7 @@ describe("ai estimate parsing", () => {
     );
 
     expect(weak.serviceEstimates[0].jobType).toContain("other_");
-    expect(weak.confidenceScore).toBeGreaterThanOrEqual(0.48);
-    expect(weak.confidenceScore).toBeLessThan(0.75);
+    expect(weak.confidenceScore).toBe(0.38);
     expect(weak.estimatorNotes.join(" ")).toContain("fallback");
   });
 

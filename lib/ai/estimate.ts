@@ -23,6 +23,7 @@ import {
   estimatePatioOrDeckSqft,
   getAnswerByKeys,
   getAnswerSelections,
+  mapConfidenceClarityToBaseTier,
   sumSurfaceMap,
   type AccessType,
   type AiEstimatorSignals,
@@ -30,9 +31,12 @@ import {
   type EngineEstimate,
   type HardSurfaceMap,
   type HardSurfaceType,
+  type JobStandardness,
   type NormalizedServiceSignal,
   type PricingRegionKey,
+  type RemainingUncertainty,
   type ServiceRequest,
+  type ScopeClarity,
   type SurfaceMaterialType,
   type TerrainType
 } from "@/estimators/shared";
@@ -141,6 +145,10 @@ const buildHardSurfaceMapResponseSchema = () =>
     patio: z.number().min(0)
   });
 
+const jobStandardnessResponseSchema = z.enum(["standard", "somewhat_unusual", "unusual"]);
+const scopeClarityResponseSchema = z.enum(["clear", "moderate", "ambiguous"]);
+const remainingUncertaintyResponseSchema = z.enum(["low", "medium", "high"]);
+
 const aiServiceSignalSchema = z.object({
   serviceType: canonicalServiceSchema,
   jobSubtype: z.string().optional(),
@@ -174,7 +182,9 @@ const aiServiceSignalSchema = z.object({
   commercialSignal: z.boolean().optional(),
   customJobSignal: z.boolean().optional(),
   needsManualReview: z.boolean().optional(),
-  aiConfidence: z.number().min(0).max(100).optional(),
+  jobStandardness: jobStandardnessResponseSchema.optional(),
+  scopeClarity: scopeClarityResponseSchema.optional(),
+  remainingUncertainty: remainingUncertaintyResponseSchema.optional(),
   aiConfidenceReasons: z.array(z.string()).optional(),
   consistencyScore: z.number().min(0).max(100).optional(),
   notes: z.array(z.string()).optional(),
@@ -224,7 +234,9 @@ const aiServiceSignalResponseSchema = z.object({
   commercialSignal: z.boolean(),
   customJobSignal: z.boolean(),
   needsManualReview: z.boolean(),
-  aiConfidence: z.number().min(-1).max(100),
+  jobStandardness: jobStandardnessResponseSchema,
+  scopeClarity: scopeClarityResponseSchema,
+  remainingUncertainty: remainingUncertaintyResponseSchema,
   aiConfidenceReasons: z.array(z.string()),
   consistencyScore: z.number().min(-1).max(100),
   notes: z.array(z.string()),
@@ -336,6 +348,18 @@ const aiSignalsResponseSchema = z.object({
 });
 
 type AiSignalsResponse = z.infer<typeof aiSignalsResponseSchema>;
+
+function normalizeJobStandardness(value: string | null | undefined): JobStandardness {
+  return value === "standard" || value === "unusual" ? value : "somewhat_unusual";
+}
+
+function normalizeScopeClarity(value: string | null | undefined): ScopeClarity {
+  return value === "clear" || value === "ambiguous" ? value : "moderate";
+}
+
+function normalizeRemainingUncertainty(value: string | null | undefined): RemainingUncertainty {
+  return value === "low" || value === "high" ? value : "medium";
+}
 
 const STRUCTURED_AI_MAX_ATTEMPTS = 3;
 const STRUCTURED_AI_TIMEOUT_MS = 45000;
@@ -1299,7 +1323,17 @@ function normalizeServiceSignalResponse(
     commercialSignal: signal.commercialSignal,
     customJobSignal: signal.customJobSignal,
     needsManualReview: signal.needsManualReview,
-    aiConfidence: maybeNumber(signal.aiConfidence) ?? null,
+    jobStandardness: normalizeJobStandardness(signal.jobStandardness),
+    scopeClarity: normalizeScopeClarity(signal.scopeClarity),
+    remainingUncertainty: normalizeRemainingUncertainty(signal.remainingUncertainty),
+    aiConfidence: mapConfidenceClarityToBaseTier(signal.serviceType, {
+      jobStandardness: normalizeJobStandardness(signal.jobStandardness),
+      scopeClarity: normalizeScopeClarity(signal.scopeClarity),
+      remainingUncertainty: normalizeRemainingUncertainty(signal.remainingUncertainty),
+      customJobSignal: signal.customJobSignal,
+      needsManualReview: signal.needsManualReview,
+      fallbackFamily: normalizeUnknown(signal.fallbackFamily) as NormalizedServiceSignal["fallbackFamily"]
+    }),
     aiConfidenceReasons: signal.aiConfidenceReasons,
     consistencyScore: maybeNumber(signal.consistencyScore) ?? null,
     notes: signal.notes,
@@ -1345,7 +1379,17 @@ function normalizeLooseServiceSignal(
     commercialSignal: signal.commercialSignal,
     customJobSignal: signal.customJobSignal,
     needsManualReview: signal.needsManualReview,
-    aiConfidence: signal.aiConfidence ?? null,
+    jobStandardness: normalizeJobStandardness(signal.jobStandardness),
+    scopeClarity: normalizeScopeClarity(signal.scopeClarity),
+    remainingUncertainty: normalizeRemainingUncertainty(signal.remainingUncertainty),
+    aiConfidence: mapConfidenceClarityToBaseTier(signal.serviceType, {
+      jobStandardness: normalizeJobStandardness(signal.jobStandardness),
+      scopeClarity: normalizeScopeClarity(signal.scopeClarity),
+      remainingUncertainty: normalizeRemainingUncertainty(signal.remainingUncertainty),
+      customJobSignal: signal.customJobSignal,
+      needsManualReview: signal.needsManualReview,
+      fallbackFamily: signal.fallbackFamily as NormalizedServiceSignal["fallbackFamily"]
+    }),
     aiConfidenceReasons: signal.aiConfidenceReasons,
     consistencyScore: signal.consistencyScore ?? null,
     notes: signal.notes,
@@ -2851,8 +2895,7 @@ function stabilizeAiServiceSignals(
         ...signal,
         estimatedQuantity,
         quantityEvidence,
-        aiConfidence:
-          signal.aiConfidence != null ? clamp(Math.round(signal.aiConfidence / 5) * 5, 0, 100) : signal.aiConfidence,
+        aiConfidence: mapConfidenceClarityToBaseTier(request.service, signal),
         consistencyScore:
           signal.consistencyScore != null
             ? clamp(Math.round(signal.consistencyScore / 5) * 5, 0, 100)
@@ -2909,12 +2952,18 @@ function inferFallbackServiceSignal(
     /three-story|three story|three-story or taller/.test(text) ? 3 : /two-story|two story/.test(text) ? 2 : 1;
   const premiumPropertySignal = lotSize > 18000 || houseSqft > 3600;
   const commercialSignal = /commercial|storefront|office|multi-unit|multi unit/.test(text);
+  const fallbackClarity = {
+    jobStandardness: request.service === "Other" || /custom|unusual|other/.test(text) ? "somewhat_unusual" : "standard",
+    scopeClarity: /not sure|unknown|maybe/.test(text) ? "ambiguous" : "moderate",
+    remainingUncertainty: /not sure|unknown|estimate/.test(text) ? "high" : "medium"
+  } satisfies Pick<NormalizedServiceSignal, "jobStandardness" | "scopeClarity" | "remainingUncertainty">;
   const common = {
     summary: request.service,
     premiumPropertySignal,
     luxuryHardscapeSignal: sumSurfaceMap(detectedSurfaces) > 1800,
     commercialSignal,
-    aiConfidence: 62,
+    ...fallbackClarity,
+    aiConfidence: mapConfidenceClarityToBaseTier(request.service, fallbackClarity),
     consistencyScore: 64,
     aiConfidenceReasons: ["Fallback heuristic interpretation"],
     notes: ["Heuristic service signal generated because AI extraction was unavailable."],
@@ -3347,6 +3396,19 @@ function buildSignalPrompt(
     "AI interprets. Logic prices. Do not estimate or suggest any dollar amount.",
     "Questionnaire answers are the primary structured evidence. Use description, other-text answers, photos, satellite, and property context to refine and confirm, not to override recklessly.",
     "Prefer stable categorical outputs over creative wording. Use the canonical enums and stable subtype labels whenever possible.",
+    "Do not return a confidence tier directly. Instead, return structured clarity judgments only.",
+    "For each serviceSignals item, return these enum fields for confidence input: jobStandardness, scopeClarity, remainingUncertainty.",
+    "jobStandardness must be one of: standard, somewhat_unusual, unusual.",
+    "scopeClarity must be one of: clear, moderate, ambiguous.",
+    "remainingUncertainty must be one of: low, medium, high.",
+    "Base those judgments on job clarity, ambiguity, scope certainty, how standard vs unusual the request seems, and how much guessing is still required from structured evidence.",
+    "Do not mainly base those judgments on form completion, vague selections, photo count, or description length; the backend handles those adjustments deterministically.",
+    "A fully answered form is not automatically standard, clear, or low uncertainty.",
+    "When uncertain between two adjacent clarity labels, choose the more conservative one: somewhat_unusual over standard, moderate over clear, high over medium, and medium over low.",
+    "Treat exceptional clarity as rare: only label a job standard + clear + low when the request is plainly straightforward and very little guessing remains.",
+    "For Other, use the same fields but stay conservative. Only use standard + clear + low when the custom request is unusually specific and easy to interpret.",
+    "If the request is unusual, blended, custom, or could reasonably fit multiple interpretations, prefer somewhat_unusual or unusual, and prefer moderate or ambiguous clarity.",
+    "aiConfidenceReasons should briefly justify the clarity judgments in terms of clarity and ambiguity, not completion score.",
     "Some questionnaire answers may be arrays because a few approved questions support multi-select.",
     "Treat multi-select answers as multiple components or blended attributes, not as multiple full-size jobs by default.",
     "Return both shared top-level signals and a serviceSignals array with one object per requested service.",
@@ -3398,7 +3460,7 @@ function buildSignalPrompt(
         estimatedPoolSqft: -1,
         estimatedFixtureCount: -1,
         estimatedJunkCubicYards: -1,
-        internalConfidence: 72,
+        internalConfidence: 75,
         pricingDrivers: ["string"],
         estimatorNotes: ["string"],
         serviceSignals: [
@@ -3435,8 +3497,10 @@ function buildSignalPrompt(
             commercialSignal: false,
             customJobSignal: false,
             needsManualReview: false,
-            aiConfidence: 76,
-            aiConfidenceReasons: ["Driveway was explicitly selected.", "Photos show a moderate-size flat hardscape."],
+            jobStandardness: "standard",
+            scopeClarity: "moderate",
+            remainingUncertainty: "medium",
+            aiConfidenceReasons: ["The scope is understandable and fairly standard.", "Some quantity guessing still remains."],
             consistencyScore: 84,
             notes: ["Questionnaire and photo evidence agree on driveway cleaning scope."],
             summary: "Moderate driveway cleaning request.",

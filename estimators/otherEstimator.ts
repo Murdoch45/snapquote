@@ -1,5 +1,4 @@
 import {
-  clamp,
   finalizeEstimate,
   getAnswerByKeys,
   regionalMultiplier,
@@ -79,7 +78,6 @@ export function estimateOther(context: EstimatorContext) {
     customJob: true,
     needsManualReview: needsManualReview || true
   });
-  const reducedOtherConfidence = clamp(Math.round(confidenceTrace.finalScore * 0.5), 48, 92);
 
   return finalizeEstimate({
     service: context.request.service,
@@ -91,7 +89,7 @@ export function estimateOther(context: EstimatorContext) {
     conditionMultiplier: propertyMultiplier * accessMultiplier,
     regionalMultiplier: context.signals.regionMultiplier ?? regionalMultiplier(context.regionalModel),
     minimumJobPrice: 220,
-    internalConfidence: reducedOtherConfidence,
+    internalConfidence: confidenceTrace.finalScore,
     pricingDrivers: [
       "Fallback work-type table",
       "Target-family mapping",
