@@ -42,7 +42,7 @@ import {
 } from "@/estimators/shared";
 import { resolveRegion } from "@/lib/location/resolveRegion";
 import { getTravelAdjustmentPct } from "@/lib/ai/cost-models";
-import { getGoogleMapsApiKey, buildSatelliteStaticMapUrl } from "@/lib/maps";
+import { getGoogleMapsApiKey, buildSatelliteStaticMapUrl, haversineMiles } from "@/lib/maps";
 import { getPropertyData, type PropertyData } from "@/lib/property-data";
 import {
   OTHER_OUTDOOR_UNSUPPORTED_MESSAGE,
@@ -54,7 +54,7 @@ import {
   type ServiceQuestionAnswers
 } from "@/lib/serviceQuestions";
 import { SERVICE_OPTIONS } from "@/lib/services";
-import { SubscriptionRequiredError, requireActiveSubscription } from "@/lib/subscription";
+import { requireActiveSubscription } from "@/lib/subscription";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { LeadConfidence, ServiceCategory } from "@/lib/types";
 
@@ -4297,22 +4297,61 @@ export async function generateEstimateAsync(leadId: string) {
       return;
     }
 
+    const contractorLat = contractor.business_lat != null ? Number(contractor.business_lat) : null;
+    const contractorLng = contractor.business_lng != null ? Number(contractor.business_lng) : null;
+    const leadLat = lead.lat != null ? Number(lead.lat) : null;
+    const leadLng = lead.lng != null ? Number(lead.lng) : null;
+
+    const travelDistanceMiles =
+      lead.travel_distance_miles != null
+        ? Number(lead.travel_distance_miles)
+        : contractorLat != null &&
+            contractorLng != null &&
+            leadLat != null &&
+            leadLng != null
+          ? Number(
+              haversineMiles(
+                { lat: contractorLat, lng: contractorLng },
+                { lat: leadLat, lng: leadLng }
+              ).toFixed(1)
+            )
+          : null;
+
+    if (
+      lead.travel_distance_miles == null &&
+      (travelDistanceMiles !== null || contractorLat == null || contractorLng == null)
+    ) {
+      const { error: travelDistanceUpdateError } = await admin
+        .from("leads")
+        .update({ travel_distance_miles: travelDistanceMiles })
+        .eq("id", leadId)
+        .eq("org_id", lead.org_id);
+
+      if (travelDistanceUpdateError) {
+        console.warn("Failed to persist estimator travel distance.", {
+          leadId,
+          orgId: lead.org_id,
+          travelDistanceMiles,
+          error: travelDistanceUpdateError
+        });
+      }
+    }
+
     const estimate = await generateEstimate({
       businessName: contractor.business_name as string,
       services: ((lead.services as string[]) ?? []).map((service) => service),
       serviceQuestionAnswers: parsedServiceQuestionAnswers,
       address: lead.address_full as string,
       addressPlaceId: (lead.address_place_id as string | null) ?? null,
-      lat: lead.lat as number | null,
-      lng: lead.lng as number | null,
+      lat: leadLat,
+      lng: leadLng,
       description: lead.description as string | null,
       photoUrls: (photos ?? []).map((photo) => (photo.public_url as string) || "").filter(Boolean),
       parcelLotSizeSqft: lead.parcel_lot_size_sqft ? Number(lead.parcel_lot_size_sqft) : null,
       businessAddress: (contractor.business_address_full as string | null) ?? null,
-      businessLat: contractor.business_lat != null ? Number(contractor.business_lat) : null,
-      businessLng: contractor.business_lng != null ? Number(contractor.business_lng) : null,
-      travelDistanceMiles:
-        lead.travel_distance_miles != null ? Number(lead.travel_distance_miles) : null
+      businessLat: contractorLat,
+      businessLng: contractorLng,
+      travelDistanceMiles
     });
 
     console.log("Estimator AI path resolved:", {
@@ -4357,6 +4396,8 @@ export async function generateEstimateAsync(leadId: string) {
         ai_draft_message: estimate.message,
         ai_status: "ready",
         ai_generated_at: new Date().toISOString()
+        ,
+        travel_distance_miles: travelDistanceMiles
       })
       .eq("id", leadId)
       .eq("org_id", lead.org_id);
@@ -4365,11 +4406,12 @@ export async function generateEstimateAsync(leadId: string) {
       throw updateError;
     }
   } catch (error) {
-    if (error instanceof SubscriptionRequiredError) {
-      return;
-    }
-
-    console.error("AI estimate failed:", error);
+    const failureMessage = error instanceof Error ? error.message : "Unknown estimator failure.";
+    console.error("AI estimate failed:", {
+      leadId,
+      error: failureMessage,
+      cause: error
+    });
 
     const aiModeNote = (() => {
       try {
@@ -4378,7 +4420,6 @@ export async function generateEstimateAsync(leadId: string) {
         return `Estimator AI mode: invalid (${process.env.SNAPQUOTE_ESTIMATOR_AI_MODE ?? ""}).`;
       }
     })();
-    const failureMessage = error instanceof Error ? error.message : "Unknown estimator failure.";
     const failureSummary = summarizeEstimatorFailure(failureMessage);
     const failureNotes = buildEstimatorFailureNotes({
       mode: aiModeNote.replace(/^Estimator AI mode:\s*/, "").replace(/\.$/, ""),
