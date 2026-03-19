@@ -26,7 +26,7 @@ export async function requireAuth(): Promise<AuthContext> {
     .single();
 
   if (error || !membership) {
-    redirect("/signup?onboarding=1");
+    redirect("/onboarding");
   }
 
   return {

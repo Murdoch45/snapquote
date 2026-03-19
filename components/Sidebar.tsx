@@ -2,16 +2,26 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChart3, FileText, Home, Settings, Users, UserCircle2, Receipt } from "lucide-react";
+import {
+  BarChart3,
+  CreditCard,
+  FileText,
+  Home,
+  Receipt,
+  Settings,
+  UserCircle2,
+  Users
+} from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { href: "/app", label: "Dashboard", icon: Home },
+  { href: "/app", label: "Dashboard", icon: Home, exact: true },
   { href: "/app/leads", label: "Leads", icon: FileText },
   { href: "/app/quotes", label: "Quotes", icon: Receipt },
   { href: "/app/customers", label: "Customers", icon: UserCircle2 },
   { href: "/app/analytics", label: "Analytics", icon: BarChart3 },
+  { href: "/plan", label: "My Plan", icon: CreditCard, matchPaths: ["/plan", "/app/plan"] },
   { href: "/app/team", label: "Team", icon: Users },
   { href: "/app/settings", label: "Settings", icon: Settings }
 ];
@@ -31,7 +41,10 @@ export function Sidebar({ businessName }: { businessName: string }) {
       <nav className="flex gap-1 overflow-x-auto p-3 md:block md:space-y-1">
         {navItems.map((item) => {
           const Icon = item.icon;
-          const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+          const matchPaths = item.matchPaths ?? [item.href];
+          const active = matchPaths.some(
+            (path) => pathname === path || (!item.exact && pathname.startsWith(`${path}/`))
+          );
           return (
             <Link
               key={item.href}

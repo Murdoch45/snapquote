@@ -63,21 +63,21 @@ export function getStripePlanConfig(plan: StripePlanKey): StripePlanConfig {
       key: "solo",
       orgPlan: "SOLO",
       label: "Solo",
-      monthlyPrice: "$19.99",
+      monthlyPrice: "Free",
       priceId: env.STRIPE_PRICE_SOLO
     },
     team: {
       key: "team",
       orgPlan: "TEAM",
       label: "Team",
-      monthlyPrice: "$39.99",
+      monthlyPrice: "$19",
       priceId: env.STRIPE_PRICE_TEAM
     },
     business: {
       key: "business",
       orgPlan: "BUSINESS",
       label: "Business",
-      monthlyPrice: "$79.99",
+      monthlyPrice: "$39",
       priceId: env.STRIPE_PRICE_BUSINESS
     }
   };
