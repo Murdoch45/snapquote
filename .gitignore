@@ -24,3 +24,6 @@
 /coverage
 
 .vercel
+metabase.jar
+metabase.db.mv.db
+metabase.db.trace.db
