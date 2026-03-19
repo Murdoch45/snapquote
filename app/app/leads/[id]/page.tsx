@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireAuth } from "@/lib/auth/requireAuth";
 import { DEFAULT_QUOTE_SMS_TEMPLATE, sanitizeQuoteTemplate } from "@/lib/quote-template";
 import { formatServiceQuestionAnswers, parseServiceQuestionBundles } from "@/lib/serviceQuestions";
+import { getOrganizationSubscriptionStatus } from "@/lib/subscription";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getMonthlyUsage } from "@/lib/usage";
 import { toCurrency, toRelativeMinutes } from "@/lib/utils";
@@ -17,11 +18,24 @@ type Props = {
   params: Promise<{ id: string }>;
 };
 
+function getVisibleAddress(address: string): string {
+  const parts = address.split(",").map((part) => part.trim()).filter(Boolean);
+  if (parts.length <= 1) return "Address hidden";
+  return parts.slice(1).join(", ");
+}
+
+function getMaskedValue(value: string | null | undefined, fallback: string): string {
+  return value ? fallback : `No ${fallback.toLowerCase()}`;
+}
+
 export default async function LeadDetailPage({ params }: Props) {
   const { id } = await params;
   const auth = await requireAuth();
   const supabase = await createServerSupabaseClient();
-  const usage = await getMonthlyUsage(auth.orgId);
+  const [usage, subscription] = await Promise.all([
+    getMonthlyUsage(auth.orgId),
+    getOrganizationSubscriptionStatus(auth.orgId)
+  ]);
 
   const [{ data: lead }, { data: photos }, { data: existingQuote }, { data: profile }] = await Promise.all([
     supabase
@@ -45,6 +59,10 @@ export default async function LeadDetailPage({ params }: Props) {
 
   if (!lead) notFound();
 
+  const isLocked =
+    (!subscription.active && usage.plan !== "SOLO") ||
+    (usage.plan === "SOLO" && usage.quotesSentCount >= 20);
+
   const requestedService = ((lead.services as string[] | null) ?? [])[0] ?? "unknown";
   const aiServiceEstimates = Array.isArray(lead.ai_service_estimates)
     ? (lead.ai_service_estimates as Array<{ scopeSummary?: unknown }>)
@@ -61,12 +79,20 @@ export default async function LeadDetailPage({ params }: Props) {
       answers: formatServiceQuestionAnswers(bundle.service, bundle.answers)
     }))
     .filter((bundle) => bundle.answers.length > 0);
+  const displayAddress = isLocked ? getVisibleAddress(lead.address_full as string) : (lead.address_full as string);
+  const displayCustomerName = isLocked ? "Customer hidden" : (lead.customer_name as string);
+  const displayCustomerPhone = isLocked
+    ? getMaskedValue(lead.customer_phone as string | null, "Phone hidden")
+    : ((lead.customer_phone as string | null) || "No phone");
+  const displayCustomerEmail = isLocked
+    ? getMaskedValue(lead.customer_email as string | null, "Email hidden")
+    : ((lead.customer_email as string | null) || "No email");
 
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold text-gray-900">{lead.address_full}</h1>
+          <h1 className="text-xl font-semibold text-gray-900">{displayAddress}</h1>
           <p className="text-sm text-gray-500">
             Submitted {toRelativeMinutes(lead.submitted_at)} ({format(new Date(lead.submitted_at), "PPpp")})
           </p>
@@ -82,9 +108,9 @@ export default async function LeadDetailPage({ params }: Props) {
           <CardContent className="space-y-4">
             <section>
               <h3 className="text-sm font-semibold text-gray-800">Customer</h3>
-              <p className="text-sm text-gray-700">{lead.customer_name}</p>
-              <p className="text-sm text-gray-600">{lead.customer_phone || "No phone"}</p>
-              <p className="text-sm text-gray-600">{lead.customer_email || "No email"}</p>
+              <p className={`text-sm text-gray-700 ${isLocked ? "blur-sm select-none" : ""}`}>{displayCustomerName}</p>
+              <p className={`text-sm text-gray-600 ${isLocked ? "blur-sm select-none" : ""}`}>{displayCustomerPhone}</p>
+              <p className={`text-sm text-gray-600 ${isLocked ? "blur-sm select-none" : ""}`}>{displayCustomerEmail}</p>
             </section>
 
             <section>
@@ -210,9 +236,12 @@ export default async function LeadDetailPage({ params }: Props) {
                   leadId={lead.id as string}
                   snapQuote={Number(lead.ai_suggested_price ?? 900)}
                   initialMessage={sanitizeQuoteTemplate((profile?.quote_sms_template as string | null) ?? DEFAULT_QUOTE_SMS_TEMPLATE)}
+                  customerName={(lead.customer_name as string | null) ?? null}
                   customerPhone={(lead.customer_phone as string | null) ?? null}
                   customerEmail={(lead.customer_email as string | null) ?? null}
+                  customerAddress={(lead.address_full as string | null) ?? null}
                   canSend={usage.canSend}
+                  isLocked={isLocked}
                 />
               )}
             </CardContent>

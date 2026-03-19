@@ -4,7 +4,6 @@ import { generateEstimateAsync } from "@/lib/ai/estimate";
 import { haversineMiles } from "@/lib/maps";
 import { notifyContractor, notifyCustomer } from "@/lib/notify";
 import { normalizeServiceTypes } from "@/lib/services";
-import { SubscriptionRequiredError, requireActiveSubscription } from "@/lib/subscription";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAppUrl } from "@/lib/utils";
 import { leadSubmitSchema, parseLeadSubmitQuestionAnswers } from "@/lib/validations";
@@ -86,7 +85,6 @@ export async function POST(request: Request) {
     });
 
     const orgId = contractor.org_id as string;
-    await requireActiveSubscription(orgId);
 
     const travelDistanceMiles =
       !contractor.travel_pricing_disabled &&
@@ -220,16 +218,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, leadId, received: true });
   } catch (error) {
-    if (error instanceof SubscriptionRequiredError) {
-      return NextResponse.json(
-        {
-          code: error.code,
-          error: "Your subscription is inactive. Please update billing to continue."
-        },
-        { status: error.statusCode }
-      );
-    }
-
     console.error("lead-submit failed:", error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Lead submission failed." },

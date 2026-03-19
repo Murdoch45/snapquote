@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -13,18 +14,31 @@ type Props = {
   leadId: string;
   snapQuote: number;
   initialMessage: string;
+  customerName: string | null;
   customerPhone: string | null;
   customerEmail: string | null;
+  customerAddress: string | null;
   canSend: boolean;
+  isLocked: boolean;
 };
+
+function getVisibleAddress(address: string | null): string {
+  if (!address) return "No address";
+  const parts = address.split(",").map((part) => part.trim()).filter(Boolean);
+  if (parts.length <= 1) return "Address hidden";
+  return parts.slice(1).join(", ");
+}
 
 export function QuoteComposer({
   leadId,
   snapQuote,
   initialMessage,
+  customerName,
   customerPhone,
   customerEmail,
-  canSend
+  customerAddress,
+  canSend,
+  isLocked
 }: Props) {
   const [price, setPrice] = useState(snapQuote);
   const [message, setMessage] = useState(initialMessage);
@@ -46,6 +60,11 @@ export function QuoteComposer({
   };
 
   const onSend = async () => {
+    if (isLocked) {
+      toast.error("Upgrade your plan to contact this customer and send quotes.");
+      return;
+    }
+
     if (!sendEmail && !sendText) {
       toast.error("Select email, text, or both before sending.");
       return;
@@ -88,6 +107,19 @@ export function QuoteComposer({
   return (
     <>
       <div className="space-y-4">
+        <div className="space-y-2 rounded-lg border border-gray-200 bg-gray-50 p-4">
+          <p className="text-sm font-semibold text-gray-900">Customer Contact</p>
+          <div className={`space-y-1 text-sm ${isLocked ? "select-none" : ""}`}>
+            <div className={isLocked ? "blur-sm" : ""}>
+              <p className="text-gray-700">{customerName || "No name"}</p>
+              <p className="text-gray-600">{customerPhone || "No phone"}</p>
+              <p className="text-gray-600">{customerEmail || "No email"}</p>
+            </div>
+            <p className="text-gray-600">
+              {isLocked ? getVisibleAddress(customerAddress) : (customerAddress || "No address")}
+            </p>
+          </div>
+        </div>
         <PriceSlider
           snapQuote={snapQuote}
           value={price}
@@ -121,9 +153,14 @@ export function QuoteComposer({
           </label>
         </div>
         <div className="flex flex-wrap gap-3">
-          <Button onClick={onSend} disabled={loading || !canSend || sent}>
+          <Button onClick={onSend} disabled={loading || !canSend || sent || isLocked}>
             {sent ? "Quote Sent" : loading ? "Sending..." : "Send Quote"}
           </Button>
+          {isLocked ? (
+            <Button asChild variant="outline">
+              <Link href="/pricing">Upgrade Plan</Link>
+            </Button>
+          ) : null}
           <Button
             type="button"
             variant="outline"
@@ -148,6 +185,11 @@ export function QuoteComposer({
         {!canSend && (
           <p className="text-sm text-red-600">
             Quote limit exceeded. Upgrade to continue sending this month.
+          </p>
+        )}
+        {isLocked && (
+          <p className="text-sm text-amber-700">
+            Upgrade your plan to contact this customer and send quotes.
           </p>
         )}
         {sent && (
