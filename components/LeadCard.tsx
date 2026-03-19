@@ -22,6 +22,12 @@ function getVisibleAddress(address: string): string {
 }
 
 export function LeadCard({ lead, isLocked }: LeadCardProps) {
+  console.log("LeadCard rendered:", {
+    isLocked,
+    addressFull: lead.address_full,
+    visibleAddress: getVisibleAddress(lead.address_full)
+  });
+
   return (
     <Card className="hover:border-blue-300">
       <CardContent className="space-y-3 p-4">
