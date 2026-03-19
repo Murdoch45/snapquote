@@ -11,6 +11,7 @@ type Lead = {
   submitted_at: string;
   ai_suggested_price: number | null;
   photo_count?: number;
+  isLocked: boolean;
 };
 
 export function LeadsPageClient({ orgId, leads }: { orgId: string; leads: Lead[] }) {

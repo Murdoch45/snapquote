@@ -5,11 +5,11 @@ import { LeadPropertyPreview } from "@/components/LeadPropertyPreview";
 import { ConfidenceMeter } from "@/components/ConfidenceMeter";
 import { QuoteComposer } from "@/components/QuoteComposer";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireAuth } from "@/lib/auth/requireAuth";
 import { DEFAULT_QUOTE_SMS_TEMPLATE, sanitizeQuoteTemplate } from "@/lib/quote-template";
 import { formatServiceQuestionAnswers, parseServiceQuestionBundles } from "@/lib/serviceQuestions";
-import { getOrganizationSubscriptionStatus } from "@/lib/subscription";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getMonthlyUsage } from "@/lib/usage";
 import { toCurrency, toRelativeMinutes } from "@/lib/utils";
@@ -24,18 +24,11 @@ function getVisibleAddress(address: string): string {
   return parts.slice(1).join(", ");
 }
 
-function getMaskedValue(value: string | null | undefined, fallback: string): string {
-  return value ? fallback : `No ${fallback.toLowerCase()}`;
-}
-
 export default async function LeadDetailPage({ params }: Props) {
   const { id } = await params;
   const auth = await requireAuth();
   const supabase = await createServerSupabaseClient();
-  const [usage, subscription] = await Promise.all([
-    getMonthlyUsage(auth.orgId),
-    getOrganizationSubscriptionStatus(auth.orgId)
-  ]);
+  const usage = await getMonthlyUsage(auth.orgId);
 
   const [{ data: lead }, { data: photos }, { data: existingQuote }, { data: profile }] = await Promise.all([
     supabase
@@ -59,9 +52,7 @@ export default async function LeadDetailPage({ params }: Props) {
 
   if (!lead) notFound();
 
-  const isLocked =
-    (!subscription.active && usage.plan !== "SOLO") ||
-    (usage.plan === "SOLO" && usage.quotesSentCount >= 20);
+  const isLocked = !usage.canSend;
 
   const requestedService = ((lead.services as string[] | null) ?? [])[0] ?? "unknown";
   const aiServiceEstimates = Array.isArray(lead.ai_service_estimates)
@@ -80,13 +71,6 @@ export default async function LeadDetailPage({ params }: Props) {
     }))
     .filter((bundle) => bundle.answers.length > 0);
   const displayAddress = isLocked ? getVisibleAddress(lead.address_full as string) : (lead.address_full as string);
-  const displayCustomerName = isLocked ? "Customer hidden" : (lead.customer_name as string);
-  const displayCustomerPhone = isLocked
-    ? getMaskedValue(lead.customer_phone as string | null, "Phone hidden")
-    : ((lead.customer_phone as string | null) || "No phone");
-  const displayCustomerEmail = isLocked
-    ? getMaskedValue(lead.customer_email as string | null, "Email hidden")
-    : ((lead.customer_email as string | null) || "No email");
 
   return (
     <div className="space-y-4">
@@ -106,13 +90,6 @@ export default async function LeadDetailPage({ params }: Props) {
             <CardTitle>Lead Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <section>
-              <h3 className="text-sm font-semibold text-gray-800">Customer</h3>
-              <p className={`text-sm text-gray-700 ${isLocked ? "blur-sm select-none" : ""}`}>{displayCustomerName}</p>
-              <p className={`text-sm text-gray-600 ${isLocked ? "blur-sm select-none" : ""}`}>{displayCustomerPhone}</p>
-              <p className={`text-sm text-gray-600 ${isLocked ? "blur-sm select-none" : ""}`}>{displayCustomerEmail}</p>
-            </section>
-
             <section>
               <h3 className="text-sm font-semibold text-gray-800">Services</h3>
               <div className="mt-1 flex flex-wrap gap-1">
@@ -159,11 +136,25 @@ export default async function LeadDetailPage({ params }: Props) {
                   ? `Approx. travel distance from business: ${Number(lead.travel_distance_miles).toFixed(1)} miles`
                   : "Travel distance not included for this lead."}
               </p>
-              <LeadPropertyPreview
-                address={lead.address_full as string}
-                lat={lead.lat as number | null}
-                lng={lead.lng as number | null}
-              />
+              {isLocked ? (
+                <div className="mt-3 rounded-lg border border-dashed border-gray-200 bg-gray-50 p-6 text-center">
+                  <div className="rounded-lg bg-gray-200/80 px-4 py-10 text-sm text-gray-500 blur-sm select-none">
+                    Property details hidden
+                  </div>
+                  <p className="mt-4 text-sm text-gray-600">Upgrade your plan to view property details.</p>
+                  <Button asChild variant="outline" className="mt-4">
+                    <Link href="/pricing">Upgrade Plan</Link>
+                  </Button>
+                </div>
+              ) : (
+                <div className="[&>div>p:first-child]:hidden">
+                  <LeadPropertyPreview
+                    address={lead.address_full as string}
+                    lat={lead.lat as number | null}
+                    lng={lead.lng as number | null}
+                  />
+                </div>
+              )}
             </section>
 
             <section>

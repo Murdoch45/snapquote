@@ -22,11 +22,26 @@ type Props = {
   isLocked: boolean;
 };
 
-function getVisibleAddress(address: string | null): string {
-  if (!address) return "No address";
+function getAddressParts(address: string | null): { street: string; locality: string } {
+  if (!address) {
+    return {
+      street: "No address",
+      locality: "No address"
+    };
+  }
+
   const parts = address.split(",").map((part) => part.trim()).filter(Boolean);
-  if (parts.length <= 1) return "Address hidden";
-  return parts.slice(1).join(", ");
+  if (parts.length <= 1) {
+    return {
+      street: address,
+      locality: "Address hidden"
+    };
+  }
+
+  return {
+    street: parts[0],
+    locality: parts.slice(1).join(", ")
+  };
 }
 
 export function QuoteComposer({
@@ -49,6 +64,7 @@ export function QuoteComposer({
   const [quoteLink, setQuoteLink] = useState<string | null>(null);
   const [copiedMessage, setCopiedMessage] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
+  const addressParts = getAddressParts(customerAddress);
 
   const copyText = async (value: string, successLabel: string) => {
     try {
@@ -114,9 +130,10 @@ export function QuoteComposer({
               <p className="text-gray-700">{customerName || "No name"}</p>
               <p className="text-gray-600">{customerPhone || "No phone"}</p>
               <p className="text-gray-600">{customerEmail || "No email"}</p>
+              <p className="text-gray-600">{isLocked ? addressParts.street : null}</p>
             </div>
             <p className="text-gray-600">
-              {isLocked ? getVisibleAddress(customerAddress) : (customerAddress || "No address")}
+              {isLocked ? addressParts.locality : (customerAddress || "No address")}
             </p>
           </div>
         </div>

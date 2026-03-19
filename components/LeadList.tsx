@@ -7,6 +7,7 @@ type Lead = {
   submitted_at: string;
   ai_suggested_price: number | null;
   photo_count?: number;
+  isLocked: boolean;
 };
 
 export function LeadList({ leads }: { leads: Lead[] }) {
@@ -20,8 +21,8 @@ export function LeadList({ leads }: { leads: Lead[] }) {
   return (
     <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
       {leads.map((lead) => (
-        <LeadCard key={lead.id} lead={lead} />
+        <LeadCard key={lead.id} lead={lead} isLocked={lead.isLocked} />
       ))}
-    </div>
-  );
+  </div>
+);
 }

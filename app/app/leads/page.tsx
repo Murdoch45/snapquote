@@ -1,10 +1,13 @@
 import { LeadsPageClient } from "@/components/LeadsPageClient";
 import { requireAuth } from "@/lib/auth/requireAuth";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { getMonthlyUsage } from "@/lib/usage";
 
 export default async function LeadsPage() {
   const auth = await requireAuth();
   const supabase = await createServerSupabaseClient();
+  const usage = await getMonthlyUsage(auth.orgId);
+  const isLocked = !usage.canSend;
 
   const [{ data: leads }, { data: photos }] = await Promise.all([
     supabase
@@ -23,7 +26,8 @@ export default async function LeadsPage() {
 
   const leadCards = (leads ?? []).map((lead) => ({
     ...lead,
-    photo_count: photoCountByLead[lead.id as string] ?? 0
+    photo_count: photoCountByLead[lead.id as string] ?? 0,
+    isLocked
   }));
 
   return (
@@ -42,6 +46,7 @@ export default async function LeadsPage() {
             submitted_at: string;
             ai_suggested_price: number | null;
             photo_count?: number;
+            isLocked: boolean;
           }[]
         }
       />
