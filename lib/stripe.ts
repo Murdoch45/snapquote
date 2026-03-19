@@ -7,7 +7,6 @@ enforceServerOnly();
 
 const stripeCoreEnvSchema = z.object({
   STRIPE_SECRET_KEY: z.string().min(1),
-  STRIPE_PRICE_SOLO: z.string().min(1),
   STRIPE_PRICE_TEAM: z.string().min(1),
   STRIPE_PRICE_BUSINESS: z.string().min(1),
   STRIPE_WEBHOOK_SECRET: z.string().min(1).optional()
@@ -17,7 +16,7 @@ const stripeCheckoutEnvSchema = stripeCoreEnvSchema.extend({
   NEXT_PUBLIC_APP_URL: z.string().url()
 });
 
-export type StripePlanKey = "solo" | "team" | "business";
+export type StripePlanKey = "team" | "business";
 
 type StripePlanConfig = {
   key: StripePlanKey;
@@ -59,13 +58,6 @@ export function getStripeWebhookSecret(): string {
 export function getStripePlanConfig(plan: StripePlanKey): StripePlanConfig {
   const env = getStripeEnv();
   const plans: Record<StripePlanKey, StripePlanConfig> = {
-    solo: {
-      key: "solo",
-      orgPlan: "SOLO",
-      label: "Solo",
-      monthlyPrice: "Free",
-      priceId: env.STRIPE_PRICE_SOLO
-    },
     team: {
       key: "team",
       orgPlan: "TEAM",
@@ -88,7 +80,7 @@ export function getStripePlanConfig(plan: StripePlanKey): StripePlanConfig {
 export function getPlanFromPriceId(priceId: string | null | undefined): OrgPlan | null {
   if (!priceId) return null;
 
-  const plans: StripePlanKey[] = ["solo", "team", "business"];
+  const plans: StripePlanKey[] = ["team", "business"];
   for (const key of plans) {
     const config = getStripePlanConfig(key);
     if (config.priceId === priceId) return config.orgPlan;
