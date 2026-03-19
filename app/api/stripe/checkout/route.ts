@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import Stripe from "stripe";
 import { z } from "zod";
 import { requireMemberForApi } from "@/lib/auth/requireRole";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -27,7 +28,8 @@ export async function POST(request: Request) {
       {
         data: { user }
       },
-      { data: existingSubscription }
+      { data: existingSubscription },
+      { data: organization }
     ] = await Promise.all([
       supabase.auth.getUser(),
       admin
@@ -36,11 +38,29 @@ export async function POST(request: Request) {
         .eq("user_id", auth.userId)
         .order("created_at", { ascending: false })
         .limit(1)
-        .maybeSingle()
+        .maybeSingle(),
+      admin
+        .from("organizations")
+        .select("has_used_trial")
+        .eq("id", auth.orgId)
+        .single()
     ]);
 
     if (!user?.email) {
       return NextResponse.json({ error: "Authenticated user email is required." }, { status: 400 });
+    }
+
+    const hasUsedTrial = organization?.has_used_trial ?? false;
+    const subscriptionData: Stripe.Checkout.SessionCreateParams.SubscriptionData = {
+      metadata: {
+        userId: auth.userId,
+        orgId: auth.orgId,
+        plan: planConfig.orgPlan
+      }
+    };
+
+    if (!hasUsedTrial) {
+      subscriptionData.trial_period_days = 14;
     }
 
     const session = await stripe.checkout.sessions.create({
@@ -61,14 +81,7 @@ export async function POST(request: Request) {
         orgId: auth.orgId,
         plan: planConfig.orgPlan
       },
-      subscription_data: {
-        trial_period_days: 14,
-        metadata: {
-          userId: auth.userId,
-          orgId: auth.orgId,
-          plan: planConfig.orgPlan
-        }
-      }
+      subscription_data: subscriptionData
     });
 
     if (!session.url) {
