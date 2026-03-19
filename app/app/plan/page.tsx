@@ -90,7 +90,7 @@ export default async function PlanPage() {
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
             <Button asChild className="w-full sm:w-auto">
-              <Link href="/pricing">Upgrade Plan</Link>
+              <Link href="/pricing">Change Plan</Link>
             </Button>
             <ManageBillingButton />
           </div>

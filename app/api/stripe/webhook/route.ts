@@ -59,6 +59,15 @@ async function setOrganizationPlan(orgId: string, plan: OrgPlan) {
   if (error) throw error;
 }
 
+async function markOrganizationTrialUsed(orgId: string) {
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from("organizations")
+    .update({ has_used_trial: true })
+    .eq("id", orgId);
+  if (error) throw error;
+}
+
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const userId = session.metadata?.userId;
   const orgId = session.metadata?.orgId;
@@ -79,6 +88,13 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     plan,
     status: "active"
   });
+
+  const stripe = getStripe();
+  const subscription = await stripe.subscriptions.retrieve(stripeSubscriptionId);
+
+  if (subscription.status === "trialing" || subscription.trial_end) {
+    await markOrganizationTrialUsed(orgId);
+  }
 
   await setOrganizationPlan(orgId, plan);
 }
@@ -103,7 +119,7 @@ async function handleSubscriptionChanged(subscription: Stripe.Subscription) {
   });
 
   const orgId = metadataOrgId || (await getOrgIdForUser(userId));
-  if (orgId && (subscription.status === "active" || subscription.status === "trialing")) {
+  if (orgId) {
     await setOrganizationPlan(orgId, plan);
   }
 }
@@ -178,6 +194,7 @@ export async function POST(request: Request) {
         await handleCheckoutCompleted(event.data.object as Stripe.Checkout.Session);
         break;
       case "customer.subscription.created":
+      case "customer.subscription.updated":
         await handleSubscriptionChanged(event.data.object as Stripe.Subscription);
         break;
       case "invoice.payment_succeeded":

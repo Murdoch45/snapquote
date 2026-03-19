@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -46,6 +45,7 @@ type PricingPlansProps = {
 
 export function PricingPlans({ currentPlan, hasUsedTrial }: PricingPlansProps) {
   const [loadingPlan, setLoadingPlan] = useState<PlanKey | null>(null);
+  const [loadingPortal, setLoadingPortal] = useState(false);
 
   const handleUpgrade = async (planKey: Exclude<PlanKey, "solo">) => {
     setLoadingPlan(planKey);
@@ -71,26 +71,30 @@ export function PricingPlans({ currentPlan, hasUsedTrial }: PricingPlansProps) {
     }
   };
 
-  const getButtonState = (planKey: PlanKey) => {
-    const isCurrentPlan = planKey === currentPlan;
+  const handlePortal = async () => {
+    setLoadingPortal(true);
 
-    if (planKey === "solo") {
-      return {
-        label: isCurrentPlan ? "Current Plan" : "Get Started Free",
-        disabled: isCurrentPlan
-      };
+    try {
+      const response = await fetch("/api/stripe/customer-portal", {
+        method: "POST"
+      });
+
+      const json = (await response.json()) as { error?: string; url?: string };
+      if (!response.ok || !json.url) {
+        throw new Error(json.error || "Unable to open billing portal.");
+      }
+
+      window.location.href = json.url;
+    } catch (error) {
+      console.error("pricing portal failed:", error);
+      setLoadingPortal(false);
     }
-
-    return {
-      label: hasUsedTrial ? "Upgrade" : "Start Free Trial",
-      disabled: false
-    };
   };
 
   return (
     <section className="grid gap-6 lg:grid-cols-3">
       {plans.map((plan) => {
-        const buttonState = getButtonState(plan.key);
+        const isCurrentPlan = plan.key === currentPlan;
         const cardClassName = `rounded-3xl border p-6 shadow-[0_20px_50px_-30px_rgba(15,23,42,0.45)] ${
           plan.featured
             ? "border-cyan-300 bg-slate-950 text-white"
@@ -135,14 +139,10 @@ export function PricingPlans({ currentPlan, hasUsedTrial }: PricingPlansProps) {
                 <Button
                   className={buttonClassName}
                   variant={plan.featured ? "default" : "outline"}
-                  disabled={buttonState.disabled}
-                  asChild={!buttonState.disabled}
+                  disabled={isCurrentPlan || loadingPortal}
+                  onClick={isCurrentPlan ? undefined : () => void handlePortal()}
                 >
-                  {!buttonState.disabled ? (
-                    <Link href="/signup">{buttonState.label}</Link>
-                  ) : (
-                    <>{buttonState.label}</>
-                  )}
+                  {isCurrentPlan ? "Current Plan" : loadingPortal ? "Loading..." : "Choose Plan"}
                 </Button>
               </div>
             </article>
@@ -150,6 +150,11 @@ export function PricingPlans({ currentPlan, hasUsedTrial }: PricingPlansProps) {
         }
 
         const paidPlanKey: Exclude<PlanKey, "solo"> = plan.key;
+        const paidButtonLabel = isCurrentPlan
+          ? "Current Plan"
+          : hasUsedTrial
+            ? "Choose Plan"
+            : "Start Free Trial";
 
         return (
           <article key={plan.key} className={cardClassName}>
@@ -187,10 +192,10 @@ export function PricingPlans({ currentPlan, hasUsedTrial }: PricingPlansProps) {
               <Button
                 className={buttonClassName}
                 variant={plan.featured ? "default" : "outline"}
-                disabled={loadingPlan === plan.key}
+                disabled={isCurrentPlan || loadingPlan === plan.key}
                 onClick={() => void handleUpgrade(paidPlanKey)}
               >
-                {loadingPlan === plan.key ? "Loading..." : buttonState.label}
+                {loadingPlan === plan.key ? "Loading..." : paidButtonLabel}
               </Button>
             </div>
           </article>
