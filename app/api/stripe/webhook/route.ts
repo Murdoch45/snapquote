@@ -31,6 +31,19 @@ async function getOrgIdForUser(userId: string): Promise<string | null> {
   return (membership?.org_id as string | undefined) ?? null;
 }
 
+async function getUserIdForStripeCustomer(stripeCustomerId: string): Promise<string | null> {
+  const admin = createAdminClient();
+  const { data: record } = await admin
+    .from("subscriptions")
+    .select("user_id")
+    .eq("stripe_customer_id", stripeCustomerId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  return (record?.user_id as string | undefined) ?? null;
+}
+
 async function saveSubscriptionRecord(args: {
   userId: string;
   stripeCustomerId: string;
@@ -100,14 +113,23 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 }
 
 async function handleSubscriptionChanged(subscription: Stripe.Subscription) {
-  const userId = subscription.metadata.userId;
+  const metadataUserId = subscription.metadata.userId;
   const metadataOrgId = subscription.metadata.orgId;
   const stripeCustomerId =
     typeof subscription.customer === "string" ? subscription.customer : subscription.customer.id;
   const plan = getSubscriptionPlan(subscription);
 
-  if (!userId || !stripeCustomerId || !plan) {
-    throw new Error("Subscription metadata is incomplete.");
+  if (!stripeCustomerId || !plan) {
+    throw new Error("Subscription update is missing required customer or plan data.");
+  }
+
+  const userId = metadataUserId || (await getUserIdForStripeCustomer(stripeCustomerId));
+  if (!userId) {
+    console.warn("Subscription update skipped: unable to resolve user for customer.", {
+      subscriptionId: subscription.id,
+      stripeCustomerId
+    });
+    return;
   }
 
   await saveSubscriptionRecord({
@@ -119,9 +141,16 @@ async function handleSubscriptionChanged(subscription: Stripe.Subscription) {
   });
 
   const orgId = metadataOrgId || (await getOrgIdForUser(userId));
-  if (orgId) {
-    await setOrganizationPlan(orgId, plan);
+  if (!orgId) {
+    console.warn("Subscription update skipped: unable to resolve organization for user.", {
+      subscriptionId: subscription.id,
+      userId,
+      stripeCustomerId
+    });
+    return;
   }
+
+  await setOrganizationPlan(orgId, plan);
 }
 
 async function handleInvoicePaid(invoice: Stripe.Invoice) {
