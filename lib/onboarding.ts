@@ -172,6 +172,7 @@ export async function ensureUserHasOrganization(opts: {
     business_address_place_id: opts.placeId,
     business_lat: opts.latitude,
     business_lng: opts.longitude,
+    mobile_contractor: opts.mobileContractor,
     travel_pricing_disabled: opts.mobileContractor,
     notification_lead_email: Boolean(opts.email)
   };
@@ -185,13 +186,17 @@ export async function ensureUserHasOrganization(opts: {
     throw new Error(profileError.message);
   }
 
-  const { error: updateOrgError } = await admin
-    .from("organizations")
-    .update({ name: opts.businessName })
-    .eq("id", orgId);
-  if (updateOrgError) {
-    console.error("ONBOARDING ERROR: organization update failed", updateOrgError);
-    throw new Error(updateOrgError.message);
+  try {
+    const { error: updateOrgError } = await admin
+      .from("organizations")
+      .update({ name: opts.businessName })
+      .eq("id", orgId);
+
+    if (updateOrgError) {
+      console.warn("ONBOARDING WARNING: organization update failed", updateOrgError);
+    }
+  } catch (error) {
+    console.warn("ONBOARDING WARNING: organization update threw", error);
   }
 
   return { orgId, slug };
