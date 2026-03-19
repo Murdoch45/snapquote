@@ -16,7 +16,17 @@ function getSubscriptionPlan(subscription: Stripe.Subscription): OrgPlan | null 
   const metadataPlan = normalizePlan(subscription.metadata.plan);
   if (metadataPlan) return metadataPlan;
   const firstPriceId = subscription.items.data[0]?.price?.id;
-  return getPlanFromPriceId(firstPriceId);
+  const pricePlan = getPlanFromPriceId(firstPriceId);
+
+  if (!pricePlan) {
+    console.warn("Subscription plan could not be resolved.", {
+      subscriptionId: subscription.id,
+      firstPriceId: firstPriceId ?? null
+    });
+    return null;
+  }
+
+  return pricePlan;
 }
 
 async function getOrgIdForUser(userId: string): Promise<string | null> {
@@ -91,7 +101,15 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     typeof session.subscription === "string" ? session.subscription : session.subscription?.id;
 
   if (!userId || !orgId || !plan || !stripeCustomerId || !stripeSubscriptionId) {
-    throw new Error("Checkout session metadata is incomplete.");
+    console.warn("Checkout session skipped: incomplete metadata.", {
+      sessionId: session.id,
+      userId: userId ?? null,
+      orgId: orgId ?? null,
+      plan: plan ?? null,
+      stripeCustomerId: stripeCustomerId ?? null,
+      stripeSubscriptionId: stripeSubscriptionId ?? null
+    });
+    return;
   }
 
   await saveSubscriptionRecord({
@@ -103,7 +121,17 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   });
 
   const stripe = getStripe();
-  const subscription = await stripe.subscriptions.retrieve(stripeSubscriptionId);
+  let subscription: Stripe.Subscription;
+  try {
+    subscription = await stripe.subscriptions.retrieve(stripeSubscriptionId);
+  } catch (error) {
+    console.warn("Checkout session skipped: unable to retrieve subscription.", {
+      sessionId: session.id,
+      stripeSubscriptionId,
+      error
+    });
+    return;
+  }
 
   if (subscription.status === "trialing" || subscription.trial_end) {
     await markOrganizationTrialUsed(orgId);
@@ -120,7 +148,11 @@ async function handleSubscriptionChanged(subscription: Stripe.Subscription) {
   const plan = getSubscriptionPlan(subscription);
 
   if (!stripeCustomerId || !plan) {
-    throw new Error("Subscription update is missing required customer or plan data.");
+    console.warn("Subscription update skipped: missing customer or unresolved plan.", {
+      subscriptionId: subscription.id,
+      stripeCustomerId: stripeCustomerId ?? null
+    });
+    return;
   }
 
   const userId = metadataUserId || (await getUserIdForStripeCustomer(stripeCustomerId));
@@ -159,10 +191,23 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
   const subscriptionId =
     typeof subscriptionRef === "string" ? subscriptionRef : subscriptionRef?.id;
 
-  if (!subscriptionId) return;
+  if (!subscriptionId) {
+    console.warn("Invoice payment skipped: missing subscription reference.", {
+      invoiceId: invoice.id
+    });
+    return;
+  }
 
-  const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-  await handleSubscriptionChanged(subscription);
+  try {
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+    await handleSubscriptionChanged(subscription);
+  } catch (error) {
+    console.warn("Invoice payment skipped: unable to retrieve subscription.", {
+      invoiceId: invoice.id,
+      subscriptionId,
+      error
+    });
+  }
 }
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
@@ -179,7 +224,12 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   const plan = getSubscriptionPlan(subscription) || "SOLO";
 
   if (!userId || !stripeCustomerId) {
-    throw new Error("Deleted subscription metadata is incomplete.");
+    console.warn("Subscription deletion skipped: unable to resolve user or customer.", {
+      subscriptionId: subscription.id,
+      userId: userId ?? null,
+      stripeCustomerId: stripeCustomerId ?? null
+    });
+    return;
   }
 
   await saveSubscriptionRecord({
@@ -191,9 +241,16 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   });
 
   const orgId = subscription.metadata.orgId || (await getOrgIdForUser(userId));
-  if (orgId) {
-    await setOrganizationPlan(orgId, "SOLO");
+  if (!orgId) {
+    console.warn("Subscription deletion skipped: unable to resolve organization.", {
+      subscriptionId: subscription.id,
+      userId,
+      stripeCustomerId
+    });
+    return;
   }
+
+  await setOrganizationPlan(orgId, "SOLO");
 }
 
 export async function POST(request: Request) {
