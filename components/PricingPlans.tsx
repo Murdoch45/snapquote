@@ -19,7 +19,7 @@ const plans: Array<{
     name: "Solo",
     price: "Free",
     description: "For solo contractors getting started",
-    bullets: ["1 user", "50 quotes per month"]
+    bullets: ["1 user", "20 quotes per month"]
   },
   {
     key: "team",
@@ -27,14 +27,14 @@ const plans: Array<{
     price: "$19",
     description: "For small crews handling steady job flow",
     featured: true,
-    bullets: ["Up to 5 users", "150 quotes per month"]
+    bullets: ["Up to 2 users", "Up to 200 quotes per month"]
   },
   {
     key: "business",
     name: "Business",
     price: "$39",
     description: "For established teams at full volume",
-    bullets: ["Up to 10 users", "Unlimited quotes"]
+    bullets: ["Up to 5 users", "Up to 500 quotes per month"]
   }
 ];
 

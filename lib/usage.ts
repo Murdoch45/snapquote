@@ -20,9 +20,9 @@ function firstDayOfMonth(date = new Date()): string {
 }
 
 export function getPlanUsageLimit(plan: OrgPlan): PlanUsageLimit {
-  if (plan === "SOLO") return { limit: 50, grace: 5, hardStopAt: 55 };
-  if (plan === "TEAM") return { limit: 150, grace: 5, hardStopAt: 155 };
-  return { limit: null, grace: 0, hardStopAt: null };
+  if (plan === "SOLO") return { limit: 20, grace: 5, hardStopAt: 25 };
+  if (plan === "TEAM") return { limit: 200, grace: 5, hardStopAt: 205 };
+  return { limit: 500, grace: 5, hardStopAt: 505 };
 }
 
 function getWarningAt90(limit: number | null, count: number): boolean {

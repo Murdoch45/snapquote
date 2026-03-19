@@ -6,8 +6,8 @@ import { inviteTeamSchema } from "@/lib/validations";
 
 function maxMembersByPlan(plan: string): number {
   if (plan === "SOLO") return 1;
-  if (plan === "TEAM") return 5;
-  return 10;
+  if (plan === "TEAM") return 2;
+  return 5;
 }
 
 export async function POST(request: Request) {
