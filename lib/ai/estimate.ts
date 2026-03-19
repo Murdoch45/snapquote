@@ -54,7 +54,6 @@ import {
   type ServiceQuestionAnswers
 } from "@/lib/serviceQuestions";
 import { SERVICE_OPTIONS } from "@/lib/services";
-import { requireActiveSubscription } from "@/lib/subscription";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { LeadConfidence, ServiceCategory } from "@/lib/types";
 
@@ -4237,8 +4236,6 @@ export async function generateEstimateAsync(leadId: string) {
     if (lead.ai_generated_at) {
       return;
     }
-
-    await requireActiveSubscription(lead.org_id as string);
 
     const [{ data: contractor, error: contractorError }, { data: photos, error: photosError }] =
       await Promise.all([
