@@ -4,7 +4,17 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
-export function ManageBillingButton() {
+type Props = {
+  label?: string;
+  mode?: "button" | "text";
+  className?: string;
+};
+
+export function ManageBillingButton({
+  label = "Manage Billing",
+  mode = "button",
+  className
+}: Props) {
   const [loadingPortal, setLoadingPortal] = useState(false);
 
   const onManageBilling = async () => {
@@ -27,15 +37,28 @@ export function ManageBillingButton() {
     }
   };
 
+  if (mode === "text") {
+    return (
+      <button
+        type="button"
+        onClick={() => void onManageBilling()}
+        disabled={loadingPortal}
+        className={`text-sm text-[#6B7280] transition-colors hover:text-[#111827] ${className ?? ""}`}
+      >
+        {loadingPortal ? "Opening..." : label}
+      </button>
+    );
+  }
+
   return (
     <Button
       type="button"
       variant="outline"
-      className="w-full sm:w-auto"
-      onClick={onManageBilling}
+      className={className ?? "w-full sm:w-auto"}
+      onClick={() => void onManageBilling()}
       disabled={loadingPortal}
     >
-      {loadingPortal ? "Opening..." : "Manage Billing"}
+      {loadingPortal ? "Opening..." : label}
     </Button>
   );
 }

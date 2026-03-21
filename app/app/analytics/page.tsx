@@ -9,11 +9,7 @@ export default async function AnalyticsPage() {
   const analytics = await getAnalytics(auth.orgId);
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold text-gray-900">Analytics</h1>
-        <p className="text-sm text-gray-500">Last 30 days performance.</p>
-      </div>
-      <section className="grid gap-3 md:grid-cols-3">
+      <section className="grid gap-4 md:grid-cols-3">
         <MetricCard title="Total leads" value={String(analytics.totals.totalLeads)} />
         <MetricCard title="Quotes sent" value={String(analytics.totals.quotesSent)} />
         <MetricCard title="Quotes accepted" value={String(analytics.totals.quotesAccepted)} />

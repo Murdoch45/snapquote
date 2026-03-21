@@ -15,7 +15,9 @@
 }
 
 body {
-  @apply bg-gray-50 text-gray-900 antialiased;
+  background: #f8f9fc;
+  color: #111827;
+  @apply antialiased;
 }
 
 a {

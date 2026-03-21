@@ -19,10 +19,15 @@ function firstDayOfMonth(date = new Date()): string {
     .slice(0, 10);
 }
 
+export function getPlanMonthlyCredits(plan: OrgPlan): number {
+  if (plan === "SOLO") return 5;
+  if (plan === "TEAM") return 20;
+  return 100;
+}
+
 export function getPlanUsageLimit(plan: OrgPlan): PlanUsageLimit {
-  if (plan === "SOLO") return { limit: 20, grace: 0, hardStopAt: 20 };
-  if (plan === "TEAM") return { limit: 200, grace: 0, hardStopAt: 200 };
-  return { limit: 500, grace: 0, hardStopAt: 500 };
+  const monthlyCredits = getPlanMonthlyCredits(plan);
+  return { limit: monthlyCredits, grace: 0, hardStopAt: null };
 }
 
 function getWarningAt90(limit: number | null, count: number): boolean {
@@ -36,8 +41,8 @@ function buildUsageState(plan: OrgPlan, month: string, count: number): UsageStat
     plan,
     month,
     quotesSentCount: count,
-    warningAt90: getWarningAt90(limit, count),
-    canSend: hardStopAt === null ? true : count < hardStopAt,
+    warningAt90: false,
+    canSend: true,
     limit,
     grace,
     hardStopAt
@@ -71,17 +76,12 @@ export async function getMonthlyUsage(orgId: string): Promise<UsageState> {
 export async function incrementUsageOnQuoteSend(orgId: string): Promise<UsageState> {
   const admin = createAdminClient();
   const current = await getMonthlyUsage(orgId);
-  if (!current.canSend) return current;
-
   const nextCount = current.quotesSentCount + 1;
   const payload = {
     org_id: orgId,
     month: current.month,
     quotes_sent_count: nextCount,
-    grace_used:
-      current.hardStopAt !== null &&
-      current.limit !== null &&
-      nextCount > current.limit
+    grace_used: false
   };
 
   const { error } = await admin.from("org_usage_monthly").upsert(payload, {

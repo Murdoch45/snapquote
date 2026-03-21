@@ -20,18 +20,18 @@ export default async function ContractorPublicPage({ params }: Props) {
   if (!profile) notFound();
 
   return (
-    <main className="min-h-screen bg-gray-50 px-4 py-8">
-      <div className="mx-auto max-w-2xl rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+    <main className="min-h-screen bg-[linear-gradient(135deg,#EFF6FF_0%,#F8F9FC_50%,#EFF6FF_100%)] px-4 py-10 sm:py-16">
+      <div className="mx-auto max-w-[600px] rounded-[16px] border border-[#E5E7EB] bg-white p-8 shadow-[0_4px_24px_rgba(37,99,235,0.08)] sm:p-10">
         <div className="mb-6">
-          <BrandLogo size="md" />
+          <BrandLogo size="sm" />
         </div>
-        <h1 className="text-2xl font-semibold text-gray-900">
-          {profile.business_name} - Request a Quote
+        <h1 className="mt-6 text-2xl font-bold text-[#111827]">
+          Request a Quote from {profile.business_name}
         </h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mb-6 mt-2 text-sm text-[#6B7280]">
           Submit a few details and receive your estimate shortly.
         </p>
-        <div className="mt-6">
+        <div>
           <PublicLeadForm contractorSlug={profile.public_slug as string} />
         </div>
       </div>

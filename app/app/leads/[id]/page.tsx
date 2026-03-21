@@ -1,36 +1,44 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Lock } from "lucide-react";
 import { format } from "date-fns";
 import { LeadPropertyPreview } from "@/components/LeadPropertyPreview";
 import { ConfidenceMeter } from "@/components/ConfidenceMeter";
+import { LeadUnlockButton } from "@/components/LeadUnlockButton";
 import { QuoteComposer } from "@/components/QuoteComposer";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireAuth } from "@/lib/auth/requireAuth";
-import { DEFAULT_QUOTE_SMS_TEMPLATE, sanitizeQuoteTemplate } from "@/lib/quote-template";
+import { getOrgCredits } from "@/lib/credits";
+import { getAddressParts, getVisibleAddress } from "@/lib/leadPresentation";
+import {
+  DEFAULT_QUOTE_SMS_TEMPLATE,
+  renderCustomerNamePreview,
+  sanitizeQuoteTemplate
+} from "@/lib/quote-template";
 import { formatServiceQuestionAnswers, parseServiceQuestionBundles } from "@/lib/serviceQuestions";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { getMonthlyUsage } from "@/lib/usage";
 import { toCurrency, toRelativeMinutes } from "@/lib/utils";
 
 type Props = {
   params: Promise<{ id: string }>;
 };
 
-function getVisibleAddress(address: string): string {
-  const parts = address.split(",").map((part) => part.trim()).filter(Boolean);
-  if (parts.length <= 1) return "Address hidden";
-  return parts.slice(1).join(", ");
-}
+export const dynamic = "force-dynamic";
 
 export default async function LeadDetailPage({ params }: Props) {
   const { id } = await params;
   const auth = await requireAuth();
   const supabase = await createServerSupabaseClient();
-  const usage = await getMonthlyUsage(auth.orgId);
 
-  const [{ data: lead }, { data: photos }, { data: existingQuote }, { data: profile }] = await Promise.all([
+  const [
+    { data: lead },
+    { data: photos },
+    { data: existingQuote },
+    { data: profile },
+    { data: unlockRow },
+    credits
+  ] = await Promise.all([
     supabase
       .from("leads")
       .select("*")
@@ -47,12 +55,16 @@ export default async function LeadDetailPage({ params }: Props) {
       .from("contractor_profile")
       .select("business_name,phone,email,quote_sms_template")
       .eq("org_id", auth.orgId)
-      .single()
+      .single(),
+    supabase.from("lead_unlocks").select("id").eq("org_id", auth.orgId).eq("lead_id", id).maybeSingle(),
+    getOrgCredits(auth.orgId)
   ]);
 
   if (!lead) notFound();
 
-  const isLocked = !usage.canSend;
+  const isUnlocked = Boolean(unlockRow?.id);
+  const isLocked = !isUnlocked;
+  const addressParts = getAddressParts((lead.address_full as string | null) ?? null);
 
   const requestedService = ((lead.services as string[] | null) ?? [])[0] ?? "unknown";
   const aiServiceEstimates = Array.isArray(lead.ai_service_estimates)
@@ -70,7 +82,9 @@ export default async function LeadDetailPage({ params }: Props) {
       answers: formatServiceQuestionAnswers(bundle.service, bundle.answers)
     }))
     .filter((bundle) => bundle.answers.length > 0);
-  const displayAddress = isLocked ? getVisibleAddress(lead.address_full as string) : (lead.address_full as string);
+  const displayAddress = isLocked
+    ? getVisibleAddress(lead.address_full as string)
+    : (lead.address_full as string);
 
   return (
     <div className="space-y-4">
@@ -81,7 +95,10 @@ export default async function LeadDetailPage({ params }: Props) {
             Submitted {toRelativeMinutes(lead.submitted_at)} ({format(new Date(lead.submitted_at), "PPpp")})
           </p>
         </div>
-        <Badge variant="secondary">{lead.status}</Badge>
+        <div className="flex flex-wrap items-center gap-2">
+          {isUnlocked ? <Badge variant="secondary">Unlocked</Badge> : null}
+          <Badge variant="secondary">{lead.status}</Badge>
+        </div>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
@@ -141,10 +158,13 @@ export default async function LeadDetailPage({ params }: Props) {
                   <div className="rounded-lg bg-gray-200/80 px-4 py-10 text-sm text-gray-500 blur-sm select-none">
                     Property details hidden
                   </div>
-                  <p className="mt-4 text-sm text-gray-600">Upgrade your plan to view property details.</p>
-                  <Button asChild variant="outline" className="mt-4">
-                    <Link href="/pricing">Upgrade Plan</Link>
-                  </Button>
+                  <p className="mt-4 text-sm text-gray-600">
+                    Unlock this lead to reveal the full street address and property view.
+                  </p>
+                  <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+                    <LeadUnlockButton leadId={lead.id as string}>Unlock — 1 Credit</LeadUnlockButton>
+                    <span className="text-sm text-gray-500">{credits.total} credits remaining</span>
+                  </div>
                 </div>
               ) : (
                 <div className="[&>div>p:first-child]:hidden">
@@ -179,6 +199,46 @@ export default async function LeadDetailPage({ params }: Props) {
         </Card>
 
         <div className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Contact Access</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {isUnlocked ? (
+                <div className="space-y-2 text-sm text-gray-700">
+                  <p className="font-medium text-gray-900">
+                    {(lead.customer_name as string | null) ?? "No name provided"}
+                  </p>
+                  <p>{(lead.customer_phone as string | null) ?? "No phone provided"}</p>
+                  <p>{(lead.customer_email as string | null) ?? "No email provided"}</p>
+                  <p>{lead.address_full as string}</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                    <div className="mb-3 flex items-center gap-2 text-gray-500">
+                      <Lock className="h-4 w-4" />
+                      <p className="text-sm font-medium">Contact info locked</p>
+                    </div>
+                    <div className="select-none space-y-1 text-sm text-gray-500 blur-sm">
+                      <p>Customer name hidden</p>
+                      <p>Phone hidden</p>
+                      <p>Email hidden</p>
+                      <p>Street address hidden</p>
+                    </div>
+                    <p className="mt-3 text-sm text-gray-600">{addressParts.locality}</p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <LeadUnlockButton leadId={lead.id as string}>Unlock — 1 Credit</LeadUnlockButton>
+                    <span className="text-sm text-gray-500">{credits.total} credits remaining</span>
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    Unlock this lead to reveal full address and contact details.
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
           <Card>
             <CardHeader>
               <CardTitle>AI Estimate</CardTitle>
@@ -222,17 +282,30 @@ export default async function LeadDetailPage({ params }: Props) {
                     Preview customer quote page
                   </Link>
                 </div>
+              ) : isLocked ? (
+                <div className="space-y-3 text-sm">
+                  <p className="text-gray-700">
+                    Unlock this lead before sending a quote to the customer.
+                  </p>
+                  <LeadUnlockButton leadId={lead.id as string}>Unlock — 1 Credit</LeadUnlockButton>
+                  <p className="text-gray-500">{credits.total} credits remaining</p>
+                </div>
               ) : (
                 <QuoteComposer
                   leadId={lead.id as string}
                   snapQuote={Number(lead.ai_suggested_price ?? 900)}
-                  initialMessage={sanitizeQuoteTemplate((profile?.quote_sms_template as string | null) ?? DEFAULT_QUOTE_SMS_TEMPLATE)}
+                  initialMessage={renderCustomerNamePreview(
+                    sanitizeQuoteTemplate(
+                      (profile?.quote_sms_template as string | null) ?? DEFAULT_QUOTE_SMS_TEMPLATE
+                    ),
+                    (lead.customer_name as string | null) ?? null
+                  )}
                   customerName={(lead.customer_name as string | null) ?? null}
                   customerPhone={(lead.customer_phone as string | null) ?? null}
                   customerEmail={(lead.customer_email as string | null) ?? null}
                   customerAddress={(lead.address_full as string | null) ?? null}
-                  canSend={usage.canSend}
-                  isLocked={isLocked}
+                  canSend
+                  isLocked={false}
                 />
               )}
             </CardContent>

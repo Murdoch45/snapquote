@@ -34,7 +34,9 @@ export function MultiServiceForm({
         return (
           <section key={idPrefix} className="space-y-4">
             <div className="space-y-1">
-              <h3 className="text-sm font-medium text-gray-900">Service {sectionNumber}</h3>
+              <h3 className="text-[13px] font-semibold text-[#374151]">
+                Service {sectionNumber} <span className="text-[#2563EB]">*</span>
+              </h3>
             </div>
 
             <ServiceSelector
@@ -51,9 +53,9 @@ export function MultiServiceForm({
             />
 
             {serviceEntry.service ? (
-              <div className="space-y-3 rounded-xl border border-gray-200 bg-white p-4">
-                <Label className="text-sm font-medium text-gray-900">
-                  Do you need help with another service?
+              <div className="space-y-3 rounded-[12px] border border-[#E5E7EB] bg-white p-4">
+                <Label className="text-[13px] font-semibold text-[#374151]">
+                  Do you need help with another service? <span className="text-[#2563EB]">*</span>
                 </Label>
                 <div className="space-y-2">
                   {[
@@ -65,10 +67,10 @@ export function MultiServiceForm({
                       <label
                         key={option.value}
                         htmlFor={optionId}
-                        className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 text-sm transition-colors ${
+                        className={`flex cursor-pointer items-center gap-3 rounded-[10px] border p-3 text-sm transition-colors ${
                           serviceEntry.addAnother === option.value
-                            ? "border-blue-600 bg-blue-50 text-blue-900"
-                            : "border-gray-200 bg-white text-gray-700 hover:border-blue-300"
+                            ? "border-[#2563EB] bg-[#EFF6FF] text-[#111827]"
+                            : "border-[#E5E7EB] bg-white text-[#374151] hover:border-[#BFDBFE]"
                         }`}
                       >
                         <input
@@ -78,7 +80,7 @@ export function MultiServiceForm({
                           value={option.value}
                           checked={serviceEntry.addAnother === option.value}
                           onChange={() => onAddAnotherChange(index, option.value)}
-                          className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+                          className="h-4 w-4 border-[#D1D5DB] text-[#2563EB] focus:ring-[#2563EB]"
                         />
                         <span>{option.label}</span>
                       </label>

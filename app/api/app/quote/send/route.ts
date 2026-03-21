@@ -6,7 +6,7 @@ import { buildQuoteLink, renderQuoteTemplate } from "@/lib/quote-template";
 import { SubscriptionRequiredError, requireActiveSubscription } from "@/lib/subscription";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendQuoteSms } from "@/lib/twilio";
-import { getMonthlyUsage, incrementUsageOnQuoteSend } from "@/lib/usage";
+import { incrementUsageOnQuoteSend } from "@/lib/usage";
 import { sendQuoteSchema } from "@/lib/validations";
 
 export const runtime = "nodejs";
@@ -28,14 +28,6 @@ export async function POST(request: Request) {
     const admin = createAdminClient();
 
     await requireActiveSubscription(auth.orgId);
-
-    const currentUsage = await getMonthlyUsage(auth.orgId);
-    if (!currentUsage.canSend) {
-      return NextResponse.json(
-        { error: "Upgrade required: monthly quote limit reached." },
-        { status: 402 }
-      );
-    }
 
     const { data: lead } = await admin
       .from("leads")

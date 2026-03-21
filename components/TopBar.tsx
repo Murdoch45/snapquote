@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { Bell, LogOut } from "lucide-react";
 import { toast } from "sonner";
-import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
+import { createClient } from "@/lib/supabase/client";
 
 type FeedItem = {
   id: string;
@@ -12,7 +13,30 @@ type FeedItem = {
   createdAt: string;
 };
 
-export function TopBar({ email, orgId }: { email?: string | null; orgId: string }) {
+function getPageTitle(pathname: string): string {
+  if (pathname.startsWith("/app/analytics")) return "Analytics";
+  if (pathname.startsWith("/app/leads")) return "Leads";
+  if (pathname.startsWith("/app/quotes")) return "Quotes";
+  if (pathname.startsWith("/app/customers")) return "Customers";
+  if (pathname.startsWith("/app/plan") || pathname === "/plan") return "My Plan";
+  if (pathname.startsWith("/app/team")) return "Team";
+  if (pathname.startsWith("/app/settings")) return "Settings";
+  if (pathname.startsWith("/dashboard/my-link")) return "My Link";
+  if (pathname === "/app" || pathname === "/app/") return "Dashboard";
+
+  return "Dashboard";
+}
+
+export function TopBar({
+  email,
+  orgId,
+  businessName
+}: {
+  email?: string | null;
+  orgId: string;
+  businessName?: string | null;
+}) {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [feed, setFeed] = useState<FeedItem[]>([]);
 
@@ -27,8 +51,13 @@ export function TopBar({ email, orgId }: { email?: string | null; orgId: string 
           const previousStatus = (payload.old as { ai_status?: string }).ai_status;
           const nextStatus = (payload.new as { ai_status?: string }).ai_status;
           if (previousStatus === "ready" || nextStatus !== "ready") return;
-          const text = `New lead received at ${(payload.new as any).address_full}`;
-          setFeed((prev) => [{ id: crypto.randomUUID(), text, createdAt: new Date().toISOString() }, ...prev].slice(0, 12));
+          const text = `New lead received at ${(payload.new as { address_full?: string }).address_full}`;
+          setFeed((prev) =>
+            [{ id: crypto.randomUUID(), text, createdAt: new Date().toISOString() }, ...prev].slice(
+              0,
+              12
+            )
+          );
           toast(text);
         }
       )
@@ -36,9 +65,14 @@ export function TopBar({ email, orgId }: { email?: string | null; orgId: string 
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "quotes", filter: `org_id=eq.${orgId}` },
         (payload) => {
-          if ((payload.new as any).status !== "ACCEPTED") return;
+          if ((payload.new as { status?: string }).status !== "ACCEPTED") return;
           const text = "A quote was accepted";
-          setFeed((prev) => [{ id: crypto.randomUUID(), text, createdAt: new Date().toISOString() }, ...prev].slice(0, 12));
+          setFeed((prev) =>
+            [{ id: crypto.randomUUID(), text, createdAt: new Date().toISOString() }, ...prev].slice(
+              0,
+              12
+            )
+          );
           toast.success(text);
         }
       )
@@ -56,39 +90,40 @@ export function TopBar({ email, orgId }: { email?: string | null; orgId: string 
   };
 
   return (
-    <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 md:px-6">
+    <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-[#E5E7EB] bg-white px-6">
       <div className="min-w-0">
-        <p className="text-xs text-gray-500">Contractor Dashboard</p>
-        <p className="truncate text-sm font-medium text-gray-800">{email ?? "Account"}</p>
+        <p className="text-2xl font-bold text-[#111827]">{getPageTitle(pathname)}</p>
       </div>
-      <div className="flex items-center gap-2">
+
+      <div className="flex items-center gap-4">
         <div className="relative">
           <button
             type="button"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-gray-200 text-gray-600 hover:bg-gray-100"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] border border-[#E5E7EB] bg-white text-[#6B7280] transition-colors hover:bg-[#F8F9FC] hover:text-[#111827]"
             aria-label="Notifications"
-            onClick={() => setOpen((v) => !v)}
+            onClick={() => setOpen((value) => !value)}
           >
             <Bell className="h-4 w-4" />
             {feed.length > 0 ? (
-              <span className="absolute -right-1 -top-1 rounded-full bg-blue-600 px-1.5 text-[10px] text-white">
+              <span className="absolute -right-1 -top-1 rounded-full bg-[#2563EB] px-1.5 text-[10px] text-white">
                 {feed.length}
               </span>
             ) : null}
           </button>
-          {open && (
-            <div className="absolute right-0 z-30 mt-2 w-72 rounded-lg border border-gray-200 bg-white p-3 shadow-lg">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+
+          {open ? (
+            <div className="absolute right-0 z-30 mt-2 w-72 rounded-[14px] border border-[#E5E7EB] bg-white p-3 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)]">
+              <p className="mb-2 text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280]">
                 Notifications
               </p>
               {feed.length === 0 ? (
-                <p className="text-sm text-gray-500">No notifications yet.</p>
+                <p className="text-sm text-[#6B7280]">No notifications yet.</p>
               ) : (
                 <ul className="space-y-2">
                   {feed.map((item) => (
-                    <li key={item.id} className="rounded-md bg-gray-50 p-2 text-sm text-gray-700">
+                    <li key={item.id} className="rounded-[10px] bg-[#F8F9FC] p-3 text-sm text-[#111827]">
                       <p>{item.text}</p>
-                      <p className="text-xs text-gray-500">
+                      <p className="mt-1 text-xs text-[#6B7280]">
                         {new Date(item.createdAt).toLocaleTimeString()}
                       </p>
                     </li>
@@ -96,8 +131,16 @@ export function TopBar({ email, orgId }: { email?: string | null; orgId: string 
                 </ul>
               )}
             </div>
-          )}
+          ) : null}
         </div>
+
+        <div className="min-w-0 text-right">
+          <p className="truncate text-sm font-medium text-[#111827]">
+            {businessName ?? "SnapQuote"}
+          </p>
+          <p className="truncate text-sm text-[#6B7280]">{email ?? "Account"}</p>
+        </div>
+
         <Button variant="outline" size="sm" onClick={onLogout}>
           <LogOut className="mr-2 h-4 w-4" />
           Sign out

@@ -30,25 +30,30 @@ export async function POST(request: Request) {
       }
     }
 
+    const updatePayload: Record<string, unknown> = {
+      business_name: body.businessName,
+      public_slug: body.publicSlug,
+      phone: body.phone || null,
+      email: body.email || null,
+      business_address_full: body.businessAddressFull?.trim() || null,
+      business_address_place_id: body.businessAddressPlaceId?.trim() || null,
+      business_lat: body.businessLat ?? null,
+      business_lng: body.businessLng ?? null,
+      quote_sms_template: body.quoteSmsTemplate?.trim() || null,
+      travel_pricing_disabled: body.travelPricingDisabled,
+      notification_lead_sms: body.notificationLeadSms,
+      notification_lead_email: body.notificationLeadEmail,
+      notification_accept_sms: body.notificationAcceptSms,
+      notification_accept_email: body.notificationAcceptEmail
+    };
+
+    if (body.services !== undefined) {
+      updatePayload.services = body.services;
+    }
+
     const { error } = await admin
       .from("contractor_profile")
-      .update({
-        business_name: body.businessName,
-        public_slug: body.publicSlug,
-        phone: body.phone || null,
-        email: body.email || null,
-        services: body.services,
-        business_address_full: body.businessAddressFull?.trim() || null,
-        business_address_place_id: body.businessAddressPlaceId?.trim() || null,
-        business_lat: body.businessLat ?? null,
-        business_lng: body.businessLng ?? null,
-        quote_sms_template: body.quoteSmsTemplate?.trim() || null,
-        travel_pricing_disabled: body.travelPricingDisabled,
-        notification_lead_sms: body.notificationLeadSms,
-        notification_lead_email: body.notificationLeadEmail,
-        notification_accept_sms: body.notificationAcceptSms,
-        notification_accept_email: body.notificationAcceptEmail
-      })
+      .update(updatePayload)
       .eq("org_id", auth.orgId);
 
     if (error) throw error;

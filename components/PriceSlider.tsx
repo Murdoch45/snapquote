@@ -45,6 +45,7 @@ export function PriceSlider({ snapQuote, value, onChange }: PriceSliderProps) {
         type="range"
         min={min}
         max={max}
+        step={5}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
         className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-gray-200 accent-blue-600"
@@ -55,13 +56,20 @@ export function PriceSlider({ snapQuote, value, onChange }: PriceSliderProps) {
       </div>
       <div>
         <Label htmlFor="price-input">Manual price input</Label>
-        <Input
-          id="price-input"
-          type="number"
-          min={0}
-          value={value}
-          onChange={(e) => onChange(Number(e.target.value || 0))}
-        />
+        <div className="relative">
+          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
+            $
+          </span>
+          <Input
+            id="price-input"
+            type="number"
+            min={0}
+            step={5}
+            value={value}
+            onChange={(e) => onChange(Number(e.target.value || 0))}
+            className="pl-7"
+          />
+        </div>
       </div>
     </div>
   );

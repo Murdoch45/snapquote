@@ -9,6 +9,9 @@ const stripeCoreEnvSchema = z.object({
   STRIPE_SECRET_KEY: z.string().min(1),
   STRIPE_PRICE_TEAM: z.string().min(1),
   STRIPE_PRICE_BUSINESS: z.string().min(1),
+  STRIPE_CREDIT_PACK_10_PRICE_ID: z.string().min(1).optional(),
+  STRIPE_CREDIT_PACK_50_PRICE_ID: z.string().min(1).optional(),
+  STRIPE_CREDIT_PACK_100_PRICE_ID: z.string().min(1).optional(),
   STRIPE_WEBHOOK_SECRET: z.string().min(1).optional()
 });
 
@@ -17,6 +20,7 @@ const stripeCheckoutEnvSchema = stripeCoreEnvSchema.extend({
 });
 
 export type StripePlanKey = "team" | "business";
+export type StripeCreditPackKey = "10" | "50" | "100";
 
 type StripePlanConfig = {
   key: StripePlanKey;
@@ -24,6 +28,13 @@ type StripePlanConfig = {
   label: string;
   monthlyPrice: string;
   priceId: string;
+};
+
+type StripeCreditPackConfig = {
+  key: StripeCreditPackKey;
+  credits: number;
+  label: string;
+  priceLabel: string;
 };
 
 let stripeClient: Stripe | null = null;
@@ -87,4 +98,29 @@ export function getPlanFromPriceId(priceId: string | null | undefined): OrgPlan 
   }
 
   return null;
+}
+
+export function getStripeCreditPackConfig(pack: StripeCreditPackKey): StripeCreditPackConfig {
+  const packs: Record<StripeCreditPackKey, StripeCreditPackConfig> = {
+    "10": {
+      key: "10",
+      credits: 10,
+      label: "10 credits",
+      priceLabel: "$10"
+    },
+    "50": {
+      key: "50",
+      credits: 50,
+      label: "50 credits",
+      priceLabel: "$40"
+    },
+    "100": {
+      key: "100",
+      credits: 100,
+      label: "100 credits",
+      priceLabel: "$70"
+    }
+  };
+
+  return packs[pack];
 }

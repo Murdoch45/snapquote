@@ -36,17 +36,29 @@ export default function HomePage() {
           <div className="absolute inset-x-0 top-0 h-52 bg-gradient-to-b from-black/30 via-transparent to-transparent" />
 
           <div className="relative mx-auto flex min-h-[82svh] max-w-6xl flex-col px-6 pb-32 pt-8 sm:px-8 md:pb-40 lg:px-10">
-            <div className="self-start rounded-full border border-white/[0.12] bg-white/[0.06] p-2 pr-4 backdrop-blur-sm">
-              <Link
-                href="/"
-                className="inline-flex rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
-              >
-                <BrandLogo
-                  size="sm"
-                  iconClassName="drop-shadow-[0_10px_30px_rgba(37,99,235,0.35)]"
-                  wordmarkClassName="text-white"
-                />
-              </Link>
+            <div className="flex items-center justify-between gap-4">
+              <div className="rounded-full border border-white/[0.12] bg-white/[0.06] p-2 pr-4 backdrop-blur-sm">
+                <Link
+                  href="/"
+                  className="inline-flex rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+                >
+                  <BrandLogo
+                    size="sm"
+                    iconClassName="drop-shadow-[0_10px_30px_rgba(37,99,235,0.35)]"
+                    wordmarkClassName="text-white"
+                  />
+                </Link>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <Button
+                  asChild
+                  variant="outline"
+                  className="border-white/[0.15] bg-white/[0.08] text-white hover:bg-white/[0.14] hover:text-white"
+                >
+                  <Link href="/pricing">Pricing</Link>
+                </Button>
+              </div>
             </div>
 
             <div className="mx-auto flex max-w-4xl flex-1 flex-col items-center justify-center text-center">

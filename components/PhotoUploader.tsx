@@ -38,8 +38,8 @@ export function PhotoUploader({
 
   return (
     <div className="space-y-3">
-      <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4">
-        <p className="mb-3 text-sm text-gray-600">
+      <div className="rounded-[12px] border-2 border-dashed border-[#BFDBFE] bg-[#F8FBFF] p-6 text-center">
+        <p className="mb-4 text-sm text-[#6B7280]">
           {required
             ? `Upload at least 1 photo for a quote request (up to ${maxFiles}).`
             : `Add photos for more accurate estimate (up to ${maxFiles}).`}
@@ -55,7 +55,6 @@ export function PhotoUploader({
         />
         <Button
           type="button"
-          variant="outline"
           onClick={() => inputRef.current?.click()}
           disabled={files.length >= maxFiles}
         >
@@ -64,9 +63,9 @@ export function PhotoUploader({
         </Button>
       </div>
       {previews.length > 0 && (
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {previews.map(({ file, url }, index) => (
-            <div key={`${file.name}-${index}`} className="group relative overflow-hidden rounded-md">
+            <div key={`${file.name}-${index}`} className="group relative overflow-hidden rounded-[12px] border border-[#E5E7EB] bg-white">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={url} alt={file.name} className="h-24 w-full object-cover" />
               <button
@@ -81,7 +80,7 @@ export function PhotoUploader({
         </div>
       )}
       {required && files.length === 0 ? (
-        <p className="text-xs text-red-600">At least one photo is required before submission.</p>
+        <p className="text-xs text-[#DC2626]">At least one photo is required before submission.</p>
       ) : null}
     </div>
   );

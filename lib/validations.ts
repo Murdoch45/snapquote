@@ -31,7 +31,7 @@ export const leadSubmitSchema = z
     contractorSlug: z.string().min(3),
     customerName: z.string().min(2).max(120),
     customerPhone: phoneSchema,
-    customerEmail: z.string().email().optional().or(z.literal("").transform(() => undefined)),
+    customerEmail: z.string().email(),
     addressFull: z.string().min(5).max(240),
     addressPlaceId: z.string().trim().min(1, "Select an address from the Google suggestions."),
     lat: z.number().finite(),
@@ -46,19 +46,6 @@ export const leadSubmitSchema = z
       .max(10, "Upload up to 10 photos before submitting.")
   })
   .superRefine((val, ctx) => {
-    if (!val.customerPhone && !val.customerEmail) {
-      ctx.addIssue({
-        path: ["customerPhone"],
-        code: z.ZodIssueCode.custom,
-        message: "Provide phone or email."
-      });
-      ctx.addIssue({
-        path: ["customerEmail"],
-        code: z.ZodIssueCode.custom,
-        message: "Provide phone or email."
-      });
-    }
-
     if (val.serviceQuestionAnswers.length !== val.services.length) {
       ctx.addIssue({
         path: ["serviceQuestionAnswers"],
@@ -115,7 +102,10 @@ export const updateSettingsSchema = z.object({
   publicSlug: z.string().min(3).max(80).regex(/^[a-z0-9-]+$/),
   phone: z.string().max(40).optional().nullable(),
   email: z.string().email().optional().nullable().or(z.literal("").transform(() => null)),
-  services: z.array(z.enum(SERVICE_OPTIONS)).min(1),
+  services: z.preprocess(
+    (value) => (Array.isArray(value) && value.length === 0 ? undefined : value),
+    z.array(z.enum(SERVICE_OPTIONS)).min(1).optional()
+  ),
   businessAddressFull: z.string().max(240).optional().nullable(),
   businessAddressPlaceId: z.string().optional().nullable(),
   businessLat: z.number().finite().optional().nullable(),

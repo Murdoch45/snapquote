@@ -18,12 +18,14 @@ export function ServiceSelector({
 }: Props) {
   return (
     <div className="space-y-2">
-      <Label htmlFor={inputId}>{label}</Label>
+      <Label htmlFor={inputId} className="mb-1.5 block text-[13px] font-semibold text-[#374151]">
+        {label}
+      </Label>
       <select
         id={inputId}
         value={value}
         onChange={(event) => onChange(event.target.value as ServiceType | "")}
-        className="flex h-11 w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-900 shadow-sm outline-none transition focus:border-gray-400 focus:ring-2 focus:ring-blue-100"
+        className="flex w-full rounded-[8px] border border-[#E5E7EB] bg-white px-[14px] py-3 text-sm text-[#111827] outline-none transition focus:border-[#2563EB] focus:ring-4 focus:ring-[rgba(37,99,235,0.1)]"
         required
       >
         <option value="">Select a service</option>

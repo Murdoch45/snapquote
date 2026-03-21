@@ -59,13 +59,13 @@ export function PublicLeadForm({ contractorSlug }: Props) {
     return (
       hasGooglePlacesKey &&
       customerFirstName.trim().length >= 2 &&
+      customerEmail.trim().length > 0 &&
       hasSelectedAddress &&
       hasSelectedServices &&
       hasRequiredAnswers &&
-      photos.length >= 1 &&
-      Boolean(customerPhone.trim() || customerEmail.trim())
+      photos.length >= 1
     );
-  }, [customerFirstName, hasSelectedAddress, services, customerPhone, customerEmail, photos.length]);
+  }, [customerFirstName, customerEmail, hasSelectedAddress, services, photos.length]);
 
   const handleAddressChange = (nextAddress: string) => {
     setAddress(nextAddress);
@@ -150,7 +150,7 @@ export function PublicLeadForm({ contractorSlug }: Props) {
     }
 
     if (!canSubmit) {
-      toast.error("Complete all service questions, upload at least one photo, and provide phone or email.");
+      toast.error("Complete all required fields, answer all service questions, and upload at least one photo.");
       return;
     }
 
@@ -224,8 +224,8 @@ export function PublicLeadForm({ contractorSlug }: Props) {
 
   if (submitted) {
     return (
-      <div className="rounded-xl border border-green-200 bg-green-50 p-6">
-        <p className="text-sm font-medium text-green-800">
+      <div className="rounded-[12px] border border-[#BBF7D0] bg-[#F0FDF4] p-6 text-center">
+        <p className="text-base font-semibold text-[#16A34A]">
           Request sent - you will receive your quote shortly.
         </p>
       </div>
@@ -234,8 +234,15 @@ export function PublicLeadForm({ contractorSlug }: Props) {
 
   return (
     <>
-      <form className="space-y-4" onSubmit={onSubmit}>
+      <form className="space-y-5" onSubmit={onSubmit}>
+        <p className="text-xs text-[#6B7280]">* Required fields</p>
         <AddressAutocomplete
+          variant="public"
+          label={
+            <span>
+              Address <span className="text-[#2563EB]">*</span>
+            </span>
+          }
           value={address}
           onAddressChange={handleAddressChange}
           onPlaceResolved={({ placeId, lat: latVal, lng: lngVal }) => {
@@ -261,12 +268,18 @@ export function PublicLeadForm({ contractorSlug }: Props) {
         />
 
         <div className="space-y-2">
-          <Label htmlFor="description">Description (optional)</Label>
+          <Label
+            htmlFor="description"
+            className="mb-1.5 block text-[13px] font-semibold text-[#374151]"
+          >
+            Description
+          </Label>
           <Textarea
             id="description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Tell us what work you need done."
+            className="min-h-28 rounded-[8px] border-[#E5E7EB] bg-white px-[14px] py-3 text-sm text-[#111827] placeholder:text-[#6B7280] focus-visible:ring-[rgba(37,99,235,0.1)]"
           />
         </div>
 
@@ -274,46 +287,70 @@ export function PublicLeadForm({ contractorSlug }: Props) {
 
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="customer-first-name">First name</Label>
+            <Label
+              htmlFor="customer-first-name"
+              className="mb-1.5 block text-[13px] font-semibold text-[#374151]"
+            >
+              First name <span className="text-[#2563EB]">*</span>
+            </Label>
             <Input
               id="customer-first-name"
               value={customerFirstName}
               onChange={(e) => setCustomerFirstName(e.target.value)}
               required
+              className="h-auto rounded-[8px] border-[#E5E7EB] bg-white px-[14px] py-3 text-sm text-[#111827] placeholder:text-[#6B7280] focus-visible:ring-[rgba(37,99,235,0.1)]"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="customer-last-name">Last name (optional)</Label>
+            <Label
+              htmlFor="customer-last-name"
+              className="mb-1.5 block text-[13px] font-semibold text-[#374151]"
+            >
+              Last name
+            </Label>
             <Input
               id="customer-last-name"
               value={customerLastName}
               onChange={(e) => setCustomerLastName(e.target.value)}
+              className="h-auto rounded-[8px] border-[#E5E7EB] bg-white px-[14px] py-3 text-sm text-[#111827] placeholder:text-[#6B7280] focus-visible:ring-[rgba(37,99,235,0.1)]"
             />
           </div>
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="customer-phone">Phone (optional)</Label>
+            <Label
+              htmlFor="customer-phone"
+              className="mb-1.5 block text-[13px] font-semibold text-[#374151]"
+            >
+              Phone
+            </Label>
             <Input
               id="customer-phone"
               value={customerPhone}
               onChange={(e) => setCustomerPhone(e.target.value)}
+              className="h-auto rounded-[8px] border-[#E5E7EB] bg-white px-[14px] py-3 text-sm text-[#111827] placeholder:text-[#6B7280] focus-visible:ring-[rgba(37,99,235,0.1)]"
             />
           </div>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="customer-email">Email (optional)</Label>
+          <Label
+            htmlFor="customer-email"
+            className="mb-1.5 block text-[13px] font-semibold text-[#374151]"
+          >
+            Email <span className="text-[#2563EB]">*</span>
+          </Label>
           <Input
             id="customer-email"
             type="email"
             value={customerEmail}
             onChange={(e) => setCustomerEmail(e.target.value)}
+            required
+            className="h-auto rounded-[8px] border-[#E5E7EB] bg-white px-[14px] py-3 text-sm text-[#111827] placeholder:text-[#6B7280] focus-visible:ring-[rgba(37,99,235,0.1)]"
           />
-          <p className="text-xs text-gray-500">Provide at least one: phone or email.</p>
         </div>
 
-        <Button className="w-full sm:w-auto" disabled={!canSubmit || loading}>
+        <Button className="mt-6 w-full rounded-[10px] py-3 text-base font-bold" disabled={!canSubmit || loading}>
           {loading ? "Sending..." : "Get My Quote"}
         </Button>
       </form>

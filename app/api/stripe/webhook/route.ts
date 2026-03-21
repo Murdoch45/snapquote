@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
+import { getPlanMonthlyCredits } from "@/lib/usage";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getPlanFromPriceId, getStripe, getStripeWebhookSecret } from "@/lib/stripe";
 import type { OrgPlan } from "@/lib/types";
@@ -10,6 +11,22 @@ export const runtime = "nodejs";
 function normalizePlan(value: string | null | undefined): OrgPlan | null {
   if (value === "SOLO" || value === "TEAM" || value === "BUSINESS") return value;
   return null;
+}
+
+function shouldDowngradeToSolo(status: string): boolean {
+  return status === "canceled" || status === "unpaid" || status === "past_due";
+}
+
+function addOneMonth(from = new Date()): Date {
+  const next = new Date(from);
+  next.setMonth(next.getMonth() + 1);
+  return next;
+}
+
+function getStripeCustomerId(
+  customer: string | Stripe.Customer | Stripe.DeletedCustomer | null
+): string | null {
+  return typeof customer === "string" ? customer : customer?.id ?? null;
 }
 
 function getSubscriptionPlan(subscription: Stripe.Subscription): OrgPlan | null {
@@ -82,6 +99,19 @@ async function setOrganizationPlan(orgId: string, plan: OrgPlan) {
   if (error) throw error;
 }
 
+async function resetOrganizationCredits(orgId: string, plan: OrgPlan) {
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from("organizations")
+    .update({
+      monthly_credits: getPlanMonthlyCredits(plan),
+      credits_reset_at: addOneMonth().toISOString()
+    })
+    .eq("id", orgId);
+
+  if (error) throw error;
+}
+
 async function markOrganizationTrialUsed(orgId: string) {
   const admin = createAdminClient();
   const { error } = await admin
@@ -91,7 +121,42 @@ async function markOrganizationTrialUsed(orgId: string) {
   if (error) throw error;
 }
 
+async function handleCreditPackCheckoutCompleted(session: Stripe.Checkout.Session) {
+  const orgId = session.metadata?.orgId;
+  const creditAmountRaw = session.metadata?.creditAmount;
+  const creditAmount = Number(creditAmountRaw);
+
+  if (!orgId || !Number.isInteger(creditAmount) || creditAmount <= 0) {
+    console.warn("Credit pack checkout skipped: incomplete metadata.", {
+      sessionId: session.id,
+      orgId: orgId ?? null,
+      creditAmount: creditAmountRaw ?? null
+    });
+    return;
+  }
+
+  const admin = createAdminClient();
+  const { data, error } = await admin.rpc("record_credit_purchase", {
+    p_org_id: orgId,
+    p_stripe_checkout_session_id: session.id,
+    p_credit_amount: creditAmount
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  if (data === "already_processed") {
+    return;
+  }
+}
+
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
+  if (session.metadata?.creditAmount) {
+    await handleCreditPackCheckoutCompleted(session);
+    return;
+  }
+
   const userId = session.metadata?.userId;
   const orgId = session.metadata?.orgId;
   const plan = normalizePlan(session.metadata?.plan);
@@ -143,14 +208,16 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 async function handleSubscriptionChanged(subscription: Stripe.Subscription) {
   const metadataUserId = subscription.metadata.userId;
   const metadataOrgId = subscription.metadata.orgId;
-  const stripeCustomerId =
-    typeof subscription.customer === "string" ? subscription.customer : subscription.customer.id;
-  const plan = getSubscriptionPlan(subscription);
+  const stripeCustomerId = getStripeCustomerId(subscription.customer);
+  const resolvedPlan = getSubscriptionPlan(subscription);
+  const downgradedToSolo = shouldDowngradeToSolo(subscription.status);
+  const plan = downgradedToSolo ? "SOLO" : resolvedPlan;
 
   if (!stripeCustomerId || !plan) {
     console.warn("Subscription update skipped: missing customer or unresolved plan.", {
       subscriptionId: subscription.id,
-      stripeCustomerId: stripeCustomerId ?? null
+      stripeCustomerId: stripeCustomerId ?? null,
+      status: subscription.status
     });
     return;
   }
@@ -183,6 +250,10 @@ async function handleSubscriptionChanged(subscription: Stripe.Subscription) {
   }
 
   await setOrganizationPlan(orgId, plan);
+
+  if (downgradedToSolo) {
+    await resetOrganizationCredits(orgId, "SOLO");
+  }
 }
 
 async function handleInvoicePaid(invoice: Stripe.Invoice) {
@@ -201,6 +272,49 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
   try {
     const subscription = await stripe.subscriptions.retrieve(subscriptionId);
     await handleSubscriptionChanged(subscription);
+
+    const effectivePlan = shouldDowngradeToSolo(subscription.status)
+      ? "SOLO"
+      : getSubscriptionPlan(subscription);
+
+    if (!effectivePlan) {
+      console.warn("Invoice payment credit reset skipped: unable to resolve subscription plan.", {
+        invoiceId: invoice.id,
+        subscriptionId
+      });
+      return;
+    }
+
+    const stripeCustomerId = getStripeCustomerId(subscription.customer);
+    if (!stripeCustomerId) {
+      console.warn("Invoice payment credit reset skipped: unable to resolve customer.", {
+        invoiceId: invoice.id,
+        subscriptionId
+      });
+      return;
+    }
+
+    const userId =
+      subscription.metadata.userId || (await getUserIdForStripeCustomer(stripeCustomerId));
+    if (!userId) {
+      console.warn("Invoice payment credit reset skipped: unable to resolve user.", {
+        invoiceId: invoice.id,
+        subscriptionId
+      });
+      return;
+    }
+
+    const orgId = subscription.metadata.orgId || (await getOrgIdForUser(userId));
+    if (!orgId) {
+      console.warn("Invoice payment credit reset skipped: unable to resolve organization.", {
+        invoiceId: invoice.id,
+        subscriptionId,
+        userId
+      });
+      return;
+    }
+
+    await resetOrganizationCredits(orgId, effectivePlan);
   } catch (error) {
     console.warn("Invoice payment skipped: unable to retrieve subscription.", {
       invoiceId: invoice.id,
@@ -219,10 +333,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     .maybeSingle();
 
   const userId = subscription.metadata.userId || (record?.user_id as string | undefined);
-  const stripeCustomerId =
-    typeof subscription.customer === "string" ? subscription.customer : subscription.customer.id;
-  const plan = getSubscriptionPlan(subscription) || "SOLO";
-
+  const stripeCustomerId = getStripeCustomerId(subscription.customer);
   if (!userId || !stripeCustomerId) {
     console.warn("Subscription deletion skipped: unable to resolve user or customer.", {
       subscriptionId: subscription.id,
@@ -236,7 +347,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     userId,
     stripeCustomerId,
     stripeSubscriptionId: subscription.id,
-    plan,
+    plan: "SOLO",
     status: subscription.status
   });
 
@@ -251,6 +362,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   }
 
   await setOrganizationPlan(orgId, "SOLO");
+  await resetOrganizationCredits(orgId, "SOLO");
 }
 
 export async function POST(request: Request) {

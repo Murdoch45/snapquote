@@ -1,7 +1,7 @@
 "use client";
 
-import Script from "next/script";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { loadGoogleMaps } from "@/lib/googleMaps";
 
 type Props = {
   address: string;
@@ -10,14 +10,6 @@ type Props = {
 };
 
 type MapType = "roadmap" | "satellite";
-
-declare global {
-  interface Window {
-    google?: any;
-  }
-}
-
-const GOOGLE_MAPS_SCRIPT_ID = "google-maps-javascript-api";
 
 export function LeadPropertyPreview({ address, lat, lng }: Props) {
   const mapKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
@@ -72,26 +64,37 @@ export function LeadPropertyPreview({ address, lat, lng }: Props) {
   }, [lat, lng, mapType]);
 
   useEffect(() => {
-    if (window.google?.maps && !loadError) {
-      initializeMap();
+    if (!mapKey || lat == null || lng == null) {
+      return;
     }
-  }, [initializeMap, loadError]);
+
+    let cancelled = false;
+
+    const init = async () => {
+      try {
+        await loadGoogleMaps(mapKey);
+        if (!cancelled) {
+          initializeMap();
+        }
+      } catch {
+        if (!cancelled) {
+          setLoadError(true);
+        }
+      }
+    };
+
+    void init();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [initializeMap, lat, lng, mapKey]);
 
   const showFallback = !mapKey || lat == null || lng == null || loadError;
 
   return (
     <div className="mt-2 space-y-3">
       <p className="text-sm text-gray-700">{address}</p>
-
-      {mapKey ? (
-        <Script
-          id={GOOGLE_MAPS_SCRIPT_ID}
-          src={`https://maps.googleapis.com/maps/api/js?key=${mapKey}&v=weekly`}
-          strategy="afterInteractive"
-          onReady={initializeMap}
-          onError={() => setLoadError(true)}
-        />
-      ) : null}
 
       {showFallback ? (
         <div className="rounded-lg border border-dashed border-gray-200 bg-gray-50 p-4">

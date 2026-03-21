@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { loadGoogleMaps } from "@/lib/googleMaps";
 
 type Props = {
   value: string;
@@ -10,62 +11,13 @@ type Props = {
   onPlaceResolved: (payload: { placeId?: string; lat?: number; lng?: number }) => void;
   helperText?: string;
   invalid?: boolean;
-  label?: string;
+  label?: React.ReactNode;
   inputId?: string;
   placeholder?: string;
   required?: boolean;
   disabled?: boolean;
+  variant?: "default" | "public";
 };
-
-declare global {
-  interface Window {
-    google?: any;
-  }
-}
-
-const GOOGLE_MAPS_SCRIPT_ID = "google-maps-places-script";
-
-let googleMapsPlacesPromise: Promise<void> | null = null;
-
-function loadGoogleMapsPlaces(key: string) {
-  if (window.google?.maps?.places) {
-    return Promise.resolve();
-  }
-
-  if (googleMapsPlacesPromise) {
-    return googleMapsPlacesPromise;
-  }
-
-  googleMapsPlacesPromise = new Promise<void>((resolve, reject) => {
-    const existingScript = document.getElementById(GOOGLE_MAPS_SCRIPT_ID) as HTMLScriptElement | null;
-    if (existingScript) {
-      if (existingScript.dataset.loaded === "true") {
-        resolve();
-        return;
-      }
-
-      existingScript.addEventListener("load", () => resolve(), { once: true });
-      existingScript.addEventListener("error", () => reject(new Error("Failed to load Google Maps.")), {
-        once: true
-      });
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.id = GOOGLE_MAPS_SCRIPT_ID;
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${key}&libraries=places`;
-    script.async = true;
-    script.defer = true;
-    script.onload = () => {
-      script.dataset.loaded = "true";
-      resolve();
-    };
-    script.onerror = () => reject(new Error("Failed to load Google Maps."));
-    document.body.appendChild(script);
-  });
-
-  return googleMapsPlacesPromise;
-}
 
 export function AddressAutocomplete({
   value,
@@ -77,7 +29,8 @@ export function AddressAutocomplete({
   inputId = "address",
   placeholder = "123 Main St, City, State",
   required = true,
-  disabled = false
+  disabled = false,
+  variant = "default"
 }: Props) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const onAddressChangeRef = useRef(onAddressChange);
@@ -101,7 +54,7 @@ export function AddressAutocomplete({
 
     const initAutocomplete = async () => {
       try {
-        await loadGoogleMapsPlaces(key);
+        await loadGoogleMaps(key);
         if (isCancelled || !window.google?.maps?.places || !inputRef.current) return;
 
         const autocomplete = new window.google.maps.places.Autocomplete(inputRef.current, {
@@ -134,7 +87,16 @@ export function AddressAutocomplete({
 
   return (
     <div className="space-y-2">
-      <Label htmlFor={inputId}>{label}</Label>
+      <Label
+        htmlFor={inputId}
+        className={
+          variant === "public"
+            ? "mb-1.5 block text-[13px] font-semibold text-[#374151]"
+            : "mb-1.5 block text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280]"
+        }
+      >
+        {label}
+      </Label>
       <Input
         id={inputId}
         ref={inputRef}
@@ -148,9 +110,27 @@ export function AddressAutocomplete({
         }}
         placeholder={placeholder}
         aria-invalid={invalid}
-        className={invalid ? "border-red-300 focus-visible:ring-red-200" : undefined}
+        className={
+          variant === "public"
+            ? invalid
+              ? "h-auto rounded-[8px] border-[#DC2626] bg-white px-[14px] py-3 text-sm text-[#111827] placeholder:text-[#6B7280] focus-visible:ring-[rgba(220,38,38,0.12)]"
+              : "h-auto rounded-[8px] border-[#E5E7EB] bg-white px-[14px] py-3 text-sm text-[#111827] placeholder:text-[#6B7280] focus-visible:ring-[rgba(37,99,235,0.1)]"
+            : invalid
+              ? "h-11 rounded-[8px] border-[#FECACA] bg-white px-[14px] text-sm text-[#111827] placeholder:text-[#6B7280] focus-visible:ring-[#DC2626]"
+              : "h-11 rounded-[8px] border-[#E5E7EB] bg-white px-[14px] text-sm text-[#111827] placeholder:text-[#6B7280] focus-visible:ring-[#2563EB]"
+        }
       />
-      <p className={`text-xs ${invalid || loadError ? "text-red-600" : "text-gray-500"}`}>
+      <p
+        className={
+          variant === "public"
+            ? `text-xs ${invalid || loadError ? "text-[#DC2626]" : "text-[#6B7280]"}`
+            : `rounded-[8px] border px-4 py-3 text-sm ${
+                invalid || loadError
+                  ? "border-[#FECACA] bg-[#FEF2F2] text-[#DC2626]"
+                  : "border-[#E5E7EB] bg-white text-[#6B7280]"
+              }`
+        }
+      >
         {loadError || helperText || "Start typing and select an address from the dropdown."}
       </p>
     </div>

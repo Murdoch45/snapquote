@@ -83,14 +83,19 @@ export default async function PricingPage() {
 
         <section className="max-w-3xl space-y-4">
           <h1 className="text-4xl font-semibold tracking-tight text-slate-950 md:text-6xl">
-            Upgrade SnapQuote with a 14-day free trial
+            Plans built around lead credits
           </h1>
           <p className="text-lg leading-8 text-slate-600">
-            Pick the plan that fits your business
+            Every plan lets you review leads, use the AI estimator, and send quotes. Credits are
+            only used when you unlock customer contact info.
           </p>
         </section>
 
-        <PricingPlans currentPlan={currentPlan} hasUsedTrial={hasUsedTrial} />
+        <PricingPlans
+          currentPlan={currentPlan}
+          hasUsedTrial={hasUsedTrial}
+          isAuthenticated={Boolean(user)}
+        />
       </div>
     </main>
   );
