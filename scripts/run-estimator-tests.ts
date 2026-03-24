@@ -775,7 +775,7 @@ async function submitLead(input: {
   formData.append("contractorSlug", input.contractorSlug);
   formData.append("customerName", TEST_CUSTOMER_NAME);
   formData.append("customerPhone", TEST_CUSTOMER_PHONE);
-  formData.append("customerEmail", "");
+  formData.append("customerEmail", "test@snapquote.com");
   formData.append("addressFull", input.property.formattedAddress);
   formData.append("addressPlaceId", input.property.placeId);
   formData.append("lat", String(input.property.lat));

@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 const navItems = [
   { href: "/app", label: "Dashboard", icon: Home, exact: true },
   { href: "/app/leads", label: "Leads", icon: FileText },
-  { href: "/app/quotes", label: "Quotes", icon: Receipt },
+  { href: "/app/quotes", label: "Estimates", icon: Receipt },
   { href: "/app/customers", label: "Customers", icon: UserCircle2 },
   { href: "/app/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/dashboard/my-link", label: "My Link", icon: Link2 },

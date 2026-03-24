@@ -41,7 +41,7 @@ type NavigationItem = {
 const navigationItems: NavigationItem[] = [
   { id: "dashboard", label: "Dashboard", description: "Overview", icon: Home },
   { id: "leads", label: "Leads", description: "Incoming requests", icon: FileText },
-  { id: "quotes", label: "Quotes", description: "Sent estimates", icon: Receipt },
+  { id: "quotes", label: "Estimates", description: "Sent estimates", icon: Receipt },
   { id: "analytics", label: "Analytics", description: "Performance", icon: BarChart3 },
   { id: "settings", label: "Settings", description: "Preferences", icon: Settings }
 ];
@@ -63,10 +63,10 @@ const viewMeta: Record<
       "Review services, photos, locations, statuses, and suggested pricing in one controlled landing-page demo view."
   },
   quotes: {
-    eyebrow: "Quote workflow",
+    eyebrow: "Estimate workflow",
     title: "Track estimates without opening the full back office.",
     description:
-      "Show how SnapQuote organizes sent quotes, approvals, follow-ups, and booked work without triggering real actions."
+      "Show how SnapQuote organizes sent estimates, approvals, follow-ups, and booked work without triggering real actions."
   },
   analytics: {
     eyebrow: "Performance",
@@ -90,7 +90,7 @@ const metricToneClasses: Record<MetricTone, string> = {
 
 const badgeClasses: Record<string, string> = {
   New: "bg-sky-50 text-sky-700 ring-sky-200",
-  Quoted: "bg-indigo-50 text-indigo-700 ring-indigo-200",
+  Estimated: "bg-indigo-50 text-indigo-700 ring-indigo-200",
   Scheduled: "bg-amber-50 text-amber-700 ring-amber-200",
   Completed: "bg-emerald-50 text-emerald-700 ring-emerald-200",
   Draft: "bg-slate-100 text-slate-600 ring-slate-200",
@@ -103,7 +103,7 @@ const badgeClasses: Record<string, string> = {
   "Proposal review": "bg-violet-50 text-violet-700 ring-violet-200"
 };
 
-const pipelineStages: LeadStatus[] = ["New", "Quoted", "Scheduled", "Completed"];
+const pipelineStages: LeadStatus[] = ["New", "Estimated", "Scheduled", "Completed"];
 
 export function ProductDemo() {
   const [activeView, setActiveView] = useState<DemoView>("dashboard");
@@ -144,7 +144,7 @@ export function ProductDemo() {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <div className="hidden items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500 xl:flex">
               <Search className="h-4 w-4" />
-              Search leads, quotes, customers
+              Search leads, estimates, customers
             </div>
             <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
@@ -211,7 +211,7 @@ export function ProductDemo() {
             </p>
             <div className="mt-4 space-y-3">
               <SidebarStat label="New leads today" value="12" />
-              <SidebarStat label="Quotes awaiting reply" value="7" />
+              <SidebarStat label="Estimates awaiting reply" value="7" />
               <SidebarStat label="Crews booked today" value="3" />
             </div>
           </div>
@@ -339,7 +339,7 @@ function DashboardView() {
           <div className="mt-5 rounded-[22px] bg-sky-50 p-4">
             <p className="text-sm font-semibold text-slate-900">Response speed</p>
             <p className="mt-1 text-sm text-slate-600">
-              Median time from intake to first quote stays under 11 minutes.
+              Median time from intake to first estimate stays under 11 minutes.
             </p>
           </div>
         </SurfaceCard>
@@ -349,7 +349,7 @@ function DashboardView() {
         <SurfaceCard>
           <SectionHeader
             title="Today's schedule"
-            description="Booked work and sales visits sitting beside quote activity."
+            description="Booked work and sales visits sitting beside estimate activity."
           />
           <div className="mt-5 space-y-3">
             {todaySchedule.map((item) => (
@@ -506,11 +506,11 @@ function QuotesView() {
           <p className="text-sm font-medium text-slate-500">Awaiting approval</p>
           <p className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-slate-950">7</p>
           <p className="mt-2 text-sm text-slate-600">
-            Viewed quotes still inside the follow-up window.
+            Viewed estimates still inside the follow-up window.
           </p>
         </SurfaceCard>
         <SurfaceCard>
-          <p className="text-sm font-medium text-slate-500">Scheduled from quotes</p>
+          <p className="text-sm font-medium text-slate-500">Scheduled from estimates</p>
           <p className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-slate-950">18</p>
           <p className="mt-2 text-sm text-slate-600">
             Booked jobs move cleanly from acceptance to route planning.
@@ -530,13 +530,13 @@ function QuotesView() {
       <SurfaceCard className="overflow-hidden p-0">
         <div className="flex flex-col gap-3 border-b border-slate-200/80 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm font-semibold text-slate-950">Quote queue</p>
+            <p className="text-sm font-semibold text-slate-950">Estimate queue</p>
             <p className="mt-1 text-sm text-slate-600">
-              A focused, read-only preview of sent quotes and their next step.
+              A focused, read-only preview of sent estimates and their next step.
             </p>
           </div>
           <div className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-600">
-            {demoQuotes.length} recent quotes
+            {demoQuotes.length} recent estimates
           </div>
         </div>
 
@@ -544,7 +544,7 @@ function QuotesView() {
           <table className="w-full min-w-[840px] text-sm">
             <thead className="bg-slate-50">
               <tr className="border-b border-slate-200/80 text-left text-xs uppercase tracking-[0.22em] text-slate-400">
-                <th className="px-5 py-3 font-medium">Quote</th>
+                <th className="px-5 py-3 font-medium">Estimate</th>
                 <th className="px-5 py-3 font-medium">Customer</th>
                 <th className="px-5 py-3 font-medium">Service</th>
                 <th className="px-5 py-3 font-medium">Amount</th>
@@ -605,7 +605,7 @@ function AnalyticsView() {
       <div className="grid gap-6 xl:grid-cols-[1.2fr_0.85fr]">
         <SurfaceCard>
           <SectionHeader
-            title="Quote performance"
+            title="Estimate performance"
             description="Sent versus won across the last six weeks."
           />
           <div className="mt-6">
@@ -669,12 +669,12 @@ function AnalyticsView() {
         <InsightCard
           icon={TrendingUp}
           title="Best closing lane"
-          description="Pressure washing quotes close fastest at a believable 52% win rate."
+          description="Pressure washing estimates close fastest at a believable 52% win rate."
         />
         <InsightCard
           icon={Clock3}
           title="Fastest response window"
-          description="Requests submitted before lunch get quoted in roughly 8 to 10 minutes."
+          description="Requests submitted before lunch get estimated in roughly 8 to 10 minutes."
         />
         <InsightCard
           icon={MapPin}

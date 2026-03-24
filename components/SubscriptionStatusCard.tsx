@@ -102,7 +102,7 @@ export function SubscriptionStatusCard({ subscription }: Props) {
           {inactive ? (
             <div className="space-y-1 sm:col-span-2">
               <p className="text-sm text-red-700">
-                Your subscription is inactive. Upgrade to continue generating quotes.
+                Your subscription is inactive. Upgrade to continue generating estimates.
               </p>
             </div>
           ) : null}

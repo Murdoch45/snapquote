@@ -11,7 +11,7 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "SnapQuote | Better jobs. Faster quotes.",
+  title: "SnapQuote | Better jobs. Faster estimates.",
   description: "AI-powered quoting built for contractors."
 };
 
@@ -63,7 +63,7 @@ export default function HomePage() {
 
             <div className="mx-auto flex max-w-4xl flex-1 flex-col items-center justify-center text-center">
               <h1 className="text-[clamp(3rem,8vw,6.35rem)] font-semibold leading-[0.94] tracking-[-0.075em] text-white">
-                Better jobs. Faster quotes.
+                Better jobs. Faster estimates.
               </h1>
               <p className="mt-6 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg md:text-xl">
                 AI-powered quoting built for contractors.

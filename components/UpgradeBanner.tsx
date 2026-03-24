@@ -31,11 +31,11 @@ export function UpgradeBanner({
           />
           <div>
             <p className="font-medium text-gray-900">
-              {canSend ? "You are nearing your monthly quote limit." : "Quote sending is paused."}
+              {canSend ? "You are nearing your monthly estimate limit." : "Estimate sending is paused."}
             </p>
             <p className="text-sm text-gray-700">
               {limit === null
-                ? "Business plan includes unlimited quote sends."
+                ? "Business plan includes unlimited estimate sends."
                 : `Usage: ${quotesSentCount}/${limit} (hard stop at ${hardStopAt}).`}
             </p>
           </div>

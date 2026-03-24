@@ -49,7 +49,7 @@ export default async function MyLinkPage() {
   const requestLink = `${getAppUrl()}/${profile.public_slug as string}`;
   const initialSocialCaption =
     (profile.social_caption as string | null) ??
-    `Need a quote? ${businessName} makes it easy - just fill out a quick form and we'll get back to you as soon as possible. ${requestLink}`;
+    `Need an estimate? ${businessName} makes it easy - just fill out a quick form and we'll get back to you as soon as possible. ${requestLink}`;
 
   return (
     <div className="min-h-screen bg-[#F8F9FC]">

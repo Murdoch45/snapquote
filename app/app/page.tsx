@@ -1,45 +1,22 @@
 import Link from "next/link";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Lock, LockOpen } from "lucide-react";
 import { MetricCard } from "@/components/MetricCard";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getAnalytics } from "@/lib/db";
 import { requireAuth } from "@/lib/auth/requireAuth";
+import { getAddressParts } from "@/lib/leadPresentation";
+import { getServiceBadgeClassName } from "@/lib/serviceColors";
 import { toCurrency } from "@/lib/utils";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-
-function getServiceBadgeClass(service: string | null | undefined): string {
-  const normalized = service?.trim().toLowerCase() ?? "";
-
-  if (normalized.includes("pressure washing")) {
-    return "bg-[#EFF6FF] text-[#2563EB]";
-  }
-
-  if (normalized.includes("lawn care")) {
-    return "bg-[#F0FDF4] text-[#16A34A]";
-  }
-
-  if (normalized.includes("roof")) {
-    return "bg-[#FFF7ED] text-[#EA580C]";
-  }
-
-  if (normalized.includes("concrete")) {
-    return "bg-[#F9FAFB] text-[#6B7280]";
-  }
-
-  if (normalized.includes("fenc")) {
-    return "bg-[#F5F3FF] text-[#7C3AED]";
-  }
-
-  return "bg-[#F9FAFB] text-[#6B7280]";
-}
 
 export default async function DashboardPage() {
   const auth = await requireAuth();
   const analytics = await getAnalytics(auth.orgId);
 
   const supabase = await createServerSupabaseClient();
-  const [{ data: latestLeads }] = await Promise.all([
+  const [{ data: latestLeads }, { data: unlockedRows }] = await Promise.all([
     supabase
       .from("leads")
       .select("id,address_full,submitted_at,services,status")
@@ -47,16 +24,18 @@ export default async function DashboardPage() {
       .eq("ai_status", "ready")
       .order("submitted_at", { ascending: false })
       .limit(5),
+    supabase.from("lead_unlocks").select("lead_id").eq("org_id", auth.orgId)
   ]);
+  const unlockedLeadIds = new Set((unlockedRows ?? []).map((row) => row.lead_id as string));
 
   return (
     <div className="space-y-6">
       <section className="grid gap-4 lg:grid-cols-3">
         <MetricCard title="Total leads (30d)" value={String(analytics.totals.totalLeads)} />
-        <MetricCard title="Quotes sent (30d)" value={String(analytics.totals.quotesSent)} />
-        <MetricCard title="Quotes accepted" value={String(analytics.totals.quotesAccepted)} />
+        <MetricCard title="Estimates sent (30d)" value={String(analytics.totals.quotesSent)} />
+        <MetricCard title="Estimates accepted" value={String(analytics.totals.quotesAccepted)} />
         <MetricCard title="Acceptance rate" value={`${analytics.totals.acceptanceRate}%`} />
-        <MetricCard title="Avg quote value" value={toCurrency(analytics.totals.avgQuoteValue)} />
+        <MetricCard title="Avg estimate value" value={toCurrency(analytics.totals.avgQuoteValue)} />
         <MetricCard
           title="Avg response time"
           value={`${analytics.totals.avgResponseMinutes} min`}
@@ -80,7 +59,9 @@ export default async function DashboardPage() {
               </div>
               <div className="divide-y divide-[#E5E7EB]">
                 {latestLeads.map((lead) => {
-                  const primaryService = (lead.services as string[] | null)?.[0] ?? "Service";
+                  const services = ((lead.services as string[] | null) ?? []).filter(Boolean);
+                  const locality = getAddressParts((lead.address_full as string | null) ?? null).locality;
+                  const isUnlocked = unlockedLeadIds.has(lead.id as string);
 
                   return (
                     <Link
@@ -92,26 +73,32 @@ export default async function DashboardPage() {
                         <p className="text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280] md:hidden">
                           Property Address
                         </p>
-                        <p className="truncate text-sm text-[#111827]">{lead.address_full}</p>
+                        <p className="truncate text-sm text-[#111827]">{locality}</p>
                       </div>
 
                       <div>
                         <p className="text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280] md:hidden">
                           Service Category
                         </p>
-                        <span
-                          className={`inline-flex rounded-full border border-transparent px-3 py-1 text-xs font-semibold ${getServiceBadgeClass(primaryService)}`}
-                        >
-                          {primaryService}
-                        </span>
+                        <div className="flex max-w-full flex-wrap gap-2">
+                          {(services.length > 0 ? services : ["Service"]).map((service) => (
+                            <Badge
+                              key={service}
+                              className={`max-w-full border border-transparent px-3 py-1 text-xs font-semibold ${getServiceBadgeClassName(service)}`}
+                            >
+                              {service}
+                            </Badge>
+                          ))}
+                        </div>
                       </div>
 
                       <div>
                         <p className="text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280] md:hidden">
                           Status
                         </p>
-                        <span className="text-sm font-medium capitalize text-[#111827]">
-                          {lead.status?.toLowerCase() ?? "New"}
+                        <span className="inline-flex items-center gap-2 text-sm font-medium text-[#111827]">
+                          {isUnlocked ? <LockOpen className="h-4 w-4 text-[#16A34A]" /> : <Lock className="h-4 w-4 text-[#6B7280]" />}
+                          {isUnlocked ? "Unlocked" : "Locked"}
                         </span>
                       </div>
 

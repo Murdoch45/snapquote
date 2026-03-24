@@ -86,7 +86,7 @@ export default async function PricingPage() {
             Plans built around lead credits
           </h1>
           <p className="text-lg leading-8 text-slate-600">
-            Every plan lets you review leads, use the AI estimator, and send quotes. Credits are
+            Every plan lets you review leads, use the AI estimator, and send estimates. Credits are
             only used when you unlock customer contact info.
           </p>
         </section>

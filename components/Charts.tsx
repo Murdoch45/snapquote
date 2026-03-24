@@ -17,6 +17,7 @@ import {
   YAxis
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getServiceChartColor } from "@/lib/serviceColors";
 
 type Props = {
   leadsOverTime: { date: string; count: number }[];
@@ -24,8 +25,6 @@ type Props = {
   acceptanceRateOverTime: { date: string; rate: number }[];
   servicesBreakdown: { name: string; value: number }[];
 };
-
-const CHART_COLORS = ["#2563EB", "#16A34A", "#EA580C", "#7C3AED"];
 
 function EmptyChartState() {
   return (
@@ -57,7 +56,7 @@ export function Charts({
       <Card className="shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
         <CardHeader className="pb-4">
           <CardTitle className="text-base font-semibold text-[#111827]">
-            Leads vs Quotes (30 days)
+            Leads vs Estimates (30 days)
           </CardTitle>
         </CardHeader>
         <CardContent className="h-72">
@@ -70,7 +69,7 @@ export function Charts({
                 <Tooltip />
                 <Legend />
                 <Line type="monotone" dataKey="count" name="Leads" stroke="#2563EB" strokeWidth={2} />
-                <Line type="monotone" dataKey="quotes" name="Quotes" stroke="#16A34A" strokeWidth={2} />
+                <Line type="monotone" dataKey="quotes" name="Estimates" stroke="#16A34A" strokeWidth={2} />
               </LineChart>
             </ResponsiveContainer>
           ) : (
@@ -117,7 +116,7 @@ export function Charts({
                   {servicesBreakdown.map((entry, index) => (
                     <Cell
                       key={`${entry.name}-${index}`}
-                      fill={CHART_COLORS[index % CHART_COLORS.length]}
+                      fill={getServiceChartColor(entry.name)}
                     />
                   ))}
                 </Pie>

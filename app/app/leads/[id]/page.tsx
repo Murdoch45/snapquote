@@ -1,3 +1,4 @@
+import { randomBytes } from "crypto";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Lock } from "lucide-react";
@@ -12,13 +13,16 @@ import { requireAuth } from "@/lib/auth/requireAuth";
 import { getOrgCredits } from "@/lib/credits";
 import { getAddressParts, getVisibleAddress } from "@/lib/leadPresentation";
 import {
+  buildQuoteLink,
   DEFAULT_QUOTE_SMS_TEMPLATE,
-  renderCustomerNamePreview,
+  getDisplayCustomerName,
+  renderQuoteTemplate,
   sanitizeQuoteTemplate
 } from "@/lib/quote-template";
+import { getServiceBadgeClassName } from "@/lib/serviceColors";
 import { formatServiceQuestionAnswers, parseServiceQuestionBundles } from "@/lib/serviceQuestions";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { toCurrency, toRelativeMinutes } from "@/lib/utils";
+import { formatCurrencyRange, toCurrency, toRelativeMinutes } from "@/lib/utils";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -32,6 +36,9 @@ export default async function LeadDetailPage({ params }: Props) {
   const supabase = await createServerSupabaseClient();
 
   const [
+    {
+      data: { user }
+    },
     { data: lead },
     { data: photos },
     { data: existingQuote },
@@ -39,6 +46,7 @@ export default async function LeadDetailPage({ params }: Props) {
     { data: unlockRow },
     credits
   ] = await Promise.all([
+    supabase.auth.getUser(),
     supabase
       .from("leads")
       .select("*")
@@ -68,7 +76,14 @@ export default async function LeadDetailPage({ params }: Props) {
 
   const requestedService = ((lead.services as string[] | null) ?? [])[0] ?? "unknown";
   const aiServiceEstimates = Array.isArray(lead.ai_service_estimates)
-    ? (lead.ai_service_estimates as Array<{ scopeSummary?: unknown }>)
+    ? (
+        lead.ai_service_estimates as Array<{
+          service?: unknown;
+          lowEstimate?: unknown;
+          highEstimate?: unknown;
+          scopeSummary?: unknown;
+        }>
+      )
     : [];
   const fallbackScopeSummary =
     typeof aiServiceEstimates[0]?.scopeSummary === "string"
@@ -85,6 +100,33 @@ export default async function LeadDetailPage({ params }: Props) {
   const displayAddress = isLocked
     ? getVisibleAddress(lead.address_full as string)
     : (lead.address_full as string);
+  const aiJobSummary =
+    typeof lead.ai_job_summary === "string" && lead.ai_job_summary.trim().length > 0
+      ? lead.ai_job_summary.trim()
+      : null;
+  const previewPublicId = (existingQuote?.public_id as string | null) ?? randomBytes(6).toString("base64url");
+  const previewMessage = renderQuoteTemplate(
+    sanitizeQuoteTemplate((profile?.quote_sms_template as string | null) ?? DEFAULT_QUOTE_SMS_TEMPLATE),
+    {
+      customerName: getDisplayCustomerName(lead.customer_name as string | null),
+      companyName: (profile?.business_name as string | null)?.trim() || "SnapQuote",
+      quoteLink: buildQuoteLink(previewPublicId),
+      contractorPhone: (profile?.phone as string | null)?.trim() || "Not provided",
+      contractorEmail:
+        user?.email?.trim() ||
+        ((profile?.email as string | null)?.trim() || "Not provided")
+    }
+  );
+  const aiEstimateDisplay = formatCurrencyRange(
+    lead.ai_estimate_low as number | null,
+    lead.ai_estimate_high as number | null,
+    lead.ai_suggested_price as number | null
+  );
+  const quoteEstimateDisplay = formatCurrencyRange(
+    existingQuote?.estimated_price_low as number | string | null | undefined,
+    existingQuote?.estimated_price_high as number | string | null | undefined,
+    existingQuote?.estimated_price as number | string | null | undefined
+  );
 
   return (
     <div className="space-y-4">
@@ -111,40 +153,51 @@ export default async function LeadDetailPage({ params }: Props) {
               <h3 className="text-sm font-semibold text-gray-800">Services</h3>
               <div className="mt-1 flex flex-wrap gap-1">
                 {(lead.services as string[]).map((service) => (
-                  <Badge key={service}>{service}</Badge>
+                  <Badge key={service} className={getServiceBadgeClassName(service)}>{service}</Badge>
                 ))}
               </div>
             </section>
 
-            <section>
-              <h3 className="text-sm font-semibold text-gray-800">Description</h3>
-              <p className="text-sm text-gray-700">{lead.description || "No description provided."}</p>
-            </section>
+            <div className={`grid gap-4 ${aiJobSummary ? "lg:grid-cols-3" : ""}`}>
+              <div className={aiJobSummary ? "lg:col-span-2 space-y-4" : "space-y-4"}>
+                <section>
+                  <h3 className="text-sm font-semibold text-gray-800">Customer Description</h3>
+                  <p className="text-sm text-gray-700">{lead.description || "No description provided."}</p>
+                </section>
 
-            <section>
-              <h3 className="text-sm font-semibold text-gray-800">Customer Answers</h3>
-              {customerAnswerGroups.length === 0 ? (
-                <p className="text-sm text-gray-500">No questionnaire answers available.</p>
-              ) : (
-                <div className="mt-2 space-y-3">
-                  {customerAnswerGroups.map((group) => (
-                    <div key={group.service} className="rounded-lg border border-gray-200 bg-gray-50 p-3">
-                      <p className="text-sm font-medium text-gray-900">{group.service}</p>
-                      <dl className="mt-3 space-y-3">
-                        {group.answers.map((answer) => (
-                          <div key={answer.key}>
-                            <dt className="text-sm font-medium text-gray-600">
-                              {answer.label}:
-                            </dt>
-                            <dd className="mt-1 text-sm text-gray-700">{answer.value}</dd>
-                          </div>
-                        ))}
-                      </dl>
+                <section>
+                  <h3 className="text-sm font-semibold text-gray-800">Customer Answers</h3>
+                  {customerAnswerGroups.length === 0 ? (
+                    <p className="text-sm text-gray-500">No questionnaire answers available.</p>
+                  ) : (
+                    <div className="mt-2 space-y-3">
+                      {customerAnswerGroups.map((group) => (
+                        <div key={group.service} className="rounded-lg border border-gray-200 bg-gray-50 p-3">
+                          <p className="text-sm font-medium text-gray-900">{group.service}</p>
+                          <dl className="mt-3 space-y-3">
+                            {group.answers.map((answer) => (
+                              <div key={answer.key}>
+                                <dt className="text-sm font-medium text-gray-600">
+                                  {answer.label}:
+                                </dt>
+                                <dd className="mt-1 text-sm text-gray-700">{answer.value}</dd>
+                              </div>
+                            ))}
+                          </dl>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              )}
-            </section>
+                  )}
+                </section>
+              </div>
+
+              {aiJobSummary ? (
+                <section className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                  <h3 className="text-sm font-semibold text-gray-800">AI Summary</h3>
+                  <p className="mt-2 text-sm text-gray-700">{aiJobSummary}</p>
+                </section>
+              ) : null}
+            </div>
 
             <section>
               <h3 className="text-sm font-semibold text-gray-800">Property</h3>
@@ -201,7 +254,7 @@ export default async function LeadDetailPage({ params }: Props) {
         <div className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Contact Access</CardTitle>
+              <CardTitle>Contact Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {isUnlocked ? (
@@ -244,16 +297,8 @@ export default async function LeadDetailPage({ params }: Props) {
               <CardTitle>AI Estimate</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
-              <p className="text-gray-700">
-                SnapQuote price: {toCurrency(Number(lead.ai_suggested_price ?? 0))}
-              </p>
-              <p className="text-gray-700">
-                Range:{" "}
-                {lead.ai_estimate_low != null && lead.ai_estimate_high != null
-                  ? `${toCurrency(Number(lead.ai_estimate_low))} - ${toCurrency(Number(lead.ai_estimate_high))}`
-                  : "Pending estimate..."}
-              </p>
-              <p className="text-gray-700">Surface area: {surfaceAreaSummary}</p>
+              <p className="text-gray-700">Estimated price: {aiEstimateDisplay ?? "Pending estimate..."}</p>
+              <p className="text-gray-700">{surfaceAreaSummary}</p>
             </CardContent>
           </Card>
           <ConfidenceMeter
@@ -269,23 +314,23 @@ export default async function LeadDetailPage({ params }: Props) {
           />
           <Card>
             <CardHeader>
-              <CardTitle>Send Quote</CardTitle>
+              <CardTitle>Send Estimate</CardTitle>
             </CardHeader>
             <CardContent>
               {existingQuote ? (
                 <div className="space-y-2 text-sm">
-                  <p className="text-gray-700">Quote already sent for this lead.</p>
+                  <p className="text-gray-700">Estimate already sent for this lead.</p>
                   <p className="text-gray-700">
-                    Price: {toCurrency(Number(existingQuote.price))} ({existingQuote.status})
+                    Price: {quoteEstimateDisplay ?? toCurrency(Number(existingQuote.price))} ({existingQuote.status})
                   </p>
                   <Link href={`/q/${existingQuote.public_id}`} target="_blank">
-                    Preview customer quote page
+                    Preview customer estimate page
                   </Link>
                 </div>
               ) : isLocked ? (
                 <div className="space-y-3 text-sm">
                   <p className="text-gray-700">
-                    Unlock this lead before sending a quote to the customer.
+                    Unlock this lead before sending an estimate to the customer.
                   </p>
                   <LeadUnlockButton leadId={lead.id as string}>Unlock — 1 Credit</LeadUnlockButton>
                   <p className="text-gray-500">{credits.total} credits remaining</p>
@@ -293,13 +338,12 @@ export default async function LeadDetailPage({ params }: Props) {
               ) : (
                 <QuoteComposer
                   leadId={lead.id as string}
+                  publicId={previewPublicId}
                   snapQuote={Number(lead.ai_suggested_price ?? 900)}
-                  initialMessage={renderCustomerNamePreview(
-                    sanitizeQuoteTemplate(
-                      (profile?.quote_sms_template as string | null) ?? DEFAULT_QUOTE_SMS_TEMPLATE
-                    ),
-                    (lead.customer_name as string | null) ?? null
-                  )}
+                  estimateLow={(lead.ai_estimate_low as number | null) ?? null}
+                  estimateHigh={(lead.ai_estimate_high as number | null) ?? null}
+                  serviceEstimates={aiServiceEstimates}
+                  initialMessage={previewMessage}
                   customerName={(lead.customer_name as string | null) ?? null}
                   customerPhone={(lead.customer_phone as string | null) ?? null}
                   customerEmail={(lead.customer_email as string | null) ?? null}

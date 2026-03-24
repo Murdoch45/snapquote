@@ -41,7 +41,7 @@ export function PhotoUploader({
       <div className="rounded-[12px] border-2 border-dashed border-[#BFDBFE] bg-[#F8FBFF] p-6 text-center">
         <p className="mb-4 text-sm text-[#6B7280]">
           {required
-            ? `Upload at least 1 photo for a quote request (up to ${maxFiles}).`
+            ? `Upload at least 1 photo for an estimate request (up to ${maxFiles}).`
             : `Add photos for more accurate estimate (up to ${maxFiles}).`}
         </p>
         <input

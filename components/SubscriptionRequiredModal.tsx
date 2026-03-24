@@ -22,7 +22,7 @@ export function SubscriptionRequiredModal({ open, onClose }: Props) {
             Your SnapQuote subscription is inactive.
           </h2>
           <p className="text-sm leading-6 text-slate-600">
-            Update billing to continue generating quotes.
+            Update billing to continue generating estimates.
           </p>
         </div>
 

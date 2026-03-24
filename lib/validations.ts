@@ -83,7 +83,9 @@ export function parseLeadSubmitQuestionAnswers(value: unknown) {
 
 export const sendQuoteSchema = z.object({
   leadId: z.string().uuid(),
-  price: z.number().positive(),
+  publicId: z.string().min(6).max(24).optional(),
+  estimatedPriceLow: z.number().positive(),
+  estimatedPriceHigh: z.number().positive(),
   message: z.string().min(12).max(4000),
   sendEmail: z.boolean(),
   sendText: z.boolean()
@@ -92,7 +94,23 @@ export const sendQuoteSchema = z.object({
     ctx.addIssue({
       path: ["sendEmail"],
       code: z.ZodIssueCode.custom,
-      message: "Select email, text, or both before sending."
+      message: "Select email, text, or both before sending the estimate."
+    });
+  }
+
+  if (val.estimatedPriceLow > val.estimatedPriceHigh) {
+    ctx.addIssue({
+      path: ["estimatedPriceLow"],
+      code: z.ZodIssueCode.custom,
+      message: "Low price cannot exceed high price."
+    });
+  }
+
+  if (val.estimatedPriceHigh > val.estimatedPriceLow * 1.2) {
+    ctx.addIssue({
+      path: ["estimatedPriceHigh"],
+      code: z.ZodIssueCode.custom,
+      message: "High price cannot be more than 20% above low price."
     });
   }
 });

@@ -1,0 +1,751 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SnapQuote Estimator Report</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f6f4ef;
+        --card: #ffffff;
+        --ink: #1f2937;
+        --muted: #6b7280;
+        --line: #d1d5db;
+        --accent: #14532d;
+        --accent-soft: #ecfdf5;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: Georgia, "Times New Roman", serif;
+        background: linear-gradient(180deg, #f8f7f2 0%, #eef3f7 100%);
+        color: var(--ink);
+      }
+      main {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 40px 20px 64px;
+      }
+      h1 {
+        margin: 0 0 12px;
+        font-size: 2.4rem;
+      }
+      .intro {
+        margin: 0 0 32px;
+        color: var(--muted);
+        font-size: 1rem;
+      }
+      .property-card {
+        background: var(--card);
+        border: 1px solid rgba(20, 83, 45, 0.12);
+        border-radius: 18px;
+        padding: 24px;
+        margin-bottom: 28px;
+        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.06);
+      }
+      .property-card h2 {
+        margin: 0 0 18px;
+        font-size: 1.5rem;
+      }
+      .property-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 12px;
+        margin-bottom: 24px;
+      }
+      .property-grid div {
+        background: var(--accent-soft);
+        border-radius: 12px;
+        padding: 12px 14px;
+      }
+      .property-grid strong {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 0.85rem;
+      }
+      .service-card {
+        border-top: 1px solid var(--line);
+        padding-top: 20px;
+        margin-top: 20px;
+      }
+      .service-card h3 {
+        margin: 0 0 6px;
+        font-size: 1.2rem;
+      }
+      .service-meta {
+        margin: 0 0 14px;
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fff;
+      }
+      th, td {
+        padding: 10px 12px;
+        border: 1px solid var(--line);
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        background: #f3f4f6;
+        font-size: 0.95rem;
+      }
+      .estimate {
+        margin: 14px 0 0;
+        font-size: 1rem;
+      }
+      @media (max-width: 720px) {
+        main {
+          padding: 24px 14px 48px;
+        }
+        h1 {
+          font-size: 1.9rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>SnapQuote Estimator Report</h1>
+      <p class="intro">
+        Thurston Consistency 2 / AI Run 2 / Seed: seed-a.
+        Grouped by property and service. The CSV backup remains available at snapquote-test-results.csv.
+      </p>
+      
+        <section class="property-card">
+          <h2>11356 Thurston Cir, Los Angeles, CA 90049, USA</h2>
+          <div class="property-grid">
+            <div><strong>City</strong><span>Los Angeles</span></div>
+            <div><strong>Google Lot Size</strong><span>9931</span></div>
+            <div><strong>Google House Size</strong><span>3675</span></div>
+            <div><strong>Travel Distance</strong><span>3.1</span></div>
+          </div>
+          
+            <section class="service-card">
+              <h3>Pressure Washing</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-23T17:24:01.936Z
+                <br />
+                AI mode: auto | Signal source: fallback | Execution: fallback | Live invocation: yes | Cache: off | Status: ready
+              </p>
+              <p class="service-meta">Multipliers: {&quot;pricingRegionModelKey&quot;:&quot;los-angeles-ca&quot;,&quot;resolvedRegion&quot;:&quot;los_angeles&quot;,&quot;regionalMultiplier&quot;:1.2,&quot;travelDistanceMiles&quot;:3.1,&quot;travelMultiplier&quot;:1,&quot;luxuryMultiplier&quot;:1,&quot;serviceMultipliers&quot;:[{&quot;service&quot;:&quot;Pressure Washing&quot;,&quot;conditionMultiplier&quot;:1.1664,&quot;terrainMultiplier&quot;:1,&quot;accessMultiplier&quot;:1.18,&quot;materialMultiplier&quot;:1,&quot;regionalMultiplier&quot;:1.2,&quot;luxuryMultiplier&quot;:1}]}</p>
+              <p class="service-meta">Selected answers: {&quot;pressure_washing_target&quot;:[&quot;Fence&quot;,&quot;Driveway&quot;],&quot;pressure_washing_size&quot;:&quot;Medium area (~500-1,500 sq ft)&quot;,&quot;pressure_washing_condition&quot;:&quot;Moderate buildup&quot;,&quot;pressure_washing_access&quot;:&quot;Tight or difficult access&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What do you want cleaned?</td>
+                      <td>Fence | Driveway</td>
+                    </tr>
+                    <tr>
+                      <td>About how much needs to be cleaned?</td>
+                      <td>Medium area (~500-1,500 sq ft)</td>
+                    </tr>
+                    <tr>
+                      <td>How dirty is it?</td>
+                      <td>Moderate buildup</td>
+                    </tr>
+                    <tr>
+                      <td>Is the area easy to access?</td>
+                      <td>Tight or difficult access</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 1050.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Gutter Cleaning</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-23T17:24:11.489Z
+                <br />
+                AI mode: unknown | Signal source: failed | Execution: failed | Live invocation: unknown | Cache: unknown | Status: error
+              </p>
+              <p class="service-meta">Multipliers: n/a</p>
+              <p class="service-meta">Selected answers: {&quot;gutter_work_type&quot;:&quot;Clean gutters and downspouts&quot;,&quot;gutter_fill_level&quot;:&quot;Moderate debris&quot;,&quot;gutter_access&quot;:&quot;Yes, steep roof or hard access&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What type of building is this for?</td>
+                      <td></td>
+                    </tr>
+                    <tr>
+                      <td>What do you need done?</td>
+                      <td>Clean gutters and downspouts</td>
+                    </tr>
+                    <tr>
+                      <td>About how full are the gutters?</td>
+                      <td>Moderate debris</td>
+                    </tr>
+                    <tr>
+                      <td>Are there any access challenges?</td>
+                      <td>Yes, steep roof or hard access</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> ERROR: [
+  {
+    &quot;path&quot;: [
+      &quot;serviceQuestionAnswers&quot;,
+      0,
+      &quot;answers&quot;,
+      &quot;gutter_building_type&quot;
+    ],
+    &quot;code&quot;: &quot;custom&quot;,
+    &quot;message&quot;: &quot;Answer required: What type of building is this for?&quot;
+  }
+]</p>
+            </section>
+            <section class="service-card">
+              <h3>Window Cleaning</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-23T17:24:11.548Z
+                <br />
+                AI mode: auto | Signal source: fallback | Execution: fallback | Live invocation: yes | Cache: off | Status: ready
+              </p>
+              <p class="service-meta">Multipliers: {&quot;pricingRegionModelKey&quot;:&quot;los-angeles-ca&quot;,&quot;resolvedRegion&quot;:&quot;los_angeles&quot;,&quot;regionalMultiplier&quot;:1.2,&quot;travelDistanceMiles&quot;:3.1,&quot;travelMultiplier&quot;:1,&quot;luxuryMultiplier&quot;:1,&quot;serviceMultipliers&quot;:[{&quot;service&quot;:&quot;Window Cleaning&quot;,&quot;conditionMultiplier&quot;:1.08,&quot;terrainMultiplier&quot;:1,&quot;accessMultiplier&quot;:1.2189999999999999,&quot;materialMultiplier&quot;:1,&quot;regionalMultiplier&quot;:1.2,&quot;luxuryMultiplier&quot;:1}]}</p>
+              <p class="service-meta">Selected answers: {&quot;window_target_type&quot;:&quot;Large exterior windows or glass doors&quot;,&quot;window_count&quot;:&quot;11-25&quot;,&quot;window_property_type&quot;:&quot;Two-story home&quot;,&quot;window_access&quot;:&quot;Some ladders needed&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What kind of windows need cleaning?</td>
+                      <td>Large exterior windows or glass doors</td>
+                    </tr>
+                    <tr>
+                      <td>About how many windows need cleaning?</td>
+                      <td>11-25</td>
+                    </tr>
+                    <tr>
+                      <td>What type of property is this?</td>
+                      <td>Two-story home</td>
+                    </tr>
+                    <tr>
+                      <td>How easy is access to the windows?</td>
+                      <td>Some ladders needed</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 500.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Pool Service / Cleaning</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-23T17:24:18.305Z
+                <br />
+                AI mode: auto | Signal source: fallback | Execution: fallback | Live invocation: yes | Cache: off | Status: ready
+              </p>
+              <p class="service-meta">Multipliers: {&quot;pricingRegionModelKey&quot;:&quot;los-angeles-ca&quot;,&quot;resolvedRegion&quot;:&quot;los_angeles&quot;,&quot;regionalMultiplier&quot;:1.2,&quot;travelDistanceMiles&quot;:3.1,&quot;travelMultiplier&quot;:1,&quot;luxuryMultiplier&quot;:1,&quot;serviceMultipliers&quot;:[{&quot;service&quot;:&quot;Pool Service / Cleaning&quot;,&quot;conditionMultiplier&quot;:1,&quot;terrainMultiplier&quot;:1,&quot;accessMultiplier&quot;:1.05,&quot;materialMultiplier&quot;:1,&quot;regionalMultiplier&quot;:1.2,&quot;luxuryMultiplier&quot;:1}]}</p>
+              <p class="service-meta">Selected answers: {&quot;pool_work_type&quot;:&quot;Routine cleaning&quot;,&quot;pool_type&quot;:&quot;In-ground pool&quot;,&quot;pool_condition&quot;:&quot;Mostly clean&quot;,&quot;pool_size&quot;:&quot;Medium&quot;,&quot;pool_access&quot;:&quot;Somewhat&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What do you need help with?</td>
+                      <td>Routine cleaning</td>
+                    </tr>
+                    <tr>
+                      <td>What type of pool is it?</td>
+                      <td>In-ground pool</td>
+                    </tr>
+                    <tr>
+                      <td>What condition is the pool in right now?</td>
+                      <td>Mostly clean</td>
+                    </tr>
+                    <tr>
+                      <td>About how large is the pool?</td>
+                      <td>Medium</td>
+                    </tr>
+                    <tr>
+                      <td>Is there easy access to the pool equipment and pool area?</td>
+                      <td>Somewhat</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 200.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Lawn Care / Maintenance</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-23T17:24:25.092Z
+                <br />
+                AI mode: auto | Signal source: fallback | Execution: fallback | Live invocation: yes | Cache: off | Status: ready
+              </p>
+              <p class="service-meta">Multipliers: {&quot;pricingRegionModelKey&quot;:&quot;los-angeles-ca&quot;,&quot;resolvedRegion&quot;:&quot;los_angeles&quot;,&quot;regionalMultiplier&quot;:1.2,&quot;travelDistanceMiles&quot;:3.1,&quot;travelMultiplier&quot;:1,&quot;luxuryMultiplier&quot;:1,&quot;serviceMultipliers&quot;:[{&quot;service&quot;:&quot;Lawn Care / Maintenance&quot;,&quot;conditionMultiplier&quot;:1.5,&quot;terrainMultiplier&quot;:1,&quot;accessMultiplier&quot;:1,&quot;materialMultiplier&quot;:1,&quot;regionalMultiplier&quot;:1.2,&quot;luxuryMultiplier&quot;:1}]}</p>
+              <p class="service-meta">Selected answers: {&quot;lawn_work_type&quot;:&quot;Mowing and edging&quot;,&quot;lawn_area_size&quot;:&quot;Medium yard (~2,000-5,000 sq ft)&quot;,&quot;lawn_condition&quot;:&quot;Thick weeds or neglected&quot;,&quot;lawn_property_type&quot;:&quot;Multi-area property&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What service do you need done?</td>
+                      <td>Mowing and edging</td>
+                    </tr>
+                    <tr>
+                      <td>How big is the area that needs service?</td>
+                      <td>Medium yard (~2,000-5,000 sq ft)</td>
+                    </tr>
+                    <tr>
+                      <td>What is the current condition of the yard?</td>
+                      <td>Thick weeds or neglected</td>
+                    </tr>
+                    <tr>
+                      <td>What area of the property needs service?</td>
+                      <td>Multi-area property</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 625.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Landscaping / Installation</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-23T17:24:31.645Z
+                <br />
+                AI mode: auto | Signal source: fallback | Execution: fallback | Live invocation: yes | Cache: off | Status: ready
+              </p>
+              <p class="service-meta">Multipliers: {&quot;pricingRegionModelKey&quot;:&quot;los-angeles-ca&quot;,&quot;resolvedRegion&quot;:&quot;los_angeles&quot;,&quot;regionalMultiplier&quot;:1.2,&quot;travelDistanceMiles&quot;:3.1,&quot;travelMultiplier&quot;:1,&quot;luxuryMultiplier&quot;:1,&quot;serviceMultipliers&quot;:[{&quot;service&quot;:&quot;Landscaping / Installation&quot;,&quot;conditionMultiplier&quot;:1,&quot;terrainMultiplier&quot;:1,&quot;accessMultiplier&quot;:1.0870613037793646,&quot;materialMultiplier&quot;:1.3798669815446283,&quot;regionalMultiplier&quot;:1.2,&quot;luxuryMultiplier&quot;:1}]}</p>
+              <p class="service-meta">Selected answers: {&quot;landscape_work_type&quot;:[&quot;New plants or garden beds&quot;,&quot;Yard makeover&quot;,&quot;Rock or mulch installation&quot;,&quot;Sod or lawn installation&quot;],&quot;landscape_area_size&quot;:&quot;Full property (4,000+ sq ft)&quot;,&quot;landscape_job_type&quot;:&quot;New installation on bare area&quot;,&quot;landscape_materials&quot;:[&quot;Sod or turf&quot;],&quot;landscape_access&quot;:&quot;Somewhat difficult&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What kind of landscaping work do you want?</td>
+                      <td>New plants or garden beds | Yard makeover | Rock or mulch installation | Sod or lawn installation</td>
+                    </tr>
+                    <tr>
+                      <td>How much of the yard is involved?</td>
+                      <td>Full property (4,000+ sq ft)</td>
+                    </tr>
+                    <tr>
+                      <td>What best describes the job?</td>
+                      <td>New installation on bare area</td>
+                    </tr>
+                    <tr>
+                      <td>What materials are involved?</td>
+                      <td>Sod or turf</td>
+                    </tr>
+                    <tr>
+                      <td>Is the area easy to access with materials and tools?</td>
+                      <td>Somewhat difficult</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 17825.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Tree Service / Removal</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-23T17:24:38.134Z
+                <br />
+                AI mode: auto | Signal source: fallback | Execution: fallback | Live invocation: yes | Cache: off | Status: ready
+              </p>
+              <p class="service-meta">Multipliers: {&quot;pricingRegionModelKey&quot;:&quot;los-angeles-ca&quot;,&quot;resolvedRegion&quot;:&quot;los_angeles&quot;,&quot;regionalMultiplier&quot;:1.2,&quot;travelDistanceMiles&quot;:3.1,&quot;travelMultiplier&quot;:1,&quot;luxuryMultiplier&quot;:1,&quot;serviceMultipliers&quot;:[{&quot;service&quot;:&quot;Tree Service / Removal&quot;,&quot;conditionMultiplier&quot;:1.12,&quot;terrainMultiplier&quot;:1,&quot;accessMultiplier&quot;:1.1,&quot;materialMultiplier&quot;:1,&quot;regionalMultiplier&quot;:1.2,&quot;luxuryMultiplier&quot;:1}]}</p>
+              <p class="service-meta">Selected answers: {&quot;tree_work_type&quot;:&quot;Trim or cut back branches&quot;,&quot;tree_size&quot;:&quot;Medium&quot;,&quot;tree_location&quot;:&quot;Backyard&quot;,&quot;tree_access&quot;:&quot;Moderate&quot;,&quot;tree_haul_away&quot;:&quot;Yes&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What service do you need done?</td>
+                      <td>Trim or cut back branches</td>
+                    </tr>
+                    <tr>
+                      <td>How large is the tree or trees?</td>
+                      <td>Medium</td>
+                    </tr>
+                    <tr>
+                      <td>Where is the tree / trees located?</td>
+                      <td>Backyard</td>
+                    </tr>
+                    <tr>
+                      <td>How easy is access for the crew and equipment?</td>
+                      <td>Moderate</td>
+                    </tr>
+                    <tr>
+                      <td>Do you want haul-away included?</td>
+                      <td>Yes</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 2375.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Fence Installation / Repair</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-23T17:24:44.577Z
+                <br />
+                AI mode: auto | Signal source: fallback | Execution: fallback | Live invocation: yes | Cache: off | Status: ready
+              </p>
+              <p class="service-meta">Multipliers: {&quot;pricingRegionModelKey&quot;:&quot;los-angeles-ca&quot;,&quot;resolvedRegion&quot;:&quot;los_angeles&quot;,&quot;regionalMultiplier&quot;:1.2,&quot;travelDistanceMiles&quot;:3.1,&quot;travelMultiplier&quot;:1,&quot;luxuryMultiplier&quot;:1,&quot;serviceMultipliers&quot;:[{&quot;service&quot;:&quot;Fence Installation / Repair&quot;,&quot;conditionMultiplier&quot;:1,&quot;terrainMultiplier&quot;:1,&quot;accessMultiplier&quot;:1,&quot;materialMultiplier&quot;:1.16,&quot;regionalMultiplier&quot;:1.2,&quot;luxuryMultiplier&quot;:1}]}</p>
+              <p class="service-meta">Selected answers: {&quot;fence_work_type&quot;:&quot;New fence installation&quot;,&quot;fence_material&quot;:&quot;Vinyl&quot;,&quot;fence_scope&quot;:&quot;Small section (up to ~25 linear ft)&quot;,&quot;fence_site&quot;:&quot;Flat and clear&quot;,&quot;fence_repair_condition&quot;:&quot;Moderate&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What service do you need?</td>
+                      <td>New fence installation</td>
+                    </tr>
+                    <tr>
+                      <td>What fence material do you want?</td>
+                      <td>Vinyl</td>
+                    </tr>
+                    <tr>
+                      <td>About how much fence work is needed?</td>
+                      <td>Small section (up to ~25 linear ft)</td>
+                    </tr>
+                    <tr>
+                      <td>What is the site like?</td>
+                      <td>Flat and clear</td>
+                    </tr>
+                    <tr>
+                      <td>If this is a repair, how bad is the damage?</td>
+                      <td>Moderate</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 1325.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Concrete</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-23T17:24:51.203Z
+                <br />
+                AI mode: auto | Signal source: fallback | Execution: fallback | Live invocation: yes | Cache: off | Status: ready
+              </p>
+              <p class="service-meta">Multipliers: {&quot;pricingRegionModelKey&quot;:&quot;los-angeles-ca&quot;,&quot;resolvedRegion&quot;:&quot;los_angeles&quot;,&quot;regionalMultiplier&quot;:1.2,&quot;travelDistanceMiles&quot;:3.1,&quot;travelMultiplier&quot;:1,&quot;luxuryMultiplier&quot;:1,&quot;serviceMultipliers&quot;:[{&quot;service&quot;:&quot;Concrete&quot;,&quot;conditionMultiplier&quot;:1,&quot;terrainMultiplier&quot;:1,&quot;accessMultiplier&quot;:1,&quot;materialMultiplier&quot;:1,&quot;regionalMultiplier&quot;:1.2,&quot;luxuryMultiplier&quot;:1}]}</p>
+              <p class="service-meta">Selected answers: {&quot;concrete_project_type&quot;:[&quot;Driveway&quot;],&quot;concrete_work_type&quot;:&quot;New installation&quot;,&quot;concrete_material&quot;:&quot;Standard concrete&quot;,&quot;concrete_scope&quot;:&quot;Medium (~200-600 sq ft)&quot;,&quot;concrete_site_condition&quot;:&quot;Open and ready&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What type of concrete project is this?</td>
+                      <td>Driveway</td>
+                    </tr>
+                    <tr>
+                      <td>What service do you need done?</td>
+                      <td>New installation</td>
+                    </tr>
+                    <tr>
+                      <td>What material or finish do you want?</td>
+                      <td>Standard concrete</td>
+                    </tr>
+                    <tr>
+                      <td>About how big is the job?</td>
+                      <td>Medium (~200-600 sq ft)</td>
+                    </tr>
+                    <tr>
+                      <td>What is the condition of the site now?</td>
+                      <td>Open and ready</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 16900.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Deck Installation / Repair</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-23T17:24:57.663Z
+                <br />
+                AI mode: auto | Signal source: fallback | Execution: fallback | Live invocation: yes | Cache: off | Status: ready
+              </p>
+              <p class="service-meta">Multipliers: {&quot;pricingRegionModelKey&quot;:&quot;los-angeles-ca&quot;,&quot;resolvedRegion&quot;:&quot;los_angeles&quot;,&quot;regionalMultiplier&quot;:1.2,&quot;travelDistanceMiles&quot;:3.1,&quot;travelMultiplier&quot;:1,&quot;luxuryMultiplier&quot;:1,&quot;serviceMultipliers&quot;:[{&quot;service&quot;:&quot;Deck Installation / Repair&quot;,&quot;conditionMultiplier&quot;:0.82,&quot;terrainMultiplier&quot;:1,&quot;accessMultiplier&quot;:1,&quot;materialMultiplier&quot;:1.612,&quot;regionalMultiplier&quot;:1.2,&quot;luxuryMultiplier&quot;:1}]}</p>
+              <p class="service-meta">Selected answers: {&quot;deck_work_type&quot;:&quot;Repair existing deck&quot;,&quot;deck_material&quot;:&quot;Composite&quot;,&quot;deck_scope&quot;:&quot;Small (up to ~150 sq ft)&quot;,&quot;deck_area_type&quot;:&quot;Rooftop or specialty area&quot;,&quot;deck_repair_condition&quot;:&quot;Some damaged boards&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What service do you need done?</td>
+                      <td>Repair existing deck</td>
+                    </tr>
+                    <tr>
+                      <td>What deck material do you want?</td>
+                      <td>Composite</td>
+                    </tr>
+                    <tr>
+                      <td>About how large is the deck project?</td>
+                      <td>Small (up to ~150 sq ft)</td>
+                    </tr>
+                    <tr>
+                      <td>What type of work area is it?</td>
+                      <td>Rooftop or specialty area</td>
+                    </tr>
+                    <tr>
+                      <td>If this is a repair, what condition is the deck in?</td>
+                      <td>Some damaged boards</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 9450.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Exterior Painting</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-23T17:25:04.234Z
+                <br />
+                AI mode: auto | Signal source: fallback | Execution: fallback | Live invocation: yes | Cache: off | Status: ready
+              </p>
+              <p class="service-meta">Multipliers: {&quot;pricingRegionModelKey&quot;:&quot;los-angeles-ca&quot;,&quot;resolvedRegion&quot;:&quot;los_angeles&quot;,&quot;regionalMultiplier&quot;:1.2,&quot;travelDistanceMiles&quot;:3.1,&quot;travelMultiplier&quot;:1,&quot;luxuryMultiplier&quot;:1,&quot;serviceMultipliers&quot;:[{&quot;service&quot;:&quot;Exterior Painting&quot;,&quot;conditionMultiplier&quot;:1.1922167181270669,&quot;terrainMultiplier&quot;:1,&quot;accessMultiplier&quot;:1.1542350732142548,&quot;materialMultiplier&quot;:1.0900383675201644,&quot;regionalMultiplier&quot;:1.2,&quot;luxuryMultiplier&quot;:1}]}</p>
+              <p class="service-meta">Selected answers: {&quot;painting_target&quot;:&quot;Fence or detached structure&quot;,&quot;painting_surface_type&quot;:&quot;Wood&quot;,&quot;painting_condition&quot;:&quot;Needs prep and repairs&quot;,&quot;painting_scope&quot;:&quot;One side or small area&quot;,&quot;painting_access&quot;:&quot;Two-story areas&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What needs to be painted?</td>
+                      <td>Fence or detached structure</td>
+                    </tr>
+                    <tr>
+                      <td>What type of surface is being painted?</td>
+                      <td>Wood</td>
+                    </tr>
+                    <tr>
+                      <td>What is the current condition of the surface?</td>
+                      <td>Needs prep and repairs</td>
+                    </tr>
+                    <tr>
+                      <td>What is the size of the job?</td>
+                      <td>One side or small area</td>
+                    </tr>
+                    <tr>
+                      <td>How difficult is access?</td>
+                      <td>Two-story areas</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 3650.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Roofing</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-23T17:25:11.055Z
+                <br />
+                AI mode: auto | Signal source: fallback | Execution: fallback | Live invocation: yes | Cache: off | Status: ready
+              </p>
+              <p class="service-meta">Multipliers: {&quot;pricingRegionModelKey&quot;:&quot;los-angeles-ca&quot;,&quot;resolvedRegion&quot;:&quot;los_angeles&quot;,&quot;regionalMultiplier&quot;:1.2,&quot;travelDistanceMiles&quot;:3.1,&quot;travelMultiplier&quot;:1,&quot;luxuryMultiplier&quot;:1,&quot;serviceMultipliers&quot;:[{&quot;service&quot;:&quot;Roofing&quot;,&quot;conditionMultiplier&quot;:1,&quot;terrainMultiplier&quot;:1,&quot;accessMultiplier&quot;:1.18,&quot;materialMultiplier&quot;:1.14,&quot;regionalMultiplier&quot;:1.2,&quot;luxuryMultiplier&quot;:1}]}</p>
+              <p class="service-meta">Selected answers: {&quot;roofing_work_type&quot;:&quot;Leak repair&quot;,&quot;roofing_type&quot;:&quot;Flat roof&quot;,&quot;roofing_problem&quot;:&quot;Missing or damaged area&quot;,&quot;roofing_scope&quot;:&quot;Small section&quot;,&quot;roofing_access&quot;:&quot;Steep or difficult&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What type of roofing work do you need?</td>
+                      <td>Leak repair</td>
+                    </tr>
+                    <tr>
+                      <td>What type of roof is it?</td>
+                      <td>Flat roof</td>
+                    </tr>
+                    <tr>
+                      <td>What best describes the problem?</td>
+                      <td>Missing or damaged area</td>
+                    </tr>
+                    <tr>
+                      <td>About how much of the roof is involved?</td>
+                      <td>Small section</td>
+                    </tr>
+                    <tr>
+                      <td>How easy is roof access?</td>
+                      <td>Steep or difficult</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 700.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Junk Removal</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-23T17:25:17.706Z
+                <br />
+                AI mode: auto | Signal source: fallback | Execution: fallback | Live invocation: yes | Cache: off | Status: ready
+              </p>
+              <p class="service-meta">Multipliers: {&quot;pricingRegionModelKey&quot;:&quot;los-angeles-ca&quot;,&quot;resolvedRegion&quot;:&quot;los_angeles&quot;,&quot;regionalMultiplier&quot;:1.2,&quot;travelDistanceMiles&quot;:3.1,&quot;travelMultiplier&quot;:1,&quot;luxuryMultiplier&quot;:1,&quot;serviceMultipliers&quot;:[{&quot;service&quot;:&quot;Junk Removal&quot;,&quot;conditionMultiplier&quot;:0.96,&quot;terrainMultiplier&quot;:1,&quot;accessMultiplier&quot;:1,&quot;materialMultiplier&quot;:1,&quot;regionalMultiplier&quot;:1.2,&quot;luxuryMultiplier&quot;:1}]}</p>
+              <p class="service-meta">Selected answers: {&quot;junk_type&quot;:&quot;Yard debris&quot;,&quot;junk_amount&quot;:&quot;Medium load (about half a trailer or small truck)&quot;,&quot;junk_location&quot;:&quot;Curbside&quot;,&quot;junk_heavy_items&quot;:&quot;No&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What needs to be removed?</td>
+                      <td>Yard debris</td>
+                    </tr>
+                    <tr>
+                      <td>How much junk is there?</td>
+                      <td>Medium load (about half a trailer or small truck)</td>
+                    </tr>
+                    <tr>
+                      <td>Where is the junk located?</td>
+                      <td>Curbside</td>
+                    </tr>
+                    <tr>
+                      <td>Are there any heavy or difficult items?</td>
+                      <td>No</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 450.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Outdoor Lighting Installation</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-23T17:25:25.348Z
+                <br />
+                AI mode: auto | Signal source: fallback | Execution: fallback | Live invocation: yes | Cache: off | Status: ready
+              </p>
+              <p class="service-meta">Multipliers: {&quot;pricingRegionModelKey&quot;:&quot;los-angeles-ca&quot;,&quot;resolvedRegion&quot;:&quot;los_angeles&quot;,&quot;regionalMultiplier&quot;:1.2,&quot;travelDistanceMiles&quot;:3.1,&quot;travelMultiplier&quot;:1,&quot;luxuryMultiplier&quot;:1,&quot;serviceMultipliers&quot;:[{&quot;service&quot;:&quot;Outdoor Lighting Installation&quot;,&quot;conditionMultiplier&quot;:1.4537600000000002,&quot;terrainMultiplier&quot;:1,&quot;accessMultiplier&quot;:1,&quot;materialMultiplier&quot;:1,&quot;regionalMultiplier&quot;:1.2,&quot;luxuryMultiplier&quot;:1}]}</p>
+              <p class="service-meta">Selected answers: {&quot;lighting_work_type&quot;:&quot;Repair existing lighting&quot;,&quot;lighting_type&quot;:[&quot;Accent or landscape lights&quot;,&quot;Driveway lights&quot;,&quot;Pathway lights&quot;],&quot;lighting_scope&quot;:&quot;One medium-sized area&quot;,&quot;lighting_power&quot;:&quot;Partly&quot;,&quot;lighting_install_difficulty&quot;:&quot;Complex or large-property installation&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>What do you need help with?</td>
+                      <td>Repair existing lighting</td>
+                    </tr>
+                    <tr>
+                      <td>What kind of lighting is this for?</td>
+                      <td>Accent or landscape lights | Driveway lights | Pathway lights</td>
+                    </tr>
+                    <tr>
+                      <td>How much of the property needs lighting work?</td>
+                      <td>One medium-sized area</td>
+                    </tr>
+                    <tr>
+                      <td>Is power already available where the lighting is needed?</td>
+                      <td>Partly</td>
+                    </tr>
+                    <tr>
+                      <td>What best describes the installation difficulty?</td>
+                      <td>Complex or large-property installation</td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> 675.00</p>
+            </section>
+            <section class="service-card">
+              <h3>Other</h3>
+              <p class="service-meta">
+                Submitted at 2026-03-23T17:25:31.882Z
+                <br />
+                AI mode: auto | Signal source: unsupported_request | Execution: unsupported_request | Live invocation: no | Cache: none | Status: failed
+              </p>
+              <p class="service-meta">Multipliers: n/a</p>
+              <p class="service-meta">Selected answers: {&quot;other_outdoor_service&quot;:&quot;No&quot;}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <tr>
+                      <td>Is this an outdoor service?</td>
+                      <td>No</td>
+                    </tr>
+                    <tr>
+                      <td>What kind of project do you need help with?</td>
+                      <td></td>
+                    </tr>
+                    <tr>
+                      <td>What size is the project?</td>
+                      <td></td>
+                    </tr>
+                    <tr>
+                      <td>What type of property is this for?</td>
+                      <td></td>
+                    </tr>
+                    <tr>
+                      <td>How easy is access to the work area?</td>
+                      <td></td>
+                    </tr>
+                </tbody>
+              </table>
+              <p class="estimate"><strong>Estimated Price:</strong> ERROR: Estimator generation failed for lead 1b9b7afd-e99a-4653-b417-50575fbe0db9. Estimator AI mode: auto. | Estimator signal source: unsupported_request. | Estimator AI execution: unsupported_request. | Estimator AI live invocation: no. | Estimator AI cache mode: off. | Estimator AI cache status: none. | Estimator generation failed: Sorry, the current SnapQuote model only supports outdoor services at this time.</p>
+            </section>
+        </section>
+    </main>
+  </body>
+</html>

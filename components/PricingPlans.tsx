@@ -34,7 +34,7 @@ const plans: Array<{
     key: "solo",
     name: "Solo",
     price: "Free",
-    description: "For owner-operators who want a simple way to review leads and quote faster.",
+    description: "For owner-operators who want a simple way to review leads and estimate faster.",
     monthlyCredits: 5,
     teamMembers: 1
   },
@@ -66,7 +66,7 @@ const creditPacks = [
 const faqItems = [
   {
     title: "What happens when I run out of credits?",
-    body: "You can still browse leads, photos, job details, quote tools, and AI estimate context, but you will not be able to unlock more customer contact info until you reset or buy more credits."
+    body: "You can still browse leads, photos, job details, estimate tools, and AI estimate context, but you will not be able to unlock more customer contact info until you reset or buy more credits."
   },
   {
     title: "When do credits reset?",
@@ -86,7 +86,7 @@ function getPlanFeatures(teamMembers: number): string[] {
   return [
     "View all leads and job details",
     "Unlock customer contact info for 1 credit per lead",
-    "Send quotes",
+    "Send estimates",
     "Access to AI estimator",
     `${teamMembers} team member${teamMembers === 1 ? "" : "s"} allowed`
   ];

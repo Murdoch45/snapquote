@@ -36,7 +36,7 @@ export function ServiceQuestions({
       <div className="space-y-1">
         <Label className="text-[13px] font-semibold text-[#374151]">Estimator Questions</Label>
         <p className="text-xs text-[#6B7280]">
-          Answer a few quick questions so the quote request includes service-specific details.
+          Answer a few quick questions so the estimate request includes service-specific details.
         </p>
       </div>
 

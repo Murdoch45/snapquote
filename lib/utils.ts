@@ -37,6 +37,36 @@ export function toCurrency(value: number | string | null): string {
   }).format(numeric);
 }
 
+function toNullableNumber(value: number | string | null | undefined): number | null {
+  if (value == null) return null;
+  const numeric = typeof value === "string" ? Number(value) : value;
+  return Number.isFinite(numeric) ? numeric : null;
+}
+
+export function formatCurrencyRange(
+  low: number | string | null | undefined,
+  high: number | string | null | undefined,
+  fallback?: number | string | null | undefined
+): string | null {
+  const normalizedLow = toNullableNumber(low);
+  const normalizedHigh = toNullableNumber(high);
+  const normalizedFallback = toNullableNumber(fallback);
+
+  if (normalizedLow != null && normalizedHigh != null) {
+    if (normalizedLow === normalizedHigh) {
+      return toCurrency(normalizedLow);
+    }
+
+    return `${toCurrency(normalizedLow)} \u2013 ${toCurrency(normalizedHigh)}`;
+  }
+
+  if (normalizedLow != null) return toCurrency(normalizedLow);
+  if (normalizedHigh != null) return toCurrency(normalizedHigh);
+  if (normalizedFallback != null) return toCurrency(normalizedFallback);
+
+  return null;
+}
+
 export function toRelativeMinutes(dateInput: string | Date): string {
   const date = dateInput instanceof Date ? dateInput : new Date(dateInput);
   return formatDistanceToNowStrict(date, { addSuffix: true });

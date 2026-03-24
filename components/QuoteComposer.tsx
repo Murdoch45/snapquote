@@ -9,10 +9,19 @@ import { SubscriptionRequiredModal } from "@/components/SubscriptionRequiredModa
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { PriceSlider } from "@/components/PriceSlider";
+import { formatCurrencyRange } from "@/lib/utils";
 
 type Props = {
   leadId: string;
+  publicId: string;
   snapQuote: number;
+  estimateLow: number | null;
+  estimateHigh: number | null;
+  serviceEstimates: Array<{
+    service?: unknown;
+    lowEstimate?: unknown;
+    highEstimate?: unknown;
+  }>;
   initialMessage: string;
   customerName: string | null;
   customerPhone: string | null;
@@ -46,7 +55,11 @@ function getAddressParts(address: string | null): { street: string; locality: st
 
 export function QuoteComposer({
   leadId,
+  publicId,
   snapQuote,
+  estimateLow,
+  estimateHigh,
+  serviceEstimates,
   initialMessage,
   customerName,
   customerPhone,
@@ -55,7 +68,10 @@ export function QuoteComposer({
   canSend,
   isLocked
 }: Props) {
-  const [price, setPrice] = useState(snapQuote);
+  const [priceRange, setPriceRange] = useState(() => ({
+    low: estimateLow ?? snapQuote,
+    high: estimateHigh ?? snapQuote
+  }));
   const [message, setMessage] = useState(initialMessage);
   const [sendEmail, setSendEmail] = useState(Boolean(customerEmail));
   const [sendText, setSendText] = useState(Boolean(customerPhone));
@@ -65,6 +81,13 @@ export function QuoteComposer({
   const [copiedMessage, setCopiedMessage] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
   const addressParts = getAddressParts(customerAddress);
+  const sendingRange = formatCurrencyRange(priceRange.low, priceRange.high) ?? `${priceRange.low} - ${priceRange.high}`;
+  const multiServiceBreakdown = serviceEstimates.filter(
+    (estimate) =>
+      typeof estimate.service === "string" &&
+      typeof estimate.lowEstimate === "number" &&
+      typeof estimate.highEstimate === "number"
+  );
 
   const copyText = async (value: string, successLabel: string) => {
     try {
@@ -77,7 +100,7 @@ export function QuoteComposer({
 
   const onSend = async () => {
     if (isLocked) {
-      toast.error("Upgrade your plan to contact this customer and send quotes.");
+      toast.error("Upgrade your plan to contact this customer and send estimates.");
       return;
     }
 
@@ -93,7 +116,9 @@ export function QuoteComposer({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           leadId,
-          price,
+          publicId,
+          estimatedPriceLow: priceRange.low,
+          estimatedPriceHigh: priceRange.high,
           message,
           sendEmail,
           sendText
@@ -104,17 +129,17 @@ export function QuoteComposer({
         setShowSubscriptionModal(true);
         return;
       }
-      if (!res.ok) throw new Error(json.error || "Failed to send quote.");
+      if (!res.ok) throw new Error(json.error || "Failed to send estimate.");
       setQuoteLink(json.publicUrl ?? null);
       setCopiedMessage(json.resolvedMessage ?? message);
       setSent(true);
       if (json.warning) {
         toast.warning(json.warning);
       } else {
-        toast.success("Quote sent to customer.");
+        toast.success("Estimate sent to customer.");
       }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to send quote.");
+      toast.error(error instanceof Error ? error.message : "Failed to send estimate.");
     } finally {
       setLoading(false);
     }
@@ -137,13 +162,33 @@ export function QuoteComposer({
             </p>
           </div>
         </div>
-        <PriceSlider
-          snapQuote={snapQuote}
-          value={price}
-          onChange={setPrice}
-        />
+        <div className="space-y-3 rounded-lg border border-blue-200 bg-blue-50 p-4">
+          <p className="text-sm font-semibold text-blue-900">Sending to customer:</p>
+          <p className="mt-1 text-3xl font-bold leading-none text-blue-600">{sendingRange}</p>
+          {multiServiceBreakdown.length > 1 ? (
+            <div className="space-y-2 rounded-lg border border-blue-100 bg-white/60 p-3">
+              {multiServiceBreakdown.map((estimate) => (
+                <div
+                  key={`${estimate.service}-${estimate.lowEstimate}-${estimate.highEstimate}`}
+                  className="flex items-center justify-between gap-4 text-sm text-gray-600"
+                >
+                  <span>{estimate.service as string}</span>
+                  <span>
+                    {formatCurrencyRange(estimate.lowEstimate as number, estimate.highEstimate as number)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : null}
+          <PriceSlider
+            snapQuote={snapQuote}
+            low={priceRange.low}
+            high={priceRange.high}
+            onChange={setPriceRange}
+          />
+        </div>
         <div className="space-y-2">
-          <Label htmlFor="quote-message">Quote message</Label>
+          <Label htmlFor="quote-message">Estimate message</Label>
           <Textarea
             id="quote-message"
             value={message}
@@ -171,7 +216,7 @@ export function QuoteComposer({
         </div>
         <div className="flex flex-wrap gap-3">
           <Button onClick={onSend} disabled={loading || !canSend || sent || isLocked}>
-            {sent ? "Quote Sent" : loading ? "Sending..." : "Send Quote"}
+            {sent ? "Estimate Sent" : loading ? "Sending..." : "Send Estimate"}
           </Button>
           {isLocked ? (
             <Button asChild variant="outline">
@@ -183,10 +228,10 @@ export function QuoteComposer({
             variant="outline"
             onClick={() => {
               if (!quoteLink) {
-                toast.error("Send the quote first to copy its link.");
+                toast.error("Send the estimate first to copy its link.");
                 return;
               }
-              void copyText(quoteLink, "Quote link copied.");
+              void copyText(quoteLink, "Estimate link copied.");
             }}
           >
             Copy Link
@@ -194,24 +239,24 @@ export function QuoteComposer({
           <Button
             type="button"
             variant="outline"
-            onClick={() => void copyText(copiedMessage ?? message, "Quote message copied.")}
+            onClick={() => void copyText(copiedMessage ?? message, "Estimate message copied.")}
           >
             Copy Message
           </Button>
         </div>
         {!canSend && (
           <p className="text-sm text-red-600">
-            Quote limit exceeded. Upgrade to continue sending this month.
+            Estimate limit exceeded. Upgrade to continue sending this month.
           </p>
         )}
         {isLocked && (
           <p className="text-sm text-amber-700">
-            Upgrade your plan to contact this customer and send quotes.
+            Upgrade your plan to contact this customer and send estimates.
           </p>
         )}
         {sent && (
           <p className="text-sm text-emerald-700">
-            Quote sent. You can now copy the link or message above.
+            Estimate sent. You can now copy the link or message above.
           </p>
         )}
       </div>

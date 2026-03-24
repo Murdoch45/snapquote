@@ -12,34 +12,9 @@ import {
   TableRow
 } from "@/components/ui/table";
 import { requireAuth } from "@/lib/auth/requireAuth";
+import { getServiceBadgeClassName } from "@/lib/serviceColors";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { toCurrency } from "@/lib/utils";
-
-function getServiceBadgeClass(service: string | null | undefined): string {
-  const normalized = service?.trim().toLowerCase() ?? "";
-
-  if (normalized.includes("pressure washing")) {
-    return "border-transparent bg-[#EFF6FF] text-[#2563EB]";
-  }
-
-  if (normalized.includes("lawn care")) {
-    return "border-transparent bg-[#F0FDF4] text-[#16A34A]";
-  }
-
-  if (normalized.includes("roof")) {
-    return "border-transparent bg-[#FFF7ED] text-[#EA580C]";
-  }
-
-  if (normalized.includes("concrete")) {
-    return "border-transparent bg-[#F9FAFB] text-[#6B7280]";
-  }
-
-  if (normalized.includes("fenc")) {
-    return "border-transparent bg-[#F5F3FF] text-[#7C3AED]";
-  }
-
-  return "border-transparent bg-[#F9FAFB] text-[#6B7280]";
-}
+import { formatCurrencyRange } from "@/lib/utils";
 
 function getStatusBadgeClass(status: string | null | undefined): string {
   switch (status) {
@@ -64,7 +39,7 @@ export default async function QuotesPage() {
   const supabase = await createServerSupabaseClient();
   const { data: quotes } = await supabase
     .from("quotes")
-    .select("id,public_id,price,status,sent_at,accepted_at,lead:leads(address_full,services)")
+    .select("id,public_id,price,estimated_price,estimated_price_low,estimated_price_high,status,sent_at,accepted_at,lead:leads(address_full,services)")
     .eq("org_id", auth.orgId)
     .order("sent_at", { ascending: false });
 
@@ -72,7 +47,7 @@ export default async function QuotesPage() {
     <div className="space-y-6">
       <Card className="shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
         <CardHeader>
-          <CardTitle className="text-lg font-semibold text-[#111827]">Sent quotes</CardTitle>
+          <CardTitle className="text-lg font-semibold text-[#111827]">Sent estimates</CardTitle>
         </CardHeader>
         <CardContent className="pt-0">
           <div className="overflow-hidden rounded-[12px] border border-[#E5E7EB]">
@@ -95,7 +70,7 @@ export default async function QuotesPage() {
                     Sent
                   </TableHead>
                   <TableHead className="h-auto px-5 py-3 text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280]">
-                    Open public quote
+                    Open public estimate
                   </TableHead>
                   <TableHead className="w-10 px-5 py-3">
                     <span className="sr-only">Open</span>
@@ -108,7 +83,16 @@ export default async function QuotesPage() {
                   const address = lead?.address_full ?? "";
                   const primaryService = ((lead?.services as string[] | null) ?? [])[0] ?? "Service";
                   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
-                return (
+                  const displayPrice =
+                    formatCurrencyRange(
+                      quote.estimated_price_low as number | string | null | undefined,
+                      quote.estimated_price_high as number | string | null | undefined,
+                      quote.estimated_price as number | string | null | undefined
+                    ) ??
+                    formatCurrencyRange(null, null, quote.price as number | string | null | undefined) ??
+                    "-";
+
+                  return (
                   <TableRow
                     key={quote.id}
                     className="border-b border-[#E5E7EB] transition-colors hover:bg-[#F9FAFB]"
@@ -121,7 +105,7 @@ export default async function QuotesPage() {
                         ).map((service) => (
                           <Badge
                             key={service}
-                            className={`px-3 py-1 text-xs font-semibold ${getServiceBadgeClass(service)}`}
+                            className={`px-3 py-1 text-xs font-semibold ${getServiceBadgeClassName(service)}`}
                           >
                             {service}
                           </Badge>
@@ -129,7 +113,7 @@ export default async function QuotesPage() {
                       </div>
                     </TableCell>
                       <TableCell className="px-5 py-4 text-2xl font-bold text-[#111827]">
-                        {toCurrency(Number(quote.price))}
+                        {displayPrice}
                       </TableCell>
                       <TableCell className="px-5 py-4">
                         {address ? (
@@ -160,7 +144,7 @@ export default async function QuotesPage() {
                           className="h-auto border-2 border-[#2563EB] bg-transparent px-4 py-2 font-semibold text-[#2563EB] hover:bg-[#EFF6FF]"
                         >
                           <Link href={`/q/${quote.public_id}`} target="_blank">
-                            Open public quote
+                            Open public estimate
                           </Link>
                         </Button>
                       </TableCell>

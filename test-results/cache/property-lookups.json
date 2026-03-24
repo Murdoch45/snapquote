@@ -142,5 +142,37 @@
     "placeId": "ChIJD1cICMIG5IkRYY1iKGn1gck",
     "lat": 42.2777158,
     "lng": -71.8334735
+  },
+  "3003 S Beverly Dr, Los Angeles, CA 90034": {
+    "city": "Los Angeles",
+    "originalAddress": "3003 S Beverly Dr, Los Angeles, CA 90034",
+    "formattedAddress": "3003 S Beverly Dr, Los Angeles, CA 90034, USA",
+    "placeId": "ChIJBT5yvda7woARs5ttE5SKm_Q",
+    "lat": 34.0354134,
+    "lng": -118.3973932
+  },
+  "11356 Thurston Cir, Los Angeles, CA 90049": {
+    "city": "Los Angeles",
+    "originalAddress": "11356 Thurston Cir, Los Angeles, CA 90049",
+    "formattedAddress": "11356 Thurston Cir, Los Angeles, CA 90049, USA",
+    "placeId": "ChIJg2D3h7-8woARteDHCwg8Ejc",
+    "lat": 34.0738662,
+    "lng": -118.4653082
+  },
+  "712 Walden Dr, Beverly Hills, CA 90210": {
+    "city": "Beverly Hills",
+    "originalAddress": "712 Walden Dr, Beverly Hills, CA 90210",
+    "formattedAddress": "712 Walden Dr, Beverly Hills, CA 90210, USA",
+    "placeId": "ChIJJzu8rgy8woARJHhP-oMgnQs",
+    "lat": 34.0712197,
+    "lng": -118.4158042
+  },
+  "216 S Almont Dr, Beverly Hills, CA 90211": {
+    "city": "Beverly Hills",
+    "originalAddress": "216 S Almont Dr, Beverly Hills, CA 90211",
+    "formattedAddress": "216 S Almont Dr, Beverly Hills, CA 90211, USA",
+    "placeId": "ChIJ8Rr0NFe5woARPXZcIQ_tciY",
+    "lat": 34.0642716,
+    "lng": -118.3873853
   }
 }

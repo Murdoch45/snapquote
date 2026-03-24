@@ -1,73 +1,112 @@
 "use client";
 
-import { useMemo } from "react";
+import * as Slider from "@radix-ui/react-slider";
+import { useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toCurrency } from "@/lib/utils";
 
 type PriceSliderProps = {
-  snapQuote: number;
-  value: number;
-  onChange: (value: number) => void;
+  low: number;
+  high: number;
+  onChange: ((low: number, high: number) => void) | ((value: { low: number; high: number }) => void);
+  snapQuote?: number;
 };
 
-export function PriceSlider({ snapQuote, value, onChange }: PriceSliderProps) {
-  const { min, max } = useMemo(() => {
-    const extension = Math.max(100, Math.ceil(snapQuote * 0.25));
-    return {
-      min: Math.max(0, snapQuote - extension),
-      max: snapQuote + extension
-    };
-  }, [snapQuote]);
+const STEP = 25;
 
-  const snapQuoteLeft = `${((snapQuote - min) / Math.max(max - min, 1)) * 100}%`;
+function roundToStep(value: number) {
+  return Math.round(value / STEP) * STEP;
+}
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max);
+}
+
+function normalize(low: number, high: number, min: number, max: number) {
+  const nextLow = clamp(roundToStep(low), min, max);
+  const nextHigh = clamp(roundToStep(high), nextLow, max);
+  return { low: nextLow, high: nextHigh };
+}
+
+export function PriceSlider({ low, high, onChange }: PriceSliderProps) {
+  const boundsRef = useRef({
+    min: Math.max(0, Math.round((low * 0.5) / STEP) * STEP),
+    max: Math.round((high * 2) / STEP) * STEP
+  });
+
+  const trackMin = boundsRef.current.min;
+  const trackMax = Math.max(boundsRef.current.max, trackMin + STEP);
+  const range = normalize(low, high, trackMin, trackMax);
+
+  const emitChange = (nextLow: number, nextHigh: number) => {
+    const next = normalize(nextLow, nextHigh, trackMin, trackMax);
+    if (onChange.length >= 2) {
+      (onChange as (low: number, high: number) => void)(next.low, next.high);
+      return;
+    }
+    (onChange as (value: { low: number; high: number }) => void)(next);
+  };
 
   return (
-    <div className="space-y-3 rounded-lg border border-gray-200 bg-gray-50 p-4">
+    <div className="space-y-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
       <div className="flex items-center justify-between">
-        <Label htmlFor="price-range">Final price</Label>
-        <p className="text-sm font-medium text-gray-700">{toCurrency(value)}</p>
+        <Label>Estimate range</Label>
+        <p className="text-sm font-medium text-gray-700">
+          {toCurrency(range.low)} - {toCurrency(range.high)}
+        </p>
       </div>
-      <div className="rounded-lg border border-gray-200 bg-white p-3">
-        <div className="relative h-12">
-          <div
-            className="absolute top-0 -translate-x-1/2 text-center"
-            style={{ left: snapQuoteLeft }}
-          >
-            <div className="mx-auto h-2.5 w-2.5 rounded-full bg-blue-600" />
-            <p className="mt-1 text-[11px] font-semibold text-gray-700">SnapQuote</p>
-            <p className="text-[11px] text-gray-500">{toCurrency(snapQuote)}</p>
-          </div>
-        </div>
-      </div>
-      <input
-        id="price-range"
-        type="range"
-        min={min}
-        max={max}
-        step={5}
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-gray-200 accent-blue-600"
-      />
+
+      <Slider.Root
+        value={[range.low, range.high]}
+        min={trackMin}
+        max={trackMax}
+        step={STEP}
+        minStepsBetweenThumbs={0}
+        onValueChange={([nextLow = range.low, nextHigh = range.high]) => emitChange(nextLow, nextHigh)}
+        className="relative flex h-10 w-full touch-none select-none items-center"
+      >
+        <Slider.Track className="relative h-2 w-full grow rounded-full bg-gray-200">
+          <Slider.Range className="absolute h-full rounded-full bg-blue-500" />
+        </Slider.Track>
+        <Slider.Thumb
+          aria-label="Low price handle"
+          className="block h-5 w-5 rounded-full border-2 border-blue-600 bg-white shadow outline-none focus-visible:ring-2 focus-visible:ring-blue-300"
+        />
+        <Slider.Thumb
+          aria-label="High price handle"
+          className="block h-5 w-5 rounded-full border-2 border-emerald-600 bg-white shadow outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
+        />
+      </Slider.Root>
+
       <div className="flex items-center justify-between text-xs text-gray-500">
-        <span>{toCurrency(min)}</span>
-        <span>{toCurrency(max)}</span>
+        <span>{toCurrency(trackMin)}</span>
+        <span>{toCurrency(trackMax)}</span>
       </div>
-      <div>
-        <Label htmlFor="price-input">Manual price input</Label>
-        <div className="relative">
-          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
-            $
-          </span>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <Label htmlFor="price-input-low">Low</Label>
           <Input
-            id="price-input"
+            id="price-input-low"
             type="number"
-            min={0}
-            step={5}
-            value={value}
-            onChange={(e) => onChange(Number(e.target.value || 0))}
-            className="pl-7"
+            min={trackMin}
+            max={range.high}
+            step={STEP}
+            value={range.low}
+            onChange={(e) => emitChange(Number(e.target.value || 0), range.high)}
+          />
+        </div>
+        <div>
+          <Label htmlFor="price-input-high">High</Label>
+          <Input
+            id="price-input-high"
+            type="number"
+            min={range.low}
+            max={trackMax}
+            step={STEP}
+            value={range.high}
+            onChange={(e) => emitChange(range.low, Number(e.target.value || 0))}
           />
         </div>
       </div>

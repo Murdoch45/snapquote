@@ -5,6 +5,7 @@ import { sendEmail } from "@/lib/notify";
 import { buildQuoteLink, renderQuoteTemplate } from "@/lib/quote-template";
 import { SubscriptionRequiredError, requireActiveSubscription } from "@/lib/subscription";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { sendQuoteSms } from "@/lib/twilio";
 import { incrementUsageOnQuoteSend } from "@/lib/usage";
 import { sendQuoteSchema } from "@/lib/validations";
@@ -13,6 +14,10 @@ export const runtime = "nodejs";
 
 function makePublicId(): string {
   return randomBytes(6).toString("base64url");
+}
+
+function roundToNearestFive(value: number): number {
+  return Math.round(value / 5) * 5;
 }
 
 export async function POST(request: Request) {
@@ -26,6 +31,7 @@ export async function POST(request: Request) {
     const body = sendQuoteSchema.parse(await request.json());
     bodyLeadId = body.leadId;
     const admin = createAdminClient();
+    const supabase = await createServerSupabaseClient();
 
     await requireActiveSubscription(auth.orgId);
 
@@ -53,7 +59,7 @@ export async function POST(request: Request) {
       .eq("lead_id", body.leadId)
       .maybeSingle();
     if (existingQuote) {
-      return NextResponse.json({ error: "Quote already exists for this lead." }, { status: 400 });
+      return NextResponse.json({ error: "Estimate already exists for this lead." }, { status: 400 });
     }
 
     const { data: profile } = await admin
@@ -61,14 +67,17 @@ export async function POST(request: Request) {
       .select("business_name,phone,email")
       .eq("org_id", auth.orgId)
       .single();
-    const publicId = makePublicId();
+    const {
+      data: { user }
+    } = await supabase.auth.getUser();
+    const publicId = body.publicId ?? makePublicId();
     const quoteLink = buildQuoteLink(publicId);
     const resolvedMessage = renderQuoteTemplate(body.message, {
       customerName: (lead.customer_name as string) || "Customer",
       companyName: (profile?.business_name as string) || "SnapQuote",
       quoteLink,
       contractorPhone: (profile?.phone as string) || "Not provided",
-      contractorEmail: (profile?.email as string) || "Not provided"
+      contractorEmail: user?.email || (profile?.email as string) || "Not provided"
     });
     const { data: quote, error: quoteError } = await admin
       .from("quotes")
@@ -76,14 +85,16 @@ export async function POST(request: Request) {
         org_id: auth.orgId,
         lead_id: body.leadId,
         public_id: publicId,
-        price: body.price,
+        price: roundToNearestFive((body.estimatedPriceLow + body.estimatedPriceHigh) / 2),
+        estimated_price_low: body.estimatedPriceLow,
+        estimated_price_high: body.estimatedPriceHigh,
         message: resolvedMessage,
         status: "SENT"
       })
       .select("id")
       .single();
 
-    if (quoteError || !quote) throw quoteError || new Error("Quote send failed.");
+    if (quoteError || !quote) throw quoteError || new Error("Estimate send failed.");
     createdQuoteId = quote.id as string;
 
     const sentChannels: ("email" | "text")[] = [];
@@ -98,7 +109,7 @@ export async function POST(request: Request) {
         sentChannels.push("text");
       } catch (error) {
         deliveryErrors.push(
-          error instanceof Error ? error.message : "Failed to send quote by text."
+          error instanceof Error ? error.message : "Failed to send estimate by text."
         );
       }
     }
@@ -110,14 +121,14 @@ export async function POST(request: Request) {
         text: resolvedMessage
       });
       if (!emailSent) {
-        deliveryErrors.push("Failed to send quote by email.");
+        deliveryErrors.push("Failed to send estimate by email.");
       } else {
         sentChannels.push("email");
       }
     }
 
     if (sentChannels.length === 0) {
-      throw new Error(deliveryErrors[0] || "Failed to send quote.");
+      throw new Error(deliveryErrors[0] || "Failed to send estimate.");
     }
 
     await admin
@@ -170,7 +181,7 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to send quote." },
+      { error: error instanceof Error ? error.message : "Failed to send estimate." },
       { status: 400 }
     );
   }

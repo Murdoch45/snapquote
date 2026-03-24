@@ -3416,10 +3416,12 @@ function buildSignalPrompt(
     "Only use quantityEvidence='direct' when the customer explicitly provided dimensions, counts, or footage in the questionnaire, other-text answers, or main description.",
     "If quantity is inferred mainly from photos, satellite, property data, or general context, use strong_inference or weak_inference instead of direct.",
     "When evidence is indirect, prefer stable size bands and conservative quantities inside those bands rather than improvising a fresh exact quantity.",
+    "For landscaping, lawn care, and concrete scope estimates, always default to the lower bound of the detected size band when quantity evidence is indirect or inferred.",
     "Set needsManualReview true for large custom, unusual, or conflicting jobs, but still provide the best structured signal set possible.",
     "The pricingRegion is already determined by the backend from the address. Treat it as fixed context and do not infer or return region.",
     "Detect washable hard surfaces from satellite imagery and photos, then separately infer which of those surfaces are actually in customer scope for relevant services.",
     "Surface types are driveway, motor_court, parking_pad, walkway, and patio.",
+    "summary must be plain English sentences describing what the customer wants done, the condition or difficulty of the job, and any notable details. Write it like a contractor briefing a colleague. No technical labels, no colons, no data formats. Scale the summary length based on service count. For 1 service: write 3 detailed sentences covering scope, condition, size, and access. For 2-3 services: write 2 sentences covering all services briefly. For 4 or more services: write 1-2 concise sentences naming all services and the overall scope only. Never exceed 3 sentences regardless of service count. If multiple services are requested, summarize ALL of them. Do not focus on just one service. Cover the full scope of work across all requested services. Also include a rough size estimate using words like 'around' or 'about' — never an exact number. Base the size on satellite imagery, customer photos, and property data combined with questionnaire answers.",
     JSON.stringify(
       {
         businessName: input.businessName,
@@ -3446,7 +3448,7 @@ function buildSignalPrompt(
     "Return exactly this shape:",
     JSON.stringify(
       {
-        summary: "string",
+        summary: "The customer is looking to have their driveway and fence pressure washed at a Beverly Hills property. The driveway looks to be around 800 to 1,000 square feet based on the satellite view, with heavy oil staining on the driveway and moderate buildup on the fence. Access looks straightforward with no major obstacles.",
         condition: "light",
         access: "easy",
         severity: "minor",
@@ -3907,7 +3909,7 @@ function buildGeneratedEstimate(
   return {
     ...engineEstimate,
     message,
-    summary: engineEstimate.scopeSummary,
+    summary: signals.summary ?? engineEstimate.scopeSummary,
     costBreakdown: engineEstimate.lineItems,
     propertyData,
     terrain: engineEstimate.terrain ?? signals.terrainType ?? null,
@@ -4444,3 +4446,5 @@ export async function generateEstimateAsync(leadId: string) {
 
 export { parseAiOutput };
 export { buildAiSignalsResponseFormat };
+
+

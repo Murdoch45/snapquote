@@ -13,7 +13,7 @@ export default async function PublicQuotePage({ params }: Props) {
 
   const { data: quote } = await admin
     .from("quotes")
-    .select("public_id,org_id,lead:leads(address_full,services),price,message,status,sent_at")
+    .select("public_id,org_id,lead:leads(address_full,services),price,estimated_price,estimated_price_low,estimated_price_high,message,status,sent_at")
     .eq("public_id", publicId)
     .single();
 
@@ -37,6 +37,9 @@ export default async function PublicQuotePage({ params }: Props) {
           services: (lead?.services ?? []) as string[],
           address: lead?.address_full as string,
           price: Number(quote.price),
+          estimatedPrice: quote.estimated_price as number | string | null,
+          estimatedPriceLow: quote.estimated_price_low as number | string | null,
+          estimatedPriceHigh: quote.estimated_price_high as number | string | null,
           message: quote.message as string,
           status: quote.status as "SENT" | "VIEWED" | "ACCEPTED" | "EXPIRED",
           sentAt: quote.sent_at as string,

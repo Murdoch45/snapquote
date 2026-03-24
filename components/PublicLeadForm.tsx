@@ -226,7 +226,7 @@ export function PublicLeadForm({ contractorSlug }: Props) {
     return (
       <div className="rounded-[12px] border border-[#BBF7D0] bg-[#F0FDF4] p-6 text-center">
         <p className="text-base font-semibold text-[#16A34A]">
-          Request sent - you will receive your quote shortly.
+          Request sent - you will receive your estimate shortly.
         </p>
       </div>
     );
@@ -351,7 +351,7 @@ export function PublicLeadForm({ contractorSlug }: Props) {
         </div>
 
         <Button className="mt-6 w-full rounded-[10px] py-3 text-base font-bold" disabled={!canSubmit || loading}>
-          {loading ? "Sending..." : "Get My Quote"}
+          {loading ? "Sending..." : "Get My Estimate"}
         </Button>
       </form>
       <SubscriptionRequiredModal

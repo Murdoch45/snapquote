@@ -2,7 +2,7 @@ export type DemoView = "dashboard" | "leads" | "quotes" | "analytics" | "setting
 
 export type MetricTone = "cool" | "positive" | "neutral";
 
-export type LeadStatus = "New" | "Quoted" | "Scheduled" | "Completed";
+export type LeadStatus = "New" | "Estimated" | "Scheduled" | "Completed";
 
 export type QuoteStatus =
   | "Draft"
@@ -73,7 +73,7 @@ export type SettingsPanel = {
 
 export const overviewMetrics: DemoMetric[] = [
   {
-    label: "Quotes Sent",
+    label: "Estimates Sent",
     value: "86",
     detail: "+14% vs last 30 days",
     tone: "cool"
@@ -91,7 +91,7 @@ export const overviewMetrics: DemoMetric[] = [
     tone: "cool"
   },
   {
-    label: "Average Quote",
+    label: "Average Estimate",
     value: "$278",
     detail: "11 min avg response",
     tone: "neutral"
@@ -113,7 +113,7 @@ export const demoLeads: DemoLead[] = [
     service: "Lawn Cleanup",
     location: "Plano, TX",
     requestedAt: "38 min ago",
-    status: "Quoted",
+    status: "Estimated",
     suggestedQuote: 140,
     photos: 4
   },
@@ -140,7 +140,7 @@ export const demoLeads: DemoLead[] = [
     service: "Junk Removal",
     location: "Sacramento, CA",
     requestedAt: "3 hr ago",
-    status: "Quoted",
+    status: "Estimated",
     suggestedQuote: 360,
     photos: 9
   },
@@ -280,11 +280,11 @@ export const todaySchedule: DemoScheduleItem[] = [
 export const activityFeed: DemoActivityItem[] = [
   {
     title: "AI extracted surfaces and line items",
-    detail: "John Martinez request marked ready to quote.",
+    detail: "John Martinez request marked ready to estimate.",
     timestamp: "12 min ago"
   },
   {
-    title: "Reminder queued for viewed quote",
+    title: "Reminder queued for viewed estimate",
     detail: "Emily Carter follow-up sends at 6:00 PM.",
     timestamp: "28 min ago"
   },
@@ -294,7 +294,7 @@ export const activityFeed: DemoActivityItem[] = [
     timestamp: "1 hr ago"
   },
   {
-    title: "Accepted quote moved to scheduled",
+    title: "Accepted estimate moved to scheduled",
     detail: "Sarah Thompson cleanup added to tomorrow's route.",
     timestamp: "2 hr ago"
   }
@@ -326,7 +326,7 @@ export const settingsPanels: SettingsPanel[] = [
     description: "Blue Ridge Outdoor Services",
     items: [
       "Primary area: Austin metro plus 25 miles",
-      "Quote turnaround target: under 15 minutes",
+      "Estimate turnaround target: under 15 minutes",
       "Office hours: Mon-Sat, 7:00 AM to 6:00 PM"
     ]
   },
@@ -336,7 +336,7 @@ export const settingsPanels: SettingsPanel[] = [
     items: [
       "Instant text acknowledgement enabled",
       "AI service detection for intake photos",
-      "Two reminder nudges before quote expiry"
+      "Two reminder nudges before estimate expiry"
     ]
   },
   {
@@ -349,12 +349,12 @@ export const settingsPanels: SettingsPanel[] = [
     ]
   },
   {
-    title: "Quote preferences",
+    title: "Estimate preferences",
     description: "Guardrails for faster approvals",
     items: [
       "Suggested pricing ranges surfaced on intake",
       "Approval threshold set above $1,500",
-      "Seven-day quote validity with auto reminders"
+      "Seven-day estimate validity with auto reminders"
     ]
   }
 ];

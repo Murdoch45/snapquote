@@ -15,7 +15,7 @@ export async function POST(_request: Request, { params }: Props) {
     .eq("public_id", publicId)
     .single();
 
-  if (!quote) return NextResponse.json({ error: "Quote not found." }, { status: 404 });
+  if (!quote) return NextResponse.json({ error: "Estimate not found." }, { status: 404 });
   if (quote.status === "ACCEPTED" || quote.status === "EXPIRED") {
     return NextResponse.json({ viewed: true, status: quote.status });
   }

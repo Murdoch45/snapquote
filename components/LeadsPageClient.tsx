@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { LeadsRealtimeWatcher } from "@/components/LeadsRealtimeWatcher";
 import { LeadList } from "@/components/LeadList";
-import type { LeadQuestionPreview } from "@/lib/leadPresentation";
 
 type Lead = {
   id: string;
@@ -13,13 +12,14 @@ type Lead = {
   services: string[];
   submitted_at: string;
   ai_suggested_price: number | null;
+  ai_estimate_low: number | null;
+  ai_estimate_high: number | null;
   photo_count?: number;
-  description: string | null;
+  previewPhotos: string[];
+  ai_job_summary: string | null;
   customerName: string | null;
   customerPhone: string | null;
   customerEmail: string | null;
-  jobType: string;
-  questionPreview: LeadQuestionPreview[];
   isUnlocked: boolean;
 };
 

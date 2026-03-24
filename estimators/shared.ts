@@ -742,13 +742,7 @@ export function conditionMultiplier(
 }
 
 export function uncertaintyPct(internalConfidence: number, scope: number): number {
-  let uncertainty =
-    internalConfidence >= 88 ? 0.12 : internalConfidence >= 78 ? 0.18 : internalConfidence >= 66 ? 0.26 : 0.38;
-
-  if (scope > 5000) uncertainty += 0.04;
-  if (scope > 10000) uncertainty += 0.04;
-
-  return clamp(uncertainty, 0.12, 0.5);
+  return 0.1;
 }
 
 export function estimateDrivewaySqft(propertyData: PropertyData): number {
@@ -1278,11 +1272,50 @@ function isEstimatorAuditEnabled(): boolean {
   return raw === "1" || raw === "true" || raw === "yes" || raw === "on";
 }
 
+const NON_REGIONAL_MULTIPLIER_CAP = 1.5;
+
+function capNonRegionalMultipliers(input: {
+  condition: number;
+  terrain: number;
+  access: number;
+  material: number;
+}) {
+  const product = input.condition * input.terrain * input.access * input.material;
+  if (product <= NON_REGIONAL_MULTIPLIER_CAP || product <= 0) {
+    return {
+      condition: input.condition,
+      terrain: input.terrain,
+      access: input.access,
+      material: input.material,
+      combinedBeforeCap: product,
+      combinedAfterCap: product,
+      capped: false
+    };
+  }
+
+  const compressionExponent = Math.log(NON_REGIONAL_MULTIPLIER_CAP) / Math.log(product);
+  return {
+    condition: Math.pow(input.condition, compressionExponent),
+    terrain: Math.pow(input.terrain, compressionExponent),
+    access: Math.pow(input.access, compressionExponent),
+    material: Math.pow(input.material, compressionExponent),
+    combinedBeforeCap: product,
+    combinedAfterCap: NON_REGIONAL_MULTIPLIER_CAP,
+    capped: true
+  };
+}
+
 export function finalizeEstimate(input: FinalizeEstimateInput): ServiceEstimate {
-  const conditionMultiplierApplied = input.conditionMultiplier ?? 1;
-  const terrainMultiplierApplied = input.terrainMultiplier ?? 1;
-  const accessMultiplierApplied = input.accessMultiplier ?? 1;
-  const materialMultiplierApplied = input.materialMultiplier ?? 1;
+  const cappedMultipliers = capNonRegionalMultipliers({
+    condition: input.conditionMultiplier ?? 1,
+    terrain: input.terrainMultiplier ?? 1,
+    access: input.accessMultiplier ?? 1,
+    material: input.materialMultiplier ?? 1
+  });
+  const conditionMultiplierApplied = cappedMultipliers.condition;
+  const terrainMultiplierApplied = cappedMultipliers.terrain;
+  const accessMultiplierApplied = cappedMultipliers.access;
+  const materialMultiplierApplied = cappedMultipliers.material;
   const regionalMultiplierApplied = input.regionalMultiplier ?? 1;
   const luxuryMultiplierApplied = input.luxuryMultiplier ?? 1;
   const basePrice = input.baseScopeOverride ?? progressiveTieredBase(input.scope, input.tieredRates);
@@ -1317,6 +1350,9 @@ export function finalizeEstimate(input: FinalizeEstimateInput): ServiceEstimate 
             priceChangedByFinalRounding:
               roundCurrency(preRoundingLowEstimate) !== lowEstimate ||
               roundCurrency(preRoundingHighEstimate) !== highEstimate,
+            nonRegionalCombinedBeforeCap: roundCurrency(cappedMultipliers.combinedBeforeCap),
+            nonRegionalCombinedAfterCap: roundCurrency(cappedMultipliers.combinedAfterCap),
+            nonRegionalMultiplierCapApplied: cappedMultipliers.capped,
             conditionMultiplierApplied,
             terrainMultiplierApplied,
             accessMultiplierApplied,
@@ -1341,13 +1377,16 @@ export function finalizeEstimate(input: FinalizeEstimateInput): ServiceEstimate 
     jobType: input.jobType,
     lineItems: {
       base_scope: roundCurrency(basePrice),
-      material_adjustment: roundCurrency(basePrice * ((input.materialMultiplier ?? 1) - 1)),
-      condition_adjustment: roundCurrency(basePrice * ((input.conditionMultiplier ?? 1) - 1)),
+      material_adjustment: roundCurrency(basePrice * (materialMultiplierApplied - 1)),
+      condition_adjustment: roundCurrency(basePrice * (conditionMultiplierApplied - 1)),
       terrain_adjustment: roundCurrency(terrainAdjusted - conditionAdjusted),
       access_adjustment: roundCurrency(accessAdjusted - terrainAdjusted),
       regional_adjustment: roundCurrency(regionAdjusted - materialAdjusted),
       luxury_adjustment: roundCurrency(luxuryAdjusted - regionAdjusted),
       minimum_job_floor: roundCurrency(Math.max(0, input.minimumJobPrice - luxuryAdjusted)),
+      non_regional_multiplier_cap: roundCurrency(
+        cappedMultipliers.capped ? basePrice * (cappedMultipliers.combinedAfterCap - cappedMultipliers.combinedBeforeCap) : 0
+      ),
       ...(input.lineItems ?? {})
     },
     terrain: input.terrain ?? null,

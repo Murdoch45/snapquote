@@ -16,7 +16,7 @@ type FeedItem = {
 function getPageTitle(pathname: string): string {
   if (pathname.startsWith("/app/analytics")) return "Analytics";
   if (pathname.startsWith("/app/leads")) return "Leads";
-  if (pathname.startsWith("/app/quotes")) return "Quotes";
+  if (pathname.startsWith("/app/quotes")) return "Estimates";
   if (pathname.startsWith("/app/customers")) return "Customers";
   if (pathname.startsWith("/app/plan") || pathname === "/plan") return "My Plan";
   if (pathname.startsWith("/app/team")) return "Team";
@@ -66,7 +66,7 @@ export function TopBar({
         { event: "UPDATE", schema: "public", table: "quotes", filter: `org_id=eq.${orgId}` },
         (payload) => {
           if ((payload.new as { status?: string }).status !== "ACCEPTED") return;
-          const text = "A quote was accepted";
+          const text = "An estimate was accepted";
           setFeed((prev) =>
             [{ id: crypto.randomUUID(), text, createdAt: new Date().toISOString() }, ...prev].slice(
               0,

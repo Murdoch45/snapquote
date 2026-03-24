@@ -1,23 +1,60 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { Fragment, useEffect, useMemo, useRef } from "react";
+import { CUSTOMER_NAME_TOKEN, QUOTE_LINK_TOKEN } from "@/lib/quote-template";
+import { Button } from "@/components/ui/button";
 
-export const CUSTOMER_NAME_TOKEN = "{{customer_name}}";
+const TOKEN_CONFIG = [
+  {
+    key: "customer_name",
+    token: CUSTOMER_NAME_TOKEN,
+    label: "Customer Name"
+  },
+  {
+    key: "quote_link",
+    token: QUOTE_LINK_TOKEN,
+    label: "Estimate Link"
+  }
+] as const;
+
+type TokenKey = (typeof TOKEN_CONFIG)[number]["key"];
 
 type Props = {
   id: string;
   value: string;
   onChange: (value: string) => void;
+  showCustomerNameChip?: boolean;
+  previewBusinessName: string;
+  previewPhone: string;
+  previewEmail: string;
+  isEditing: boolean;
+  isSaving?: boolean;
+  onEdit: () => void;
+  onSave: () => void;
+  onCancel: () => void;
 };
 
-function createCustomerNameChip(): HTMLSpanElement {
+function getTokenConfigByKey(key: string | undefined) {
+  return TOKEN_CONFIG.find((item) => item.key === key);
+}
+
+function getTokenConfigByToken(token: string) {
+  return TOKEN_CONFIG.find((item) => item.token === token);
+}
+
+function createTokenChip(tokenKey: TokenKey): HTMLSpanElement {
+  const tokenConfig = getTokenConfigByKey(tokenKey);
+  if (!tokenConfig) {
+    throw new Error(`Unsupported quote template token: ${tokenKey}`);
+  }
+
   const chip = document.createElement("span");
-  chip.dataset.token = "customer_name";
+  chip.dataset.token = tokenConfig.key;
   chip.contentEditable = "false";
   chip.draggable = true;
   chip.className =
     "mx-0.5 inline-flex cursor-grab select-none items-center rounded-full border border-blue-200 bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700 align-middle";
-  chip.textContent = "👤 Customer Name";
+  chip.textContent = tokenConfig.label;
   return chip;
 }
 
@@ -47,8 +84,25 @@ function getRangeFromPoint(x: number, y: number): Range | null {
   return null;
 }
 
-export function QuoteTemplateEditor({ id, value, onChange }: Props) {
+export function QuoteTemplateEditor({
+  id,
+  value,
+  onChange,
+  showCustomerNameChip = true,
+  previewBusinessName,
+  previewPhone,
+  previewEmail,
+  isEditing,
+  isSaving = false,
+  onEdit,
+  onSave,
+  onCancel
+}: Props) {
   const editorRef = useRef<HTMLDivElement | null>(null);
+
+  const availableTokens = TOKEN_CONFIG.filter(
+    (token) => token.key !== "customer_name" || showCustomerNameChip
+  );
 
   const serializeEditor = () => {
     const editor = editorRef.current;
@@ -63,8 +117,9 @@ export function QuoteTemplateEditor({ id, value, onChange }: Props) {
         return "";
       }
 
-      if (node.dataset.token === "customer_name") {
-        return CUSTOMER_NAME_TOKEN;
+      const tokenConfig = getTokenConfigByKey(node.dataset.token);
+      if (tokenConfig) {
+        return tokenConfig.token;
       }
 
       if (node.tagName === "BR") {
@@ -109,96 +164,217 @@ export function QuoteTemplateEditor({ id, value, onChange }: Props) {
   useEffect(() => {
     const editor = editorRef.current;
     if (!editor) return;
+    if (!isEditing) return;
 
     if (serializeEditor() === value) {
       return;
     }
 
     editor.innerHTML = "";
-    const segments = value.split(CUSTOMER_NAME_TOKEN);
+    const tokenPattern = new RegExp(
+      `(${TOKEN_CONFIG.map((item) => item.token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`,
+      "g"
+    );
+    const segments = value.split(tokenPattern).filter((segment) => segment.length > 0);
 
-    segments.forEach((segment, index) => {
-      if (segment.length > 0) {
-        editor.appendChild(document.createTextNode(segment));
+    segments.forEach((segment) => {
+      const tokenConfig = getTokenConfigByToken(segment);
+      if (tokenConfig) {
+        if (tokenConfig.key === "customer_name" && !showCustomerNameChip) {
+          return;
+        }
+
+        editor.appendChild(createTokenChip(tokenConfig.key));
+        return;
       }
 
-      if (index < segments.length - 1) {
-        editor.appendChild(createCustomerNameChip());
-      }
+      editor.appendChild(document.createTextNode(segment));
     });
 
     if (value.length === 0) {
       editor.appendChild(document.createElement("br"));
     }
-  }, [value]);
+  }, [isEditing, showCustomerNameChip, value]);
+
+  useEffect(() => {
+    if (!isEditing) return;
+    editorRef.current?.focus();
+  }, [isEditing]);
+
+  const previewSegments = useMemo(
+    () =>
+      value.split(
+        /(\{\{customer_name\}\}|\{\{quote_link\}\}|\{\{company_name\}\}|\{\{contractor_phone\}\}|\{\{contractor_email\}\})/g
+      ),
+    [value]
+  );
+
+  const renderPreviewSegment = (segment: string, index: number) => {
+    if (segment === CUSTOMER_NAME_TOKEN) {
+      return (
+        <span
+          key={`${segment}-${index}`}
+          className="mx-0.5 inline-flex items-center rounded-full border border-blue-200 bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700 align-middle"
+        >
+          Customer Name
+        </span>
+      );
+    }
+
+    if (segment === QUOTE_LINK_TOKEN) {
+      return (
+        <span key={`${segment}-${index}`} className="font-medium text-[#2563EB]">
+          estimate-link.com/example
+        </span>
+      );
+    }
+
+    if (segment === "{{company_name}}") {
+      return <Fragment key={`${segment}-${index}`}>{previewBusinessName || "Your Company"}</Fragment>;
+    }
+
+    if (segment === "{{contractor_phone}}") {
+      return <Fragment key={`${segment}-${index}`}>{previewPhone || "Your Phone Number"}</Fragment>;
+    }
+
+    if (segment === "{{contractor_email}}") {
+      return <Fragment key={`${segment}-${index}`}>{previewEmail || "your@email.com"}</Fragment>;
+    }
+
+    return <Fragment key={`${segment}-${index}`}>{segment}</Fragment>;
+  };
 
   return (
-    <div
-      id={id}
-      ref={editorRef}
-      contentEditable
-      suppressContentEditableWarning
-      role="textbox"
-      aria-multiline="true"
-      className="min-h-40 w-full whitespace-pre-wrap rounded-[8px] border border-[#E5E7EB] bg-white px-[14px] py-[10px] text-sm text-[#111827] focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
-      onInput={() => emitChange()}
-      onBlur={() => emitChange()}
-      onKeyDown={(event) => {
-        if (event.key === "Enter") {
-          event.preventDefault();
-          insertTextAtSelection("\n");
-          emitChange();
-        }
-      }}
-      onPaste={(event) => {
-        event.preventDefault();
-        const text = event.clipboardData.getData("text/plain");
-        insertTextAtSelection(text);
-        emitChange();
-      }}
-      onDragStart={(event) => {
-        const target = event.target;
-        if (!(target instanceof HTMLElement) || target.dataset.token !== "customer_name") {
-          return;
-        }
+    <div className="space-y-3">
+      {isEditing ? (
+        <>
+          <div className="flex flex-wrap gap-2">
+            {availableTokens.map((token) => (
+              <button
+                key={token.key}
+                type="button"
+                className="inline-flex cursor-grab select-none items-center rounded-full border border-blue-200 bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700"
+                draggable
+                onDragStart={(event) => {
+                  event.dataTransfer.setData("application/x-snapquote-token", token.token);
+                  event.dataTransfer.effectAllowed = "move";
+                }}
+              >
+                {token.label}
+              </button>
+            ))}
+          </div>
 
-        event.dataTransfer.setData("application/x-snapquote-token", CUSTOMER_NAME_TOKEN);
-        event.dataTransfer.effectAllowed = "move";
-      }}
-      onDragOver={(event) => {
-        event.preventDefault();
-        event.dataTransfer.dropEffect = "move";
-      }}
-      onDrop={(event) => {
-        event.preventDefault();
+          <div
+            id={id}
+            ref={editorRef}
+            contentEditable
+            suppressContentEditableWarning
+            role="textbox"
+            aria-multiline="true"
+            className="min-h-40 w-full whitespace-pre-wrap rounded-[8px] border-2 border-[#2563EB] bg-white px-[14px] py-[10px] text-sm text-[#111827] shadow-[0_0_0_3px_rgba(37,99,235,0.1)] focus:outline-none"
+            onInput={() => emitChange()}
+            onBlur={() => emitChange()}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                insertTextAtSelection("\n");
+                emitChange();
+              }
+            }}
+            onPaste={(event) => {
+              event.preventDefault();
+              const text = event.clipboardData.getData("text/plain");
+              insertTextAtSelection(text);
+              emitChange();
+            }}
+            onDragStart={(event) => {
+              const target = event.target;
+              if (!(target instanceof HTMLElement) || !target.dataset.token) {
+                return;
+              }
 
-        const token =
-          event.dataTransfer.getData("application/x-snapquote-token") ||
-          event.dataTransfer.getData("text/plain");
-        if (token !== CUSTOMER_NAME_TOKEN) return;
+              const tokenConfig = getTokenConfigByKey(target.dataset.token);
+              if (!tokenConfig) return;
 
-        const editor = editorRef.current;
-        if (!editor) return;
+              event.dataTransfer.setData("application/x-snapquote-token", tokenConfig.token);
+              event.dataTransfer.effectAllowed = "move";
+            }}
+            onDragOver={(event) => {
+              event.preventDefault();
+              event.dataTransfer.dropEffect = "move";
+            }}
+            onDrop={(event) => {
+              event.preventDefault();
 
-        editor.querySelectorAll("[data-token='customer_name']").forEach((node) => node.remove());
+              const token =
+                event.dataTransfer.getData("application/x-snapquote-token") ||
+                event.dataTransfer.getData("text/plain");
+              const tokenConfig = getTokenConfigByToken(token);
+              if (!tokenConfig) return;
+              if (tokenConfig.key === "customer_name" && !showCustomerNameChip) return;
 
-        const chip = createCustomerNameChip();
-        const dropRange = getRangeFromPoint(event.clientX, event.clientY);
+              const editor = editorRef.current;
+              if (!editor) return;
 
-        if (dropRange && editor.contains(dropRange.startContainer)) {
-          dropRange.deleteContents();
-          dropRange.insertNode(chip);
-          dropRange.setStartAfter(chip);
-          dropRange.collapse(true);
-          const selection = window.getSelection();
-          selection?.removeAllRanges();
-          selection?.addRange(dropRange);
-        } else {
-          editor.appendChild(chip);
-        }
+              editor
+                .querySelectorAll(`[data-token='${tokenConfig.key}']`)
+                .forEach((node) => node.remove());
 
-        emitChange();
-      }}
-    />
+              const chip = createTokenChip(tokenConfig.key);
+              const dropRange = getRangeFromPoint(event.clientX, event.clientY);
+
+              if (dropRange && editor.contains(dropRange.startContainer)) {
+                dropRange.deleteContents();
+                dropRange.insertNode(chip);
+                dropRange.setStartAfter(chip);
+                dropRange.collapse(true);
+                const selection = window.getSelection();
+                selection?.removeAllRanges();
+                selection?.addRange(dropRange);
+              } else {
+                editor.appendChild(chip);
+              }
+
+              emitChange();
+            }}
+          />
+        </>
+      ) : (
+        <div className="whitespace-pre-wrap rounded-[8px] border border-[#E5E7EB] bg-[#F8F9FC] p-4 text-sm text-[#111827]">
+          {previewSegments.map((segment, index) => renderPreviewSegment(segment, index))}
+        </div>
+      )}
+
+      <div className="flex flex-wrap items-center gap-3">
+        <Button
+          type="button"
+          variant={isEditing ? "default" : "outline"}
+          className={
+            isEditing
+              ? "font-semibold"
+              : "border-2 border-[#2563EB] bg-transparent font-semibold text-[#2563EB] hover:bg-[#EFF6FF] hover:text-[#2563EB]"
+          }
+          onClick={isEditing ? onSave : onEdit}
+          disabled={isSaving}
+        >
+          {isEditing ? (isSaving ? "Saving..." : "Save Template") : "Edit Template"}
+        </Button>
+        {isEditing ? (
+          <button
+            type="button"
+            className="text-sm text-[#6B7280] transition-colors hover:text-[#111827]"
+            onClick={onCancel}
+            disabled={isSaving}
+          >
+            Cancel
+          </button>
+        ) : null}
+      </div>
+
+      <p className="text-xs text-[#6B7280]">
+        Customer Name and Estimate Link are draggable - place them anywhere in your message.
+      </p>
+    </div>
   );
 }

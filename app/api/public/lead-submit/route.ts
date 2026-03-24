@@ -170,7 +170,7 @@ export async function POST(request: Request) {
       // eslint-disable-next-line no-await-in-loop
       const { data: signed } = await admin.storage
         .from("lead-photos")
-        .createSignedUrl(path, 60 * 60 * 24 * 30);
+        .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
       uploadedPaths.push({ path, url: signed?.signedUrl ?? "" });
     }
 
@@ -201,9 +201,9 @@ export async function POST(request: Request) {
       emailEnabled: contractor.notification_lead_email as boolean,
       phone: contractor.phone as string | null,
       email: contractor.email as string | null,
-      smsBody: `New quote request: ${serviceText} at ${payload.addressFull}. Open: ${leadLink}`,
+      smsBody: `New estimate request: ${serviceText} at ${payload.addressFull}. Open: ${leadLink}`,
       emailSubject: "New SnapQuote lead",
-      emailBody: `New quote request: ${serviceText} at ${payload.addressFull}. Open: ${leadLink}`
+      emailBody: `New estimate request: ${serviceText} at ${payload.addressFull}. Open: ${leadLink}`
     });
     console.log("lead-submit contractor notifications:", contractorNotifications);
 
@@ -211,7 +211,7 @@ export async function POST(request: Request) {
       phone: payload.customerPhone,
       email: payload.customerEmail,
       smsBody: `We received your request. You will get your estimate shortly. - ${contractor.business_name}`,
-      emailSubject: `${contractor.business_name} received your quote request`,
+      emailSubject: `${contractor.business_name} received your estimate request`,
       emailBody: `We received your request and will send your estimate shortly. - ${contractor.business_name}`
     });
     console.log("lead-submit customer notifications:", customerNotifications);

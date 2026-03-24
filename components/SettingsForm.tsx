@@ -3,15 +3,15 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { AddressAutocomplete } from "@/components/AddressAutocomplete";
-import {
-  CUSTOMER_NAME_TOKEN,
-  QuoteTemplateEditor
-} from "@/components/quote-template/QuoteTemplateEditor";
+import { QuoteTemplateEditor } from "@/components/quote-template/QuoteTemplateEditor";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { DEFAULT_QUOTE_SMS_TEMPLATE } from "@/lib/quote-template";
+import {
+  CUSTOMER_NAME_TOKEN,
+  DEFAULT_QUOTE_SMS_TEMPLATE
+} from "@/lib/quote-template";
 import { type ServiceType } from "@/lib/services";
 
 type SettingsData = {
@@ -71,6 +71,7 @@ function ensureCustomerNameToken(template: string): string {
 
 export function SettingsForm({ initial }: { initial: SettingsData }) {
   const initialTemplate = initial.quote_sms_template ?? DEFAULT_QUOTE_SMS_TEMPLATE;
+  const [savedTemplate, setSavedTemplate] = useState(initialTemplate);
   const [form, setForm] = useState({
     businessName: initial.business_name,
     publicSlug: initial.public_slug,
@@ -88,10 +89,12 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
     notificationAcceptEmail: initial.notification_accept_email
   });
   const [loading, setLoading] = useState(false);
+  const [savingTemplate, setSavingTemplate] = useState(false);
   const [slugStatus, setSlugStatus] = useState<SlugStatus>({ type: "idle", message: null });
   const [autoInsertCustomerName, setAutoInsertCustomerName] = useState(
     initialTemplate.includes(CUSTOMER_NAME_TOKEN)
   );
+  const [isEditingTemplate, setIsEditingTemplate] = useState(false);
 
   const trimmedSlug = form.publicSlug.trim();
   const hasSelectedBusinessAddress = Boolean(
@@ -180,7 +183,7 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
     }));
   };
 
-  const submit = async () => {
+  const saveSettings = async (options?: { templateOnly?: boolean; reload?: boolean }) => {
     if (
       slugStatus.type === "invalid" ||
       slugStatus.type === "taken" ||
@@ -195,7 +198,12 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
       return;
     }
 
-    setLoading(true);
+    if (options?.templateOnly) {
+      setSavingTemplate(true);
+    } else {
+      setLoading(true);
+    }
+
     try {
       const res = await fetch("/api/app/settings/update", {
         method: "POST",
@@ -220,12 +228,37 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Update failed.");
       toast.success("Settings updated.");
-      window.location.reload();
+      setSavedTemplate(form.quoteSmsTemplate);
+      if (options?.reload) {
+        window.location.reload();
+      }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Update failed.");
+      throw error;
     } finally {
-      setLoading(false);
+      if (options?.templateOnly) {
+        setSavingTemplate(false);
+      } else {
+        setLoading(false);
+      }
     }
+  };
+
+  const submit = async () => {
+    await saveSettings({ reload: true });
+  };
+
+  const saveTemplate = async () => {
+    try {
+      await saveSettings({ templateOnly: true });
+      setIsEditingTemplate(false);
+    } catch {}
+  };
+
+  const cancelTemplateEdit = () => {
+    setForm((prev) => ({ ...prev, quoteSmsTemplate: savedTemplate }));
+    setAutoInsertCustomerName(savedTemplate.includes(CUSTOMER_NAME_TOKEN));
+    setIsEditingTemplate(false);
   };
 
   return (
@@ -371,34 +404,23 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
         <label className="flex items-center gap-2 text-sm text-[#111827]">
           <Checkbox
             className="data-[state=checked]:border-[#2563EB] data-[state=checked]:bg-[#2563EB]"
-            checked={form.notificationLeadSms}
-            onCheckedChange={(checked) =>
-              setForm((prev) => ({ ...prev, notificationLeadSms: checked === true }))
-            }
-          />
-          Lead notifications by SMS
-        </label>
-
-        <label className="flex items-center gap-2 text-sm text-[#111827]">
-          <Checkbox
-            className="data-[state=checked]:border-[#2563EB] data-[state=checked]:bg-[#2563EB]"
-            checked={form.notificationLeadEmail}
-            onCheckedChange={(checked) =>
-              setForm((prev) => ({ ...prev, notificationLeadEmail: checked === true }))
-            }
-          />
-          Lead notifications by email
-        </label>
-
-        <label className="flex items-center gap-2 text-sm text-[#111827]">
-          <Checkbox
-            className="data-[state=checked]:border-[#2563EB] data-[state=checked]:bg-[#2563EB]"
             checked={form.notificationAcceptSms}
             onCheckedChange={(checked) =>
               setForm((prev) => ({ ...prev, notificationAcceptSms: checked === true }))
             }
           />
           Acceptance notifications by SMS
+        </label>
+
+        <label className="flex items-center gap-2 text-sm text-[#111827]">
+          <Checkbox
+            className="data-[state=checked]:border-[#2563EB] data-[state=checked]:bg-[#2563EB]"
+            checked={form.notificationLeadSms}
+            onCheckedChange={(checked) =>
+              setForm((prev) => ({ ...prev, notificationLeadSms: checked === true }))
+            }
+          />
+          Lead notifications by SMS
         </label>
 
         <label className="flex items-center gap-2 text-sm text-[#111827]">
@@ -411,17 +433,28 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
           />
           Acceptance notifications by email
         </label>
+
+        <label className="flex items-center gap-2 text-sm text-[#111827]">
+          <Checkbox
+            className="data-[state=checked]:border-[#2563EB] data-[state=checked]:bg-[#2563EB]"
+            checked={form.notificationLeadEmail}
+            onCheckedChange={(checked) =>
+              setForm((prev) => ({ ...prev, notificationLeadEmail: checked === true }))
+            }
+          />
+          Lead notifications by email
+        </label>
       </div>
       </section>
 
       <section className="rounded-[14px] border border-[#E5E7EB] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
-        <h2 className="mb-4 text-base font-semibold text-[#111827]">Quote SMS Template</h2>
+        <h2 className="mb-4 text-base font-semibold text-[#111827]">Estimate SMS Template</h2>
         <div className="space-y-2">
         <Label
           htmlFor="quoteSmsTemplate"
           className="mb-1.5 block text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280]"
         >
-          Quote SMS template
+          Estimate SMS template
         </Label>
         <div className="space-y-3 rounded-[8px] border border-[#E5E7EB] bg-[#F8F9FC] p-4">
           <label className="flex items-center gap-2 text-sm text-[#111827]">
@@ -430,19 +463,22 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
               checked={autoInsertCustomerName}
               onCheckedChange={(checked) => handleCustomerNameToggle(checked === true)}
             />
-            <span>Automatically insert customer&apos;s name into quote message</span>
+            <span>Automatically insert customer&apos;s name into estimate message</span>
           </label>
-
-          {autoInsertCustomerName ? (
-            <p className="rounded-[8px] border border-[#E5E7EB] bg-white px-4 py-3 text-sm text-[#6B7280]">
-              Drag the customer name chip anywhere inside the message to control where it appears.
-            </p>
-          ) : null}
         </div>
 
         <QuoteTemplateEditor
           id="quoteSmsTemplate"
           value={form.quoteSmsTemplate}
+          showCustomerNameChip={autoInsertCustomerName}
+          previewBusinessName={form.businessName.trim() || "Your Company"}
+          previewPhone={form.phone.trim() || "Your Phone Number"}
+          previewEmail={form.email.trim() || "your@email.com"}
+          isEditing={isEditingTemplate}
+          isSaving={savingTemplate}
+          onEdit={() => setIsEditingTemplate(true)}
+          onSave={() => void saveTemplate()}
+          onCancel={cancelTemplateEdit}
           onChange={(nextValue) =>
             setForm((prev) => ({
               ...prev,
@@ -452,11 +488,6 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
             }))
           }
         />
-
-        <p className="rounded-[8px] border border-[#E5E7EB] bg-white px-4 py-3 text-sm text-[#6B7280]">
-          Supported variables: {`{{customer_name}}`}, {`{{company_name}}`}, {`{{quote_link}}`},{" "}
-          {`{{contractor_phone}}`}, {`{{contractor_email}}`}
-        </p>
         </div>
       </section>
 

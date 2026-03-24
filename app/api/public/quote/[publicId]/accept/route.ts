@@ -19,7 +19,7 @@ export async function POST(_request: Request, { params }: Props) {
     .eq("public_id", publicId)
     .single();
 
-  if (!quote) return NextResponse.json({ error: "Quote not found." }, { status: 404 });
+  if (!quote) return NextResponse.json({ error: "Estimate not found." }, { status: 404 });
   if (quote.status === "ACCEPTED") {
     return NextResponse.json({ accepted: true, acceptedAt: quote.accepted_at });
   }
@@ -27,7 +27,7 @@ export async function POST(_request: Request, { params }: Props) {
   const expiresAt = publicQuoteExpiry(quote.sent_at as string);
   if (new Date() > expiresAt) {
     await admin.from("quotes").update({ status: "EXPIRED" }).eq("id", quote.id);
-    return NextResponse.json({ error: "Quote has expired." }, { status: 400 });
+    return NextResponse.json({ error: "Estimate has expired." }, { status: 400 });
   }
 
   const acceptedAt = new Date().toISOString();
@@ -67,9 +67,9 @@ export async function POST(_request: Request, { params }: Props) {
     emailEnabled: profile?.notification_accept_email as boolean,
     phone: profile?.phone as string | null,
     email: profile?.email as string | null,
-    smsBody: `Quote accepted: ${services} at ${lead?.address_full}. View: ${quoteLink}`,
-    emailSubject: "Quote accepted",
-    emailBody: `Quote accepted: ${services} at ${lead?.address_full}. View: ${quoteLink}`
+    smsBody: `Estimate accepted: ${services} at ${lead?.address_full}. View: ${quoteLink}`,
+    emailSubject: "Estimate accepted",
+    emailBody: `Estimate accepted: ${services} at ${lead?.address_full}. View: ${quoteLink}`
   });
 
   return NextResponse.json({ accepted: true, acceptedAt });

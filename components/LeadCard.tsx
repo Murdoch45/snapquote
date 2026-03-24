@@ -4,8 +4,8 @@ import { LeadUnlockButton } from "@/components/LeadUnlockButton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import type { LeadQuestionPreview } from "@/lib/leadPresentation";
-import { toCurrency, toRelativeMinutes } from "@/lib/utils";
+import { getServiceBadgeStyle } from "@/lib/serviceColors";
+import { formatCurrencyRange, toRelativeMinutes } from "@/lib/utils";
 
 type LeadCardProps = {
   lead: {
@@ -15,55 +15,43 @@ type LeadCardProps = {
     services: string[];
     submitted_at: string;
     ai_suggested_price: number | null;
+    ai_estimate_low: number | null;
+    ai_estimate_high: number | null;
     photo_count?: number;
-    description: string | null;
+    previewPhotos: string[];
+    ai_job_summary: string | null;
     customerName: string | null;
     customerPhone: string | null;
     customerEmail: string | null;
-    jobType: string;
-    questionPreview: LeadQuestionPreview[];
     isUnlocked: boolean;
   };
   onLeadUnlocked: (args: { alreadyUnlocked: boolean }) => void;
 };
 
-function getServiceBadgeClass(service: string | null | undefined): string {
-  const normalized = service?.trim().toLowerCase() ?? "";
-
-  if (normalized.includes("pressure washing")) {
-    return "border-transparent bg-[#EFF6FF] text-[#2563EB]";
-  }
-
-  if (normalized.includes("lawn care")) {
-    return "border-transparent bg-[#F0FDF4] text-[#16A34A]";
-  }
-
-  if (normalized.includes("roof")) {
-    return "border-transparent bg-[#FFF7ED] text-[#EA580C]";
-  }
-
-  if (normalized.includes("concrete")) {
-    return "border-transparent bg-[#F9FAFB] text-[#6B7280]";
-  }
-
-  if (normalized.includes("fenc")) {
-    return "border-transparent bg-[#F5F3FF] text-[#7C3AED]";
-  }
-
-  return "border-transparent bg-[#F9FAFB] text-[#6B7280]";
-}
-
 export function LeadCard({ lead, onLeadUnlocked }: LeadCardProps) {
-  const primaryService = lead.jobType || lead.services[0] || "Service";
+  const displayEstimate =
+    formatCurrencyRange(lead.ai_estimate_low, lead.ai_estimate_high, lead.ai_suggested_price) ??
+    "Pending estimate...";
+  const previewSummary = lead.ai_job_summary
+    ? lead.ai_job_summary.match(/[^.!?]+[.!?]+(\s|$)|[^.!?]+$/g)?.slice(0, 2).join(" ").trim() ?? lead.ai_job_summary
+    : null;
 
   return (
     <Card className="h-full rounded-[14px] shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
       <CardContent className="space-y-6 p-6">
         <div className="flex items-start justify-between gap-3">
           <div className="space-y-3">
-            <Badge className={`px-3 py-1 text-xs font-semibold ${getServiceBadgeClass(primaryService)}`}>
-              {primaryService}
-            </Badge>
+            <div className="flex flex-wrap gap-2">
+              {(lead.services.length > 0 ? lead.services : ["Service"]).map((service) => (
+                <Badge
+                  key={service}
+                  className="border-transparent px-3 py-1 text-xs font-semibold"
+                  style={getServiceBadgeStyle(service)}
+                >
+                  {service}
+                </Badge>
+              ))}
+            </div>
             <div className="space-y-1">
               <p className="text-sm font-medium text-[#111827]">{lead.locality}</p>
               <p className="text-sm text-[#6B7280]">
@@ -86,7 +74,7 @@ export function LeadCard({ lead, onLeadUnlocked }: LeadCardProps) {
             AI Estimate
           </p>
           <p className="text-[28px] font-bold leading-none text-[#2563EB]">
-            {toCurrency(lead.ai_suggested_price ?? 0)}
+            {displayEstimate}
           </p>
         </div>
 
@@ -94,15 +82,8 @@ export function LeadCard({ lead, onLeadUnlocked }: LeadCardProps) {
           <p className="text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280]">
             Job Details
           </p>
-          <p className="text-sm text-[#111827]">{lead.description || "No description provided."}</p>
-          {lead.questionPreview.length > 0 ? (
-            <div className="space-y-1">
-              {lead.questionPreview.map((answer) => (
-                <p key={answer.key} className="text-sm text-[#6B7280]">
-                  <span className="font-medium text-[#111827]">{answer.label}:</span> {answer.value}
-                </p>
-              ))}
-            </div>
+          {previewSummary ? (
+            <p className="text-sm text-[#111827]">{previewSummary}</p>
           ) : null}
         </div>
 
@@ -135,22 +116,41 @@ export function LeadCard({ lead, onLeadUnlocked }: LeadCardProps) {
           )}
         </div>
 
-        {lead.isUnlocked ? (
-          <Button
-            asChild
-            variant="outline"
-            className="h-auto border-2 border-[#2563EB] bg-transparent px-5 py-2 font-semibold text-[#2563EB] hover:bg-[#EFF6FF]"
-          >
-            <Link href={`/app/leads/${lead.id}`}>View</Link>
-          </Button>
-        ) : (
-          <Link
-            className="inline-flex text-sm font-medium text-[#2563EB] transition-colors hover:text-[#1D4ED8]"
-            href={`/app/leads/${lead.id}`}
-          >
-            Open lead
-          </Link>
-        )}
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          {lead.isUnlocked ? (
+            <Button
+              asChild
+              variant="outline"
+              className="h-auto border-2 border-[#2563EB] bg-transparent px-5 py-2 font-semibold text-[#2563EB] hover:bg-[#EFF6FF]"
+            >
+              <Link href={`/app/leads/${lead.id}`}>View</Link>
+            </Button>
+          ) : (
+            <Link
+              className="inline-flex text-sm font-medium text-[#2563EB] transition-colors hover:text-[#1D4ED8]"
+              href={`/app/leads/${lead.id}`}
+            >
+              Open lead
+            </Link>
+          )}
+
+          {lead.previewPhotos.length > 0 ? (
+            <div className="flex gap-2">
+              {lead.previewPhotos.slice(0, 2).map((photoUrl, index) => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  key={`${lead.id}-preview-${index}`}
+                  src={photoUrl}
+                  alt="Lead preview"
+                  className="h-24 w-32 rounded-[10px] object-cover"
+                  onError={(event) => {
+                    event.currentTarget.style.display = "none";
+                  }}
+                />
+              ))}
+            </div>
+          ) : null}
+        </div>
       </CardContent>
     </Card>
   );
