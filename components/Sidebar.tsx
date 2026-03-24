@@ -23,7 +23,7 @@ const navItems = [
   { href: "/app/customers", label: "Customers", icon: UserCircle2 },
   { href: "/app/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/dashboard/my-link", label: "My Link", icon: Link2 },
-  { href: "/plan", label: "My Plan", icon: CreditCard, matchPaths: ["/plan", "/app/plan"] },
+  { href: "/plan", label: "Plan", icon: CreditCard, matchPaths: ["/plan", "/app/plan"] },
   { href: "/app/team", label: "Team", icon: Users },
   { href: "/app/settings", label: "Settings", icon: Settings }
 ];

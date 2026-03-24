@@ -39,6 +39,7 @@ export function BrandLogo({
         viewBox="0 0 104 92"
         aria-hidden="true"
         className={cn("shrink-0", sizing.icon, iconClassName)}
+        shapeRendering="geometricPrecision"
       >
         <defs>
           <linearGradient id="snapquote-bubble" x1="12" y1="12" x2="88" y2="80">
@@ -51,13 +52,11 @@ export function BrandLogo({
           fill="url(#snapquote-bubble)"
         />
         <path
-          d="M45 13H70L61 26H34Z"
-          fill="#D6E3F2"
-          opacity="0.95"
-        />
-        <path
           d="M50.5 18L35 48H51L42 71L75 36H59L68 18H50.5Z"
           fill="white"
+          stroke="white"
+          strokeWidth="1"
+          strokeLinejoin="round"
         />
       </svg>
       <span

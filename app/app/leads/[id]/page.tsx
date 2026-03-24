@@ -100,10 +100,6 @@ export default async function LeadDetailPage({ params }: Props) {
   const displayAddress = isLocked
     ? getVisibleAddress(lead.address_full as string)
     : (lead.address_full as string);
-  const aiJobSummary =
-    typeof lead.ai_job_summary === "string" && lead.ai_job_summary.trim().length > 0
-      ? lead.ai_job_summary.trim()
-      : null;
   const previewPublicId = (existingQuote?.public_id as string | null) ?? randomBytes(6).toString("base64url");
   const previewMessage = renderQuoteTemplate(
     sanitizeQuoteTemplate((profile?.quote_sms_template as string | null) ?? DEFAULT_QUOTE_SMS_TEMPLATE),
@@ -158,46 +154,35 @@ export default async function LeadDetailPage({ params }: Props) {
               </div>
             </section>
 
-            <div className={`grid gap-4 ${aiJobSummary ? "lg:grid-cols-3" : ""}`}>
-              <div className={aiJobSummary ? "lg:col-span-2 space-y-4" : "space-y-4"}>
-                <section>
-                  <h3 className="text-sm font-semibold text-gray-800">Customer Description</h3>
-                  <p className="text-sm text-gray-700">{lead.description || "No description provided."}</p>
-                </section>
+            <section>
+              <h3 className="text-sm font-semibold text-gray-800">Customer Description</h3>
+              <p className="text-sm text-gray-700">{lead.description || "No description provided."}</p>
+            </section>
 
-                <section>
-                  <h3 className="text-sm font-semibold text-gray-800">Customer Answers</h3>
-                  {customerAnswerGroups.length === 0 ? (
-                    <p className="text-sm text-gray-500">No questionnaire answers available.</p>
-                  ) : (
-                    <div className="mt-2 space-y-3">
-                      {customerAnswerGroups.map((group) => (
-                        <div key={group.service} className="rounded-lg border border-gray-200 bg-gray-50 p-3">
-                          <p className="text-sm font-medium text-gray-900">{group.service}</p>
-                          <dl className="mt-3 space-y-3">
-                            {group.answers.map((answer) => (
-                              <div key={answer.key}>
-                                <dt className="text-sm font-medium text-gray-600">
-                                  {answer.label}:
-                                </dt>
-                                <dd className="mt-1 text-sm text-gray-700">{answer.value}</dd>
-                              </div>
-                            ))}
-                          </dl>
-                        </div>
-                      ))}
+            <section>
+              <h3 className="text-sm font-semibold text-gray-800">Customer Answers</h3>
+              {customerAnswerGroups.length === 0 ? (
+                <p className="text-sm text-gray-500">No questionnaire answers available.</p>
+              ) : (
+                <div className="mt-2 space-y-3">
+                  {customerAnswerGroups.map((group) => (
+                    <div key={group.service} className="rounded-lg border border-gray-200 bg-gray-50 p-3">
+                      <p className="text-sm font-medium text-gray-900">{group.service}</p>
+                      <dl className="mt-3 space-y-3">
+                        {group.answers.map((answer) => (
+                          <div key={answer.key}>
+                            <dt className="text-sm font-medium text-gray-600">
+                              {answer.label}:
+                            </dt>
+                            <dd className="mt-1 text-sm text-gray-700">{answer.value}</dd>
+                          </div>
+                        ))}
+                      </dl>
                     </div>
-                  )}
-                </section>
-              </div>
-
-              {aiJobSummary ? (
-                <section className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                  <h3 className="text-sm font-semibold text-gray-800">AI Summary</h3>
-                  <p className="mt-2 text-sm text-gray-700">{aiJobSummary}</p>
-                </section>
-              ) : null}
-            </div>
+                  ))}
+                </div>
+              )}
+            </section>
 
             <section>
               <h3 className="text-sm font-semibold text-gray-800">Property</h3>
