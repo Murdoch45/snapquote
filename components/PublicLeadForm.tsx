@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { Turnstile } from "@marsidev/react-turnstile";
 import { MultiServiceForm, type MultiServiceEntry } from "@/components/forms/MultiServiceForm";
 import { toast } from "sonner";
 import { AddressAutocomplete } from "@/components/AddressAutocomplete";
@@ -24,6 +25,7 @@ type Props = {
 
 const hasGooglePlacesKey = Boolean(process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY);
 const MAX_PHOTO_UPLOADS = 10;
+const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
 export function PublicLeadForm({ contractorSlug }: Props) {
   const [customerFirstName, setCustomerFirstName] = useState("");
@@ -39,6 +41,7 @@ export function PublicLeadForm({ contractorSlug }: Props) {
   ]);
   const [description, setDescription] = useState("");
   const [photos, setPhotos] = useState<File[]>([]);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
@@ -176,6 +179,11 @@ export function PublicLeadForm({ contractorSlug }: Props) {
       return;
     }
 
+    if (!turnstileToken) {
+      toast.error("Bot verification failed.");
+      return;
+    }
+
     setLoading(true);
     try {
       const submitPath = "/api/public/lead-submit";
@@ -200,6 +208,7 @@ export function PublicLeadForm({ contractorSlug }: Props) {
       selectedServiceAnswers.forEach((serviceEntry) => formData.append("services[]", serviceEntry.service));
       formData.append("serviceQuestionAnswers", JSON.stringify(selectedServiceAnswers));
       formData.append("description", description.trim());
+      formData.append("turnstileToken", turnstileToken);
       photos.forEach((photo) => formData.append("photos", photo));
 
       const res = await fetch(submitPath, {
@@ -357,7 +366,21 @@ export function PublicLeadForm({ contractorSlug }: Props) {
           />
         </div>
 
-        <Button className="mt-6 w-full rounded-[10px] py-3 text-base font-bold" disabled={!canSubmit || loading}>
+        {turnstileSiteKey ? (
+          <div className="pt-2">
+            <Turnstile
+              siteKey={turnstileSiteKey}
+              onSuccess={(token) => setTurnstileToken(token)}
+              onExpire={() => setTurnstileToken(null)}
+              onError={() => setTurnstileToken(null)}
+            />
+          </div>
+        ) : null}
+
+        <Button
+          className="mt-6 w-full rounded-[10px] py-3 text-base font-bold"
+          disabled={!canSubmit || !turnstileToken || loading}
+        >
           {loading ? "Sending..." : "Get My Estimate"}
         </Button>
       </form>

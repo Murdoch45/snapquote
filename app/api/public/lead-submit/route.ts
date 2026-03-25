@@ -30,6 +30,33 @@ function parseJsonField<T>(input: FormDataEntryValue | null, fallback: T): T {
 export async function POST(request: Request) {
   try {
     const formData = await request.formData();
+    const turnstileToken = String(formData.get("turnstileToken") ?? "");
+
+    if (!turnstileToken) {
+      return NextResponse.json({ error: "Bot verification failed." }, { status: 400 });
+    }
+
+    const verificationResponse = await fetch(
+      "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: new URLSearchParams({
+          secret: process.env.TURNSTILE_SECRET_KEY ?? "",
+          response: turnstileToken
+        })
+      }
+    );
+    const verificationJson = (await verificationResponse.json().catch(() => null)) as
+      | { success?: boolean }
+      | null;
+
+    if (!verificationResponse.ok || verificationJson?.success !== true) {
+      return NextResponse.json({ error: "Bot verification failed." }, { status: 400 });
+    }
+
     const services = normalizeServiceTypes(formData.getAll("services[]").map((value) => String(value)));
     const rawServiceQuestionAnswers = parseJsonField<unknown>(formData.get("serviceQuestionAnswers"), null);
     const serviceQuestionAnswers = parseLeadSubmitQuestionAnswers(rawServiceQuestionAnswers);
