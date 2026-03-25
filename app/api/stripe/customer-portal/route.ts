@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import { requireMemberForApi } from "@/lib/auth/requireRole";
+import { requireOwnerForApi } from "@/lib/auth/requireRole";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe, getStripeAppUrl } from "@/lib/stripe";
 
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
-  const auth = await requireMemberForApi();
+  const auth = await requireOwnerForApi();
   if (!auth.ok) return auth.response;
 
   try {

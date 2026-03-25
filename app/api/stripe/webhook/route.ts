@@ -95,7 +95,30 @@ async function saveSubscriptionRecord(args: {
 
 async function setOrganizationPlan(orgId: string, plan: OrgPlan) {
   const admin = createAdminClient();
-  const { error } = await admin.from("organizations").update({ plan }).eq("id", orgId);
+  const nextPlanMonthlyCredits = getPlanMonthlyCredits(plan);
+  const { data: organization, error: organizationError } = await admin
+    .from("organizations")
+    .select("monthly_credits,credits_reset_at")
+    .eq("id", orgId)
+    .single();
+
+  if (organizationError || !organization) {
+    throw organizationError ?? new Error("Organization not found.");
+  }
+
+  const currentMonthlyCredits = Number(organization.monthly_credits ?? 0);
+  const shouldCapCredits = currentMonthlyCredits > nextPlanMonthlyCredits;
+  const { error } = await admin
+    .from("organizations")
+    .update({
+      plan,
+      monthly_credits: Math.min(currentMonthlyCredits, nextPlanMonthlyCredits),
+      credits_reset_at: shouldCapCredits
+        ? addOneMonth().toISOString()
+        : ((organization.credits_reset_at as string | null | undefined) ?? null)
+    })
+    .eq("id", orgId);
+
   if (error) throw error;
 }
 

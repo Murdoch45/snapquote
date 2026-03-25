@@ -80,6 +80,13 @@ export async function requireMemberForApi(): Promise<ApiAuthFailure | MemberApiA
     };
   }
 
+  if ((membership.org_id as string) === process.env.DEMO_ORG_ID) {
+    return {
+      ok: false,
+      response: NextResponse.json({ error: "Demo org is read-only." }, { status: 403 })
+    };
+  }
+
   return {
     ok: true as const,
     userId: user.id,

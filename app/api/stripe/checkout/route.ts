@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { z } from "zod";
-import { requireMemberForApi } from "@/lib/auth/requireRole";
+import { requireOwnerForApi } from "@/lib/auth/requireRole";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import {
@@ -46,7 +46,7 @@ function resolveCurrentPlan(plan: OrgPlan | null | undefined, priceId: string | 
 }
 
 export async function POST(request: Request) {
-  const auth = await requireMemberForApi();
+  const auth = await requireOwnerForApi();
   if (!auth.ok) return auth.response;
 
   try {

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { requireMemberForApi } from "@/lib/auth/requireRole";
+import { requireOwnerForApi } from "@/lib/auth/requireRole";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import {
@@ -23,7 +23,7 @@ const creditPackEnvSchema = z.object({
 });
 
 export async function POST(request: Request) {
-  const auth = await requireMemberForApi();
+  const auth = await requireOwnerForApi();
   if (!auth.ok) return auth.response;
 
   try {
