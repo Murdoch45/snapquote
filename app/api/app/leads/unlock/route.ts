@@ -21,7 +21,8 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       ok: true,
-      alreadyUnlocked: result.alreadyUnlocked
+      alreadyUnlocked: result.alreadyUnlocked,
+      remainingCredits: result.remainingCredits
     });
   } catch (error) {
     return NextResponse.json(

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +11,7 @@ import { OAuthButtons } from "@/components/auth/OAuthButtons";
 import { PasswordField } from "@/components/auth/PasswordField";
 
 type Provider = "google" | "apple";
+const OAUTH_SIGNUP_TOAST_KEY = "snapquote-oauth-signup-success";
 
 export function SignupForm() {
   const router = useRouter();
@@ -49,12 +51,14 @@ export function SignupForm() {
       return;
     }
 
+    toast.success("Account created! Welcome to SnapQuote.");
     router.replace("/onboarding");
   };
 
   const handleOAuth = async (provider: Provider) => {
     setError(null);
     setLoadingProvider(provider);
+    window.sessionStorage.setItem(OAUTH_SIGNUP_TOAST_KEY, "1");
 
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider,
@@ -64,6 +68,7 @@ export function SignupForm() {
     });
 
     if (oauthError) {
+      window.sessionStorage.removeItem(OAUTH_SIGNUP_TOAST_KEY);
       setError(oauthError.message);
       setLoadingProvider(null);
     }

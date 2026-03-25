@@ -20,7 +20,7 @@ export type OrgCredits = {
 };
 
 export type UnlockLeadResult =
-  | { ok: true; alreadyUnlocked: boolean }
+  | { ok: true; alreadyUnlocked: boolean; remainingCredits: number }
   | { ok: false; error: "no_credits" };
 
 function addOneMonth(from = new Date()): Date {
@@ -148,8 +148,11 @@ export async function unlockLead(orgId: string, leadId: string): Promise<UnlockL
     return { ok: false, error: "no_credits" };
   }
 
+  const credits = await getOrgCredits(orgId);
+
   return {
     ok: true,
-    alreadyUnlocked: data === "already_unlocked"
+    alreadyUnlocked: data === "already_unlocked",
+    remainingCredits: credits.total
   };
 }

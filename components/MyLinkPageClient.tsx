@@ -54,23 +54,12 @@ export function MyLinkPageClient({
   const [socialCaption, setSocialCaption] = useState(initialSocialCaption);
   const [draftCaption, setDraftCaption] = useState(initialSocialCaption);
   const [savingCaption, setSavingCaption] = useState(false);
-  const [saveMessageVisible, setSaveMessageVisible] = useState(false);
   const [isEditingCaption, setIsEditingCaption] = useState(false);
 
   useEffect(() => {
     setSocialCaption(initialSocialCaption);
     setDraftCaption(initialSocialCaption);
   }, [initialSocialCaption]);
-
-  useEffect(() => {
-    if (!saveMessageVisible) return;
-
-    const timeoutId = window.setTimeout(() => {
-      setSaveMessageVisible(false);
-    }, 2000);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [saveMessageVisible]);
 
   useEffect(() => {
     if (!isEditingCaption) return;
@@ -114,8 +103,8 @@ export function MyLinkPageClient({
       }
 
       setSocialCaption(draftCaption);
-      setSaveMessageVisible(true);
       setIsEditingCaption(false);
+      toast.success("Caption saved.");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Could not save caption.");
     } finally {
@@ -240,9 +229,6 @@ export function MyLinkPageClient({
                 Edit Caption
               </Button>
             )}
-            {saveMessageVisible ? (
-              <p className="text-sm font-medium text-[#16A34A]">Caption saved!</p>
-            ) : null}
           </div>
         </CardContent>
       </Card>

@@ -18,14 +18,14 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/app", label: "Dashboard", icon: Home, exact: true },
-  { href: "/app/leads", label: "Leads", icon: FileText },
-  { href: "/app/quotes", label: "Estimates", icon: Receipt },
+  { href: "/app/leads", label: "Leads", icon: FileText, tourId: "leads" },
+  { href: "/app/quotes", label: "Estimates", icon: Receipt, tourId: "estimates" },
   { href: "/app/customers", label: "Customers", icon: UserCircle2 },
   { href: "/app/analytics", label: "Analytics", icon: BarChart3 },
-  { href: "/dashboard/my-link", label: "My Link", icon: Link2 },
+  { href: "/dashboard/my-link", label: "My Link", icon: Link2, tourId: "my-link" },
   { href: "/plan", label: "Plan", icon: CreditCard, matchPaths: ["/plan", "/app/plan"] },
   { href: "/app/team", label: "Team", icon: Users },
-  { href: "/app/settings", label: "Settings", icon: Settings }
+  { href: "/app/settings", label: "Settings", icon: Settings, tourId: "settings" }
 ];
 
 function getInitials(name?: string | null): string {
@@ -61,6 +61,7 @@ export function Sidebar({ businessName }: { businessName?: string | null }) {
               <Link
                 key={item.href}
                 href={item.href}
+                data-tour-id={item.tourId}
                 className={cn(
                   "inline-flex items-center gap-2 rounded-[8px] border-l-[3px] px-3 py-2.5 text-sm font-medium md:flex",
                   active

@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
+    "seed:demo": "tsx scripts/seedDemo.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:estimator": "tsx scripts/run-estimator-tests.ts"

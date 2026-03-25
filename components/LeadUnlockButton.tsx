@@ -32,11 +32,12 @@ export function LeadUnlockButton({ leadId, onUnlocked, children, ...props }: Pro
         error?: string;
         ok?: boolean;
         alreadyUnlocked?: boolean;
+        remainingCredits?: number;
       };
 
       if (!response.ok) {
         if (json.error === "no_credits") {
-          toast.error("You're out of credits. Purchase more in My Plan.");
+          toast.error("You're out of credits. Go to My Plan to buy more.", { duration: 6000 });
           return;
         }
 
@@ -45,6 +46,9 @@ export function LeadUnlockButton({ leadId, onUnlocked, children, ...props }: Pro
 
       onUnlocked?.({ alreadyUnlocked: json.alreadyUnlocked === true });
       toast.success(json.alreadyUnlocked ? "Lead already unlocked." : "Lead unlocked.");
+      if ((json.remainingCredits ?? Number.POSITIVE_INFINITY) <= 2) {
+        toast.warning("You're running low on credits. Buy more in My Plan.");
+      }
       startTransition(() => {
         router.refresh();
       });

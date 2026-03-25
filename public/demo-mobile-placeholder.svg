@@ -1,0 +1,28 @@
+<svg width="1600" height="1200" viewBox="0 0 1600 1200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1600" height="1200" rx="48" fill="#F8FAFC"/>
+  <rect x="96" y="96" width="1408" height="1008" rx="40" fill="white" stroke="#D8E3F0" stroke-width="8"/>
+  <rect x="96" y="96" width="1408" height="112" rx="40" fill="#F8FAFC"/>
+  <circle cx="168" cy="152" r="16" fill="#F87171"/>
+  <circle cx="216" cy="152" r="16" fill="#FBBF24"/>
+  <circle cx="264" cy="152" r="16" fill="#34D399"/>
+  <rect x="440" y="126" width="720" height="52" rx="26" fill="white" stroke="#D1D5DB" stroke-width="4"/>
+  <rect x="152" y="264" width="312" height="744" rx="28" fill="white" stroke="#E5E7EB" stroke-width="4"/>
+  <rect x="520" y="264" width="928" height="104" rx="24" fill="white" stroke="#E5E7EB" stroke-width="4"/>
+  <rect x="520" y="404" width="928" height="540" rx="28" fill="#F8F9FC" stroke="#E5E7EB" stroke-width="4"/>
+  <rect x="192" y="332" width="232" height="28" rx="14" fill="#DBEAFE"/>
+  <rect x="192" y="398" width="232" height="24" rx="12" fill="#EFF6FF"/>
+  <rect x="192" y="454" width="232" height="24" rx="12" fill="#EFF6FF"/>
+  <rect x="192" y="510" width="232" height="24" rx="12" fill="#EFF6FF"/>
+  <rect x="192" y="566" width="232" height="24" rx="12" fill="#EFF6FF"/>
+  <rect x="192" y="622" width="232" height="24" rx="12" fill="#EFF6FF"/>
+  <rect x="192" y="678" width="232" height="24" rx="12" fill="#EFF6FF"/>
+  <rect x="568" y="456" width="392" height="180" rx="24" fill="white" stroke="#E5E7EB" stroke-width="4"/>
+  <rect x="1008" y="456" width="392" height="180" rx="24" fill="white" stroke="#E5E7EB" stroke-width="4"/>
+  <rect x="568" y="680" width="832" height="208" rx="24" fill="white" stroke="#E5E7EB" stroke-width="4"/>
+  <text x="800" y="1010" text-anchor="middle" fill="#2563EB" font-family="Arial, sans-serif" font-size="44" font-weight="700">
+    Interactive demo is available on desktop
+  </text>
+  <text x="800" y="1064" text-anchor="middle" fill="#64748B" font-family="Arial, sans-serif" font-size="30">
+    Mobile visitors see a static preview placeholder for now
+  </text>
+</svg>

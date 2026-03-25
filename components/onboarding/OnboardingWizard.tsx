@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { AddressAutocomplete } from "@/components/AddressAutocomplete";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -24,6 +25,7 @@ const serviceOptions: ServiceOption[] = SERVICE_OPTIONS.map((value) => ({
   value,
   label: serviceLabelOverrides[value] ?? value
 }));
+const OAUTH_SIGNUP_TOAST_KEY = "snapquote-oauth-signup-success";
 
 export function OnboardingWizard() {
   const router = useRouter();
@@ -37,6 +39,12 @@ export function OnboardingWizard() {
   const [mobileContractor, setMobileContractor] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (window.sessionStorage.getItem(OAUTH_SIGNUP_TOAST_KEY) !== "1") return;
+    window.sessionStorage.removeItem(OAUTH_SIGNUP_TOAST_KEY);
+    toast.success("Account created! Welcome to SnapQuote.");
+  }, []);
 
   const hasResolvedAddress = Boolean(
     businessAddress.trim() &&

@@ -5,6 +5,7 @@ type BrandLogoProps = {
   className?: string;
   iconClassName?: string;
   wordmarkClassName?: string;
+  showWordmark?: boolean;
 };
 
 const sizeClasses = {
@@ -29,7 +30,8 @@ export function BrandLogo({
   size = "md",
   className,
   iconClassName,
-  wordmarkClassName
+  wordmarkClassName,
+  showWordmark = true
 }: BrandLogoProps) {
   const sizing = sizeClasses[size];
 
@@ -59,15 +61,17 @@ export function BrandLogo({
           strokeLinejoin="round"
         />
       </svg>
-      <span
-        className={cn(
-          "font-extrabold tracking-tight text-[#1557B6]",
-          sizing.wordmark,
-          wordmarkClassName
-        )}
-      >
-        SnapQuote
-      </span>
+      {showWordmark ? (
+        <span
+          className={cn(
+            "font-extrabold tracking-tight text-[#1557B6]",
+            sizing.wordmark,
+            wordmarkClassName
+          )}
+        >
+          SnapQuote
+        </span>
+      ) : null}
     </div>
   );
 }

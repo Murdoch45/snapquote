@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -51,9 +52,31 @@ const PLAN_OPTIONS: PlanOption[] = [
 ];
 
 export function PlanOptionsSection({ currentPlan }: Props) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const hasShownToastRef = useRef(false);
   const [loadingPlan, setLoadingPlan] = useState<Plan | null>(null);
   const [loadingPortal, setLoadingPortal] = useState(false);
   const [downgradeTarget, setDowngradeTarget] = useState<PlanOption | null>(null);
+
+  useEffect(() => {
+    const updated = searchParams.get("updated");
+    const change = searchParams.get("change");
+    if (hasShownToastRef.current) return;
+
+    if (updated === "1") {
+      hasShownToastRef.current = true;
+      toast.success("Plan upgraded successfully!");
+      router.replace("/app/plan");
+      return;
+    }
+
+    if (change === "scheduled") {
+      hasShownToastRef.current = true;
+      toast.success("Your plan change has been scheduled.");
+      router.replace("/app/plan");
+    }
+  }, [router, searchParams]);
 
   const openUpgrade = async (plan: Exclude<Plan, "SOLO">) => {
     setLoadingPlan(plan);
@@ -84,7 +107,11 @@ export function PlanOptionsSection({ currentPlan }: Props) {
 
     try {
       const response = await fetch("/api/stripe/customer-portal", {
-        method: "POST"
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ change: "scheduled" })
       });
       const json = (await response.json()) as { error?: string; url?: string };
 

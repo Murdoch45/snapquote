@@ -207,7 +207,11 @@ export function PublicLeadForm({ contractorSlug }: Props) {
         credentials: "same-origin",
         body: formData
       });
-      const json = await res.json();
+      const json = (await res.json()) as {
+        error?: string;
+        code?: string;
+        photoUploadPartialFailure?: boolean;
+      };
       if (res.status === 402 || json.code === "SUBSCRIPTION_INACTIVE") {
         setShowSubscriptionModal(true);
         return;
@@ -215,6 +219,9 @@ export function PublicLeadForm({ contractorSlug }: Props) {
       if (!res.ok) throw new Error(json.error || "Failed to submit request.");
       setSubmitted(true);
       toast.success("Request sent.");
+      if (json.photoUploadPartialFailure) {
+        toast.error("Some photos failed to upload. Please try again.");
+      }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to submit request.");
     } finally {

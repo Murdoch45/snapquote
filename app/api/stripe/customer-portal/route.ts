@@ -5,7 +5,7 @@ import { getStripe, getStripeAppUrl } from "@/lib/stripe";
 
 export const runtime = "nodejs";
 
-export async function POST() {
+export async function POST(request: Request) {
   const auth = await requireMemberForApi();
   if (!auth.ok) return auth.response;
 
@@ -13,6 +13,9 @@ export async function POST() {
     const admin = createAdminClient();
     const stripe = getStripe();
     const appUrl = getStripeAppUrl();
+    const body = (await request.json().catch(() => null)) as { change?: string } | null;
+    const returnUrl =
+      body?.change === "scheduled" ? `${appUrl}/app/plan?change=scheduled` : `${appUrl}/app`;
 
     const { data: members, error: membersError } = await admin
       .from("organization_members")
@@ -56,7 +59,7 @@ export async function POST() {
 
     const session = await stripe.billingPortal.sessions.create({
       customer: stripeCustomerId,
-      return_url: `${appUrl}/app`
+      return_url: returnUrl
     });
 
     return NextResponse.json({ url: session.url });

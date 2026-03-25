@@ -153,8 +153,9 @@ export async function POST(request: Request) {
     const leadId = lead.id as string;
     console.log("lead-submit lead created:", { leadId, orgId });
     const uploadedPaths: { path: string; url: string }[] = [];
+    const attemptedPhotoUploads = photos.slice(0, MAX_PHOTO_UPLOADS);
 
-    for (const photo of photos.slice(0, MAX_PHOTO_UPLOADS)) {
+    for (const photo of attemptedPhotoUploads) {
       const ext = photo.type.includes("png") ? "png" : "jpg";
       const path = `${orgId}/${leadId}/${randomUUID()}.${ext}`;
       // eslint-disable-next-line no-await-in-loop
@@ -216,7 +217,12 @@ export async function POST(request: Request) {
     });
     console.log("lead-submit customer notifications:", customerNotifications);
 
-    return NextResponse.json({ success: true, leadId, received: true });
+    return NextResponse.json({
+      success: true,
+      leadId,
+      received: true,
+      photoUploadPartialFailure: uploadedPaths.length < attemptedPhotoUploads.length
+    });
   } catch (error) {
     console.error("lead-submit failed:", error);
     return NextResponse.json(

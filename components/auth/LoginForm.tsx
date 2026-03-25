@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,13 +17,11 @@ export function LoginForm() {
   const supabase = createClient();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [loadingProvider, setLoadingProvider] = useState<Provider | null>(null);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setError(null);
     setSubmitting(true);
 
     const { error: loginError } = await supabase.auth.signInWithPassword({
@@ -31,16 +30,16 @@ export function LoginForm() {
     });
 
     if (loginError) {
-      setError(loginError.message);
+      toast.error(loginError.message);
       setSubmitting(false);
       return;
     }
 
+    toast.success("Welcome back!");
     router.replace("/dashboard");
   };
 
   const handleOAuth = async (provider: Provider) => {
-    setError(null);
     setLoadingProvider(provider);
 
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
@@ -51,7 +50,7 @@ export function LoginForm() {
     });
 
     if (oauthError) {
-      setError(oauthError.message);
+      toast.error(oauthError.message);
       setLoadingProvider(null);
     }
   };
@@ -93,12 +92,6 @@ export function LoginForm() {
         loadingProvider={loadingProvider}
         onProviderClick={handleOAuth}
       />
-
-      {error ? (
-        <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
-          {error}
-        </p>
-      ) : null}
     </form>
   );
 }

@@ -65,8 +65,50 @@ export function TopBar({
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "quotes", filter: `org_id=eq.${orgId}` },
         (payload) => {
-          if ((payload.new as { status?: string }).status !== "ACCEPTED") return;
+          const previousStatus = (payload.old as { status?: string }).status;
+          const nextStatus = (payload.new as { status?: string }).status;
+          if (previousStatus === nextStatus) return;
+          if (nextStatus !== "ACCEPTED") return;
           const text = "An estimate was accepted";
+          setFeed((prev) =>
+            [{ id: crypto.randomUUID(), text, createdAt: new Date().toISOString() }, ...prev].slice(
+              0,
+              12
+            )
+          );
+          toast.success(text);
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "quotes", filter: `org_id=eq.${orgId}` },
+        (payload) => {
+          const previousStatus = (payload.old as { status?: string }).status;
+          const nextStatus = (payload.new as { status?: string }).status;
+          if (previousStatus === nextStatus || nextStatus !== "VIEWED") return;
+          const text = "A customer viewed your estimate.";
+          setFeed((prev) =>
+            [{ id: crypto.randomUUID(), text, createdAt: new Date().toISOString() }, ...prev].slice(
+              0,
+              12
+            )
+          );
+          toast(text, { icon: "👀" });
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "pending_invites",
+          filter: `org_id=eq.${orgId}`
+        },
+        (payload) => {
+          const previousStatus = (payload.old as { status?: string }).status;
+          const nextStatus = (payload.new as { status?: string }).status;
+          if (previousStatus === nextStatus || nextStatus !== "ACCEPTED") return;
+          const text = "A team member accepted your invite.";
           setFeed((prev) =>
             [{ id: crypto.randomUUID(), text, createdAt: new Date().toISOString() }, ...prev].slice(
               0,
