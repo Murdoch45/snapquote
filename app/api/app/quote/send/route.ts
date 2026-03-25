@@ -122,7 +122,7 @@ export async function POST(request: Request) {
         contractorEmail: (user?.email as string | null) ?? (profile?.email as string | null) ?? null,
         estimateLow: body.estimatedPriceLow,
         estimateHigh: body.estimatedPriceHigh,
-        quoteUrl: quoteLink
+        publicId
       });
       const emailSent = await sendEmail({
         to: lead.customer_email as string,

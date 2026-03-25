@@ -1,4 +1,4 @@
-import { getCustomerFirstName } from "@/lib/quote-template";
+import { buildQuoteLink, getCustomerFirstName } from "@/lib/quote-template";
 import { formatCurrencyRange, toCurrency } from "@/lib/utils";
 
 export function renderEmailShell(title: string, bodyHtml: string) {
@@ -49,8 +49,9 @@ export function buildEstimateSentEmail(input: {
   contractorEmail: string | null;
   estimateLow: number;
   estimateHigh: number;
-  quoteUrl: string;
+  publicId: string;
 }) {
+  const quoteUrl = buildQuoteLink(input.publicId);
   const title = `You have a new estimate from ${input.businessName}`;
   const priceRange =
     formatCurrencyRange(input.estimateLow, input.estimateHigh) ??
@@ -58,7 +59,7 @@ export function buildEstimateSentEmail(input: {
 
   return {
     subject: title,
-    text: `${title}\n\nEstimated price: ${priceRange}\nPhone: ${input.contractorPhone ?? "Not provided"}\nEmail: ${input.contractorEmail ?? "Not provided"}\n\nView estimate: ${input.quoteUrl}`,
+    text: `${title}\n\nEstimated price: ${priceRange}\nPhone: ${input.contractorPhone ?? "Not provided"}\nEmail: ${input.contractorEmail ?? "Not provided"}\n\nView estimate: ${quoteUrl}`,
     html: renderEmailShell(
       title,
       `
@@ -69,7 +70,7 @@ export function buildEstimateSentEmail(input: {
         ${renderField("Contractor", input.businessName)}
         ${renderField("Phone", input.contractorPhone ?? "Not provided")}
         ${renderField("Email", input.contractorEmail ?? "Not provided")}
-        ${renderButton("View Estimate", input.quoteUrl)}
+        ${renderButton("View Estimate", quoteUrl)}
       `
     )
   };
