@@ -159,6 +159,20 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
+        <footer className="border-t border-white/10 bg-[#101320]">
+          <div className="mx-auto flex max-w-7xl flex-col gap-3 px-6 py-6 text-sm text-white/55 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+            <p>© 2026 SnapQuote. All rights reserved.</p>
+            <div className="flex items-center gap-5">
+              <Link href="/privacy" className="transition-colors hover:text-white">
+                Privacy Policy
+              </Link>
+              <Link href="/terms" className="transition-colors hover:text-white">
+                Terms of Service
+              </Link>
+            </div>
+          </div>
+        </footer>
       </div>
     </main>
   );

@@ -7,7 +7,7 @@ export function cn(...inputs: ClassValue[]): string {
 }
 
 export function getAppUrl(): string {
-  return process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  return (process.env.NEXT_PUBLIC_APP_URL ?? "https://snapquote.us").replace(/\/$/, "");
 }
 
 export function slugify(input: string): string {

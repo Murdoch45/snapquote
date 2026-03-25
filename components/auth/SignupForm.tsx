@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -104,6 +105,18 @@ export function SignupForm() {
       >
         {submitting ? "Creating account..." : "Create Account"}
       </Button>
+
+      <p className="text-center text-sm text-slate-500">
+        By creating an account you agree to our{" "}
+        <Link href="/terms" className="text-slate-600 underline underline-offset-4 hover:text-slate-900">
+          Terms of Service
+        </Link>{" "}
+        and{" "}
+        <Link href="/privacy" className="text-slate-600 underline underline-offset-4 hover:text-slate-900">
+          Privacy Policy
+        </Link>
+        .
+      </p>
 
       <OAuthButtons
         googleLabel="Sign up with Google"
