@@ -6,8 +6,8 @@ import { getAppUrl } from "@/lib/utils";
 
 function maxMembersByPlan(plan: string): number {
   if (plan === "SOLO") return 1;
-  if (plan === "TEAM") return 5;
-  return 10;
+  if (plan === "TEAM") return 2;
+  return 5;
 }
 
 function makeInviteToken() {
@@ -20,6 +20,7 @@ export async function POST() {
 
   try {
     const admin = createAdminClient();
+    const nowIso = new Date().toISOString();
 
     const [{ data: org }, { count: memberCount }, { count: pendingCount }] = await Promise.all([
       admin.from("organizations").select("plan").eq("id", auth.orgId).single(),
@@ -32,14 +33,18 @@ export async function POST() {
         .select("*", { count: "exact", head: true })
         .eq("org_id", auth.orgId)
         .eq("status", "PENDING")
+        .gt("expires_at", nowIso)
     ]);
 
     const maxMembers = maxMembersByPlan(org?.plan ?? "SOLO");
     const occupied = (memberCount ?? 0) + (pendingCount ?? 0);
     if (occupied >= maxMembers) {
       return NextResponse.json(
-        { error: `Plan limit reached (${maxMembers} users). Upgrade to invite more members.` },
-        { status: 400 }
+        {
+          error:
+            "You've reached your plan's team member limit. Upgrade your plan to add more members."
+        },
+        { status: 403 }
       );
     }
 
