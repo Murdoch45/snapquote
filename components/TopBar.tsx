@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Bell, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { getAddressParts } from "@/lib/leadPresentation";
 import { createClient } from "@/lib/supabase/client";
 
 type FeedItem = {
@@ -49,9 +50,11 @@ function createLeadNotification(
   address: string | null | undefined,
   createdAt: string
 ): FeedItem {
+  const locality = getAddressParts(address).locality;
+
   return {
     id,
-    text: `New lead received${address ? ` at ${address}` : "."}`,
+    text: `New lead received${locality ? ` at ${locality}` : "."}`,
     createdAt
   };
 }
