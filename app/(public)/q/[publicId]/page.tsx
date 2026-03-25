@@ -21,7 +21,7 @@ export default async function PublicQuotePage({ params }: Props) {
 
   const { data: profile } = await admin
     .from("contractor_profile")
-    .select("business_name")
+    .select("business_name,phone,email")
     .eq("org_id", quote.org_id)
     .single();
 
@@ -29,11 +29,13 @@ export default async function PublicQuotePage({ params }: Props) {
   const expiresAt = publicQuoteExpiry(quote.sent_at).toISOString();
 
   return (
-    <main className="min-h-screen bg-gray-50 px-4 py-10">
+    <main className="min-h-screen bg-[#F8F9FC] px-4 py-8 sm:py-12">
       <PublicQuoteCard
         quote={{
           publicId: quote.public_id as string,
           businessName: profile?.business_name as string,
+          businessPhone: (profile?.phone as string | null) ?? null,
+          businessEmail: (profile?.email as string | null) ?? null,
           services: (lead?.services ?? []) as string[],
           address: lead?.address_full as string,
           price: Number(quote.price),

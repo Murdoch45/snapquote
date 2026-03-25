@@ -80,13 +80,12 @@ export function buildCustomerConfirmationEmail(input: {
   businessName: string;
   businessPhone: string | null;
   businessEmail: string | null;
-  requestPageUrl: string;
 }) {
   const title = `${input.businessName} received your estimate request`;
 
   return {
     subject: title,
-    text: `${title}\n\nThanks for reaching out! We received your request and will be in touch shortly with your estimate.\nPhone: ${input.businessPhone ?? "Not provided"}\nEmail: ${input.businessEmail ?? "Not provided"}\n\nView page: ${input.requestPageUrl}`,
+    text: `${title}\n\nThanks for reaching out! We received your request and will be in touch shortly with your estimate.\nPhone: ${input.businessPhone ?? "Not provided"}\nEmail: ${input.businessEmail ?? "Not provided"}`,
     html: renderEmailShell(
       title,
       `
@@ -98,7 +97,6 @@ export function buildCustomerConfirmationEmail(input: {
         </p>
         ${renderField("Phone", input.businessPhone ?? "Not provided")}
         ${renderField("Email", input.businessEmail ?? "Not provided")}
-        ${renderButton("View Request Page", input.requestPageUrl)}
       `
     )
   };

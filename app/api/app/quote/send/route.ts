@@ -71,8 +71,26 @@ export async function POST(request: Request) {
     const {
       data: { user }
     } = await supabase.auth.getUser();
-    const publicId = body.publicId ?? makePublicId();
-    const quoteLink = buildQuoteLink(publicId);
+    const requestedPublicId = body.publicId ?? makePublicId();
+    const { data: quote, error: quoteError } = await admin
+      .from("quotes")
+      .insert({
+        org_id: auth.orgId,
+        lead_id: body.leadId,
+        public_id: requestedPublicId,
+        price: roundToNearestFive((body.estimatedPriceLow + body.estimatedPriceHigh) / 2),
+        estimated_price_low: body.estimatedPriceLow,
+        estimated_price_high: body.estimatedPriceHigh,
+        message: body.message,
+        status: "SENT"
+      })
+      .select("id,public_id")
+      .single();
+
+    if (quoteError || !quote) throw quoteError || new Error("Estimate send failed.");
+    createdQuoteId = quote.id as string;
+    const confirmedPublicId = quote.public_id as string;
+    const quoteLink = buildQuoteLink(confirmedPublicId);
     const resolvedMessage = renderQuoteTemplate(body.message, {
       customerName: (lead.customer_name as string) || "Customer",
       companyName: (profile?.business_name as string) || "SnapQuote",
@@ -80,23 +98,14 @@ export async function POST(request: Request) {
       contractorPhone: (profile?.phone as string) || "Not provided",
       contractorEmail: user?.email || (profile?.email as string) || "Not provided"
     });
-    const { data: quote, error: quoteError } = await admin
-      .from("quotes")
-      .insert({
-        org_id: auth.orgId,
-        lead_id: body.leadId,
-        public_id: publicId,
-        price: roundToNearestFive((body.estimatedPriceLow + body.estimatedPriceHigh) / 2),
-        estimated_price_low: body.estimatedPriceLow,
-        estimated_price_high: body.estimatedPriceHigh,
-        message: resolvedMessage,
-        status: "SENT"
-      })
-      .select("id")
-      .single();
 
-    if (quoteError || !quote) throw quoteError || new Error("Estimate send failed.");
-    createdQuoteId = quote.id as string;
+    const { error: messageUpdateError } = await admin
+      .from("quotes")
+      .update({ message: resolvedMessage })
+      .eq("id", quote.id)
+      .eq("org_id", auth.orgId);
+
+    if (messageUpdateError) throw messageUpdateError;
 
     const sentChannels: ("email" | "text")[] = [];
     const deliveryErrors: string[] = [];
@@ -122,7 +131,7 @@ export async function POST(request: Request) {
         contractorEmail: (user?.email as string | null) ?? (profile?.email as string | null) ?? null,
         estimateLow: body.estimatedPriceLow,
         estimateHigh: body.estimatedPriceHigh,
-        publicId
+        publicId: confirmedPublicId
       });
       const emailSent = await sendEmail({
         to: lead.customer_email as string,
@@ -160,7 +169,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       ok: true,
       quoteId: quote.id,
-      publicId,
+      publicId: confirmedPublicId,
       publicUrl: quoteLink,
       resolvedMessage,
       usage,

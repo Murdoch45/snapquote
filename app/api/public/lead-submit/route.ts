@@ -298,8 +298,7 @@ export async function POST(request: Request) {
     const customerConfirmationEmail = buildCustomerConfirmationEmail({
       businessName: contractor.business_name as string,
       businessPhone: (contractor.phone as string | null) ?? null,
-      businessEmail: (contractor.email as string | null) ?? null,
-      requestPageUrl: `${getAppUrl()}/${payload.contractorSlug}`
+      businessEmail: (contractor.email as string | null) ?? null
     });
 
     const customerNotifications = await notifyCustomer({
