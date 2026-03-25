@@ -105,14 +105,6 @@ export const sendQuoteSchema = z.object({
       message: "Low price cannot exceed high price."
     });
   }
-
-  if (val.estimatedPriceHigh > val.estimatedPriceLow * 1.2) {
-    ctx.addIssue({
-      path: ["estimatedPriceHigh"],
-      code: z.ZodIssueCode.custom,
-      message: "High price cannot be more than 20% above low price."
-    });
-  }
 });
 
 export const updateSettingsSchema = z.object({
