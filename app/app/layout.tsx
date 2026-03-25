@@ -6,6 +6,8 @@ import { requireAuth } from "@/lib/auth/requireAuth";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getMonthlyUsage } from "@/lib/usage";
 
+export const dynamic = "force-dynamic";
+
 export default async function AppLayout({
   children
 }: {

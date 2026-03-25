@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { createClient } from "@/lib/supabase/client";
 
 type OnboardingTourProps = {
   enabled: boolean;
@@ -41,6 +42,7 @@ const CARD_WIDTH = 480;
 const PREVIEW_SCALE = 0.61;
 const PREVIEW_CANVAS_WIDTH = 720;
 const PREVIEW_CANVAS_HEIGHT = 360;
+const ONBOARDING_TOUR_STORAGE_PREFIX = "snapquote:onboarding-tour-completed";
 
 function MiniMyLinkPreview() {
   return (
@@ -213,7 +215,9 @@ export function OnboardingTour({ enabled }: OnboardingTourProps) {
   const router = useRouter();
   const cardRef = useRef<HTMLDivElement | null>(null);
   const [stepIndex, setStepIndex] = useState(0);
-  const [visible, setVisible] = useState(enabled);
+  const [visible, setVisible] = useState(false);
+  const [storageKey, setStorageKey] = useState<string | null>(null);
+  const [hasResolvedVisibility, setHasResolvedVisibility] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isStepVisible, setIsStepVisible] = useState(true);
   const [tooltipStyle, setTooltipStyle] = useState<React.CSSProperties>({});
@@ -223,7 +227,44 @@ export function OnboardingTour({ enabled }: OnboardingTourProps) {
   const isDashboard = pathname === "/app" || pathname === "/app/";
 
   useEffect(() => {
-    setVisible(enabled);
+    let cancelled = false;
+
+    if (!enabled) {
+      setVisible(false);
+      setStorageKey(null);
+      setHasResolvedVisibility(true);
+      return;
+    }
+
+    setHasResolvedVisibility(false);
+
+    const resolveVisibility = async () => {
+      try {
+        const supabase = createClient();
+        const {
+          data: { user }
+        } = await supabase.auth.getUser();
+        const nextStorageKey = `${ONBOARDING_TOUR_STORAGE_PREFIX}:${user?.id ?? "anonymous"}`;
+        if (cancelled) return;
+
+        setStorageKey(nextStorageKey);
+        setVisible(window.localStorage.getItem(nextStorageKey) !== "true");
+      } catch {
+        if (cancelled) return;
+        setStorageKey(null);
+        setVisible(false);
+      } finally {
+        if (!cancelled) {
+          setHasResolvedVisibility(true);
+        }
+      }
+    };
+
+    void resolveVisibility();
+
+    return () => {
+      cancelled = true;
+    };
   }, [enabled]);
 
   useEffect(() => {
@@ -292,24 +333,34 @@ export function OnboardingTour({ enabled }: OnboardingTourProps) {
   const completeTour = async (showDoneToast = false) => {
     if (isSubmitting) return;
     setIsSubmitting(true);
-    setVisible(false);
-    if (showDoneToast) {
-      toast.success("You're all set! Start by sharing your link.");
-    }
 
     try {
-      await fetch("/api/onboarding/complete", {
+      const response = await fetch("/api/onboarding/complete", {
         method: "POST"
       });
-    } catch {
-      // Keep the tour closed even if the completion request fails.
-    } finally {
+      const json = (await response.json().catch(() => null)) as { error?: string } | null;
+
+      if (!response.ok) {
+        throw new Error(json?.error || "Failed to complete onboarding tour.");
+      }
+
+      if (storageKey) {
+        window.localStorage.setItem(storageKey, "true");
+      }
+
+      setVisible(false);
+      if (showDoneToast) {
+        toast.success("You're all set! Start by sharing your link.");
+      }
       router.refresh();
+    } catch {
+      toast.error("Couldn't save onboarding progress. Please try again.");
+    } finally {
       setIsSubmitting(false);
     }
   };
 
-  if (!visible || !enabled || !isDashboard) return null;
+  if (!hasResolvedVisibility || !visible || !enabled || !isDashboard) return null;
 
   return (
     <div className="pointer-events-none fixed inset-0 z-[70]">
