@@ -41,9 +41,7 @@ export async function POST(request: Request) {
       business_lng: body.businessLng ?? null,
       quote_sms_template: body.quoteSmsTemplate?.trim() || null,
       travel_pricing_disabled: body.travelPricingDisabled,
-      notification_lead_sms: body.notificationLeadSms,
       notification_lead_email: body.notificationLeadEmail,
-      notification_accept_sms: body.notificationAcceptSms,
       notification_accept_email: body.notificationAcceptEmail
     };
 

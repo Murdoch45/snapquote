@@ -1,5 +1,6 @@
 import { randomBytes } from "crypto";
 import { NextResponse } from "next/server";
+import { buildEstimateSentEmail } from "@/lib/emailTemplates";
 import { requireMemberForApi } from "@/lib/auth/requireRole";
 import { sendEmail } from "@/lib/notify";
 import { buildQuoteLink, renderQuoteTemplate } from "@/lib/quote-template";
@@ -115,10 +116,19 @@ export async function POST(request: Request) {
     }
 
     if (body.sendEmail) {
+      const customerEmail = buildEstimateSentEmail({
+        businessName: (profile?.business_name as string) || "SnapQuote",
+        contractorPhone: (profile?.phone as string | null) ?? null,
+        contractorEmail: (user?.email as string | null) ?? (profile?.email as string | null) ?? null,
+        estimateLow: body.estimatedPriceLow,
+        estimateHigh: body.estimatedPriceHigh,
+        quoteUrl: quoteLink
+      });
       const emailSent = await sendEmail({
         to: lead.customer_email as string,
-        subject: `${profile?.business_name} sent your estimate`,
-        text: resolvedMessage
+        subject: customerEmail.subject,
+        text: customerEmail.text,
+        html: customerEmail.html
       });
       if (!emailSent) {
         deliveryErrors.push("Failed to send estimate by email.");

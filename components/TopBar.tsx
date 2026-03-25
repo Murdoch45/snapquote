@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Bell, LogOut } from "lucide-react";
 import { toast } from "sonner";
@@ -27,6 +27,57 @@ function getPageTitle(pathname: string): string {
   return "Dashboard";
 }
 
+function getTodayRange() {
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+
+  const end = new Date(start);
+  end.setDate(end.getDate() + 1);
+
+  return { start, end };
+}
+
+function formatNotificationTime(value: string) {
+  return new Date(value).toLocaleTimeString([], {
+    hour: "numeric",
+    minute: "2-digit"
+  });
+}
+
+function createLeadNotification(
+  id: string,
+  address: string | null | undefined,
+  createdAt: string
+): FeedItem {
+  return {
+    id,
+    text: `New lead received${address ? ` at ${address}` : "."}`,
+    createdAt
+  };
+}
+
+function createAcceptedNotification(id: string, createdAt: string): FeedItem {
+  return {
+    id,
+    text: "An estimate was accepted.",
+    createdAt
+  };
+}
+
+function mergeFeed(existing: FeedItem[], incoming: FeedItem[]): FeedItem[] {
+  const merged = new Map<string, FeedItem>();
+
+  [...incoming, ...existing].forEach((item) => {
+    if (!merged.has(item.id)) {
+      merged.set(item.id, item);
+    }
+  });
+
+  return [...merged.values()]
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 20);
+}
+
 export function TopBar({
   email,
   orgId,
@@ -39,9 +90,70 @@ export function TopBar({
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [feed, setFeed] = useState<FeedItem[]>([]);
+  const unreadCount = useMemo(() => feed.length, [feed]);
+
+  useEffect(() => {
+    const scheduleReset = () => {
+      const now = new Date();
+      const nextMidnight = new Date(now);
+      nextMidnight.setHours(24, 0, 0, 0);
+
+      return window.setTimeout(() => {
+        setFeed([]);
+        setOpen(false);
+        scheduleReset();
+      }, nextMidnight.getTime() - now.getTime());
+    };
+
+    const timeoutId = scheduleReset();
+    return () => window.clearTimeout(timeoutId);
+  }, []);
 
   useEffect(() => {
     const supabase = createClient();
+
+    const loadTodayNotifications = async () => {
+      const { start, end } = getTodayRange();
+
+      const [{ data: leads }, { data: acceptedEvents }] = await Promise.all([
+        supabase
+          .from("leads")
+          .select("id,address_full,submitted_at")
+          .eq("org_id", orgId)
+          .gte("submitted_at", start.toISOString())
+          .lt("submitted_at", end.toISOString())
+          .order("submitted_at", { ascending: false }),
+        supabase
+          .from("quote_events")
+          .select("id,quote_id,created_at")
+          .eq("org_id", orgId)
+          .eq("event_type", "ACCEPTED")
+          .gte("created_at", start.toISOString())
+          .lt("created_at", end.toISOString())
+          .order("created_at", { ascending: false })
+      ]);
+
+      const initialNotifications = [
+        ...(leads ?? []).map((lead) =>
+          createLeadNotification(
+            `lead-${lead.id as string}`,
+            lead.address_full as string | null,
+            lead.submitted_at as string
+          )
+        ),
+        ...(acceptedEvents ?? []).map((event) =>
+          createAcceptedNotification(
+            `accepted-quote-${event.quote_id as string}`,
+            event.created_at as string
+          )
+        )
+      ];
+
+      setFeed((prev) => mergeFeed(prev, initialNotifications));
+    };
+
+    void loadTodayNotifications();
+
     const channel = supabase
       .channel(`notifications-${orgId}`)
       .on(
@@ -49,16 +161,23 @@ export function TopBar({
         { event: "UPDATE", schema: "public", table: "leads", filter: `org_id=eq.${orgId}` },
         (payload) => {
           const previousStatus = (payload.old as { ai_status?: string }).ai_status;
-          const nextStatus = (payload.new as { ai_status?: string }).ai_status;
-          if (previousStatus === "ready" || nextStatus !== "ready") return;
-          const text = `New lead received at ${(payload.new as { address_full?: string }).address_full}`;
-          setFeed((prev) =>
-            [{ id: crypto.randomUUID(), text, createdAt: new Date().toISOString() }, ...prev].slice(
-              0,
-              12
-            )
+          const nextLead = payload.new as {
+            id?: string;
+            ai_status?: string;
+            address_full?: string;
+            submitted_at?: string;
+          };
+
+          if (previousStatus === "ready" || nextLead.ai_status !== "ready") return;
+
+          const item = createLeadNotification(
+            `lead-${nextLead.id ?? crypto.randomUUID()}`,
+            nextLead.address_full,
+            nextLead.submitted_at ?? new Date().toISOString()
           );
-          toast(text);
+
+          setFeed((prev) => mergeFeed(prev, [item]));
+          toast(item.text);
         }
       )
       .on(
@@ -66,17 +185,17 @@ export function TopBar({
         { event: "UPDATE", schema: "public", table: "quotes", filter: `org_id=eq.${orgId}` },
         (payload) => {
           const previousStatus = (payload.old as { status?: string }).status;
-          const nextStatus = (payload.new as { status?: string }).status;
-          if (previousStatus === nextStatus) return;
-          if (nextStatus !== "ACCEPTED") return;
-          const text = "An estimate was accepted";
-          setFeed((prev) =>
-            [{ id: crypto.randomUUID(), text, createdAt: new Date().toISOString() }, ...prev].slice(
-              0,
-              12
-            )
+          const nextQuote = payload.new as { id?: string; status?: string; accepted_at?: string };
+
+          if (previousStatus === nextQuote.status || nextQuote.status !== "ACCEPTED") return;
+
+          const item = createAcceptedNotification(
+            `accepted-quote-${nextQuote.id ?? crypto.randomUUID()}`,
+            nextQuote.accepted_at ?? new Date().toISOString()
           );
-          toast.success(text);
+
+          setFeed((prev) => mergeFeed(prev, [item]));
+          toast.success(item.text);
         }
       )
       .on(
@@ -86,14 +205,7 @@ export function TopBar({
           const previousStatus = (payload.old as { status?: string }).status;
           const nextStatus = (payload.new as { status?: string }).status;
           if (previousStatus === nextStatus || nextStatus !== "VIEWED") return;
-          const text = "A customer viewed your estimate.";
-          setFeed((prev) =>
-            [{ id: crypto.randomUUID(), text, createdAt: new Date().toISOString() }, ...prev].slice(
-              0,
-              12
-            )
-          );
-          toast(text, { icon: "👀" });
+          toast("A customer viewed your estimate.", { icon: "👀" });
         }
       )
       .on(
@@ -108,14 +220,7 @@ export function TopBar({
           const previousStatus = (payload.old as { status?: string }).status;
           const nextStatus = (payload.new as { status?: string }).status;
           if (previousStatus === nextStatus || nextStatus !== "ACCEPTED") return;
-          const text = "A team member accepted your invite.";
-          setFeed((prev) =>
-            [{ id: crypto.randomUUID(), text, createdAt: new Date().toISOString() }, ...prev].slice(
-              0,
-              12
-            )
-          );
-          toast.success(text);
+          toast.success("A team member accepted your invite.");
         }
       )
       .subscribe();
@@ -146,9 +251,9 @@ export function TopBar({
             onClick={() => setOpen((value) => !value)}
           >
             <Bell className="h-4 w-4" />
-            {feed.length > 0 ? (
+            {unreadCount > 0 ? (
               <span className="absolute -right-1 -top-1 rounded-full bg-[#2563EB] px-1.5 text-[10px] text-white">
-                {feed.length}
+                {unreadCount}
               </span>
             ) : null}
           </button>
@@ -159,15 +264,23 @@ export function TopBar({
                 Notifications
               </p>
               {feed.length === 0 ? (
-                <p className="text-sm text-[#6B7280]">No notifications yet.</p>
+                <p className="text-sm text-[#6B7280]">No notifications today</p>
               ) : (
                 <ul className="space-y-2">
                   {feed.map((item) => (
-                    <li key={item.id} className="rounded-[10px] bg-[#F8F9FC] p-3 text-sm text-[#111827]">
-                      <p>{item.text}</p>
-                      <p className="mt-1 text-xs text-[#6B7280]">
-                        {new Date(item.createdAt).toLocaleTimeString()}
-                      </p>
+                    <li key={item.id}>
+                      <button
+                        type="button"
+                        className="w-full rounded-[10px] bg-[#F8F9FC] p-3 text-left text-sm text-[#111827] transition-colors hover:bg-[#EEF2FF]"
+                        onClick={() =>
+                          setFeed((prev) => prev.filter((entry) => entry.id !== item.id))
+                        }
+                      >
+                        <p>{item.text}</p>
+                        <p className="mt-1 text-xs text-[#6B7280]">
+                          {formatNotificationTime(item.createdAt)}
+                        </p>
+                      </button>
                     </li>
                   ))}
                 </ul>

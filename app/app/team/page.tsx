@@ -16,7 +16,7 @@ export default async function TeamPage() {
       .order("created_at", { ascending: true }),
     supabase
       .from("pending_invites")
-      .select("id, email, role, status, created_at")
+      .select("id, email, role, status, created_at, expires_at, token")
       .eq("org_id", auth.orgId)
       .eq("status", "PENDING")
       .order("created_at", { ascending: false }),

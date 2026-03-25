@@ -26,9 +26,7 @@ type SettingsData = {
   business_lng: number | null;
   quote_sms_template: string | null;
   travel_pricing_disabled: boolean;
-  notification_lead_sms: boolean;
   notification_lead_email: boolean;
-  notification_accept_sms: boolean;
   notification_accept_email: boolean;
 };
 
@@ -83,9 +81,7 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
     businessLng: initial.business_lng ?? null,
     quoteSmsTemplate: initialTemplate,
     travelPricingDisabled: initial.travel_pricing_disabled,
-    notificationLeadSms: initial.notification_lead_sms,
     notificationLeadEmail: initial.notification_lead_email,
-    notificationAcceptSms: initial.notification_accept_sms,
     notificationAcceptEmail: initial.notification_accept_email
   });
   const [loading, setLoading] = useState(false);
@@ -219,9 +215,7 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
           businessLng: form.businessLng,
           quoteSmsTemplate: form.quoteSmsTemplate,
           travelPricingDisabled: form.travelPricingDisabled,
-          notificationLeadSms: form.notificationLeadSms,
           notificationLeadEmail: form.notificationLeadEmail,
-          notificationAcceptSms: form.notificationAcceptSms,
           notificationAcceptEmail: form.notificationAcceptEmail
         })
       });
@@ -401,28 +395,6 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
       <section className="rounded-[14px] border border-[#E5E7EB] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
         <h2 className="mb-4 text-base font-semibold text-[#111827]">Notifications</h2>
       <div className="grid gap-3 md:grid-cols-2">
-        <label className="flex items-center gap-2 text-sm text-[#111827]">
-          <Checkbox
-            className="data-[state=checked]:border-[#2563EB] data-[state=checked]:bg-[#2563EB]"
-            checked={form.notificationAcceptSms}
-            onCheckedChange={(checked) =>
-              setForm((prev) => ({ ...prev, notificationAcceptSms: checked === true }))
-            }
-          />
-          Acceptance notifications by SMS
-        </label>
-
-        <label className="flex items-center gap-2 text-sm text-[#111827]">
-          <Checkbox
-            className="data-[state=checked]:border-[#2563EB] data-[state=checked]:bg-[#2563EB]"
-            checked={form.notificationLeadSms}
-            onCheckedChange={(checked) =>
-              setForm((prev) => ({ ...prev, notificationLeadSms: checked === true }))
-            }
-          />
-          Lead notifications by SMS
-        </label>
-
         <label className="flex items-center gap-2 text-sm text-[#111827]">
           <Checkbox
             className="data-[state=checked]:border-[#2563EB] data-[state=checked]:bg-[#2563EB]"

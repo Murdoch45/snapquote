@@ -1,6 +1,11 @@
 -- Fix SOLO credit reset cron to use plan_monthly_credits() instead of hardcoded 5
 -- so it stays in sync if the SOLO plan allotment ever changes.
-SELECT cron.unschedule('reset-solo-credits');
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM cron.job WHERE jobname = 'reset-solo-credits') THEN
+    PERFORM cron.unschedule('reset-solo-credits');
+  END IF;
+END $$;
 
 SELECT cron.schedule(
   'reset-solo-credits',

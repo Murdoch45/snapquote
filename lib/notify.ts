@@ -14,9 +14,7 @@ const twilioConfigured = Boolean(
     process.env.TWILIO_FROM_NUMBER
 );
 
-const resendConfigured = Boolean(
-  process.env.RESEND_API_KEY && process.env.RESEND_FROM_EMAIL
-);
+const resendConfigured = Boolean(process.env.RESEND_API_KEY);
 
 let twilioClient: ReturnType<typeof twilio> | null = null;
 let resendClient: Resend | null = null;
@@ -60,10 +58,13 @@ export async function sendSms(to: string, body: string): Promise<boolean> {
 }
 
 export async function sendEmail(input: SendEmailInput): Promise<boolean> {
-  const fromEmail = process.env.RESEND_FROM_EMAIL;
+  const fromEmail =
+    process.env.RESEND_FROM_EMAIL && !process.env.RESEND_FROM_EMAIL.includes("@resend.dev")
+      ? process.env.RESEND_FROM_EMAIL
+      : "estimates@snapquote.us";
 
   if (!resendConfigured) {
-    console.warn("Resend sendEmail skipped: RESEND_API_KEY or RESEND_FROM_EMAIL missing.");
+    console.warn("Resend sendEmail skipped: RESEND_API_KEY missing.");
     return false;
   }
 
@@ -73,12 +74,6 @@ export async function sendEmail(input: SendEmailInput): Promise<boolean> {
     to: input.to,
     subject: input.subject
   });
-
-  if (fromEmail?.endsWith("@resend.dev")) {
-    console.warn(
-      "Resend sendEmail warning: using a resend.dev sender only allows testing to the account owner's email."
-    );
-  }
 
   try {
     const result = await getResendClient().emails.send({

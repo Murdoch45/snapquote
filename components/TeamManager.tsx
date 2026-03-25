@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 type Member = {
@@ -15,10 +14,12 @@ type Member = {
 
 type Invite = {
   id: string;
-  email: string;
+  email: string | null;
   role: "MEMBER";
   status: "PENDING" | "ACCEPTED" | "REVOKED";
   created_at: string;
+  expires_at?: string | null;
+  token?: string | null;
 };
 
 type TeamManagerProps = {
@@ -47,20 +48,16 @@ function getInitials(value: string): string {
 }
 
 export function TeamManager({ isOwner, members, invites }: TeamManagerProps) {
-  const [email, setEmail] = useState("");
   const [busy, setBusy] = useState(false);
 
   const invite = async () => {
     setBusy(true);
     try {
-      const res = await fetch("/api/app/team/invite", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email })
-      });
+      const res = await fetch("/api/app/team/invite-link", { method: "POST" });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Invite failed.");
-      toast.success("Invite sent.");
+      await navigator.clipboard.writeText(json.inviteUrl);
+      toast.success("Invite link copied. Share it with your team member.");
       window.location.reload();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Invite failed.");
@@ -91,16 +88,15 @@ export function TeamManager({ isOwner, members, invites }: TeamManagerProps) {
   return (
     <div className="space-y-6">
       {isOwner && (
-        <div className="flex flex-col gap-3 rounded-[14px] border border-[#E5E7EB] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)] sm:flex-row">
-          <Input
-            type="email"
-            placeholder="member@company.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="h-11 rounded-[8px] border-[#E5E7EB] bg-white px-[14px] text-sm text-[#111827] placeholder:text-[#6B7280] focus-visible:ring-[#2563EB]"
-          />
-          <Button disabled={busy || !email} onClick={invite}>
-            Invite member
+        <div className="flex flex-col gap-3 rounded-[14px] border border-[#E5E7EB] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)] sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm font-semibold text-[#111827]">Invite a team member</p>
+            <p className="mt-1 text-sm text-[#6B7280]">
+              Generate a secure invite link that expires in 7 days.
+            </p>
+          </div>
+          <Button disabled={busy} onClick={invite}>
+            {busy ? "Copying..." : "Copy Invite Link"}
           </Button>
         </div>
       )}
@@ -193,18 +189,20 @@ export function TeamManager({ isOwner, members, invites }: TeamManagerProps) {
               >
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#EFF6FF] text-sm font-bold text-[#2563EB]">
-                    {getInitials(inviteRow.email)}
+                    {getInitials(inviteRow.email ?? "invite-link")}
                   </div>
                   <div>
-                    <a
-                      href={`mailto:${inviteRow.email}`}
-                      className="text-sm text-[#6B7280] transition-colors hover:text-[#2563EB] hover:underline"
-                    >
-                      {inviteRow.email}
-                    </a>
+                    <p className="text-sm font-medium text-[#111827]">
+                      {inviteRow.email ?? "Invite link ready"}
+                    </p>
                     <p className="mt-1 text-sm text-[#6B7280]">
                       {new Date(inviteRow.created_at).toLocaleDateString()}
                     </p>
+                    {inviteRow.expires_at ? (
+                      <p className="mt-1 text-sm text-[#6B7280]">
+                        Expires {new Date(inviteRow.expires_at).toLocaleDateString()}
+                      </p>
+                    ) : null}
                   </div>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">

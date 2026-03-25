@@ -130,9 +130,7 @@ export const updateSettingsSchema = z.object({
   businessLng: z.number().finite().optional().nullable(),
   quoteSmsTemplate: z.string().max(4000).optional().nullable(),
   travelPricingDisabled: z.boolean(),
-  notificationLeadSms: z.boolean(),
   notificationLeadEmail: z.boolean(),
-  notificationAcceptSms: z.boolean(),
   notificationAcceptEmail: z.boolean()
 }).superRefine((val, ctx) => {
   if (val.travelPricingDisabled) return;

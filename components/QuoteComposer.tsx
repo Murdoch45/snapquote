@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -9,6 +9,7 @@ import { SubscriptionRequiredModal } from "@/components/SubscriptionRequiredModa
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { PriceSlider } from "@/components/PriceSlider";
+import { createClient } from "@/lib/supabase/client";
 import { formatCurrencyRange } from "@/lib/utils";
 
 type Props = {
@@ -73,8 +74,12 @@ export function QuoteComposer({
     high: estimateHigh ?? snapQuote
   }));
   const [message, setMessage] = useState(initialMessage);
-  const [sendEmail, setSendEmail] = useState(Boolean(customerEmail));
-  const [sendText, setSendText] = useState(Boolean(customerPhone));
+  const [deliveryPreference, setDeliveryPreference] = useState({
+    sendEmail: true,
+    sendText: false
+  });
+  const [preferenceKey, setPreferenceKey] = useState<string | null>(null);
+  const [preferencesLoaded, setPreferencesLoaded] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [quoteLink, setQuoteLink] = useState<string | null>(null);
@@ -88,6 +93,69 @@ export function QuoteComposer({
       typeof estimate.lowEstimate === "number" &&
       typeof estimate.highEstimate === "number"
   );
+  const sendEmail = deliveryPreference.sendEmail && Boolean(customerEmail);
+  const sendText = deliveryPreference.sendText && Boolean(customerPhone);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadPreferences = async () => {
+      try {
+        const supabase = createClient();
+        const {
+          data: { user }
+        } = await supabase.auth.getUser();
+
+        if (cancelled) return;
+
+        if (!user?.id) {
+          setPreferenceKey(null);
+          setDeliveryPreference({ sendEmail: true, sendText: false });
+          setPreferencesLoaded(true);
+          return;
+        }
+
+        const nextPreferenceKey = `snapquote:quote-composer:${user.id}`;
+        setPreferenceKey(nextPreferenceKey);
+
+        const storedValue = window.localStorage.getItem(nextPreferenceKey);
+        if (!storedValue) {
+          setDeliveryPreference({ sendEmail: true, sendText: false });
+          setPreferencesLoaded(true);
+          return;
+        }
+
+        const parsed = JSON.parse(storedValue) as {
+          sendEmail?: unknown;
+          sendText?: unknown;
+        };
+
+        setDeliveryPreference({
+          sendEmail: parsed.sendEmail === false ? false : true,
+          sendText: parsed.sendText === true
+        });
+      } catch {
+        setPreferenceKey(null);
+        setDeliveryPreference({ sendEmail: true, sendText: false });
+      } finally {
+        if (!cancelled) {
+          setPreferencesLoaded(true);
+        }
+      }
+    };
+
+    void loadPreferences();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!preferencesLoaded || !preferenceKey) return;
+
+    window.localStorage.setItem(preferenceKey, JSON.stringify(deliveryPreference));
+  }, [deliveryPreference, preferenceKey, preferencesLoaded]);
 
   const copyText = async (value: string, successLabel: string) => {
     try {
@@ -201,7 +269,9 @@ export function QuoteComposer({
             <Checkbox
               checked={sendEmail}
               disabled={!customerEmail}
-              onCheckedChange={(checked) => setSendEmail(checked === true)}
+              onCheckedChange={(checked) =>
+                setDeliveryPreference((prev) => ({ ...prev, sendEmail: checked === true }))
+              }
             />
             <span>Email{!customerEmail ? " (no customer email)" : ""}</span>
           </label>
@@ -209,7 +279,9 @@ export function QuoteComposer({
             <Checkbox
               checked={sendText}
               disabled={!customerPhone}
-              onCheckedChange={(checked) => setSendText(checked === true)}
+              onCheckedChange={(checked) =>
+                setDeliveryPreference((prev) => ({ ...prev, sendText: checked === true }))
+              }
             />
             <span>Text{!customerPhone ? " (no customer phone)" : ""}</span>
           </label>

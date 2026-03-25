@@ -1,8 +1,10 @@
 import { randomUUID } from "crypto";
 import { after, NextResponse } from "next/server";
 import { generateEstimateAsync } from "@/lib/ai/estimate";
+import { buildNewLeadNotificationEmail } from "@/lib/emailTemplates";
 import { haversineMiles } from "@/lib/maps";
-import { notifyContractor, notifyCustomer } from "@/lib/notify";
+import { notifyContractor, notifyCustomer, sendEmail } from "@/lib/notify";
+import { getOwnerEmailForOrg } from "@/lib/organizationOwners";
 import { normalizeServiceTypes } from "@/lib/services";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAppUrl } from "@/lib/utils";
@@ -212,7 +214,46 @@ export async function POST(request: Request) {
       await admin.from("lead_photos").insert(photoRows);
     }
 
-    after(() => generateEstimateAsync(leadId));
+    after(async () => {
+      await generateEstimateAsync(leadId);
+
+      if (!contractor.notification_lead_email) {
+        return;
+      }
+
+      const ownerEmail = await getOwnerEmailForOrg(admin, orgId);
+      if (!ownerEmail) {
+        return;
+      }
+
+      const { data: hydratedLead } = await admin
+        .from("leads")
+        .select("id,job_city,job_state,ai_estimate_low,ai_estimate_high,customer_name,services")
+        .eq("id", leadId)
+        .single();
+
+      if (!hydratedLead) {
+        return;
+      }
+
+      const email = buildNewLeadNotificationEmail({
+        customerName: hydratedLead.customer_name as string,
+        serviceType: ((hydratedLead.services ?? []) as string[]).join(", "),
+        cityState: [hydratedLead.job_city, hydratedLead.job_state].filter(Boolean).join(", "),
+        estimateLow:
+          hydratedLead.ai_estimate_low != null ? Number(hydratedLead.ai_estimate_low) : null,
+        estimateHigh:
+          hydratedLead.ai_estimate_high != null ? Number(hydratedLead.ai_estimate_high) : null,
+        leadUrl: `${getAppUrl()}/app/leads/${leadId}`
+      });
+
+      await sendEmail({
+        to: ownerEmail,
+        subject: email.subject,
+        text: email.text,
+        html: email.html
+      });
+    });
 
     const leadLink = `${getAppUrl()}/app/leads/${leadId}`;
     const serviceText = payload.services.join(", ");
@@ -226,9 +267,9 @@ export async function POST(request: Request) {
 
     const contractorNotifications = await notifyContractor({
       smsEnabled: contractor.notification_lead_sms as boolean,
-      emailEnabled: contractor.notification_lead_email as boolean,
+      emailEnabled: false,
       phone: contractor.phone as string | null,
-      email: contractor.email as string | null,
+      email: null,
       smsBody: `New estimate request: ${serviceText} at ${payload.addressFull}. Open: ${leadLink}`,
       emailSubject: "New SnapQuote lead",
       emailBody: `New estimate request: ${serviceText} at ${payload.addressFull}. Open: ${leadLink}`

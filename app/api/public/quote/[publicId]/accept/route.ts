@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
+import { buildEstimateAcceptedEmail } from "@/lib/emailTemplates";
 import { notifyContractor } from "@/lib/notify";
+import { sendEmail } from "@/lib/notify";
+import { getOwnerEmailForOrg } from "@/lib/organizationOwners";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAppUrl, publicQuoteExpiry } from "@/lib/utils";
 
@@ -15,7 +18,7 @@ export async function POST(_request: Request, { params }: Props) {
 
   const { data: quote } = await admin
     .from("quotes")
-    .select("id,org_id,lead_id,status,sent_at,accepted_at")
+    .select("id,org_id,lead_id,status,sent_at,accepted_at,price")
     .eq("public_id", publicId)
     .single();
 
@@ -47,7 +50,7 @@ export async function POST(_request: Request, { params }: Props) {
   const [{ data: lead }, { data: profile }] = await Promise.all([
     admin
       .from("leads")
-      .select("address_full,services")
+      .select("address_full,services,customer_name")
       .eq("id", quote.lead_id)
       .single(),
     admin
@@ -64,13 +67,33 @@ export async function POST(_request: Request, { params }: Props) {
 
   await notifyContractor({
     smsEnabled: profile?.notification_accept_sms as boolean,
-    emailEnabled: profile?.notification_accept_email as boolean,
+    emailEnabled: false,
     phone: profile?.phone as string | null,
-    email: profile?.email as string | null,
+    email: null,
     smsBody: `Estimate accepted: ${services} at ${lead?.address_full}. View: ${quoteLink}`,
     emailSubject: "Estimate accepted",
     emailBody: `Estimate accepted: ${services} at ${lead?.address_full}. View: ${quoteLink}`
   });
+
+  if (profile?.notification_accept_email) {
+    const ownerEmail = await getOwnerEmailForOrg(admin, quote.org_id as string);
+
+    if (ownerEmail) {
+      const email = buildEstimateAcceptedEmail({
+        customerName: (lead?.customer_name as string) || "A customer",
+        serviceType: services || "Estimate",
+        acceptedPrice: quote.price != null ? Number(quote.price) : null,
+        leadUrl: `${getAppUrl()}/app/leads/${quote.lead_id}`
+      });
+
+      await sendEmail({
+        to: ownerEmail,
+        subject: email.subject,
+        text: email.text,
+        html: email.html
+      });
+    }
+  }
 
   return NextResponse.json({ accepted: true, acceptedAt });
 }
