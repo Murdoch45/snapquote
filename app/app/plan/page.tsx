@@ -187,7 +187,7 @@ export default async function PlanPage({ searchParams }: Props) {
         <PlanOptionsSection currentPlan={plan} />
       </div>
 
-      <div className="space-y-3">
+      <div id="credits-section" className="space-y-3 scroll-mt-24">
         <div className="space-y-1">
           <h2 className="text-base font-semibold text-[#111827]">Buy More Credits</h2>
           <p className="text-sm text-[#6B7280]">

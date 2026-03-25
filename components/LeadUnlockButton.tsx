@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { Lock } from "lucide-react";
 import { toast } from "sonner";
+import { OutOfCreditsModal } from "@/components/OutOfCreditsModal";
 import { Button, type ButtonProps } from "@/components/ui/button";
 
 type Props = {
@@ -15,6 +16,7 @@ export function LeadUnlockButton({ leadId, onUnlocked, children, ...props }: Pro
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [isRefreshing, startTransition] = useTransition();
+  const [showOutOfCreditsModal, setShowOutOfCreditsModal] = useState(false);
 
   const onUnlock = async () => {
     setLoading(true);
@@ -37,7 +39,7 @@ export function LeadUnlockButton({ leadId, onUnlocked, children, ...props }: Pro
 
       if (!response.ok) {
         if (json.error === "no_credits") {
-          toast.error("You're out of credits. Go to My Plan to buy more.", { duration: 6000 });
+          setShowOutOfCreditsModal(true);
           return;
         }
 
@@ -60,14 +62,20 @@ export function LeadUnlockButton({ leadId, onUnlocked, children, ...props }: Pro
   };
 
   return (
-    <Button
-      onClick={() => void onUnlock()}
-      disabled={loading || isRefreshing}
-      className="w-full sm:w-auto"
-      {...props}
-    >
-      <Lock className="mr-2 h-4 w-4" />
-      {loading || isRefreshing ? "Unlocking..." : children ?? "Unlock - 1 Credit"}
-    </Button>
+    <>
+      <Button
+        onClick={() => void onUnlock()}
+        disabled={loading || isRefreshing}
+        className="w-full sm:w-auto"
+        {...props}
+      >
+        <Lock className="mr-2 h-4 w-4" />
+        {loading || isRefreshing ? "Unlocking..." : children ?? "Unlock - 1 Credit"}
+      </Button>
+      <OutOfCreditsModal
+        open={showOutOfCreditsModal}
+        onClose={() => setShowOutOfCreditsModal(false)}
+      />
+    </>
   );
 }
