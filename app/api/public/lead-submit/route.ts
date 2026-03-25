@@ -1,7 +1,10 @@
 import { randomUUID } from "crypto";
 import { after, NextResponse } from "next/server";
 import { generateEstimateAsync } from "@/lib/ai/estimate";
-import { buildNewLeadNotificationEmail } from "@/lib/emailTemplates";
+import {
+  buildCustomerConfirmationEmail,
+  buildNewLeadNotificationEmail
+} from "@/lib/emailTemplates";
 import { haversineMiles } from "@/lib/maps";
 import { notifyContractor, notifyCustomer, sendEmail } from "@/lib/notify";
 import { getOwnerEmailForOrg } from "@/lib/organizationOwners";
@@ -215,44 +218,60 @@ export async function POST(request: Request) {
     }
 
     after(async () => {
-      await generateEstimateAsync(leadId);
+      try {
+        await generateEstimateAsync(leadId);
 
-      if (!contractor.notification_lead_email) {
-        return;
+        if (!contractor.notification_lead_email) {
+          return;
+        }
+
+        const ownerEmail = await getOwnerEmailForOrg(admin, orgId);
+        if (!ownerEmail) {
+          return;
+        }
+
+        const { data: hydratedLead } = await admin
+          .from("leads")
+          .select("id,job_city,job_state,ai_estimate_low,ai_estimate_high,customer_name,services")
+          .eq("id", leadId)
+          .single();
+
+        if (!hydratedLead) {
+          return;
+        }
+
+        const email = buildNewLeadNotificationEmail({
+          customerName: hydratedLead.customer_name as string,
+          serviceType: ((hydratedLead.services ?? []) as string[]).join(", "),
+          cityState: [hydratedLead.job_city, hydratedLead.job_state].filter(Boolean).join(", "),
+          estimateLow:
+            hydratedLead.ai_estimate_low != null ? Number(hydratedLead.ai_estimate_low) : null,
+          estimateHigh:
+            hydratedLead.ai_estimate_high != null ? Number(hydratedLead.ai_estimate_high) : null,
+          leadUrl: `${getAppUrl()}/app/leads/${leadId}`
+        });
+
+        const sent = await sendEmail({
+          to: ownerEmail,
+          subject: email.subject,
+          text: email.text,
+          html: email.html
+        });
+
+        if (!sent) {
+          console.warn("lead-submit contractor email notification failed:", {
+            orgId,
+            leadId,
+            ownerEmail
+          });
+        }
+      } catch (error) {
+        console.error("lead-submit after() email flow failed:", {
+          orgId,
+          leadId,
+          error
+        });
       }
-
-      const ownerEmail = await getOwnerEmailForOrg(admin, orgId);
-      if (!ownerEmail) {
-        return;
-      }
-
-      const { data: hydratedLead } = await admin
-        .from("leads")
-        .select("id,job_city,job_state,ai_estimate_low,ai_estimate_high,customer_name,services")
-        .eq("id", leadId)
-        .single();
-
-      if (!hydratedLead) {
-        return;
-      }
-
-      const email = buildNewLeadNotificationEmail({
-        customerName: hydratedLead.customer_name as string,
-        serviceType: ((hydratedLead.services ?? []) as string[]).join(", "),
-        cityState: [hydratedLead.job_city, hydratedLead.job_state].filter(Boolean).join(", "),
-        estimateLow:
-          hydratedLead.ai_estimate_low != null ? Number(hydratedLead.ai_estimate_low) : null,
-        estimateHigh:
-          hydratedLead.ai_estimate_high != null ? Number(hydratedLead.ai_estimate_high) : null,
-        leadUrl: `${getAppUrl()}/app/leads/${leadId}`
-      });
-
-      await sendEmail({
-        to: ownerEmail,
-        subject: email.subject,
-        text: email.text,
-        html: email.html
-      });
     });
 
     const leadLink = `${getAppUrl()}/app/leads/${leadId}`;
@@ -276,14 +295,34 @@ export async function POST(request: Request) {
     });
     console.log("lead-submit contractor notifications:", contractorNotifications);
 
+    const customerConfirmationEmail = buildCustomerConfirmationEmail({
+      businessName: contractor.business_name as string,
+      businessPhone: (contractor.phone as string | null) ?? null,
+      businessEmail: (contractor.email as string | null) ?? null,
+      requestPageUrl: `${getAppUrl()}/${payload.contractorSlug}`
+    });
+
     const customerNotifications = await notifyCustomer({
       phone: payload.customerPhone,
-      email: payload.customerEmail,
+      email: null,
       smsBody: `We received your request. You will get your estimate shortly. - ${contractor.business_name}`,
-      emailSubject: `${contractor.business_name} received your estimate request`,
-      emailBody: `We received your request and will send your estimate shortly. - ${contractor.business_name}`
+      emailSubject: customerConfirmationEmail.subject,
+      emailBody: customerConfirmationEmail.text
     });
     console.log("lead-submit customer notifications:", customerNotifications);
+
+    if (payload.customerEmail) {
+      const customerEmailSent = await sendEmail({
+        to: payload.customerEmail,
+        subject: customerConfirmationEmail.subject,
+        text: customerConfirmationEmail.text,
+        html: customerConfirmationEmail.html
+      });
+
+      if (customerEmailSent) {
+        customerNotifications.push("email");
+      }
+    }
 
     return NextResponse.json({
       success: true,

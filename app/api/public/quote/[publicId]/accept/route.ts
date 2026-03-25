@@ -86,12 +86,20 @@ export async function POST(_request: Request, { params }: Props) {
         leadUrl: `${getAppUrl()}/app/leads/${quote.lead_id}`
       });
 
-      await sendEmail({
+      const sent = await sendEmail({
         to: ownerEmail,
         subject: email.subject,
         text: email.text,
         html: email.html
       });
+
+      if (!sent) {
+        console.warn("quote accept email notification failed:", {
+          orgId: quote.org_id,
+          quoteId: quote.id,
+          ownerEmail
+        });
+      }
     }
   }
 

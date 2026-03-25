@@ -61,7 +61,7 @@ export async function sendEmail(input: SendEmailInput): Promise<boolean> {
   const fromEmail =
     process.env.RESEND_FROM_EMAIL && !process.env.RESEND_FROM_EMAIL.includes("@resend.dev")
       ? process.env.RESEND_FROM_EMAIL
-      : "estimates@snapquote.us";
+      : "SnapQuote <estimates@snapquote.us>";
 
   if (!resendConfigured) {
     console.warn("Resend sendEmail skipped: RESEND_API_KEY missing.");
