@@ -97,6 +97,9 @@ export function buildCustomerConfirmationEmail(input: {
         </p>
         ${renderField("Phone", input.businessPhone ?? "Not provided")}
         ${renderField("Email", input.businessEmail ?? "Not provided")}
+        <p style="margin:16px 0 0;font-size:13px;line-height:1.7;color:#64748b;">
+          If you don't see this email in your inbox, please check your spam or junk folder.
+        </p>
       `
     )
   };
