@@ -27,7 +27,6 @@ export default async function PublicQuotePage({ params }: Props) {
             }>
           | null;
         price: number | string | null;
-        estimated_price: number | string | null;
         estimated_price_low: number | string | null;
         estimated_price_high: number | string | null;
         message: string | null;
@@ -39,7 +38,7 @@ export default async function PublicQuotePage({ params }: Props) {
   try {
     const { data, error } = await admin
       .from("quotes")
-      .select("public_id,org_id,lead:leads(address_full,services),price,estimated_price,estimated_price_low,estimated_price_high,message,status,sent_at")
+      .select("public_id,org_id,lead:leads(address_full,services),price,estimated_price_low,estimated_price_high,message,status,sent_at")
       .eq("public_id", publicId)
       .single();
 
@@ -50,7 +49,7 @@ export default async function PublicQuotePage({ params }: Props) {
       });
     }
 
-    quote = (data as typeof quote) ?? null;
+    quote = (data as NonNullable<typeof quote>) ?? null;
   } catch (error) {
     console.error("PublicQuotePage quote query threw:", {
       publicId,
@@ -116,7 +115,7 @@ export default async function PublicQuotePage({ params }: Props) {
           services: (lead?.services ?? []) as string[],
           address: (lead?.address_full as string | null) ?? "Address unavailable",
           price: Number(quote.price),
-          estimatedPrice: quote.estimated_price as number | string | null,
+          estimatedPrice: null,
           estimatedPriceLow: quote.estimated_price_low as number | string | null,
           estimatedPriceHigh: quote.estimated_price_high as number | string | null,
           message: (quote.message as string | null) ?? "",
