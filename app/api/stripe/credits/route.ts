@@ -13,7 +13,9 @@ import {
 export const runtime = "nodejs";
 
 const creditCheckoutSchema = z.object({
-  pack: z.enum(["10", "50", "100"])
+  pack: z.enum(["10", "50", "100"]),
+  successPath: z.string().startsWith("/app/").optional(),
+  cancelPath: z.string().startsWith("/app/").optional()
 });
 
 const creditPackEnvSchema = z.object({
@@ -60,6 +62,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Authenticated user email is required." }, { status: 400 });
     }
 
+    const successPath = body.successPath ?? "/app/plan?credits=added";
+    const cancelPath = body.cancelPath ?? "/app/plan";
+
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       line_items: [
@@ -68,8 +73,8 @@ export async function POST(request: Request) {
           quantity: 1
         }
       ],
-      success_url: `${appUrl}/app/plan?credits=added`,
-      cancel_url: `${appUrl}/app/plan`,
+      success_url: `${appUrl}${successPath}`,
+      cancel_url: `${appUrl}${cancelPath}`,
       client_reference_id: auth.userId,
       customer: latestSubscription?.stripe_customer_id || undefined,
       customer_email: latestSubscription?.stripe_customer_id ? undefined : user?.email,

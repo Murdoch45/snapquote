@@ -209,9 +209,7 @@ describe("API contracts", () => {
         businessLat: null,
         businessLng: null,
         travelPricingDisabled: false,
-        notificationLeadSms: true,
         notificationLeadEmail: true,
-        notificationAcceptSms: true,
         notificationAcceptEmail: true
       })
     ).toThrow();
@@ -229,9 +227,7 @@ describe("API contracts", () => {
       businessLat: null,
       businessLng: null,
       travelPricingDisabled: true,
-      notificationLeadSms: true,
       notificationLeadEmail: true,
-      notificationAcceptSms: true,
       notificationAcceptEmail: true
     });
 

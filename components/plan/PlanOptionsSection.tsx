@@ -8,11 +8,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type Plan = "SOLO" | "TEAM" | "BUSINESS";
+type BillingInterval = "monthly" | "annual";
 
 type PlanOption = {
   plan: Plan;
   name: string;
-  price: string;
+  monthlyPrice: string;
+  annualMonthlyPrice?: string;
+  annualBillingLine?: string;
   credits: number;
   seats: number;
 };
@@ -31,21 +34,25 @@ const PLAN_OPTIONS: PlanOption[] = [
   {
     plan: "SOLO",
     name: "Solo",
-    price: "Free",
+    monthlyPrice: "Free",
     credits: 5,
     seats: 1
   },
   {
     plan: "TEAM",
     name: "Team",
-    price: "$19/mo",
+    monthlyPrice: "$19/mo",
+    annualMonthlyPrice: "~$16/mo",
+    annualBillingLine: "billed $190/yr",
     credits: 20,
     seats: 2
   },
   {
     plan: "BUSINESS",
     name: "Business",
-    price: "$39/mo",
+    monthlyPrice: "$39/mo",
+    annualMonthlyPrice: "~$32/mo",
+    annualBillingLine: "billed $390/yr",
     credits: 100,
     seats: 5
   }
@@ -55,6 +62,7 @@ export function PlanOptionsSection({ currentPlan }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const hasShownToastRef = useRef(false);
+  const [billingInterval, setBillingInterval] = useState<BillingInterval>("annual");
   const [loadingPlan, setLoadingPlan] = useState<Plan | null>(null);
   const [loadingPortal, setLoadingPortal] = useState(false);
   const [downgradeTarget, setDowngradeTarget] = useState<PlanOption | null>(null);
@@ -87,7 +95,7 @@ export function PlanOptionsSection({ currentPlan }: Props) {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ plan: plan.toLowerCase() })
+        body: JSON.stringify({ plan: plan.toLowerCase(), billingInterval })
       });
       const json = (await response.json()) as { error?: string; url?: string };
 
@@ -128,11 +136,36 @@ export function PlanOptionsSection({ currentPlan }: Props) {
 
   return (
     <>
+      <div className="inline-flex rounded-[12px] border border-[#E5E7EB] bg-white p-1 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
+        {(["monthly", "annual"] as BillingInterval[]).map((option) => {
+          const isActive = billingInterval === option;
+
+          return (
+            <button
+              key={option}
+              type="button"
+              onClick={() => setBillingInterval(option)}
+              className={
+                isActive
+                  ? "rounded-[10px] bg-[#2563EB] px-4 py-2 text-sm font-semibold text-white"
+                  : "rounded-[10px] px-4 py-2 text-sm font-medium text-[#6B7280] transition-colors hover:text-[#111827]"
+              }
+            >
+              {option === "monthly" ? "Monthly" : "Annual"}
+            </button>
+          );
+        })}
+      </div>
+
       <div className="grid gap-4 xl:grid-cols-3">
         {PLAN_OPTIONS.map((option) => {
           const isCurrent = option.plan === currentPlan;
           const isUpgrade = PLAN_ORDER[option.plan] > PLAN_ORDER[currentPlan];
           const isDowngrade = PLAN_ORDER[option.plan] < PLAN_ORDER[currentPlan];
+          const showAnnualPricing = billingInterval === "annual" && option.plan !== "SOLO";
+          const displayPrice = showAnnualPricing
+            ? option.annualMonthlyPrice ?? option.monthlyPrice
+            : option.monthlyPrice;
 
           return (
             <Card
@@ -149,13 +182,23 @@ export function PlanOptionsSection({ currentPlan }: Props) {
                     <CardTitle className="text-base font-semibold text-[#111827]">
                       {option.name}
                     </CardTitle>
-                    <p className="mt-1 text-sm text-[#6B7280]">{option.price}</p>
+                    <p className="mt-1 text-sm text-[#6B7280]">{displayPrice}</p>
+                    {showAnnualPricing && option.annualBillingLine ? (
+                      <p className="mt-1 text-sm text-[#6B7280]">{option.annualBillingLine}</p>
+                    ) : null}
                   </div>
-                  {isCurrent ? (
-                    <Badge className="border-transparent bg-[#EFF6FF] px-3 py-1 text-[12px] font-semibold text-[#2563EB]">
-                      Current Plan
-                    </Badge>
-                  ) : null}
+                  <div className="flex flex-col items-end gap-2">
+                    {isCurrent ? (
+                      <Badge className="border-transparent bg-[#EFF6FF] px-3 py-1 text-[12px] font-semibold text-[#2563EB]">
+                        Current Plan
+                      </Badge>
+                    ) : null}
+                    {showAnnualPricing ? (
+                      <Badge className="border-transparent bg-[#EFF6FF] px-3 py-1 text-[12px] font-semibold text-[#2563EB]">
+                        Save 17%
+                      </Badge>
+                    ) : null}
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">

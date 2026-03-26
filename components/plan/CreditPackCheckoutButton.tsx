@@ -6,10 +6,17 @@ import { Button } from "@/components/ui/button";
 
 type Props = {
   pack: "10" | "50" | "100";
+  successPath?: string;
+  cancelPath?: string;
   children?: ReactNode;
 };
 
-export function CreditPackCheckoutButton({ pack, children }: Props) {
+export function CreditPackCheckoutButton({
+  pack,
+  successPath,
+  cancelPath,
+  children
+}: Props) {
   const [loading, setLoading] = useState(false);
 
   const onCheckout = async () => {
@@ -21,7 +28,7 @@ export function CreditPackCheckoutButton({ pack, children }: Props) {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ pack })
+        body: JSON.stringify({ pack, successPath, cancelPath })
       });
       const json = (await response.json()) as { error?: string; url?: string };
 

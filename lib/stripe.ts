@@ -9,6 +9,8 @@ const stripeCoreEnvSchema = z.object({
   STRIPE_SECRET_KEY: z.string().min(1),
   STRIPE_PRICE_TEAM: z.string().min(1),
   STRIPE_PRICE_BUSINESS: z.string().min(1),
+  NEXT_PUBLIC_STRIPE_TEAM_ANNUAL_PRICE_ID: z.string().min(1).optional(),
+  NEXT_PUBLIC_STRIPE_BUSINESS_ANNUAL_PRICE_ID: z.string().min(1).optional(),
   STRIPE_CREDIT_PACK_10_PRICE_ID: z.string().min(1).optional(),
   STRIPE_CREDIT_PACK_50_PRICE_ID: z.string().min(1).optional(),
   STRIPE_CREDIT_PACK_100_PRICE_ID: z.string().min(1).optional(),
@@ -21,12 +23,14 @@ const stripeCheckoutEnvSchema = stripeCoreEnvSchema.extend({
 
 export type StripePlanKey = "team" | "business";
 export type StripeCreditPackKey = "10" | "50" | "100";
+export type StripeBillingInterval = "monthly" | "annual";
 
 type StripePlanConfig = {
   key: StripePlanKey;
   orgPlan: OrgPlan;
   label: string;
   monthlyPrice: string;
+  billingInterval: StripeBillingInterval;
   priceId: string;
 };
 
@@ -66,22 +70,42 @@ export function getStripeWebhookSecret(): string {
   return secret;
 }
 
-export function getStripePlanConfig(plan: StripePlanKey): StripePlanConfig {
+export function getStripePlanConfig(
+  plan: StripePlanKey,
+  billingInterval: StripeBillingInterval = "monthly"
+): StripePlanConfig {
   const env = getStripeEnv();
+  const annualTeamPriceId = env.NEXT_PUBLIC_STRIPE_TEAM_ANNUAL_PRICE_ID;
+  const annualBusinessPriceId = env.NEXT_PUBLIC_STRIPE_BUSINESS_ANNUAL_PRICE_ID;
+
+  if (billingInterval === "annual") {
+    if (plan === "team" && !annualTeamPriceId) {
+      throw new Error("Missing NEXT_PUBLIC_STRIPE_TEAM_ANNUAL_PRICE_ID");
+    }
+    if (plan === "business" && !annualBusinessPriceId) {
+      throw new Error("Missing NEXT_PUBLIC_STRIPE_BUSINESS_ANNUAL_PRICE_ID");
+    }
+  }
+
   const plans: Record<StripePlanKey, StripePlanConfig> = {
     team: {
       key: "team",
       orgPlan: "TEAM",
       label: "Team",
       monthlyPrice: "$19",
-      priceId: env.STRIPE_PRICE_TEAM
+      billingInterval,
+      priceId: billingInterval === "annual" ? (annualTeamPriceId as string) : env.STRIPE_PRICE_TEAM
     },
     business: {
       key: "business",
       orgPlan: "BUSINESS",
       label: "Business",
       monthlyPrice: "$39",
-      priceId: env.STRIPE_PRICE_BUSINESS
+      billingInterval,
+      priceId:
+        billingInterval === "annual"
+          ? (annualBusinessPriceId as string)
+          : env.STRIPE_PRICE_BUSINESS
     }
   };
 
@@ -91,10 +115,16 @@ export function getStripePlanConfig(plan: StripePlanKey): StripePlanConfig {
 export function getPlanFromPriceId(priceId: string | null | undefined): OrgPlan | null {
   if (!priceId) return null;
 
-  const plans: StripePlanKey[] = ["team", "business"];
-  for (const key of plans) {
-    const config = getStripePlanConfig(key);
-    if (config.priceId === priceId) return config.orgPlan;
+  const env = getStripeEnv();
+  const pricePlanMap: Array<{ priceId?: string; plan: OrgPlan }> = [
+    { priceId: env.STRIPE_PRICE_TEAM, plan: "TEAM" },
+    { priceId: env.STRIPE_PRICE_BUSINESS, plan: "BUSINESS" },
+    { priceId: env.NEXT_PUBLIC_STRIPE_TEAM_ANNUAL_PRICE_ID, plan: "TEAM" },
+    { priceId: env.NEXT_PUBLIC_STRIPE_BUSINESS_ANNUAL_PRICE_ID, plan: "BUSINESS" }
+  ];
+
+  for (const entry of pricePlanMap) {
+    if (entry.priceId === priceId) return entry.plan;
   }
 
   return null;

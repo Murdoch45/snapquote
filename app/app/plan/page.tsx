@@ -1,6 +1,6 @@
+import Link from "next/link";
 import { Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { CreditPackCheckoutButton } from "@/components/plan/CreditPackCheckoutButton";
 import { CreditsAddedToast } from "@/components/plan/CreditsAddedToast";
 import { ManageBillingButton } from "@/components/plan/ManageBillingButton";
 import { PlanOptionsSection } from "@/components/plan/PlanOptionsSection";
@@ -53,12 +53,6 @@ function formatSubscriptionStatus(status: string | null, active: boolean): strin
   if (!status) return "No active subscription";
   return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
 }
-
-const creditPacks = [
-  { pack: "10" as const, credits: 10, price: "$10" },
-  { pack: "50" as const, credits: 50, price: "$40" },
-  { pack: "100" as const, credits: 100, price: "$70" }
-];
 
 type Props = {
   searchParams: Promise<{ credits?: string }>;
@@ -185,26 +179,12 @@ export default async function PlanPage({ searchParams }: Props) {
           </p>
         </div>
         <PlanOptionsSection currentPlan={plan} />
-      </div>
-
-      <div id="credits-section" className="space-y-3 scroll-mt-24">
-        <div className="space-y-1">
-          <h2 className="text-base font-semibold text-[#111827]">Buy More Credits</h2>
-          <p className="text-sm text-[#6B7280]">
-            Credit packs add to your bonus balance and never expire.
-          </p>
-        </div>
-        <div className="grid gap-4 md:grid-cols-3">
-          {creditPacks.map((pack) => (
-            <CreditPackCheckoutButton key={pack.pack} pack={pack.pack}>
-              <p className="text-base font-semibold text-[#111827]">{pack.credits} credits</p>
-              <p className="mt-4 text-[28px] font-bold text-[#2563EB]">{pack.price}</p>
-              <p className="mt-4 text-sm text-[#6B7280]">
-                Added to your bonus credits and available immediately after purchase.
-              </p>
-            </CreditPackCheckoutButton>
-          ))}
-        </div>
+        <p className="text-sm text-[#6B7280]">
+          Need more credits?{" "}
+          <Link href="/app/credits" className="font-medium text-[#2563EB] hover:text-[#1D4ED8]">
+            Buy here →
+          </Link>
+        </p>
       </div>
 
       <Card className="shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">

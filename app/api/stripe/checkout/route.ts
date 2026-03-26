@@ -5,6 +5,7 @@ import { requireOwnerForApi } from "@/lib/auth/requireRole";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import {
+  type StripeBillingInterval,
   getPlanFromPriceId,
   getStripe,
   getStripeAppUrl,
@@ -16,7 +17,8 @@ import type { OrgPlan } from "@/lib/types";
 export const runtime = "nodejs";
 
 const checkoutSchema = z.object({
-  plan: z.enum(["solo", "team", "business"])
+  plan: z.enum(["solo", "team", "business"]),
+  billingInterval: z.enum(["monthly", "annual"]).optional()
 });
 
 type CheckoutPlan = z.infer<typeof checkoutSchema>["plan"];
@@ -51,6 +53,7 @@ export async function POST(request: Request) {
 
   try {
     const body = checkoutSchema.parse(await request.json());
+    const billingInterval = (body.billingInterval ?? "monthly") as StripeBillingInterval;
     const stripe = getStripe();
     const appUrl = getStripeAppUrl();
     const admin = createAdminClient();
@@ -128,7 +131,10 @@ export async function POST(request: Request) {
       }
 
       if (isUpgrade) {
-        const planConfig = getStripePlanConfig(requestedPlan as StripePlanKey);
+        const planConfig = getStripePlanConfig(
+          requestedPlan as StripePlanKey,
+          billingInterval
+        );
         const updatedSubscription = await stripe.subscriptions.update(currentSubscription.id, {
           items: [
             {
@@ -177,7 +183,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Authenticated user email is required." }, { status: 400 });
     }
 
-    const planConfig = getStripePlanConfig(body.plan as StripePlanKey);
+    const planConfig = getStripePlanConfig(body.plan as StripePlanKey, billingInterval);
     const hasUsedTrial = organization?.has_used_trial ?? false;
     const subscriptionData: Stripe.Checkout.SessionCreateParams.SubscriptionData = {
       metadata: {
