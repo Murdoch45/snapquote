@@ -46,7 +46,7 @@ const PLAN_OPTIONS: PlanOption[] = [
   {
     plan: "TEAM",
     name: "Team",
-    description: "For growing crews that need faster quoting and shared access.",
+    description: "For growing crews that need faster estimating and shared access.",
     monthlyPrice: "$19/mo",
     annualMonthlyPrice: "$16/mo",
     annualBillingLine: "billed $190/yr",
@@ -181,7 +181,7 @@ export function PlanOptionsSection({ currentPlan }: Props) {
 
   return (
     <>
-      <div className="grid gap-5 xl:grid-cols-3">
+      <div className="grid items-stretch gap-5 xl:grid-cols-3">
         {PLAN_OPTIONS.map((option) => {
           const isCurrent = option.plan === currentPlan;
           const isUpgrade = PLAN_ORDER[option.plan] > PLAN_ORDER[currentPlan];
