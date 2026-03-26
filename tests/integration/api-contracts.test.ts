@@ -182,12 +182,13 @@ describe("API contracts", () => {
   it("accepts valid quote send payload", () => {
     const parsed = sendQuoteSchema.parse({
       leadId: "17b3f688-f594-4014-abf8-04dca0c37d74",
-      price: 950,
+      estimatedPriceLow: 850,
+      estimatedPriceHigh: 1050,
       message: "Thanks for your request. We can complete this work for $950.",
       sendEmail: true,
       sendText: false
     });
-    expect(parsed.price).toBe(950);
+    expect(parsed.estimatedPriceLow).toBe(850);
   });
 
   it("calculates 7-day quote expiry", () => {

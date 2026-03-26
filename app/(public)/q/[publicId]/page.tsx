@@ -12,28 +12,18 @@ export default async function PublicQuotePage({ params }: Props) {
   console.log("PublicQuotePage params:", { publicId });
 
   const admin = createAdminClient();
-  let quote:
-    | {
-        public_id: string;
-        org_id: string;
-        lead:
-          | {
-              address_full: string | null;
-              services: string[] | null;
-            }
-          | Array<{
-              address_full: string | null;
-              services: string[] | null;
-            }>
-          | null;
-        price: number | string | null;
-        estimated_price_low: number | string | null;
-        estimated_price_high: number | string | null;
-        message: string | null;
-        status: "SENT" | "VIEWED" | "ACCEPTED" | "EXPIRED";
-        sent_at: string;
-      }
-    | null = null;
+  type QuoteRow = {
+    public_id: string;
+    org_id: string;
+    lead: { address_full: string | null; services: string[] | null } | null;
+    price: number | null;
+    estimated_price_low: number | null;
+    estimated_price_high: number | null;
+    message: string | null;
+    status: string | null;
+    sent_at: string;
+  };
+  let quote: QuoteRow | null = null;
 
   try {
     const { data, error } = await admin
@@ -49,7 +39,7 @@ export default async function PublicQuotePage({ params }: Props) {
       });
     }
 
-    quote = (data as NonNullable<typeof quote>) ?? null;
+    quote = (data as QuoteRow | null) ?? null;
   } catch (error) {
     console.error("PublicQuotePage quote query threw:", {
       publicId,
@@ -85,7 +75,7 @@ export default async function PublicQuotePage({ params }: Props) {
       });
     }
 
-    profile = (data as typeof profile) ?? null;
+    profile = (data as { business_name: string | null; phone: string | null; email: string | null } | null) ?? null;
   } catch (error) {
     console.error("PublicQuotePage contractor profile query threw:", {
       publicId,
