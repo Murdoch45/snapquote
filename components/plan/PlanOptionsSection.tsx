@@ -282,7 +282,7 @@ export function PlanOptionsSection({ currentPlan }: Props) {
                   </div>
                 </div>
 
-                <div className="mt-4 space-y-3 rounded-[14px] border border-[#E5E7EB] bg-white px-4 py-4">
+                <div className="mt-3 space-y-3 rounded-[14px] border border-[#E5E7EB] bg-white px-4 py-4">
                   {option.highlights.map((item) => (
                     <div key={item} className="flex items-start gap-3 text-sm text-[#111827]">
                       <span className="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#EFF6FF]">
@@ -294,7 +294,7 @@ export function PlanOptionsSection({ currentPlan }: Props) {
                 </div>
               </div>
 
-              <div className="px-6 pb-6 pt-1 xl:self-end">
+              <div className="px-6 pb-6 pt-3 xl:self-end">
                 {isCurrent ? (
                   <Button
                     type="button"
