@@ -6,7 +6,7 @@ import { ArrowRight, Check, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 
 type Plan = "SOLO" | "TEAM" | "BUSINESS";
 type BillingInterval = "monthly" | "annual";
@@ -210,7 +210,7 @@ export function PlanOptionsSection({ currentPlan }: Props) {
                 }
               />
 
-              <CardHeader className="relative flex flex-col space-y-5 pb-3">
+              <CardHeader className="relative flex flex-col space-y-4 pb-2">
                 <div className="flex min-h-[72px] items-start justify-between gap-4">
                   <div className="space-y-2">
                     <div className="flex flex-wrap items-center gap-2">
@@ -250,19 +250,20 @@ export function PlanOptionsSection({ currentPlan }: Props) {
                   )}
                 </div>
 
-                <div className="rounded-[14px] border border-[#E5E7EB] bg-white/80 px-5 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)] backdrop-blur">
-                  <div className="flex items-end gap-2">
-                    <p className="text-4xl font-semibold tracking-[-0.04em] text-[#111827]">
-                      {displayPrice}
-                    </p>
-                  </div>
-                  <p className="mt-2 min-h-[20px] text-sm text-[#6B7280]">
-                    {showAnnualPricing && option.annualBillingLine ? option.annualBillingLine : " "}
-                  </p>
-                </div>
               </CardHeader>
 
-              <CardContent className="relative flex flex-1 flex-col pt-2 xl:grid xl:grid-rows-subgrid xl:row-span-3">
+              <div className="mx-6 rounded-[14px] border border-[#E5E7EB] bg-white/80 px-5 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)] backdrop-blur">
+                <div className="flex items-end gap-2">
+                  <p className="text-4xl font-semibold tracking-[-0.04em] text-[#111827]">
+                    {displayPrice}
+                  </p>
+                </div>
+                <p className="mt-1.5 min-h-[20px] text-sm text-[#6B7280]">
+                  {showAnnualPricing && option.annualBillingLine ? option.annualBillingLine : " "}
+                </p>
+              </div>
+
+              <div className="relative flex flex-1 flex-col px-6 py-4">
                 <div className="grid grid-cols-2 gap-3">
                   <div className="rounded-[14px] border border-[#E5E7EB] bg-white px-4 py-4">
                     <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#6B7280]">
@@ -281,7 +282,7 @@ export function PlanOptionsSection({ currentPlan }: Props) {
                   </div>
                 </div>
 
-                <div className="mt-5 space-y-3 rounded-[14px] border border-[#E5E7EB] bg-white px-4 py-4">
+                <div className="mt-4 space-y-3 rounded-[14px] border border-[#E5E7EB] bg-white px-4 py-4">
                   {option.highlights.map((item) => (
                     <div key={item} className="flex items-start gap-3 text-sm text-[#111827]">
                       <span className="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#EFF6FF]">
@@ -291,47 +292,47 @@ export function PlanOptionsSection({ currentPlan }: Props) {
                     </div>
                   ))}
                 </div>
+              </div>
 
-                <div className="mt-auto pt-6 xl:self-end">
-                  {isCurrent ? (
-                    <Button
-                      type="button"
-                      disabled
-                      className="h-11 w-full rounded-[10px] bg-[#111827] text-sm font-semibold text-white opacity-100 hover:bg-[#111827]"
-                    >
-                      <Sparkles className="mr-2 h-4 w-4" />
-                      Current Plan
-                    </Button>
-                  ) : isUpgrade ? (
-                    <Button
-                      type="button"
-                      className="h-11 w-full rounded-[10px] bg-[#2563EB] text-sm font-semibold text-white shadow-[0_12px_24px_rgba(37,99,235,0.24)] hover:bg-[#1D4ED8]"
-                      disabled={loadingPlan === option.plan}
-                      onClick={() => {
-                        if (option.plan !== "SOLO") {
-                          void openUpgrade(
-                            option.plan,
-                            billingIntervals[option.plan as "TEAM" | "BUSINESS"]
-                          );
-                        }
-                      }}
-                    >
-                      {loadingPlan === option.plan ? "Opening..." : `Switch to ${option.name}`}
-                      {loadingPlan === option.plan ? null : <ArrowRight className="ml-2 h-4 w-4" />}
-                    </Button>
-                  ) : isDowngrade ? (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="h-11 w-full rounded-[10px] border border-[#BFDBFE] bg-white text-sm font-semibold text-[#2563EB] shadow-[0_8px_20px_rgba(37,99,235,0.08)] hover:bg-[#EFF6FF] hover:text-[#2563EB]"
-                      disabled={loadingPortal}
-                      onClick={() => setDowngradeTarget(option)}
-                    >
-                      {`Switch to ${option.name}`}
-                    </Button>
-                  ) : null}
-                </div>
-              </CardContent>
+              <div className="px-6 pb-6 pt-1 xl:self-end">
+                {isCurrent ? (
+                  <Button
+                    type="button"
+                    disabled
+                    className="h-11 w-full rounded-[10px] bg-[#111827] text-sm font-semibold text-white opacity-100 hover:bg-[#111827]"
+                  >
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    Current Plan
+                  </Button>
+                ) : isUpgrade ? (
+                  <Button
+                    type="button"
+                    className="h-11 w-full rounded-[10px] bg-[#2563EB] text-sm font-semibold text-white shadow-[0_12px_24px_rgba(37,99,235,0.24)] hover:bg-[#1D4ED8]"
+                    disabled={loadingPlan === option.plan}
+                    onClick={() => {
+                      if (option.plan !== "SOLO") {
+                        void openUpgrade(
+                          option.plan,
+                          billingIntervals[option.plan as "TEAM" | "BUSINESS"]
+                        );
+                      }
+                    }}
+                  >
+                    {loadingPlan === option.plan ? "Opening..." : `Switch to ${option.name}`}
+                    {loadingPlan === option.plan ? null : <ArrowRight className="ml-2 h-4 w-4" />}
+                  </Button>
+                ) : isDowngrade ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="h-11 w-full rounded-[10px] border border-[#BFDBFE] bg-white text-sm font-semibold text-[#2563EB] shadow-[0_8px_20px_rgba(37,99,235,0.08)] hover:bg-[#EFF6FF] hover:text-[#2563EB]"
+                    disabled={loadingPortal}
+                    onClick={() => setDowngradeTarget(option)}
+                  >
+                    {`Switch to ${option.name}`}
+                  </Button>
+                ) : null}
+              </div>
             </Card>
           );
         })}
