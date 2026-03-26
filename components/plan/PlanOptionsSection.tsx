@@ -181,7 +181,7 @@ export function PlanOptionsSection({ currentPlan }: Props) {
 
   return (
     <>
-      <div className="grid items-stretch gap-5 xl:grid-cols-3">
+      <div className="grid items-stretch gap-5 xl:grid-cols-3 xl:grid-rows-[auto_auto_1fr_auto]">
         {PLAN_OPTIONS.map((option) => {
           const isCurrent = option.plan === currentPlan;
           const isUpgrade = PLAN_ORDER[option.plan] > PLAN_ORDER[currentPlan];
@@ -198,8 +198,8 @@ export function PlanOptionsSection({ currentPlan }: Props) {
               key={option.plan}
               className={
                 isCurrent
-                  ? "relative flex h-full flex-col overflow-hidden rounded-[14px] border border-[#BFDBFE] bg-[radial-gradient(circle_at_top_left,rgba(37,99,235,0.16),transparent_40%),linear-gradient(160deg,#ffffff_0%,#F5F9FF_100%)] shadow-[0_20px_40px_rgba(37,99,235,0.12),0_2px_8px_rgba(0,0,0,0.06)]"
-                  : "relative flex h-full flex-col overflow-hidden rounded-[14px] border border-[#E5E7EB] bg-[linear-gradient(180deg,#ffffff_0%,#F8F9FC_100%)] shadow-[0_16px_30px_rgba(15,23,42,0.06),0_2px_8px_rgba(0,0,0,0.04)]"
+                  ? "relative flex h-full flex-col overflow-hidden rounded-[14px] border border-[#BFDBFE] bg-[radial-gradient(circle_at_top_left,rgba(37,99,235,0.16),transparent_40%),linear-gradient(160deg,#ffffff_0%,#F5F9FF_100%)] shadow-[0_20px_40px_rgba(37,99,235,0.12),0_2px_8px_rgba(0,0,0,0.06)] xl:row-span-4 xl:grid xl:grid-rows-subgrid"
+                  : "relative flex h-full flex-col overflow-hidden rounded-[14px] border border-[#E5E7EB] bg-[linear-gradient(180deg,#ffffff_0%,#F8F9FC_100%)] shadow-[0_16px_30px_rgba(15,23,42,0.06),0_2px_8px_rgba(0,0,0,0.04)] xl:row-span-4 xl:grid xl:grid-rows-subgrid"
               }
             >
               <div
@@ -210,7 +210,7 @@ export function PlanOptionsSection({ currentPlan }: Props) {
                 }
               />
 
-              <CardHeader className="relative space-y-5 pb-3">
+              <CardHeader className="relative flex flex-col space-y-5 pb-3">
                 <div className="flex min-h-[72px] items-start justify-between gap-4">
                   <div className="space-y-2">
                     <div className="flex flex-wrap items-center gap-2">
@@ -262,7 +262,7 @@ export function PlanOptionsSection({ currentPlan }: Props) {
                 </div>
               </CardHeader>
 
-              <CardContent className="relative flex flex-1 flex-col pt-2">
+              <CardContent className="relative flex flex-1 flex-col pt-2 xl:grid xl:grid-rows-subgrid xl:row-span-3">
                 <div className="grid grid-cols-2 gap-3">
                   <div className="rounded-[14px] border border-[#E5E7EB] bg-white px-4 py-4">
                     <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#6B7280]">
@@ -292,7 +292,7 @@ export function PlanOptionsSection({ currentPlan }: Props) {
                   ))}
                 </div>
 
-                <div className="mt-auto pt-6">
+                <div className="mt-auto pt-6 xl:self-end">
                   {isCurrent ? (
                     <Button
                       type="button"
