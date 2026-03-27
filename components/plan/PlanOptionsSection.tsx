@@ -263,8 +263,8 @@ export function PlanOptionsSection({ currentPlan }: Props) {
                 </p>
               </div>
 
-              <div className="relative flex flex-1 flex-col px-6 pb-4 pt-3">
-                <div className="grid grid-cols-2 gap-3">
+              <div className="relative flex flex-1 flex-col px-6 pb-4">
+                <div className="mt-3 grid grid-cols-2 gap-3">
                   <div className="rounded-[14px] border border-[#E5E7EB] bg-white px-4 py-4">
                     <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#6B7280]">
                       Credits
