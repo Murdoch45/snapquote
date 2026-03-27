@@ -58,6 +58,7 @@ export async function resetMonthlyCredits(orgId: string, plan: OrgPlan): Promise
   const admin = createAdminClient();
   const nextResetAt = addOneMonth().toISOString();
   const monthlyCredits = getPlanMonthlyCredits(plan);
+  const nowIso = new Date().toISOString();
 
   const { data, error } = await admin
     .from("organizations")
@@ -66,15 +67,27 @@ export async function resetMonthlyCredits(orgId: string, plan: OrgPlan): Promise
       credits_reset_at: nextResetAt
     })
     .eq("id", orgId)
-    .select("monthly_credits,bonus_credits")
-    .single();
+    .or(`credits_reset_at.lte.${nowIso},credits_reset_at.is.null`)
+    .select("monthly_credits,bonus_credits");
 
-  if (error || !data) {
+  if (error) {
     throw error ?? new Error("Unable to reset monthly credits.");
   }
 
-  const monthly = Number(data.monthly_credits ?? monthlyCredits);
-  const bonus = Number(data.bonus_credits ?? 0);
+  const updatedRow = Array.isArray(data) ? data[0] : null;
+
+  if (!updatedRow) {
+    const current = await getOrgCreditRow(orgId);
+
+    return {
+      monthly_credits: current.monthly_credits,
+      bonus_credits: current.bonus_credits,
+      total: current.monthly_credits + current.bonus_credits
+    };
+  }
+
+  const monthly = Number(updatedRow.monthly_credits ?? monthlyCredits);
+  const bonus = Number(updatedRow.bonus_credits ?? 0);
 
   return {
     monthly_credits: monthly,

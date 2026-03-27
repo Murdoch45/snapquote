@@ -10,21 +10,29 @@ export async function GET(_request: Request, { params }: Props) {
   const { publicId } = await params;
   const admin = createAdminClient();
 
-  const { data: quote } = await admin
+  const { data: quote, error: quoteError } = await admin
     .from("quotes")
     .select("id,org_id,public_id,price,estimated_price_low,estimated_price_high,message,status,sent_at,lead:leads(address_full,services)")
     .eq("public_id", publicId)
     .single();
 
-  if (!quote) {
+  if (quoteError || !quote) {
     return NextResponse.json({ error: "Estimate not found." }, { status: 404 });
   }
 
-  const { data: profile } = await admin
+  const { data: profile, error: profileError } = await admin
     .from("contractor_profile")
     .select("business_name")
     .eq("org_id", quote.org_id)
     .single();
+
+  if (profileError) {
+    return NextResponse.json({ error: "Unable to load contractor profile." }, { status: 500 });
+  }
+
+  if (!profile) {
+    return NextResponse.json({ error: "Contractor profile not found." }, { status: 404 });
+  }
 
   const lead = Array.isArray(quote.lead) ? quote.lead[0] : quote.lead;
   const expiresAt = publicQuoteExpiry(quote.sent_at as string);

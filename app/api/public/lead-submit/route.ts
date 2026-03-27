@@ -119,45 +119,119 @@ export async function POST(request: Request) {
           )
         : null;
 
-    const { data: customer, error: customerError } = await admin
-      .from("customers")
-      .insert({
-        org_id: orgId,
-        name: payload.customerName,
-        phone: payload.customerPhone || null,
-        email: payload.customerEmail || null
-      })
-      .select("id")
-      .single();
+    let createdCustomerId: string | null = null;
+    let lead:
+      | {
+          id: string;
+          parcel_lot_size_sqft: number | string | null;
+        }
+      | null = null;
 
-    if (customerError || !customer) {
-      throw customerError || new Error("Failed to create customer.");
+    try {
+      let existingCustomer:
+        | {
+            id: string;
+          }
+        | null = null;
+
+      if (payload.customerEmail) {
+        const { data: customerByEmail, error: customerByEmailError } = await admin
+          .from("customers")
+          .select("id")
+          .eq("org_id", orgId)
+          .eq("email", payload.customerEmail)
+          .limit(1)
+          .maybeSingle();
+
+        if (customerByEmailError) {
+          throw customerByEmailError;
+        }
+
+        existingCustomer = (customerByEmail as { id: string } | null) ?? null;
+      }
+
+      if (!existingCustomer && payload.customerPhone) {
+        const { data: customerByPhone, error: customerByPhoneError } = await admin
+          .from("customers")
+          .select("id")
+          .eq("org_id", orgId)
+          .eq("phone", payload.customerPhone)
+          .limit(1)
+          .maybeSingle();
+
+        if (customerByPhoneError) {
+          throw customerByPhoneError;
+        }
+
+        existingCustomer = (customerByPhone as { id: string } | null) ?? null;
+      }
+
+      if (!existingCustomer) {
+        const { data: customer, error: customerError } = await admin
+          .from("customers")
+          .insert({
+            org_id: orgId,
+            name: payload.customerName,
+            phone: payload.customerPhone || null,
+            email: payload.customerEmail || null
+          })
+          .select("id")
+          .single();
+
+        if (customerError || !customer) {
+          throw customerError || new Error("Failed to create customer.");
+        }
+
+        createdCustomerId = customer.id as string;
+      }
+
+      // This is not a true DB transaction: if the lead insert fails after creating a brand-new
+      // customer row, we best-effort delete that orphaned customer to avoid leaving stray data behind.
+      const { data: insertedLead, error: leadError } = await admin
+        .from("leads")
+        .insert({
+          org_id: orgId,
+          contractor_slug_snapshot: payload.contractorSlug,
+          customer_name: payload.customerName,
+          customer_phone: payload.customerPhone || null,
+          customer_email: payload.customerEmail || null,
+          address_full: payload.addressFull,
+          address_place_id: payload.addressPlaceId || null,
+          lat: payload.lat,
+          lng: payload.lng,
+          travel_distance_miles: travelDistanceMiles,
+          services: payload.services,
+          service_question_answers: payload.serviceQuestionAnswers,
+          description: payload.description || null,
+          status: "NEW",
+          ai_status: "processing"
+        })
+        .select("id,parcel_lot_size_sqft")
+        .single();
+
+      if (leadError || !insertedLead) {
+        throw leadError || new Error("Failed to create lead.");
+      }
+
+      lead = insertedLead as { id: string; parcel_lot_size_sqft: number | string | null };
+    } catch (error) {
+      if (createdCustomerId) {
+        const { error: cleanupError } = await admin
+          .from("customers")
+          .delete()
+          .eq("id", createdCustomerId)
+          .eq("org_id", orgId);
+
+        if (cleanupError) {
+          console.error("lead-submit customer cleanup failed:", cleanupError);
+        }
+      }
+
+      throw error;
     }
 
-    const { data: lead, error: leadError } = await admin
-      .from("leads")
-      .insert({
-        org_id: orgId,
-        contractor_slug_snapshot: payload.contractorSlug,
-        customer_name: payload.customerName,
-        customer_phone: payload.customerPhone || null,
-        customer_email: payload.customerEmail || null,
-        address_full: payload.addressFull,
-        address_place_id: payload.addressPlaceId || null,
-        lat: payload.lat,
-        lng: payload.lng,
-        travel_distance_miles: travelDistanceMiles,
-        services: payload.services,
-        service_question_answers: payload.serviceQuestionAnswers,
-        description: payload.description || null,
-        status: "NEW",
-        ai_status: "processing"
-      })
-      .select("id,parcel_lot_size_sqft")
-      .single();
-
-    if (leadError || !lead) {
-      throw leadError || new Error("Failed to create lead.");
+    if (!lead) {
+      throw new Error("Failed to create lead.");
     }
 
     const leadId = lead.id as string;

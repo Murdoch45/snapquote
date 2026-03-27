@@ -16,13 +16,15 @@ export async function POST(_request: Request, { params }: Props) {
   const { publicId } = await params;
   const admin = createAdminClient();
 
-  const { data: quote } = await admin
+  const { data: quote, error: quoteError } = await admin
     .from("quotes")
     .select("id,org_id,lead_id,status,sent_at,accepted_at,price")
     .eq("public_id", publicId)
     .single();
 
-  if (!quote) return NextResponse.json({ error: "Estimate not found." }, { status: 404 });
+  if (quoteError || !quote) {
+    return NextResponse.json({ error: "Estimate not found." }, { status: 404 });
+  }
   if (quote.status === "ACCEPTED") {
     return NextResponse.json({ accepted: true, acceptedAt: quote.accepted_at });
   }
@@ -34,33 +36,69 @@ export async function POST(_request: Request, { params }: Props) {
   }
 
   const acceptedAt = new Date().toISOString();
-  await admin
+  const { data: acceptedQuote, error: acceptedQuoteError } = await admin
     .from("quotes")
     .update({ status: "ACCEPTED", accepted_at: acceptedAt })
-    .eq("id", quote.id);
+    .eq("id", quote.id)
+    .neq("status", "ACCEPTED")
+    .select("id,org_id,lead_id,status,sent_at,accepted_at,price")
+    .maybeSingle();
 
-  await admin.from("leads").update({ status: "ACCEPTED" }).eq("id", quote.lead_id);
+  if (acceptedQuoteError) {
+    return NextResponse.json({ error: "Unable to accept estimate." }, { status: 500 });
+  }
+
+  if (!acceptedQuote) {
+    const { data: currentQuote, error: currentQuoteError } = await admin
+      .from("quotes")
+      .select("accepted_at,status")
+      .eq("id", quote.id)
+      .maybeSingle();
+
+    if (currentQuoteError) {
+      return NextResponse.json({ error: "Unable to load accepted estimate." }, { status: 500 });
+    }
+
+    if (currentQuote?.status === "ACCEPTED") {
+      return NextResponse.json({ accepted: true, acceptedAt: currentQuote.accepted_at });
+    }
+
+    return NextResponse.json({ error: "Unable to accept estimate." }, { status: 500 });
+  }
+
+  await admin.from("leads").update({ status: "ACCEPTED" }).eq("id", acceptedQuote.lead_id);
 
   await admin.from("quote_events").insert({
-    org_id: quote.org_id,
-    quote_id: quote.id,
+    org_id: acceptedQuote.org_id,
+    quote_id: acceptedQuote.id,
     event_type: "ACCEPTED"
   });
 
-  const [{ data: lead }, { data: profile }] = await Promise.all([
+  const [
+    { data: lead, error: leadError },
+    { data: profile, error: profileError }
+  ] = await Promise.all([
     admin
       .from("leads")
       .select("address_full,services,customer_name")
-      .eq("id", quote.lead_id)
+      .eq("id", acceptedQuote.lead_id)
       .single(),
     admin
       .from("contractor_profile")
       .select(
         "phone,email,notification_accept_sms,notification_accept_email,business_name"
       )
-      .eq("org_id", quote.org_id)
+      .eq("org_id", acceptedQuote.org_id)
       .single()
   ]);
+
+  if (leadError || !lead) {
+    return NextResponse.json({ error: "Lead not found for estimate." }, { status: 404 });
+  }
+
+  if (profileError || !profile) {
+    return NextResponse.json({ error: "Contractor profile not found." }, { status: 404 });
+  }
 
   const services = ((lead?.services ?? []) as string[]).join(", ");
   const quoteLink = `${getAppUrl()}/app/quotes`;
@@ -76,14 +114,14 @@ export async function POST(_request: Request, { params }: Props) {
   });
 
   if (profile?.notification_accept_email) {
-    const ownerEmail = await getOwnerEmailForOrg(admin, quote.org_id as string);
+    const ownerEmail = await getOwnerEmailForOrg(admin, acceptedQuote.org_id as string);
 
     if (ownerEmail) {
       const email = buildEstimateAcceptedEmail({
         customerName: (lead?.customer_name as string) || "A customer",
         serviceType: services || "Estimate",
-        acceptedPrice: quote.price != null ? Number(quote.price) : null,
-        leadUrl: `${getAppUrl()}/app/leads/${quote.lead_id}`
+        acceptedPrice: acceptedQuote.price != null ? Number(acceptedQuote.price) : null,
+        leadUrl: `${getAppUrl()}/app/leads/${acceptedQuote.lead_id}`
       });
 
       const sent = await sendEmail({
@@ -99,5 +137,5 @@ export async function POST(_request: Request, { params }: Props) {
     }
   }
 
-  return NextResponse.json({ accepted: true, acceptedAt });
+  return NextResponse.json({ accepted: true, acceptedAt: acceptedQuote.accepted_at });
 }

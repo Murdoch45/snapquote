@@ -36,14 +36,16 @@ export async function POST(request: Request) {
 
     await requireActiveSubscription(auth.orgId);
 
-    const { data: lead } = await admin
+    const { data: lead, error: leadError } = await admin
       .from("leads")
       .select("id,org_id,status,customer_name,customer_phone,customer_email,address_full,services")
       .eq("id", body.leadId)
       .eq("org_id", auth.orgId)
       .single();
 
-    if (!lead) return NextResponse.json({ error: "Lead not found." }, { status: 404 });
+    if (leadError || !lead) {
+      return NextResponse.json({ error: "Lead not found." }, { status: 404 });
+    }
     if (lead.status === "ACCEPTED") {
       return NextResponse.json({ error: "Lead already accepted." }, { status: 400 });
     }
@@ -63,11 +65,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Estimate already exists for this lead." }, { status: 400 });
     }
 
-    const { data: profile } = await admin
+    const { data: profile, error: profileError } = await admin
       .from("contractor_profile")
       .select("business_name,phone,email")
       .eq("org_id", auth.orgId)
       .single();
+    if (profileError || !profile) {
+      return NextResponse.json({ error: "Contractor profile not found." }, { status: 404 });
+    }
     const {
       data: { user }
     } = await supabase.auth.getUser();
@@ -164,7 +169,13 @@ export async function POST(request: Request) {
       event_type: "SENT"
     });
 
-    const usage = await incrementUsageOnQuoteSend(auth.orgId);
+    let usage: Awaited<ReturnType<typeof incrementUsageOnQuoteSend>> | null = null;
+
+    try {
+      usage = await incrementUsageOnQuoteSend(auth.orgId);
+    } catch (usageError) {
+      console.error("quote send usage increment failed:", usageError);
+    }
 
     return NextResponse.json({
       ok: true,
