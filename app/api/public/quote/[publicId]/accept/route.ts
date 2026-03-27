@@ -68,11 +68,21 @@ export async function POST(_request: Request, { params }: Props) {
 
   await admin.from("leads").update({ status: "ACCEPTED" }).eq("id", acceptedQuote.lead_id);
 
-  await admin.from("quote_events").insert({
-    org_id: acceptedQuote.org_id,
-    quote_id: acceptedQuote.id,
-    event_type: "ACCEPTED"
-  });
+  const { error: quoteEventError } = await admin.from("quote_events").upsert(
+    {
+      org_id: acceptedQuote.org_id,
+      quote_id: acceptedQuote.id,
+      event_type: "ACCEPTED"
+    },
+    {
+      onConflict: "quote_id,event_type",
+      ignoreDuplicates: true
+    }
+  );
+
+  if (quoteEventError) {
+    return NextResponse.json({ error: "Unable to record estimate acceptance." }, { status: 500 });
+  }
 
   const [
     { data: lead, error: leadError },
