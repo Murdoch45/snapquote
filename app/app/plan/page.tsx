@@ -73,7 +73,7 @@ export default async function PlanPage({ searchParams }: Props) {
     throw new Error("Organization not found.");
   }
 
-  const orgCreditRow = organization.data;
+  const orgCreditRow = organization.data as { plan: string; monthly_credits: number; bonus_credits: number; credits_reset_at: string | null };
   const plan = orgCreditRow.plan as "SOLO" | "TEAM" | "BUSINESS";
   const price = getPlanPrice(plan);
   const monthlyCreditsRemaining = Number(orgCreditRow.monthly_credits ?? 0);
