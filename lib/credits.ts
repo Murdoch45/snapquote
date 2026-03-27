@@ -62,21 +62,18 @@ export async function resetMonthlyCredits(orgId: string, plan: OrgPlan): Promise
   const monthlyCredits = getPlanMonthlyCredits(plan);
   const nowIso = new Date().toISOString();
 
-  const { data, error } = await admin
-    .from("organizations")
-    .update({
-      monthly_credits: monthlyCredits,
-      credits_reset_at: nextResetAt
-    })
-    .eq("id", orgId)
-    .or(`credits_reset_at.lte.${nowIso},credits_reset_at.is.null`)
-    .select("monthly_credits,bonus_credits");
+  const { data, error } = await admin.rpc("reset_org_credits", {
+    p_org_id: orgId,
+    p_monthly_credits: monthlyCredits,
+    p_credits_reset_at: nextResetAt,
+    p_now: nowIso
+  });
 
   if (error) {
     throw error ?? new Error("Unable to reset monthly credits.");
   }
 
-  const updatedRow = Array.isArray(data) ? data[0] : null;
+  const updatedRow = Array.isArray(data) ? data[0] : data ?? null;
 
   if (!updatedRow) {
     const current = await getOrgCreditRow(orgId);

@@ -33,7 +33,6 @@ type OrganizationRow = {
   plan: "SOLO" | "TEAM" | "BUSINESS";
   monthly_credits: number | null;
   bonus_credits: number | null;
-  credits_reset_at: string | null;
 };
 
 type ContractorProfileRow = {
@@ -387,7 +386,7 @@ async function loadDataset(): Promise<DemoDataset> {
   ] = await Promise.all([
     admin
       .from("organizations")
-      .select("id,name,slug,plan,monthly_credits,bonus_credits,credits_reset_at")
+      .select("id,name,slug,plan,monthly_credits,bonus_credits")
       .eq("id", orgId)
       .single(),
     admin
@@ -645,13 +644,6 @@ export async function getDemoPageData(page: DemoPageId): Promise<DemoApiResponse
   }
 
   if (page === "plan") {
-    const creditsResetLabel = dataset.org.credits_reset_at
-      ? new Intl.DateTimeFormat("en-US", {
-          month: "long",
-          day: "numeric"
-        }).format(new Date(dataset.org.credits_reset_at))
-      : null;
-
     return {
       page,
       shell,
@@ -662,7 +654,7 @@ export async function getDemoPageData(page: DemoPageId): Promise<DemoApiResponse
         monthlyCreditsLimit: getPlanMonthlyCredits(plan),
         bonusCredits,
         totalCredits,
-        creditsResetLabel,
+        creditsResetLabel: null,
         seatsUsed: dataset.members.length,
         seatsLimit: getPlanSeatLimit(plan),
         highlights: [

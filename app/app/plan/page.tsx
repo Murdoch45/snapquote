@@ -66,27 +66,24 @@ export default async function PlanPage({ searchParams }: Props) {
       .from("organization_members")
       .select("*", { count: "exact", head: true })
       .eq("org_id", orgId),
-    admin
-      .from("organizations")
-      .select("plan,monthly_credits,bonus_credits,credits_reset_at")
-      .eq("id", orgId)
-      .single()
+    admin.rpc("get_org_credit_row", { p_org_id: orgId }).single()
   ]);
 
-  if (!organization.data) {
+  if (organization.error || !organization.data) {
     throw new Error("Organization not found.");
   }
 
-  const plan = organization.data.plan as "SOLO" | "TEAM" | "BUSINESS";
+  const orgCreditRow = organization.data;
+  const plan = orgCreditRow.plan as "SOLO" | "TEAM" | "BUSINESS";
   const price = getPlanPrice(plan);
-  const monthlyCreditsRemaining = Number(organization.data.monthly_credits ?? 0);
-  const bonusCredits = Number(organization.data.bonus_credits ?? 0);
+  const monthlyCreditsRemaining = Number(orgCreditRow.monthly_credits ?? 0);
+  const bonusCredits = Number(orgCreditRow.bonus_credits ?? 0);
   const totalCredits = monthlyCreditsRemaining + bonusCredits;
   const monthlyCreditsLimit = getPlanMonthlyCredits(plan);
   const usersUsed = membersResult.count ?? 0;
   const usersLimit = getPlanSeatLimit(plan);
-  const resetAt = organization.data.credits_reset_at
-    ? new Date(organization.data.credits_reset_at as string)
+  const resetAt = orgCreditRow.credits_reset_at
+    ? new Date(orgCreditRow.credits_reset_at as string)
     : null;
   const trialEndLabel =
     subscription.status === "trialing" && subscription.trialEndDate

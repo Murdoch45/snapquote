@@ -98,13 +98,11 @@ async function setOrganizationPlan(orgId: string, plan: OrgPlan) {
 
 async function resetOrganizationCredits(orgId: string, plan: OrgPlan) {
   const admin = createAdminClient();
-  const { error } = await admin
-    .from("organizations")
-    .update({
-      monthly_credits: getPlanMonthlyCredits(plan),
-      credits_reset_at: addOneMonth().toISOString()
-    })
-    .eq("id", orgId);
+  const { error } = await admin.rpc("update_org_plan_credits", {
+    p_org_id: orgId,
+    p_monthly_credits: getPlanMonthlyCredits(plan),
+    p_credits_reset_at: addOneMonth().toISOString()
+  });
 
   if (error) throw error;
 }
