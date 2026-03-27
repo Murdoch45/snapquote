@@ -197,6 +197,21 @@ export async function POST(request: Request) {
     after(async () => {
       try {
         await generateEstimateAsync(leadId);
+      } catch (error) {
+        console.error("lead-submit estimator failed:", error);
+
+        const { error: failureUpdateError } = await admin
+          .from("leads")
+          .update({ ai_status: "failed" })
+          .eq("id", leadId)
+          .eq("org_id", orgId);
+
+        if (failureUpdateError) {
+          console.error("lead-submit failed to persist estimator failure state:", failureUpdateError);
+        }
+      }
+
+      try {
 
         if (!contractor.notification_lead_email) {
           return;
@@ -239,7 +254,7 @@ export async function POST(request: Request) {
           console.warn("lead-submit contractor email notification failed.");
         }
       } catch (error) {
-        console.error("lead-submit after() email flow failed:", error);
+        console.error("lead-submit contractor email flow failed:", error);
       }
     });
 

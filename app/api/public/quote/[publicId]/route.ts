@@ -12,7 +12,7 @@ export async function GET(_request: Request, { params }: Props) {
 
   const { data: quote } = await admin
     .from("quotes")
-    .select("id,org_id,public_id,price,estimated_price,estimated_price_low,estimated_price_high,message,status,sent_at,lead:leads(address_full,services)")
+    .select("id,org_id,public_id,price,estimated_price_low,estimated_price_high,message,status,sent_at,lead:leads(address_full,services)")
     .eq("public_id", publicId)
     .single();
 
@@ -40,7 +40,7 @@ export async function GET(_request: Request, { params }: Props) {
     services: lead?.services ?? [],
     address: lead?.address_full,
     price: Number(quote.price),
-    estimatedPrice: quote.estimated_price,
+    estimatedPrice: null,
     estimatedPriceLow: quote.estimated_price_low,
     estimatedPriceHigh: quote.estimated_price_high,
     message: quote.message,

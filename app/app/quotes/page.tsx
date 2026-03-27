@@ -39,7 +39,7 @@ export default async function QuotesPage() {
   const supabase = await createServerSupabaseClient();
   const { data: quotes } = await supabase
     .from("quotes")
-    .select("id,public_id,price,estimated_price,estimated_price_low,estimated_price_high,status,sent_at,accepted_at,lead:leads(address_full,services)")
+    .select("id,public_id,price,estimated_price_low,estimated_price_high,status,sent_at,accepted_at,lead:leads(address_full,services)")
     .eq("org_id", auth.orgId)
     .order("sent_at", { ascending: false });
 
@@ -86,8 +86,7 @@ export default async function QuotesPage() {
                   const displayPrice =
                     formatCurrencyRange(
                       quote.estimated_price_low as number | string | null | undefined,
-                      quote.estimated_price_high as number | string | null | undefined,
-                      quote.estimated_price as number | string | null | undefined
+                      quote.estimated_price_high as number | string | null | undefined
                     ) ??
                     formatCurrencyRange(null, null, quote.price as number | string | null | undefined) ??
                     "-";

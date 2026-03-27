@@ -120,8 +120,7 @@ export default async function LeadDetailPage({ params }: Props) {
   );
   const quoteEstimateDisplay = formatCurrencyRange(
     existingQuote?.estimated_price_low as number | string | null | undefined,
-    existingQuote?.estimated_price_high as number | string | null | undefined,
-    existingQuote?.estimated_price as number | string | null | undefined
+    existingQuote?.estimated_price_high as number | string | null | undefined
   );
 
   return (
@@ -282,8 +281,19 @@ export default async function LeadDetailPage({ params }: Props) {
               <CardTitle>AI Estimate</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
-              <p className="text-gray-700">Estimated price: {aiEstimateDisplay ?? "Pending estimate..."}</p>
-              <p className="text-gray-700">{surfaceAreaSummary}</p>
+              {lead.ai_status === "failed" ? (
+                <>
+                  <p className="font-medium text-amber-700">AI estimate unavailable</p>
+                  <p className="text-gray-700">
+                    We couldn&apos;t generate an AI estimate for this lead. You can still review the lead and send your own estimate manually.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="text-gray-700">Estimated price: {aiEstimateDisplay ?? "Pending estimate..."}</p>
+                  <p className="text-gray-700">{surfaceAreaSummary}</p>
+                </>
+              )}
             </CardContent>
           </Card>
           <ConfidenceMeter

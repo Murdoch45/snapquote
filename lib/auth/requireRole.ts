@@ -20,6 +20,16 @@ type MemberApiAuthSuccess = {
   role: "OWNER" | "MEMBER";
 };
 
+function getDemoOrgId(): string {
+  const demoOrgId = process.env.DEMO_ORG_ID?.trim();
+
+  if (!demoOrgId) {
+    throw new Error("Missing DEMO_ORG_ID. Run npm run seed:demo and add DEMO_ORG_ID to .env.local.");
+  }
+
+  return demoOrgId;
+}
+
 export async function requireOwnerForApi(): Promise<ApiAuthFailure | OwnerApiAuthSuccess> {
   const supabase = await createServerSupabaseClient();
   const {
@@ -47,6 +57,13 @@ export async function requireOwnerForApi(): Promise<ApiAuthFailure | OwnerApiAut
     return {
       ok: false,
       response: NextResponse.json({ error: "Owner role required" }, { status: 403 })
+    };
+  }
+
+  if ((membership.org_id as string) === getDemoOrgId()) {
+    return {
+      ok: false,
+      response: NextResponse.json({ error: "Demo org is read-only." }, { status: 403 })
     };
   }
 
@@ -80,7 +97,7 @@ export async function requireMemberForApi(): Promise<ApiAuthFailure | MemberApiA
     };
   }
 
-  if ((membership.org_id as string) === process.env.DEMO_ORG_ID) {
+  if ((membership.org_id as string) === getDemoOrgId()) {
     return {
       ok: false,
       response: NextResponse.json({ error: "Demo org is read-only." }, { status: 403 })
