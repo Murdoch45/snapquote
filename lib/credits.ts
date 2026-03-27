@@ -36,21 +36,23 @@ function shouldResetCredits(resetAt: string | null): boolean {
 
 async function getOrgCreditRow(orgId: string): Promise<OrgCreditRow> {
   const admin = createAdminClient();
-  const { data, error } = await admin
-    .from("organizations")
-    .select("plan,monthly_credits,bonus_credits,credits_reset_at")
-    .eq("id", orgId)
-    .single();
+  const { data, error } = await admin.rpc("get_org_credit_row", { p_org_id: orgId });
 
-  if (error || !data) {
-    throw error ?? new Error("Organization not found.");
+  if (error) {
+    throw error;
+  }
+
+  const row = Array.isArray(data) ? data[0] : null;
+
+  if (!row) {
+    throw new Error("Organization not found.");
   }
 
   return {
-    plan: data.plan as OrgPlan,
-    monthly_credits: Number(data.monthly_credits ?? 0),
-    bonus_credits: Number(data.bonus_credits ?? 0),
-    credits_reset_at: (data.credits_reset_at as string | null | undefined) ?? null
+    plan: row.plan as OrgPlan,
+    monthly_credits: Number(row.monthly_credits ?? 0),
+    bonus_credits: Number(row.bonus_credits ?? 0),
+    credits_reset_at: (row.credits_reset_at as string | null | undefined) ?? null
   };
 }
 
