@@ -13,7 +13,7 @@ export function SubscriptionRequiredModal({ open, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 px-4">
-      <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl">
+      <div className="w-full max-w-[calc(100vw-2rem)] rounded-2xl border border-slate-200 bg-white p-4 shadow-2xl sm:max-w-md sm:p-6">
         <div className="space-y-3">
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-cyan-700">
             Billing Required

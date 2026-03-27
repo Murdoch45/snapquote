@@ -142,7 +142,7 @@ export function LeadCard({ lead, onLeadUnlocked }: LeadCardProps) {
                   key={`${lead.id}-preview-${index}`}
                   src={photoUrl}
                   alt="Lead preview"
-                  className="h-24 w-32 rounded-[10px] object-cover"
+                  className="w-24 aspect-[4/3] rounded-[10px] object-cover sm:w-32"
                   onError={(event) => {
                     event.currentTarget.style.display = "none";
                   }}

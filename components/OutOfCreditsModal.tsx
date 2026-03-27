@@ -23,7 +23,7 @@ export function OutOfCreditsModal({ open, onClose }: OutOfCreditsModalProps) {
       />
 
       <div className="relative flex min-h-full items-center justify-center px-4 py-6">
-        <div className="relative w-full max-w-md rounded-[14px] border border-[#E5E7EB] bg-white p-6 shadow-[0_24px_60px_-24px_rgba(15,23,42,0.28)]">
+        <div className="relative w-full max-w-[calc(100vw-2rem)] rounded-[14px] border border-[#E5E7EB] bg-white p-4 shadow-[0_24px_60px_-24px_rgba(15,23,42,0.28)] sm:max-w-md sm:p-6">
           <button
             type="button"
             aria-label="Dismiss"

@@ -52,14 +52,14 @@ export function Charts({
   const hasServicesData = servicesBreakdown.length > 0;
 
   return (
-    <div className="grid gap-4 lg:grid-cols-2">
-      <Card className="shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
+    <div className="grid min-w-0 gap-4 lg:grid-cols-2">
+      <Card className="min-w-0 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
         <CardHeader className="pb-4">
           <CardTitle className="text-base font-semibold text-[#111827]">
             Leads vs Estimates (30 days)
           </CardTitle>
         </CardHeader>
-        <CardContent className="h-72">
+        <CardContent className="min-w-0 overflow-hidden h-48 sm:h-64 md:h-72">
           {hasLeadsVsQuotesData ? (
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={leadsVsQuotesData}>
@@ -78,13 +78,13 @@ export function Charts({
         </CardContent>
       </Card>
 
-      <Card className="shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
+      <Card className="min-w-0 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
         <CardHeader className="pb-4">
           <CardTitle className="text-base font-semibold text-[#111827]">
             Acceptance Rate (%)
           </CardTitle>
         </CardHeader>
-        <CardContent className="h-72">
+        <CardContent className="min-w-0 overflow-hidden h-48 sm:h-64 md:h-72">
           {hasAcceptanceRateData ? (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={acceptanceRateOverTime}>
@@ -101,13 +101,13 @@ export function Charts({
         </CardContent>
       </Card>
 
-      <Card className="shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)] lg:col-span-2">
+      <Card className="min-w-0 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)] lg:col-span-2">
         <CardHeader className="pb-4">
           <CardTitle className="text-base font-semibold text-[#111827]">
             Services Breakdown
           </CardTitle>
         </CardHeader>
-        <CardContent className="h-80">
+        <CardContent className="min-w-0 overflow-hidden h-56 sm:h-72 md:h-80">
           {hasServicesData ? (
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>

@@ -196,8 +196,12 @@ export function MyLinkPageClient({
               }
             />
           </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <Button type="button" className="min-w-[160px]" onClick={onCopyCaption}>
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+            <Button
+              type="button"
+              className="w-full sm:min-w-[160px] sm:w-auto"
+              onClick={onCopyCaption}
+            >
               <Copy className="mr-2 h-4 w-4" />
               Copy Caption
             </Button>
@@ -205,7 +209,7 @@ export function MyLinkPageClient({
               <>
                 <Button
                   type="button"
-                  className="min-w-[160px]"
+                  className="w-full sm:min-w-[160px] sm:w-auto"
                   onClick={onSaveCaption}
                   disabled={savingCaption}
                 >
@@ -214,7 +218,7 @@ export function MyLinkPageClient({
                 <button
                   type="button"
                   onClick={onCancelEditingCaption}
-                  className="min-w-[160px] text-sm font-medium text-[#6B7280] transition-colors hover:text-[#111827]"
+                  className="w-full text-sm font-medium text-[#6B7280] transition-colors hover:text-[#111827] sm:min-w-[160px] sm:w-auto"
                 >
                   Cancel
                 </button>
@@ -223,7 +227,7 @@ export function MyLinkPageClient({
               <Button
                 type="button"
                 variant="outline"
-                className="min-w-[160px] border-2 border-[#2563EB] bg-transparent text-[#2563EB] hover:bg-[#EFF6FF]"
+                className="w-full border-2 border-[#2563EB] bg-transparent text-[#2563EB] hover:bg-[#EFF6FF] sm:min-w-[160px] sm:w-auto"
                 onClick={onStartEditingCaption}
               >
                 Edit Caption

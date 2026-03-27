@@ -20,7 +20,7 @@ export default function HomePage() {
     <main className={manrope.className}>
       <div className="min-h-screen overflow-x-hidden bg-[#101320] text-slate-900">
         <section className="relative overflow-hidden bg-[radial-gradient(circle_at_50%_-20%,#1e2a4a_0%,#101320_70%)]">
-          <div className="pointer-events-none absolute left-1/2 top-1/4 h-[400px] w-[800px] -translate-x-1/2 rounded-full bg-[rgba(180,197,255,0.1)] blur-[120px]" />
+          <div className="pointer-events-none absolute left-1/2 top-24 h-[220px] w-[420px] -translate-x-1/2 rounded-full bg-[rgba(180,197,255,0.1)] blur-[90px] sm:top-1/4 sm:h-[300px] sm:w-[620px] sm:blur-[110px] lg:h-[400px] lg:w-[800px] lg:blur-[120px]" />
 
           <nav className="fixed top-0 z-50 w-full bg-transparent shadow-none backdrop-blur-0">
             <div className="mx-auto flex h-20 max-w-7xl items-center px-6 sm:px-8">
@@ -57,7 +57,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <div className="h-96 w-full bg-[linear-gradient(180deg,#101320_0%,#1b2338_18%,#2a344f_34%,#556175_54%,#97a4b8_72%,#d7dfea_88%,#F8F9FC_100%)]" />
+        <div className="min-h-[12rem] w-full bg-[linear-gradient(180deg,#101320_0%,#1b2338_18%,#2a344f_34%,#556175_54%,#97a4b8_72%,#d7dfea_88%,#F8F9FC_100%)] sm:min-h-[18rem] md:min-h-[24rem]" />
 
         <section className="min-h-screen bg-[#F8F9FC] py-24">
           <div className="mx-auto max-w-7xl px-6 sm:px-8">
@@ -94,7 +94,7 @@ export default function HomePage() {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     alt="Contractor working"
-                    className="mb-6 h-80 w-full rounded-xl object-cover shadow-sm"
+                    className="mb-6 h-48 w-full rounded-xl object-cover shadow-sm sm:h-64 md:h-80"
                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuDlazVSG2jSx9e9SFNIm17TPVmWzKn3vlGd_v1oo2hhwKpdk00yh5TPDptVC5GnWTyD2qgNOg8wtE2q70jXWjMFuGQQf5wQ46DNfW_-bLHK3xvLr49fsiG2fiyYmTm39NhtcbhSFlQKy_nOzG-rmtv0zD2-75LlSHhdNpiGjAQ--NchXwKN8XbLEsdMCqPSZlnRt-OQ9xd_nLdsvYiIo5i0EavYMLdBDKWRqTlkaojxp5_N4AK7rn5KzhnhJQ45NlYNHnQL8SDFjHY"
                   />
                   <div className="rounded-lg bg-slate-50 p-4">
@@ -141,7 +141,7 @@ export default function HomePage() {
         </section>
 
         <section className="relative overflow-hidden bg-[#101320] py-32">
-          <div className="absolute right-0 top-0 h-[500px] w-[500px] rounded-full bg-[#b4c5ff]/10 blur-[120px]" />
+          <div className="absolute right-0 top-0 h-[240px] w-[240px] rounded-full bg-[#b4c5ff]/10 blur-[90px] sm:h-[360px] sm:w-[360px] sm:blur-[110px] lg:h-[500px] lg:w-[500px] lg:blur-[120px]" />
           <div className="relative z-10 mx-auto max-w-4xl px-6 text-center sm:px-8">
             <h2 className="mb-8 text-4xl font-extrabold tracking-tight text-white md:text-5xl">
               Ready to reclaim your weekends?

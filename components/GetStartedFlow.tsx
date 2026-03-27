@@ -70,7 +70,7 @@ export function GetStartedFlow() {
 
       {open ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4">
-          <div className="relative w-full max-w-xl rounded-2xl border border-blue-100 bg-white p-6 shadow-2xl">
+          <div className="relative w-full max-w-[calc(100vw-2rem)] rounded-2xl border border-blue-100 bg-white p-4 shadow-2xl sm:max-w-xl sm:p-6">
             <button
               type="button"
               aria-label="Close setup"

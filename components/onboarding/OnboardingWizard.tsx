@@ -153,11 +153,11 @@ export function OnboardingWizard() {
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-6 p-6 pt-6 md:p-8 md:pt-8">
+      <CardContent className="space-y-6 p-4 pt-4 sm:p-6 sm:pt-6 md:p-8 md:pt-8">
         {step === 0 ? (
           <div className="space-y-6">
             <div className="space-y-2">
-              <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
+              <h1 className="text-xl font-semibold tracking-tight text-gray-900 sm:text-2xl">
                 What type of services does your business offer?
               </h1>
               <p className="text-sm text-gray-500">
@@ -203,7 +203,7 @@ export function OnboardingWizard() {
         {step === 1 ? (
           <div className="space-y-6">
             <div className="space-y-2">
-              <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
+              <h1 className="text-xl font-semibold tracking-tight text-gray-900 sm:text-2xl">
                 What&apos;s your business&apos;s name?
               </h1>
               <p className="text-sm text-gray-500">
@@ -231,7 +231,7 @@ export function OnboardingWizard() {
         {step === 2 ? (
           <div className="space-y-6">
             <div className="space-y-2">
-              <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
+              <h1 className="text-xl font-semibold tracking-tight text-gray-900 sm:text-2xl">
                 Where is your business located?
               </h1>
             </div>

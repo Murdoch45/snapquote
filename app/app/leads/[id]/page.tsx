@@ -138,8 +138,8 @@ export default async function LeadDetailPage({ params }: Props) {
         </div>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:items-start">
+        <Card className="min-w-0 lg:col-span-2">
           <CardHeader>
             <CardTitle>Lead Details</CardTitle>
           </CardHeader>
@@ -235,7 +235,7 @@ export default async function LeadDetailPage({ params }: Props) {
           </CardContent>
         </Card>
 
-        <div className="space-y-4">
+        <div className="min-w-0 space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Contact Information</CardTitle>

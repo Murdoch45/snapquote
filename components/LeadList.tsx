@@ -33,7 +33,7 @@ export function LeadList({
     );
   }
   return (
-    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
       {leads.map((lead) => (
         <LeadCard key={lead.id} lead={lead} onLeadUnlocked={onLeadUnlocked} />
       ))}

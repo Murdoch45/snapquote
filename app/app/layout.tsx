@@ -1,6 +1,5 @@
+import { AppShell } from "@/components/AppShell";
 import { OnboardingTour } from "@/components/OnboardingTour";
-import { Sidebar } from "@/components/Sidebar";
-import { TopBar } from "@/components/TopBar";
 import { UpgradeBanner } from "@/components/UpgradeBanner";
 import { requireAuth } from "@/lib/auth/requireAuth";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -38,20 +37,16 @@ export default async function AppLayout({
   ]);
 
   return (
-    <div className="min-h-screen bg-[#F8F9FC]">
-      <Sidebar businessName={(profile?.business_name as string) ?? "SnapQuote"} />
+    <>
       <OnboardingTour enabled={!Boolean(organization?.onboarding_completed)} />
-      <div className="flex min-h-screen min-w-0 flex-1 flex-col md:pl-[220px]">
-        <TopBar
-          email={user?.email}
-          orgId={auth.orgId}
-          businessName={(profile?.business_name as string) ?? "SnapQuote"}
-        />
-        <main className="flex-1 space-y-6 bg-[#F8F9FC] p-4 md:p-6">
-          <UpgradeBanner {...usage} />
-          {children}
-        </main>
-      </div>
-    </div>
+      <AppShell
+        email={user?.email}
+        orgId={auth.orgId}
+        businessName={(profile?.business_name as string) ?? "SnapQuote"}
+      >
+        <UpgradeBanner {...usage} />
+        {children}
+      </AppShell>
+    </>
   );
 }

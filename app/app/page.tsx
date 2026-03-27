@@ -30,7 +30,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <section className="grid gap-4 lg:grid-cols-3">
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <MetricCard title="Total leads (30d)" value={String(analytics.totals.totalLeads)} />
         <MetricCard title="Estimates sent (30d)" value={String(analytics.totals.quotesSent)} />
         <MetricCard title="Estimates accepted" value={String(analytics.totals.quotesAccepted)} />
@@ -50,64 +50,70 @@ export default async function DashboardPage() {
         </CardHeader>
         <CardContent className="pt-0">
           {latestLeads?.length ? (
-            <div className="overflow-hidden rounded-[12px] border border-[#E5E7EB]">
-              <div className="hidden grid-cols-[minmax(0,1.8fr)_minmax(0,1fr)_auto_24px] gap-4 border-b border-[#E5E7EB] bg-[#F8F9FC] px-5 py-3 text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280] md:grid">
-                <span>Property Address</span>
-                <span>Service Category</span>
-                <span>Status</span>
-                <span className="sr-only">Open</span>
-              </div>
-              <div className="divide-y divide-[#E5E7EB]">
-                {latestLeads.map((lead) => {
-                  const services = ((lead.services as string[] | null) ?? []).filter(Boolean);
-                  const locality = getAddressParts((lead.address_full as string | null) ?? null).locality;
-                  const isUnlocked = unlockedLeadIds.has(lead.id as string);
+            <div className="overflow-x-auto">
+              <div className="overflow-hidden rounded-[12px] border border-[#E5E7EB]">
+                <div className="hidden grid-cols-[minmax(0,1.8fr)_minmax(0,1fr)_auto_24px] gap-4 border-b border-[#E5E7EB] bg-[#F8F9FC] px-5 py-3 text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280] md:grid">
+                  <span>Property Address</span>
+                  <span>Service Category</span>
+                  <span>Status</span>
+                  <span className="sr-only">Open</span>
+                </div>
+                <div className="divide-y divide-[#E5E7EB]">
+                  {latestLeads.map((lead) => {
+                    const services = ((lead.services as string[] | null) ?? []).filter(Boolean);
+                    const locality = getAddressParts((lead.address_full as string | null) ?? null).locality;
+                    const isUnlocked = unlockedLeadIds.has(lead.id as string);
 
-                  return (
-                    <Link
-                      key={lead.id}
-                      href={`/app/leads/${lead.id}`}
-                      className="grid gap-3 px-5 py-4 transition-colors hover:bg-[#F9FAFB] md:grid-cols-[minmax(0,1.8fr)_minmax(0,1fr)_auto_24px] md:items-center md:gap-4"
-                    >
-                      <div className="min-w-0">
-                        <p className="text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280] md:hidden">
-                          Property Address
-                        </p>
-                        <p className="truncate text-sm text-[#111827]">{locality}</p>
-                      </div>
-
-                      <div>
-                        <p className="text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280] md:hidden">
-                          Service Category
-                        </p>
-                        <div className="flex max-w-full flex-wrap gap-2">
-                          {(services.length > 0 ? services : ["Service"]).map((service) => (
-                            <Badge
-                              key={service}
-                              className={`max-w-full border border-transparent px-3 py-1 text-xs font-semibold ${getServiceBadgeClassName(service)}`}
-                            >
-                              {service}
-                            </Badge>
-                          ))}
+                    return (
+                      <Link
+                        key={lead.id}
+                        href={`/app/leads/${lead.id}`}
+                        className="grid gap-3 px-5 py-4 transition-colors hover:bg-[#F9FAFB] md:grid-cols-[minmax(0,1.8fr)_minmax(0,1fr)_auto_24px] md:items-center md:gap-4"
+                      >
+                        <div className="min-w-0">
+                          <p className="text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280] md:hidden">
+                            Property Address
+                          </p>
+                          <p className="truncate text-sm text-[#111827]">{locality}</p>
                         </div>
-                      </div>
 
-                      <div>
-                        <p className="text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280] md:hidden">
-                          Status
-                        </p>
-                        <span className="inline-flex items-center gap-2 text-sm font-medium text-[#111827]">
-                          {isUnlocked ? <LockOpen className="h-4 w-4 text-[#16A34A]" /> : <Lock className="h-4 w-4 text-[#6B7280]" />}
-                          {isUnlocked ? "Unlocked" : "Locked"}
-                        </span>
-                      </div>
+                        <div>
+                          <p className="text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280] md:hidden">
+                            Service Category
+                          </p>
+                          <div className="flex max-w-full flex-wrap gap-2">
+                            {(services.length > 0 ? services : ["Service"]).map((service) => (
+                              <Badge
+                                key={service}
+                                className={`max-w-full border border-transparent px-3 py-1 text-xs font-semibold ${getServiceBadgeClassName(service)}`}
+                              >
+                                {service}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
 
-                      <div className="hidden justify-self-end text-[#6B7280] md:block">
-                        <ChevronRight className="h-4 w-4" />
-                      </div>
-                    </Link>
-                  );
-                })}
+                        <div>
+                          <p className="text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280] md:hidden">
+                            Status
+                          </p>
+                          <span className="inline-flex items-center gap-2 text-sm font-medium text-[#111827]">
+                            {isUnlocked ? (
+                              <LockOpen className="h-4 w-4 text-[#16A34A]" />
+                            ) : (
+                              <Lock className="h-4 w-4 text-[#6B7280]" />
+                            )}
+                            {isUnlocked ? "Unlocked" : "Locked"}
+                          </span>
+                        </div>
+
+                        <div className="hidden justify-self-end text-[#6B7280] md:block">
+                          <ChevronRight className="h-4 w-4" />
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           ) : (

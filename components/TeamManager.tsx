@@ -102,79 +102,150 @@ export function TeamManager({ isOwner, members, invites }: TeamManagerProps) {
       )}
       <div className="rounded-[14px] border border-[#E5E7EB] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
         <h2 className="mb-4 text-base font-semibold text-[#111827]">Members</h2>
-        <Table>
-          <TableHeader>
-            <TableRow className="border-b border-[#E5E7EB] bg-[#F8F9FC] hover:bg-[#F8F9FC]">
-              <TableHead className="h-auto px-5 py-3 text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280]">
-                Member
-              </TableHead>
-              <TableHead className="h-auto px-5 py-3 text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280]">
-                Role
-              </TableHead>
-              <TableHead className="h-auto px-5 py-3 text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280]">
-                Joined
-              </TableHead>
-              <TableHead className="h-auto px-5 py-3" />
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {members.map((member) => (
-              <TableRow
-                key={member.user_id}
-                className="border-b border-[#E5E7EB] transition-colors hover:bg-[#F9FAFB]"
-              >
-                <TableCell className="px-5 py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#EFF6FF] text-sm font-bold text-[#2563EB]">
-                      {getInitials(member.user_email ?? member.user_id)}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-[#111827]">
-                        {member.user_email?.split("@")[0] ?? "Team member"}
-                      </p>
-                      {member.user_email ? (
-                        <a
-                          href={`mailto:${member.user_email}`}
-                          className="text-sm text-[#6B7280] transition-colors hover:text-[#2563EB] hover:underline"
-                        >
-                          {member.user_email}
-                        </a>
-                      ) : (
-                        <p className="text-sm text-[#6B7280]">{member.user_id}</p>
-                      )}
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell className="px-5 py-4">
+        <div className="space-y-3 md:hidden">
+          {members.map((member) => (
+            <div
+              key={member.user_id}
+              className="rounded-[12px] border border-[#E5E7EB] bg-[#F8F9FC] p-4"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#EFF6FF] text-sm font-bold text-[#2563EB]">
+                  {getInitials(member.user_email ?? member.user_id)}
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-[#111827]">
+                    {member.user_email?.split("@")[0] ?? "Team member"}
+                  </p>
+                  {member.user_email ? (
+                    <a
+                      href={`mailto:${member.user_email}`}
+                      className="break-all text-sm text-[#6B7280] transition-colors hover:text-[#2563EB] hover:underline"
+                    >
+                      {member.user_email}
+                    </a>
+                  ) : (
+                    <p className="break-all text-sm text-[#6B7280]">{member.user_id}</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                <div>
+                  <p className="text-[11px] font-medium uppercase tracking-[0.05em] text-[#6B7280]">
+                    Role
+                  </p>
                   <span
                     className={
                       member.role === "OWNER"
-                        ? "inline-flex rounded-full bg-[#EFF6FF] px-3 py-1 text-[12px] font-semibold text-[#2563EB]"
-                        : "inline-flex rounded-full bg-[#F0FDF4] px-3 py-1 text-[12px] font-semibold text-[#16A34A]"
+                        ? "mt-1 inline-flex rounded-full bg-[#EFF6FF] px-3 py-1 text-[12px] font-semibold text-[#2563EB]"
+                        : "mt-1 inline-flex rounded-full bg-[#F0FDF4] px-3 py-1 text-[12px] font-semibold text-[#16A34A]"
                     }
                   >
                     {formatRole(member.role)}
                   </span>
-                </TableCell>
-                <TableCell className="px-5 py-4 text-sm text-[#6B7280]">
-                  {new Date(member.created_at).toLocaleDateString()}
-                </TableCell>
-                <TableCell className="px-5 py-4 text-right">
-                  {isOwner && member.role !== "OWNER" && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="border-2 border-[#2563EB] bg-transparent text-[#2563EB] hover:bg-[#EFF6FF]"
-                      onClick={() => remove(member.user_id)}
-                    >
-                      Remove
-                    </Button>
-                  )}
-                </TableCell>
+                </div>
+                <div>
+                  <p className="text-[11px] font-medium uppercase tracking-[0.05em] text-[#6B7280]">
+                    Joined
+                  </p>
+                  <p className="mt-1 text-sm text-[#111827]">
+                    {new Date(member.created_at).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-4">
+                {isOwner && member.role !== "OWNER" ? (
+                  <Button
+                    variant="outline"
+                    className="h-11 w-full border-2 border-[#2563EB] bg-transparent text-[#2563EB] hover:bg-[#EFF6FF]"
+                    onClick={() => remove(member.user_id)}
+                  >
+                    Remove
+                  </Button>
+                ) : (
+                  <p className="text-sm text-[#6B7280]">Account owner</p>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="hidden md:block">
+          <Table>
+            <TableHeader>
+              <TableRow className="border-b border-[#E5E7EB] bg-[#F8F9FC] hover:bg-[#F8F9FC]">
+                <TableHead className="h-auto px-5 py-3 text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280]">
+                  Member
+                </TableHead>
+                <TableHead className="h-auto px-5 py-3 text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280]">
+                  Role
+                </TableHead>
+                <TableHead className="h-auto px-5 py-3 text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280]">
+                  Joined
+                </TableHead>
+                <TableHead className="h-auto px-5 py-3" />
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {members.map((member) => (
+                <TableRow
+                  key={member.user_id}
+                  className="border-b border-[#E5E7EB] transition-colors hover:bg-[#F9FAFB]"
+                >
+                  <TableCell className="px-5 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#EFF6FF] text-sm font-bold text-[#2563EB]">
+                        {getInitials(member.user_email ?? member.user_id)}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-[#111827]">
+                          {member.user_email?.split("@")[0] ?? "Team member"}
+                        </p>
+                        {member.user_email ? (
+                          <a
+                            href={`mailto:${member.user_email}`}
+                            className="text-sm text-[#6B7280] transition-colors hover:text-[#2563EB] hover:underline"
+                          >
+                            {member.user_email}
+                          </a>
+                        ) : (
+                          <p className="text-sm text-[#6B7280]">{member.user_id}</p>
+                        )}
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell className="px-5 py-4">
+                    <span
+                      className={
+                        member.role === "OWNER"
+                          ? "inline-flex rounded-full bg-[#EFF6FF] px-3 py-1 text-[12px] font-semibold text-[#2563EB]"
+                          : "inline-flex rounded-full bg-[#F0FDF4] px-3 py-1 text-[12px] font-semibold text-[#16A34A]"
+                      }
+                    >
+                      {formatRole(member.role)}
+                    </span>
+                  </TableCell>
+                  <TableCell className="px-5 py-4 text-sm text-[#6B7280]">
+                    {new Date(member.created_at).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell className="px-5 py-4 text-right">
+                    {isOwner && member.role !== "OWNER" && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="border-2 border-[#2563EB] bg-transparent text-[#2563EB] hover:bg-[#EFF6FF]"
+                        onClick={() => remove(member.user_id)}
+                      >
+                        Remove
+                      </Button>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
       <div className="rounded-[14px] border border-[#E5E7EB] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
         <h2 className="mb-4 text-base font-semibold text-[#111827]">Pending Invites</h2>

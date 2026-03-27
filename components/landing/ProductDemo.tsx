@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useState, useTransition } from "react";
 import type { LucideIcon } from "lucide-react";
 import {
@@ -668,131 +667,113 @@ export function ProductDemo() {
   const activeData = cache[activePage];
 
   return (
-    <>
-      <div className="md:hidden">
-        <div className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_24px_60px_-30px_rgba(15,23,42,0.35)]">
-          <div className="border-b border-slate-200 bg-slate-50 px-4 py-3">
-            <p className="text-sm font-semibold text-slate-900">SnapQuote Demo</p>
-            <p className="mt-1 text-xs text-slate-500">Interactive preview is shown on desktop.</p>
-          </div>
-          <Image
-            src="/demo-mobile-placeholder.svg"
-            alt="SnapQuote mobile demo placeholder"
-            width={1600}
-            height={1200}
-            className="h-auto w-full"
-          />
-        </div>
-      </div>
-
-      <div className="hidden md:block">
-        <div className="overflow-hidden rounded-[30px] border border-[#DDE5F0] bg-white shadow-[0_42px_90px_-52px_rgba(15,23,42,0.55)]">
-          <div className="border-b border-[#E5E7EB] bg-[#F8FAFC] px-5 py-4">
-            <div className="flex flex-wrap items-center gap-4">
-              <div className="flex items-center gap-2">
-                <span className="h-3 w-3 rounded-full bg-[#F87171]" />
-                <span className="h-3 w-3 rounded-full bg-[#FBBF24]" />
-                <span className="h-3 w-3 rounded-full bg-[#34D399]" />
-              </div>
-              <div className="flex min-w-0 flex-1 items-center justify-center">
-                <div className="flex min-w-[320px] max-w-[540px] flex-1 items-center justify-center rounded-full border border-[#D1D5DB] bg-white px-4 py-2 text-sm text-[#6B7280]">
-                  snapquote.app/demo
-                </div>
-              </div>
+    <div className="hidden md:block">
+      <div className="overflow-hidden rounded-[30px] border border-[#DDE5F0] bg-white shadow-[0_42px_90px_-52px_rgba(15,23,42,0.55)]">
+        <div className="border-b border-[#E5E7EB] bg-[#F8FAFC] px-5 py-4">
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex items-center gap-2">
+              <span className="h-3 w-3 rounded-full bg-[#F87171]" />
+              <span className="h-3 w-3 rounded-full bg-[#FBBF24]" />
+              <span className="h-3 w-3 rounded-full bg-[#34D399]" />
             </div>
-          </div>
-
-          <div className="min-h-[920px] bg-[#F8F9FC]">
-            <div className="flex min-h-[920px]">
-              <aside className="flex w-[220px] flex-col border-r border-[#E5E7EB] bg-white">
-                <div className="px-6 py-7">
-                  <div className="inline-flex">
-                    <BrandLogo size="sm" />
-                  </div>
-                </div>
-
-                <nav className="space-y-1 px-3 pb-4">
-                  {navigationItems.map((item) => {
-                    const Icon = item.icon;
-                    const active = item.id === activePage;
-
-                    return (
-                      <button
-                        key={item.id}
-                        type="button"
-                        onClick={() =>
-                          startTransition(() => {
-                            setActivePage(item.id);
-                          })
-                        }
-                        className={cn(
-                          "flex w-full items-center gap-2 rounded-[8px] border-l-[3px] px-3 py-2.5 text-left text-sm font-medium",
-                          active
-                            ? "border-l-[#2563EB] bg-[#EFF6FF] font-semibold text-[#2563EB]"
-                            : "border-l-transparent text-[#6B7280] hover:bg-[#F8F9FC] hover:text-[#111827]"
-                        )}
-                      >
-                        <Icon className="h-4 w-4" />
-                        {item.label}
-                      </button>
-                    );
-                  })}
-                </nav>
-
-                <div className="mt-auto border-t border-[#E5E7EB] px-6 py-5">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#EFF6FF] text-sm font-semibold text-[#2563EB]">
-                      SQ
-                    </div>
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-[#111827]">
-                        {activeData?.shell.businessName ?? "SnapQuote Demo"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </aside>
-
-              <div className="flex min-w-0 flex-1 flex-col">
-                <header className="border-b border-[#E5E7EB] bg-white px-6 py-4">
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="min-w-0">
-                      <p className="text-2xl font-bold text-[#111827]">
-                        {activeData?.shell.pageTitle ?? demoPageLabels[activePage]}
-                      </p>
-                    </div>
-
-                    <div className="flex items-center gap-4">
-                      <div className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] border border-[#E5E7EB] bg-white text-[#6B7280]">
-                        <Bell className="h-4 w-4" />
-                      </div>
-
-                      <div className="text-right">
-                        <p className="text-sm font-medium text-[#111827]">
-                          {activeData?.shell.businessName ?? "Rivera's Pressure Washing"}
-                        </p>
-                        <p className="text-sm text-[#6B7280]">
-                          {activeData?.shell.ownerEmail ?? "demo@snapquote.com"}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </header>
-
-                <main className="flex-1 bg-[#F8F9FC] p-6">
-                  {error ? <DemoErrorState message={error} /> : null}
-                  {!error && !activeData ? <DemoLoadingState title={demoPageLabels[activePage]} /> : null}
-                  {!error && activeData ? (
-                    <div className={cn("pointer-events-none space-y-6", isPending && "opacity-80 transition-opacity")}>
-                      <DemoPageView data={activeData} />
-                    </div>
-                  ) : null}
-                </main>
+            <div className="flex min-w-0 flex-1 items-center justify-center">
+              <div className="flex min-w-[320px] max-w-[540px] flex-1 items-center justify-center rounded-full border border-[#D1D5DB] bg-white px-4 py-2 text-sm text-[#6B7280]">
+                snapquote.app/demo
               </div>
             </div>
           </div>
         </div>
+
+        <div className="min-h-[920px] bg-[#F8F9FC]">
+          <div className="flex min-h-[920px]">
+            <aside className="flex w-[220px] flex-col border-r border-[#E5E7EB] bg-white">
+              <div className="px-6 py-7">
+                <div className="inline-flex">
+                  <BrandLogo size="sm" />
+                </div>
+              </div>
+
+              <nav className="space-y-1 px-3 pb-4">
+                {navigationItems.map((item) => {
+                  const Icon = item.icon;
+                  const active = item.id === activePage;
+
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() =>
+                        startTransition(() => {
+                          setActivePage(item.id);
+                        })
+                      }
+                      className={cn(
+                        "flex w-full items-center gap-2 rounded-[8px] border-l-[3px] px-3 py-2.5 text-left text-sm font-medium",
+                        active
+                          ? "border-l-[#2563EB] bg-[#EFF6FF] font-semibold text-[#2563EB]"
+                          : "border-l-transparent text-[#6B7280] hover:bg-[#F8F9FC] hover:text-[#111827]"
+                      )}
+                    >
+                      <Icon className="h-4 w-4" />
+                      {item.label}
+                    </button>
+                  );
+                })}
+              </nav>
+
+              <div className="mt-auto border-t border-[#E5E7EB] px-6 py-5">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#EFF6FF] text-sm font-semibold text-[#2563EB]">
+                    SQ
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-[#111827]">
+                      {activeData?.shell.businessName ?? "SnapQuote Demo"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </aside>
+
+            <div className="flex min-w-0 flex-1 flex-col">
+              <header className="border-b border-[#E5E7EB] bg-white px-6 py-4">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="min-w-0">
+                    <p className="text-2xl font-bold text-[#111827]">
+                      {activeData?.shell.pageTitle ?? demoPageLabels[activePage]}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-4">
+                    <div className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] border border-[#E5E7EB] bg-white text-[#6B7280]">
+                      <Bell className="h-4 w-4" />
+                    </div>
+
+                    <div className="text-right">
+                      <p className="text-sm font-medium text-[#111827]">
+                        {activeData?.shell.businessName ?? "Rivera's Pressure Washing"}
+                      </p>
+                      <p className="text-sm text-[#6B7280]">
+                        {activeData?.shell.ownerEmail ?? "demo@snapquote.com"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </header>
+
+              <main className="flex-1 bg-[#F8F9FC] p-6">
+                {error ? <DemoErrorState message={error} /> : null}
+                {!error && !activeData ? <DemoLoadingState title={demoPageLabels[activePage]} /> : null}
+                {!error && activeData ? (
+                  <div className={cn("pointer-events-none space-y-6", isPending && "opacity-80 transition-opacity")}>
+                    <DemoPageView data={activeData} />
+                  </div>
+                ) : null}
+              </main>
+            </div>
+          </div>
+        </div>
       </div>
-    </>
+    </div>
   );
 }

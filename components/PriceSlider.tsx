@@ -71,11 +71,11 @@ export function PriceSlider({ low, high, onChange }: PriceSliderProps) {
         </Slider.Track>
         <Slider.Thumb
           aria-label="Low price handle"
-          className="block h-5 w-5 rounded-full border-2 border-blue-600 bg-white shadow outline-none focus-visible:ring-2 focus-visible:ring-blue-300"
+          className="block h-6 w-6 rounded-full border-2 border-blue-600 bg-white shadow outline-none focus-visible:ring-2 focus-visible:ring-blue-300 sm:h-5 sm:w-5"
         />
         <Slider.Thumb
           aria-label="High price handle"
-          className="block h-5 w-5 rounded-full border-2 border-emerald-600 bg-white shadow outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
+          className="block h-6 w-6 rounded-full border-2 border-emerald-600 bg-white shadow outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 sm:h-5 sm:w-5"
         />
       </Slider.Root>
 

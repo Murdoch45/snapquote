@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { Bell, LogOut } from "lucide-react";
+import { Bell, LogOut, Menu } from "lucide-react";
+import { BrandLogo } from "@/components/BrandLogo";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { getAddressParts } from "@/lib/leadPresentation";
@@ -84,16 +86,19 @@ function mergeFeed(existing: FeedItem[], incoming: FeedItem[]): FeedItem[] {
 export function TopBar({
   email,
   orgId,
-  businessName
+  businessName,
+  onOpenSidebar
 }: {
   email?: string | null;
   orgId: string;
   businessName?: string | null;
+  onOpenSidebar?: () => void;
 }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [feed, setFeed] = useState<FeedItem[]>([]);
-  const unreadCount = useMemo(() => feed.length, [feed]);
+  const unreadCount = feed.length;
+  const pageTitle = getPageTitle(pathname);
 
   useEffect(() => {
     const scheduleReset = () => {
@@ -233,76 +238,134 @@ export function TopBar({
     };
   }, [orgId]);
 
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
   const onLogout = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
     window.location.href = "/login";
   };
 
+  const notificationButtonClassName =
+    "inline-flex h-11 w-11 items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#6B7280] transition-colors hover:bg-[#F8F9FC] hover:text-[#111827] md:h-10 md:w-10";
+  const notificationPanelClassName =
+    "absolute right-0 z-30 mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-[14px] border border-[#E5E7EB] bg-white p-3 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)]";
+  const mobileAccountLabel = businessName ?? email ?? "Account";
+
+  const renderNotifications = () => (
+    <div className="relative">
+      <button
+        type="button"
+        className={notificationButtonClassName}
+        aria-label="Notifications"
+        aria-expanded={open}
+        onClick={() => setOpen((value) => !value)}
+      >
+        <Bell className="h-4 w-4" />
+        {unreadCount > 0 ? (
+          <span className="absolute -right-1 -top-1 rounded-full bg-[#2563EB] px-1.5 text-[10px] text-white">
+            {unreadCount}
+          </span>
+        ) : null}
+      </button>
+
+      {open ? (
+        <div className={notificationPanelClassName}>
+          <p className="mb-2 text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280]">
+            Notifications
+          </p>
+          {feed.length === 0 ? (
+            <p className="text-sm text-[#6B7280]">No notifications today</p>
+          ) : (
+            <ul className="space-y-2">
+              {feed.map((item) => (
+                <li key={item.id}>
+                  <button
+                    type="button"
+                    className="min-h-[44px] w-full rounded-[10px] bg-[#F8F9FC] p-3 text-left text-sm text-[#111827] transition-colors hover:bg-[#EEF2FF]"
+                    onClick={() => setFeed((prev) => prev.filter((entry) => entry.id !== item.id))}
+                  >
+                    <p>{item.text}</p>
+                    <p className="mt-1 text-xs text-[#6B7280]">
+                      {formatNotificationTime(item.createdAt)}
+                    </p>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      ) : null}
+    </div>
+  );
+
   return (
-    <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-[#E5E7EB] bg-white px-6">
-      <div className="min-w-0">
-        <p className="text-2xl font-bold text-[#111827]">{getPageTitle(pathname)}</p>
+    <header className="sticky top-0 z-20 border-b border-[#E5E7EB] bg-white/95 backdrop-blur">
+      <div className="space-y-3 px-4 py-3 md:hidden">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-2">
+            {onOpenSidebar ? (
+              <button
+                type="button"
+                className={notificationButtonClassName}
+                aria-label="Open navigation menu"
+                onClick={onOpenSidebar}
+              >
+                <Menu className="h-5 w-5" />
+              </button>
+            ) : null}
+
+            <Link href="/app" className="min-w-0">
+              <BrandLogo
+                size="sm"
+                className="max-w-full"
+                iconClassName="h-8 w-10"
+                wordmarkClassName="text-lg"
+              />
+            </Link>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {renderNotifications()}
+            <Button
+              variant="outline"
+              className="h-11 w-11 px-0"
+              onClick={onLogout}
+              aria-label="Sign out"
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+
+        <div className="min-w-0">
+          <p className="truncate text-xl font-bold text-[#111827]">{pageTitle}</p>
+          <p className="truncate text-sm text-[#6B7280]">{mobileAccountLabel}</p>
+        </div>
       </div>
 
-      <div className="flex items-center gap-4">
-        <div className="relative">
-          <button
-            type="button"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] border border-[#E5E7EB] bg-white text-[#6B7280] transition-colors hover:bg-[#F8F9FC] hover:text-[#111827]"
-            aria-label="Notifications"
-            onClick={() => setOpen((value) => !value)}
-          >
-            <Bell className="h-4 w-4" />
-            {unreadCount > 0 ? (
-              <span className="absolute -right-1 -top-1 rounded-full bg-[#2563EB] px-1.5 text-[10px] text-white">
-                {unreadCount}
-              </span>
-            ) : null}
-          </button>
-
-          {open ? (
-            <div className="absolute right-0 z-30 mt-2 w-72 rounded-[14px] border border-[#E5E7EB] bg-white p-3 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)]">
-              <p className="mb-2 text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280]">
-                Notifications
-              </p>
-              {feed.length === 0 ? (
-                <p className="text-sm text-[#6B7280]">No notifications today</p>
-              ) : (
-                <ul className="space-y-2">
-                  {feed.map((item) => (
-                    <li key={item.id}>
-                      <button
-                        type="button"
-                        className="w-full rounded-[10px] bg-[#F8F9FC] p-3 text-left text-sm text-[#111827] transition-colors hover:bg-[#EEF2FF]"
-                        onClick={() =>
-                          setFeed((prev) => prev.filter((entry) => entry.id !== item.id))
-                        }
-                      >
-                        <p>{item.text}</p>
-                        <p className="mt-1 text-xs text-[#6B7280]">
-                          {formatNotificationTime(item.createdAt)}
-                        </p>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          ) : null}
+      <div className="hidden h-16 items-center justify-between gap-6 px-6 md:flex">
+        <div className="min-w-0">
+          <p className="text-2xl font-bold text-[#111827]">{pageTitle}</p>
         </div>
 
-        <div className="min-w-0 text-right">
-          <p className="truncate text-sm font-medium text-[#111827]">
-            {businessName ?? "SnapQuote"}
-          </p>
-          <p className="truncate text-sm text-[#6B7280]">{email ?? "Account"}</p>
-        </div>
+        <div className="flex items-center gap-4">
+          {renderNotifications()}
 
-        <Button variant="outline" size="sm" onClick={onLogout}>
-          <LogOut className="mr-2 h-4 w-4" />
-          Sign out
-        </Button>
+          <div className="min-w-0 text-right">
+            <p className="truncate text-sm font-medium text-[#111827]">
+              {businessName ?? "SnapQuote"}
+            </p>
+            <p className="truncate text-sm text-[#6B7280]">{email ?? "Account"}</p>
+          </div>
+
+          <Button variant="outline" className="h-10 px-4" onClick={onLogout}>
+            <LogOut className="mr-2 h-4 w-4" />
+            Sign out
+          </Button>
+        </div>
       </div>
     </header>
   );
