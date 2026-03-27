@@ -237,11 +237,11 @@ begin
       from organization_members om
       where om.org_id = pi.org_id
     ) <
-    case
-      when o.plan = 'SOLO' then 1
-      when o.plan = 'TEAM' then 5
-      else 10
-    end
+      case
+        when o.plan = 'SOLO' then 1
+        when o.plan = 'TEAM' then 2
+        else 5
+      end
   on conflict (org_id, user_id) do nothing;
 
   update pending_invites
@@ -266,11 +266,11 @@ begin
       from organization_members om
       where om.org_id = pi.org_id
     ) >=
-    case
-      when o.plan = 'SOLO' then 1
-      when o.plan = 'TEAM' then 5
-      else 10
-    end;
+      case
+        when o.plan = 'SOLO' then 1
+        when o.plan = 'TEAM' then 2
+        else 5
+      end;
 
   return new;
 end;

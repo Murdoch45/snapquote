@@ -1,14 +1,9 @@
 import { randomBytes } from "crypto";
 import { NextResponse } from "next/server";
 import { requireOwnerForApi } from "@/lib/auth/requireRole";
+import { getPlanSeatLimit } from "@/lib/plans";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAppUrl } from "@/lib/utils";
-
-function maxMembersByPlan(plan: string): number {
-  if (plan === "SOLO") return 1;
-  if (plan === "TEAM") return 2;
-  return 5;
-}
 
 function makeInviteToken() {
   return randomBytes(24).toString("base64url");
@@ -36,7 +31,7 @@ export async function POST() {
         .gt("expires_at", nowIso)
     ]);
 
-    const maxMembers = maxMembersByPlan(org?.plan ?? "SOLO");
+    const maxMembers = getPlanSeatLimit((org?.plan as "SOLO" | "TEAM" | "BUSINESS" | null) ?? "SOLO");
     const occupied = (memberCount ?? 0) + (pendingCount ?? 0);
     if (occupied >= maxMembers) {
       return NextResponse.json(

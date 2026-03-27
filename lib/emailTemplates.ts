@@ -1,13 +1,20 @@
 import { buildQuoteLink, getCustomerFirstName } from "@/lib/quote-template";
 import { formatCurrencyRange, toCurrency } from "@/lib/utils";
 
+const esc = (s: string) =>
+  s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+
 export function renderEmailShell(title: string, bodyHtml: string) {
   return `
     <div style="margin:0;padding:32px 16px;background:#f8fafc;font-family:'DM Sans',Arial,sans-serif;color:#0f172a;">
       <div style="max-width:560px;margin:0 auto;background:#ffffff;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden;">
         <div style="padding:24px 24px 8px;">
           <div style="font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:#64748b;font-weight:700;">SnapQuote</div>
-          <h1 style="margin:12px 0 0;font-size:24px;line-height:1.2;color:#0f172a;">${title}</h1>
+          <h1 style="margin:12px 0 0;font-size:24px;line-height:1.2;color:#0f172a;">${esc(title)}</h1>
         </div>
         <div style="padding:24px;">
           ${bodyHtml}
@@ -26,10 +33,10 @@ export function renderEmailShell(title: string, bodyHtml: string) {
 export function renderButton(label: string, href: string) {
   return `
     <a
-      href="${href}"
+      href="${esc(href)}"
       style="display:inline-block;margin-top:24px;padding:12px 18px;border-radius:10px;background:#2563EB;color:#ffffff;text-decoration:none;font-weight:700;"
     >
-      ${label}
+      ${esc(label)}
     </a>
   `;
 }
@@ -37,8 +44,8 @@ export function renderButton(label: string, href: string) {
 export function renderField(label: string, value: string) {
   return `
     <div style="margin-top:12px;padding:14px 16px;border-radius:12px;background:#f8fafc;border:1px solid #e2e8f0;">
-      <div style="font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#64748b;">${label}</div>
-      <div style="margin-top:6px;font-size:15px;line-height:1.5;color:#0f172a;">${value}</div>
+      <div style="font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#64748b;">${esc(label)}</div>
+      <div style="margin-top:6px;font-size:15px;line-height:1.5;color:#0f172a;">${esc(value)}</div>
     </div>
   `;
 }
@@ -90,7 +97,7 @@ export function buildCustomerConfirmationEmail(input: {
       title,
       `
         <p style="margin:0 0 16px;font-size:28px;line-height:1.2;font-weight:700;color:#0f172a;">
-          ${input.businessName}
+          ${esc(input.businessName)}
         </p>
         <p style="margin:0 0 16px;font-size:15px;line-height:1.7;color:#334155;">
           Thanks for reaching out! We received your request and will be in touch shortly with your estimate.

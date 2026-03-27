@@ -7,6 +7,7 @@ import { PlanOptionsSection } from "@/components/plan/PlanOptionsSection";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireAuth } from "@/lib/auth/requireAuth";
 import { getOrgCredits } from "@/lib/credits";
+import { getPlanSeatLimit } from "@/lib/plans";
 import { getOrganizationSubscriptionStatus } from "@/lib/subscription";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getPlanMonthlyCredits } from "@/lib/usage";
@@ -23,12 +24,6 @@ function getPlanPrice(plan: "SOLO" | "TEAM" | "BUSINESS"): string {
   if (plan === "SOLO") return "Free";
   if (plan === "TEAM") return "$19/month";
   return "$39/month";
-}
-
-function getSeatLimit(plan: "SOLO" | "TEAM" | "BUSINESS"): number {
-  if (plan === "SOLO") return 1;
-  if (plan === "TEAM") return 2;
-  return 5;
 }
 
 function getUsagePercent(used: number, limit: number): number {
@@ -89,7 +84,7 @@ export default async function PlanPage({ searchParams }: Props) {
   const totalCredits = monthlyCreditsRemaining + bonusCredits;
   const monthlyCreditsLimit = getPlanMonthlyCredits(plan);
   const usersUsed = membersResult.count ?? 0;
-  const usersLimit = getSeatLimit(plan);
+  const usersLimit = getPlanSeatLimit(plan);
   const resetAt = organization.data.credits_reset_at
     ? new Date(organization.data.credits_reset_at as string)
     : null;

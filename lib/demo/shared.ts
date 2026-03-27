@@ -9,7 +9,10 @@ export type DemoPageId =
   | "team"
   | "settings";
 
-export type DemoPlan = "SOLO" | "TEAM" | "BUSINESS";
+import { getPlanMonthlyCredits, getPlanSeatLimit } from "@/lib/plans";
+import type { OrgPlan } from "@/lib/types";
+
+export type DemoPlan = OrgPlan;
 
 export const DEMO_BUSINESS_NAME = "Rivera's Pressure Washing";
 export const DEMO_OWNER_NAME = "Carlos Rivera";
@@ -222,14 +225,4 @@ export function getPlanPriceLabel(plan: DemoPlan): string {
   return "$39/month";
 }
 
-export function getPlanSeatLimit(plan: DemoPlan): number {
-  if (plan === "SOLO") return 1;
-  if (plan === "TEAM") return 2;
-  return 5;
-}
-
-export function getPlanMonthlyCredits(plan: DemoPlan): number {
-  if (plan === "SOLO") return 5;
-  if (plan === "TEAM") return 20;
-  return 100;
-}
+export { getPlanMonthlyCredits, getPlanSeatLimit };

@@ -1,5 +1,6 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getPlanMonthlyCredits } from "@/lib/plans";
 import { ORG_PLANS, type OrgPlan, type PlanUsageLimit } from "@/lib/types";
 
 export type UsageState = {
@@ -19,11 +20,7 @@ function firstDayOfMonth(date = new Date()): string {
     .slice(0, 10);
 }
 
-export function getPlanMonthlyCredits(plan: OrgPlan): number {
-  if (plan === "SOLO") return 5;
-  if (plan === "TEAM") return 20;
-  return 100;
-}
+export { getPlanMonthlyCredits } from "@/lib/plans";
 
 export function getPlanUsageLimit(plan: OrgPlan): PlanUsageLimit {
   const monthlyCredits = getPlanMonthlyCredits(plan);

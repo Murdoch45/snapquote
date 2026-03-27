@@ -162,13 +162,18 @@ export async function POST(request: Request) {
           throw subscriptionUpdateError;
         }
 
-        const { error: orgUpdateError } = await admin
-          .from("organizations")
-          .update({ plan: planConfig.orgPlan })
-          .eq("id", auth.orgId);
+        if (
+          updatedSubscription.status === "active" ||
+          updatedSubscription.status === "trialing"
+        ) {
+          const { error: orgUpdateError } = await admin
+            .from("organizations")
+            .update({ plan: planConfig.orgPlan })
+            .eq("id", auth.orgId);
 
-        if (orgUpdateError) {
-          throw orgUpdateError;
+          if (orgUpdateError) {
+            throw orgUpdateError;
+          }
         }
       }
 

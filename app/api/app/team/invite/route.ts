@@ -1,14 +1,9 @@
 import { NextResponse } from "next/server";
 import { requireOwnerForApi } from "@/lib/auth/requireRole";
+import { getPlanSeatLimit } from "@/lib/plans";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAppUrl } from "@/lib/utils";
 import { inviteTeamSchema } from "@/lib/validations";
-
-function maxMembersByPlan(plan: string): number {
-  if (plan === "SOLO") return 1;
-  if (plan === "TEAM") return 2;
-  return 5;
-}
 
 export async function POST(request: Request) {
   const auth = await requireOwnerForApi();
@@ -30,7 +25,7 @@ export async function POST(request: Request) {
         .eq("status", "PENDING")
     ]);
 
-    const maxMembers = maxMembersByPlan(org?.plan ?? "SOLO");
+    const maxMembers = getPlanSeatLimit((org?.plan as "SOLO" | "TEAM" | "BUSINESS" | null) ?? "SOLO");
     const occupied = (memberCount ?? 0) + (pendingCount ?? 0);
     if (occupied >= maxMembers) {
       return NextResponse.json(

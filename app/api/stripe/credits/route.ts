@@ -81,7 +81,7 @@ export async function POST(request: Request) {
       metadata: {
         userId: auth.userId,
         orgId: auth.orgId,
-        creditAmount: body.pack
+        creditAmount: packConfig.credits.toString()
       }
     });
 
