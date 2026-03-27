@@ -3795,7 +3795,7 @@ async function callOpenAI(prompt: string, input: EstimateInput): Promise<Structu
       try {
         const response = await client.responses.parse(
           {
-            model: "gpt-5-mini",
+            model: process.env.OPENAI_MODEL ?? "gpt-5-mini",
             reasoning: {
               effort: "low"
             },
