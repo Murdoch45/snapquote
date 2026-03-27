@@ -210,9 +210,9 @@ export function PlanOptionsSection({ currentPlan }: Props) {
                 }
               />
 
-              <CardHeader className="relative flex flex-col space-y-4 pb-2">
-                <div className="flex min-h-[72px] items-start justify-between gap-4">
-                  <div className="space-y-2">
+              <CardHeader className="relative flex flex-col space-y-2.5 px-4 pt-4 pb-1">
+                <div className="flex min-h-[56px] items-start justify-between gap-2.5">
+                  <div className="space-y-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <CardTitle className="text-lg font-semibold text-[#111827]">
                         {option.name}
@@ -244,7 +244,7 @@ export function PlanOptionsSection({ currentPlan }: Props) {
                       }
                     />
                   ) : (
-                    <div className="rounded-full border border-[#E5E7EB] bg-white px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.05em] text-[#6B7280]">
+                    <div className="rounded-full border border-[#E5E7EB] bg-white px-2.5 py-1.5 text-xs font-semibold uppercase tracking-[0.05em] text-[#6B7280]">
                       Free
                     </div>
                   )}
@@ -252,39 +252,39 @@ export function PlanOptionsSection({ currentPlan }: Props) {
 
               </CardHeader>
 
-              <div className="mx-6 rounded-[14px] border border-[#E5E7EB] bg-white/80 px-5 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)] backdrop-blur">
+              <div className="mx-4 rounded-[14px] border border-[#E5E7EB] bg-white/80 px-4 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)] backdrop-blur">
                 <div className="flex items-end gap-2">
                   <p className="text-4xl font-semibold tracking-[-0.04em] text-[#111827]">
                     {displayPrice}
                   </p>
                 </div>
-                <p className="mt-1.5 min-h-[20px] text-sm text-[#6B7280]">
+                <p className="mt-1 min-h-[20px] text-sm text-[#6B7280]">
                   {showAnnualPricing && option.annualBillingLine ? option.annualBillingLine : " "}
                 </p>
               </div>
 
-              <div className="relative flex flex-1 flex-col px-6">
-                <div className="mt-3 grid grid-cols-2 gap-3">
-                  <div className="rounded-[14px] border border-[#E5E7EB] bg-white px-4 py-4">
+              <div className="relative flex flex-1 flex-col px-4">
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  <div className="rounded-[14px] border border-[#E5E7EB] bg-white px-3 py-3">
                     <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#6B7280]">
                       Credits
                     </p>
-                    <p className="mt-2 text-lg font-semibold text-[#111827]">
+                    <p className="mt-1.5 text-lg font-semibold text-[#111827]">
                       {option.credits}
                       <span className="ml-1 text-sm font-medium text-[#6B7280]">/ month</span>
                     </p>
                   </div>
-                  <div className="rounded-[14px] border border-[#E5E7EB] bg-white px-4 py-4">
+                  <div className="rounded-[14px] border border-[#E5E7EB] bg-white px-3 py-3">
                     <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#6B7280]">
-                      Team Seats
+                      Users
                     </p>
-                    <p className="mt-2 text-lg font-semibold text-[#111827]">{option.seats}</p>
+                    <p className="mt-1.5 text-lg font-semibold text-[#111827]">{option.seats}</p>
                   </div>
                 </div>
 
-                <div className="mt-3 space-y-3 rounded-[14px] border border-[#E5E7EB] bg-white px-4 py-4">
+                <div className="mt-2 space-y-2 rounded-[14px] border border-[#E5E7EB] bg-white px-3 py-3">
                   {option.highlights.map((item) => (
-                    <div key={item} className="flex items-start gap-3 text-sm text-[#111827]">
+                    <div key={item} className="flex items-start gap-2 text-sm text-[#111827]">
                       <span className="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#EFF6FF]">
                         <Check className="h-3.5 w-3.5 text-[#2563EB]" />
                       </span>
@@ -294,7 +294,7 @@ export function PlanOptionsSection({ currentPlan }: Props) {
                 </div>
               </div>
 
-              <div className="px-6 pb-4 pt-3 xl:self-end">
+              <div className="px-4 pb-3 pt-2 xl:self-end">
                 {isCurrent ? (
                   <Button
                     type="button"
