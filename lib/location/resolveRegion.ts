@@ -88,18 +88,12 @@ const BAY_AREA_MATCHERS = [
 ];
 
 export function resolveRegion(googleAddress: GoogleAddress): Region {
-  const propertyData = googleAddress;
   const rawState = googleAddress.state?.trim() ?? "";
   const rawCity = googleAddress.city?.trim() ?? "";
   const city = rawCity.toLowerCase();
   const normalizedState = (STATE_MAP[rawState] ?? rawState).toUpperCase();
   const formattedAddress = googleAddress.formattedAddress?.trim().toLowerCase() ?? "";
   const locationText = `${city} ${formattedAddress}`;
-
-  console.log("Region debug -> city:", rawCity);
-  console.log("Region debug -> state:", rawState);
-  console.log("Region debug -> normalizedState:", normalizedState);
-  console.log("Region debug -> propertyData:", propertyData);
 
   if (!normalizedState) return "default";
 
@@ -112,6 +106,5 @@ export function resolveRegion(googleAddress: GoogleAddress): Region {
   }
 
   const resolvedRegion = REGION_MAP[normalizedState] ?? "default";
-  console.log("Region debug -> resolvedRegion:", resolvedRegion);
   return resolvedRegion;
 }

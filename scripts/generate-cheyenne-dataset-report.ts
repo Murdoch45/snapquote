@@ -985,8 +985,6 @@ async function main() {
     writeFile(OUTPUT_HTML_PATH, html, "utf8"),
     writeFile(OUTPUT_AUDIT_JSON_PATH, JSON.stringify(auditRows, null, 2), "utf8")
   ]);
-  console.log(`Cheyenne diagnostic dashboard written to ${OUTPUT_HTML_PATH}`);
-  console.log(`Cheyenne audit JSON written to ${OUTPUT_AUDIT_JSON_PATH}`);
 }
 
 main().catch((error) => {

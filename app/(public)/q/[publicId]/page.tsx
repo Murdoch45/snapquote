@@ -9,7 +9,6 @@ type Props = {
 
 export default async function PublicQuotePage({ params }: Props) {
   const { publicId } = await params;
-  console.log("PublicQuotePage params:", { publicId });
 
   const admin = createAdminClient();
   type QuoteRow = {
@@ -33,22 +32,16 @@ export default async function PublicQuotePage({ params }: Props) {
       .single();
 
     if (error) {
-      console.error("PublicQuotePage quote query failed:", {
-        publicId,
-        error
-      });
+      console.error("PublicQuotePage quote query failed:", error);
     }
 
     quote = (data as QuoteRow | null) ?? null;
   } catch (error) {
-    console.error("PublicQuotePage quote query threw:", {
-      publicId,
-      error
-    });
+    console.error("PublicQuotePage quote query threw:", error);
   }
 
   if (!quote) {
-    console.warn("PublicQuotePage quote not found:", { publicId });
+    console.warn("PublicQuotePage quote not found.");
     notFound();
   }
 
@@ -68,27 +61,16 @@ export default async function PublicQuotePage({ params }: Props) {
       .maybeSingle();
 
     if (error) {
-      console.error("PublicQuotePage contractor profile query failed:", {
-        publicId,
-        orgId: quote.org_id,
-        error
-      });
+      console.error("PublicQuotePage contractor profile query failed:", error);
     }
 
     profile = (data as { business_name: string | null; phone: string | null; email: string | null } | null) ?? null;
   } catch (error) {
-    console.error("PublicQuotePage contractor profile query threw:", {
-      publicId,
-      orgId: quote.org_id,
-      error
-    });
+    console.error("PublicQuotePage contractor profile query threw:", error);
   }
 
   if (!profile) {
-    console.warn("PublicQuotePage contractor profile missing:", {
-      publicId,
-      orgId: quote.org_id
-    });
+    console.warn("PublicQuotePage contractor profile missing.");
   }
 
   const lead = Array.isArray(quote.lead) ? quote.lead[0] : quote.lead;

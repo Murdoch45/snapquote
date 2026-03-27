@@ -62,9 +62,7 @@ export async function ensureOrganizationMembershipForUser(opts: {
     return { orgId: membership.org_id as string };
   }
 
-  console.warn("No organization found for user, creating fallback organization", {
-    user_id: opts.userId
-  });
+  console.warn("No organization found for user, creating fallback organization.");
 
   const bootstrapName = getDefaultOrganizationName(opts.email);
   const bootstrapSlug = getBootstrapOrganizationSlug(opts.userId);
@@ -114,7 +112,7 @@ export async function ensureOrganizationMembershipForUser(opts: {
   }
 
   if (!confirmedMembership?.org_id) {
-    console.error("No organization found for user", { user_id: opts.userId });
+    console.error("No organization found for user.");
     throw new Error("No organization found for user.");
   }
 
@@ -134,14 +132,10 @@ export async function ensureUserHasOrganization(opts: {
 }): Promise<{ orgId: string; slug: string }> {
   const admin = createAdminClient();
 
-  console.log("USER:", opts.userId);
-
   const { orgId } = await ensureOrganizationMembershipForUser({
     userId: opts.userId,
     email: opts.email
   });
-
-  console.log("ORG LOOKUP RESULT:", { org_id: orgId });
 
   const { data: profile, error: profileLookupError } = await admin
     .from("contractor_profile")
@@ -155,12 +149,6 @@ export async function ensureUserHasOrganization(opts: {
   }
 
   const slug = profile?.public_slug ?? (await generateUniquePublicSlug(opts.businessName));
-  console.log({
-    user_id: opts.userId,
-    organization_id: orgId,
-    business_name: opts.businessName,
-    services: opts.services
-  });
 
   const profilePayload = {
     org_id: orgId,

@@ -1172,13 +1172,6 @@ async function main() {
   let abortRunMessage: string | null = null;
   await prepareResultsFile();
 
-  console.log(`Using contractor slug: ${contractorSlug}`);
-  console.log(`Submitting ${properties.length} test properties across ${TEST_SERVICES.length} services.`);
-  console.log(`Run label: ${runContext.runLabel}`);
-  console.log(`Test label: ${runContext.testLabel}`);
-  console.log(`Seed: ${runContext.seedDisplay}`);
-  console.log("Note: this script exercises the live lead-submit route, so normal notification side effects may still run.");
-
   for (const property of properties) {
     if (abortRunMessage) {
       break;
@@ -1187,12 +1180,11 @@ async function main() {
     let geocodedProperty: GeocodedProperty;
 
     try {
-      console.log(`Geocoding property: ${property.address}`);
       geocodedProperty = await resolveGeocodedProperty(property.address, property.city);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown geocoding error";
 
-      console.error(`Failed to geocode ${property.address}: ${message}`);
+      console.error(`Failed to geocode property: ${message}`);
       const propertyReport = getOrCreatePropertyReport(propertyReports, {
         address: property.address,
         city: property.city
@@ -1273,7 +1265,6 @@ async function main() {
     }
 
     for (const service of TEST_SERVICES) {
-      console.log(`Submitting lead for ${service} at ${geocodedProperty.formattedAddress}`);
       const answers = buildBasicAnswers(runContext, property.address, service);
       const selectedAnswers = buildSelectedAnswersValue(service, answers);
       const questionRows = buildQuestionAnswerRows(service, answers);
@@ -1374,10 +1365,6 @@ async function main() {
           error: null
         });
 
-        console.log(`Completed ${service} for ${geocodedProperty.formattedAddress}: ${estimate}`);
-        if (leadMetadata.multiplierSummary) {
-          console.log(`Multipliers ${service}: ${leadMetadata.multiplierSummary}`);
-        }
       } catch (error) {
         const message = error instanceof Error ? error.message : "Unknown error";
         const failureMetadata =
@@ -1468,7 +1455,7 @@ async function main() {
           error: message
         });
 
-        console.error(`Failed ${service} for ${geocodedProperty.formattedAddress}: ${message}`);
+        console.error(`Failed ${service} estimate run: ${message}`);
 
         if (isReplayMissFailure(failureMetadata, message)) {
           abortRunMessage =
@@ -1494,12 +1481,6 @@ async function main() {
       rows: detailRows
     })
   ]);
-  console.log(`Estimator test results written to ${DEFAULT_RESULTS_PATH}`);
-  console.log(`Estimator run CSV written to ${runContext.resultsPath}`);
-  console.log(`Estimator HTML report written to ${DEFAULT_HTML_REPORT_PATH}`);
-  console.log(`Estimator run HTML report written to ${runContext.htmlReportPath}`);
-  console.log(`Estimator run detail JSON written to ${runContext.detailsPath}`);
-
   if (abortRunMessage) {
     throw new Error(abortRunMessage);
   }

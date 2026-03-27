@@ -82,14 +82,6 @@ export async function POST(request: Request) {
       photoCount: photos.length
     });
 
-    console.log("lead-submit parsed payload:", {
-      contractorSlug: payload.contractorSlug,
-      hasCustomerPhone: Boolean(payload.customerPhone),
-      hasCustomerEmail: Boolean(payload.customerEmail),
-      customerEmail: payload.customerEmail ?? null,
-      servicesCount: payload.services.length
-    });
-
     const admin = createAdminClient();
     const { data: contractor, error: contractorError } = await admin
       .from("contractor_profile")
@@ -106,15 +98,6 @@ export async function POST(request: Request) {
     if (!contractor) {
       return NextResponse.json({ error: "Contractor slug not found." }, { status: 404 });
     }
-
-    console.log("lead-submit contractor profile:", {
-      orgId: contractor.org_id,
-      contractorSlug: contractor.public_slug,
-      hasPhone: Boolean(contractor.phone),
-      hasEmail: Boolean(contractor.email),
-      notificationLeadSms: contractor.notification_lead_sms,
-      notificationLeadEmail: contractor.notification_lead_email
-    });
 
     const orgId = contractor.org_id as string;
 
@@ -151,11 +134,6 @@ export async function POST(request: Request) {
       throw customerError || new Error("Failed to create customer.");
     }
 
-    console.log("lead-submit customer created:", {
-      customerId: customer.id,
-      orgId
-    });
-
     const { data: lead, error: leadError } = await admin
       .from("leads")
       .insert({
@@ -183,7 +161,6 @@ export async function POST(request: Request) {
     }
 
     const leadId = lead.id as string;
-    console.log("lead-submit lead created:", { leadId, orgId });
     const uploadedPaths: { path: string; url: string }[] = [];
     const attemptedPhotoUploads = photos.slice(0, MAX_PHOTO_UPLOADS);
 
@@ -259,18 +236,10 @@ export async function POST(request: Request) {
         });
 
         if (!sent) {
-          console.warn("lead-submit contractor email notification failed:", {
-            orgId,
-            leadId,
-            ownerEmail
-          });
+          console.warn("lead-submit contractor email notification failed.");
         }
       } catch (error) {
-        console.error("lead-submit after() email flow failed:", {
-          orgId,
-          leadId,
-          error
-        });
+        console.error("lead-submit after() email flow failed:", error);
       }
     });
 
@@ -278,10 +247,7 @@ export async function POST(request: Request) {
     const serviceText = payload.services.join(", ");
 
     if (!contractor.notification_lead_email && contractor.email) {
-      console.warn("lead-submit contractor email notification disabled:", {
-        contractorSlug: contractor.public_slug,
-        contractorEmail: contractor.email
-      });
+      console.warn("lead-submit contractor email notification disabled.");
     }
 
     const contractorNotifications = await notifyContractor({
@@ -293,8 +259,6 @@ export async function POST(request: Request) {
       emailSubject: "New SnapQuote lead",
       emailBody: `New estimate request: ${serviceText} at ${payload.addressFull}. Open: ${leadLink}`
     });
-    console.log("lead-submit contractor notifications:", contractorNotifications);
-
     const customerConfirmationEmail = buildCustomerConfirmationEmail({
       businessName: contractor.business_name as string,
       businessPhone: (contractor.phone as string | null) ?? null,
@@ -308,8 +272,6 @@ export async function POST(request: Request) {
       emailSubject: customerConfirmationEmail.subject,
       emailBody: customerConfirmationEmail.text
     });
-    console.log("lead-submit customer notifications:", customerNotifications);
-
     if (payload.customerEmail) {
       const customerEmailSent = await sendEmail({
         to: payload.customerEmail,

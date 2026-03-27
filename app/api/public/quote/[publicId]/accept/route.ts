@@ -94,11 +94,7 @@ export async function POST(_request: Request, { params }: Props) {
       });
 
       if (!sent) {
-        console.warn("quote accept email notification failed:", {
-          orgId: quote.org_id,
-          quoteId: quote.id,
-          ownerEmail
-        });
+        console.warn("quote accept email notification failed.");
       }
     }
   }

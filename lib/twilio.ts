@@ -39,10 +39,5 @@ export async function sendQuoteSms({ to, body }: SendQuoteSmsInput): Promise<str
     body
   });
 
-  console.log("Twilio quote SMS sent:", {
-    sid: result.sid,
-    to
-  });
-
   return result.sid;
 }

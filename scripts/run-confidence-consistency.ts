@@ -153,19 +153,7 @@ function summarizeCapsOrFloors(input: {
 }
 
 function printRun(result: RunResult) {
-  console.log(
-    [
-      `${result.jobName} run ${result.runNumber}`,
-      `service tier ${result.serviceTier}`,
-      `baseline ${result.serviceBaseline}`,
-      `vague ${result.vagueAnswerCount}`,
-      `non-vague ${result.nonVagueAnswerCount}`,
-      `photos ${result.photoCount}`,
-      `photo adj ${result.photoAdjustment >= 0 ? "+" : ""}${result.photoAdjustment}`,
-      `caps/floors ${result.capsOrFloorsTriggered.join(", ")}`,
-      `final ${result.finalConfidence}`
-    ].join(" | ")
-  );
+  void result;
 }
 
 async function main() {
@@ -186,18 +174,7 @@ async function main() {
   const photoDataUrl = await loadPhotoDataUrl();
   const results: RunResult[] = [];
 
-  console.log(`Using contractor slug: ${contractor.public_slug}`);
-  console.log(`Business name: ${contractor.business_name ?? "(unknown)"}`);
-  console.log(`Runs per job: ${RUNS_PER_JOB}`);
-  console.log("");
-
   for (const job of JOBS) {
-    console.log(`${job.jobName}`);
-    console.log(`address: ${job.address}`);
-    console.log(`service: ${job.service}`);
-    console.log(`questionnaire: ${formatAnswers(job.answers)}`);
-    console.log(`photo count: ${job.photoCount}`);
-
     for (let runNumber = 1; runNumber <= RUNS_PER_JOB; runNumber += 1) {
       const trace = await debugEstimateTrace({
         businessName: contractor.business_name ?? "Falcon Test Contractor",
@@ -254,22 +231,8 @@ async function main() {
     const baselines = Array.from(new Set(jobResults.map((result) => result.serviceBaseline)));
     const finalScores = Array.from(new Set(jobResults.map((result) => result.finalConfidence)));
 
-    console.log("summary:");
-    console.log(`all 5 service baselines matched: ${baselines.length === 1 ? "yes" : "no"}${baselines.length === 1 ? ` (${baselines[0]})` : ` (${baselines.join(", ")})`}`);
-    console.log(`all 5 final confidence scores matched: ${finalScores.length === 1 ? "yes" : "no"}${finalScores.length === 1 ? ` (${finalScores[0]})` : ` (${finalScores.join(", ")})`}`);
-    if (baselines.length > 1 || finalScores.length > 1) {
-      console.log(
-        `variation: ${jobResults
-          .map(
-            (result) =>
-              `run ${result.runNumber}: baseline ${result.serviceBaseline}, vague ${result.vagueAnswerCount}, non-vague ${result.nonVagueAnswerCount}, final ${result.finalConfidence}`
-          )
-          .join(" | ")}`
-      );
-    } else {
-      console.log("variation: none");
-    }
-    console.log("");
+    void baselines;
+    void finalScores;
   }
 
   await mkdir(path.dirname(RESULTS_PATH), { recursive: true });
@@ -287,7 +250,6 @@ async function main() {
     )
   );
 
-  console.log(`Saved detailed results to ${RESULTS_PATH}`);
 }
 
 main().catch((error) => {

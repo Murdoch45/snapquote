@@ -40,15 +40,10 @@ export async function sendSms(to: string, body: string): Promise<boolean> {
     return false;
   }
   try {
-    const result = await getTwilioClient().messages.create({
+    await getTwilioClient().messages.create({
       to,
       from: process.env.TWILIO_FROM_NUMBER as string,
       body
-    });
-    console.log("Twilio sendSms result:", {
-      sid: result.sid,
-      status: result.status,
-      to
     });
     return true;
   } catch (error) {
@@ -68,13 +63,6 @@ export async function sendEmail(input: SendEmailInput): Promise<boolean> {
     return false;
   }
 
-  console.log("Resend sendEmail attempt:", {
-    hasApiKey: Boolean(process.env.RESEND_API_KEY),
-    from: fromEmail ?? null,
-    to: input.to,
-    subject: input.subject
-  });
-
   try {
     const result = await getResendClient().emails.send({
       from: fromEmail as string,
@@ -87,7 +75,6 @@ export async function sendEmail(input: SendEmailInput): Promise<boolean> {
       console.error("Resend sendEmail API error:", result.error);
       return false;
     }
-    console.log("Resend sendEmail result:", result);
     return Boolean(result.data?.id);
   } catch (error) {
     console.error("Resend sendEmail error:", error);
@@ -102,19 +89,10 @@ export async function notifyCustomer(opts: {
   emailSubject: string;
   emailBody: string;
 }): Promise<("sms" | "email")[]> {
-  console.log("notifyCustomer called:", {
-    hasPhone: Boolean(opts.phone),
-    hasEmail: Boolean(opts.email),
-    email: opts.email ?? null,
-    subject: opts.emailSubject
-  });
-
   const sent: ("sms" | "email")[] = [];
   if (opts.phone) {
     const smsSent = await sendSms(opts.phone, opts.smsBody);
     if (smsSent) sent.push("sms");
-  } else {
-    console.log("notifyCustomer SMS skipped: no phone provided.");
   }
   if (opts.email) {
     const emailSent = await sendEmail({
@@ -123,11 +101,7 @@ export async function notifyCustomer(opts: {
       text: opts.emailBody
     });
     if (emailSent) sent.push("email");
-  } else {
-    console.log("notifyCustomer email skipped: no email provided.");
   }
-
-  console.log("notifyCustomer completed:", { sent });
   return sent;
 }
 
@@ -140,15 +114,6 @@ export async function notifyContractor(opts: {
   emailSubject: string;
   emailBody: string;
 }): Promise<("sms" | "email")[]> {
-  console.log("notifyContractor called:", {
-    smsEnabled: opts.smsEnabled,
-    emailEnabled: opts.emailEnabled,
-    hasPhone: Boolean(opts.phone),
-    hasEmail: Boolean(opts.email),
-    email: opts.email ?? null,
-    subject: opts.emailSubject
-  });
-
   const sent: ("sms" | "email")[] = [];
   if (opts.smsEnabled && opts.phone) {
     if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN) {
@@ -157,11 +122,6 @@ export async function notifyContractor(opts: {
       const ok = await sendSms(opts.phone, opts.smsBody);
       if (ok) sent.push("sms");
     }
-  } else {
-    console.log("notifyContractor SMS skipped:", {
-      smsEnabled: opts.smsEnabled,
-      hasPhone: Boolean(opts.phone)
-    });
   }
   if (opts.emailEnabled && opts.email) {
     const ok = await sendEmail({
@@ -171,14 +131,9 @@ export async function notifyContractor(opts: {
     });
     if (ok) sent.push("email");
   } else {
-    const log = opts.email
-      ? console.warn
-      : console.log;
-    log("notifyContractor email skipped:", {
-      emailEnabled: opts.emailEnabled,
-      hasEmail: Boolean(opts.email)
-    });
+    if (opts.email) {
+      console.warn("notifyContractor email skipped.");
+    }
   }
-  console.log("notifyContractor completed:", { sent });
   return sent;
 }

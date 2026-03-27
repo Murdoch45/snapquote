@@ -121,10 +121,6 @@ async function main() {
     }
 
     await ensureOrgHasSubscriptionEligibleMember(existingContractor.org_id as string);
-    console.log("Worcester contractor already exists:", {
-      public_slug: existing.public_slug,
-      business_address_full: existing.business_address_full
-    });
     return;
   }
 
@@ -149,7 +145,6 @@ async function main() {
     throw new Error(`Failed to create Worcester contractor profile: ${insertError?.message ?? "Unknown error"}`);
   }
 
-  console.log("Created Worcester contractor profile:", inserted);
 }
 
 main().catch((error) => {

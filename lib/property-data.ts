@@ -332,13 +332,6 @@ export async function getPropertyData(input: PropertyLookupInput): Promise<Prope
       : "unavailable";
 
   const estimatedBackyardSqft = resolveBackyardSqft(lotSizeSqft, houseSqft);
-  console.log("Property data lot size resolution:", {
-    lotSizeSqft,
-    lotSizeSource,
-    houseSqft,
-    houseSqftSource,
-    locationSource
-  });
 
   return {
     formattedAddress: addressContext?.formattedAddress ?? input.address,

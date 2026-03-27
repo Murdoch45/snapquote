@@ -85,7 +85,6 @@ async function main() {
     grace_used: false
   });
 
-  console.log("Seed complete:", { orgId: org.id, customerId: customer?.id, leadId: lead?.id });
 }
 
 main().catch((error) => {

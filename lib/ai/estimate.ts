@@ -3706,7 +3706,6 @@ async function callOpenAI(prompt: string, input: EstimateInput): Promise<Structu
       const cached = await readStructuredAiTestCacheEntry(prompt, input);
 
       if (cached) {
-        console.log("Structured AI test cache hit.", { cachePath: cached.cachePath });
         return {
           ok: true,
           signals: withStructuredAiCacheNote(
@@ -3867,7 +3866,6 @@ async function callOpenAI(prompt: string, input: EstimateInput): Promise<Structu
     if (testCacheMode === "record" || testCacheMode === "record_replay") {
       try {
         const cachePath = await writeStructuredAiTestCacheEntry(prompt, input, signals);
-        console.log("Structured AI test cache saved.", { cachePath });
         signals = withStructuredAiCacheNote(
           signals,
           `Structured AI test cache: recorded (${path.basename(cachePath)}).`
@@ -3983,7 +3981,6 @@ export function fallbackEstimate(
   const multiplierVisibilityNote = buildMultiplierVisibilityNote(engineEstimate, propertyData);
   engineEstimate.estimatorNotes = Array.from(new Set([multiplierVisibilityNote, ...engineEstimate.estimatorNotes]))
     .slice(0, 12);
-  console.log("Estimator multiplier summary:", multiplierVisibilityNote);
   const serviceStages = normalizeAudit?.serviceStages ?? {};
   const aiSignalsChangedByGuardrails = Object.values(serviceStages).some((stage) => Boolean(stage?.changedByGuardrails));
   const aiSignalsChangedByReconciliation = Object.values(serviceStages).some((stage) =>
@@ -4036,8 +4033,6 @@ export async function generateEstimate(input: EstimateInput): Promise<GeneratedL
   });
   const systemRegion = resolveRegion(propertyData);
   const aiMode = getEstimatorAiMode();
-
-  console.log("Resolved region:", systemRegion);
 
   const prompt = buildSignalPrompt(input, propertyData, systemRegion);
   if (aiMode === "off") {
@@ -4288,11 +4283,7 @@ export async function generateEstimateAsync(leadId: string) {
         throw unsupportedUpdateError;
       }
 
-      console.warn("Estimator request blocked as unsupported.", {
-        leadId,
-        service: unsupportedRequest.service,
-        reason: unsupportedRequest.message
-      });
+      console.warn("Estimator request blocked as unsupported.");
       return;
     }
 
@@ -4327,12 +4318,7 @@ export async function generateEstimateAsync(leadId: string) {
         .eq("org_id", lead.org_id);
 
       if (travelDistanceUpdateError) {
-        console.warn("Failed to persist estimator travel distance.", {
-          leadId,
-          orgId: lead.org_id,
-          travelDistanceMiles,
-          error: travelDistanceUpdateError
-        });
+        console.warn("Failed to persist estimator travel distance.", travelDistanceUpdateError);
       }
     }
 
@@ -4351,17 +4337,6 @@ export async function generateEstimateAsync(leadId: string) {
       businessLat: contractorLat,
       businessLng: contractorLng,
       travelDistanceMiles
-    });
-
-    console.log("Estimator AI path resolved:", {
-      leadId,
-      aiMode,
-      source: estimate.aiExtractionTrace?.source ?? "unknown",
-      structuredAiSucceeded: estimate.aiExtractionTrace?.structuredAiSucceeded ?? false,
-      fallbackUsed: estimate.aiExtractionTrace?.fallbackUsed ?? true,
-      execution: findEstimatorNoteValue(estimate.estimatorNotes, "Estimator AI execution: "),
-      liveInvocation: findEstimatorNoteValue(estimate.estimatorNotes, "Estimator AI live invocation: "),
-      cacheStatus: findEstimatorNoteValue(estimate.estimatorNotes, "Estimator AI cache status: ")
     });
 
     const { error: updateError } = await admin
@@ -4406,11 +4381,7 @@ export async function generateEstimateAsync(leadId: string) {
     }
   } catch (error) {
     const failureMessage = error instanceof Error ? error.message : "Unknown estimator failure.";
-    console.error("AI estimate failed:", {
-      leadId,
-      error: failureMessage,
-      cause: error
-    });
+    console.error("AI estimate failed:", error);
 
     const aiModeNote = (() => {
       try {

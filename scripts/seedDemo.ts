@@ -808,17 +808,6 @@ async function main() {
     { onConflict: "org_id,month" }
   );
 
-  console.log("Demo seed complete:", {
-    orgId,
-    business: DEMO_BUSINESS_NAME,
-    owner: DEMO_OWNER_NAME,
-    email: DEMO_USER_EMAIL,
-    location: DEMO_LOCATION_LABEL,
-    unlockedLeads: unlockedLeadIds.length,
-    totalLeads: leadSeeds.length,
-    totalQuotes: leadSeeds.filter((lead) => lead.quote).length,
-    nextStep: `Set DEMO_ORG_ID=${orgId} in .env.local`
-  });
 }
 
 main().catch((error) => {
