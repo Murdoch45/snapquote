@@ -5,7 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 export async function GET(request: Request) {
-  const auth = await requireOwnerForApi();
+  const auth = await requireOwnerForApi(request);
   if (!auth.ok) return auth.response;
 
   const { searchParams } = new URL(request.url);

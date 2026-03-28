@@ -1,6 +1,9 @@
 import "server-only";
 import { NextResponse } from "next/server";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import {
+  createServerSupabaseClient,
+  createSupabaseClientFromToken
+} from "@/lib/supabase/server";
 
 type ApiAuthFailure = {
   ok: false;
@@ -30,8 +33,32 @@ function getDemoOrgId(): string {
   return demoOrgId;
 }
 
-export async function requireOwnerForApi(): Promise<ApiAuthFailure | OwnerApiAuthSuccess> {
-  const supabase = await createServerSupabaseClient();
+function getBearerToken(request?: Request): string | null {
+  const authorization = request?.headers.get("authorization");
+
+  if (!authorization) {
+    return null;
+  }
+
+  const match = authorization.match(/^Bearer\s+(.+)$/i);
+
+  return match?.[1]?.trim() || null;
+}
+
+async function getSupabaseClientForApi(request?: Request) {
+  const accessToken = getBearerToken(request);
+
+  if (accessToken) {
+    return createSupabaseClientFromToken(accessToken);
+  }
+
+  return createServerSupabaseClient();
+}
+
+export async function requireOwnerForApi(
+  request?: Request
+): Promise<ApiAuthFailure | OwnerApiAuthSuccess> {
+  const supabase = await getSupabaseClientForApi(request);
   const {
     data: { user }
   } = await supabase.auth.getUser();
@@ -74,8 +101,10 @@ export async function requireOwnerForApi(): Promise<ApiAuthFailure | OwnerApiAut
   };
 }
 
-export async function requireMemberForApi(): Promise<ApiAuthFailure | MemberApiAuthSuccess> {
-  const supabase = await createServerSupabaseClient();
+export async function requireMemberForApi(
+  request?: Request
+): Promise<ApiAuthFailure | MemberApiAuthSuccess> {
+  const supabase = await getSupabaseClientForApi(request);
   const {
     data: { user }
   } = await supabase.auth.getUser();
