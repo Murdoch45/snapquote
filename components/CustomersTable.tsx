@@ -161,7 +161,7 @@ export function CustomersTable({ customers }: { customers: CustomerRow[] }) {
         </>
       ) : (
         <div className="rounded-[14px] border border-[#E5E7EB] bg-white px-5 py-6 text-center text-sm text-[#6B7280] shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
-          No customers match that first name.
+          {query.trim() ? "No customers match that first name." : "No customers yet."}
         </div>
       )}
     </div>

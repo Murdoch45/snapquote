@@ -573,7 +573,7 @@ function SettingsView({ data }: { data: DemoApiResponse<"settings"> }) {
         <div className="grid gap-4 md:grid-cols-2">
           <ReadonlyField label="Business name" value={data.payload.businessName} />
           <ReadonlyField label="Phone" value={data.payload.phone ?? "-"} />
-          <ReadonlyField label="Public URL" value={`snapquote.app/${data.payload.publicSlug}`} />
+          <ReadonlyField label="Public URL" value={`snapquote.us/${data.payload.publicSlug}`} />
           <ReadonlyField label="Email" value={data.payload.email ?? "-"} />
         </div>
       </section>
@@ -668,7 +668,7 @@ export function ProductDemo() {
 
   return (
     <div className="hidden md:block">
-      <div className="overflow-hidden rounded-[30px] border border-[#DDE5F0] bg-white shadow-[0_42px_90px_-52px_rgba(15,23,42,0.55)]">
+      <div className="overflow-clip rounded-[30px] border border-[#DDE5F0] bg-white shadow-[0_42px_90px_-52px_rgba(15,23,42,0.55)]">
         <div className="border-b border-[#E5E7EB] bg-[#F8FAFC] px-5 py-4">
           <div className="flex flex-wrap items-center gap-4">
             <div className="flex items-center gap-2">
@@ -678,7 +678,7 @@ export function ProductDemo() {
             </div>
             <div className="flex min-w-0 flex-1 items-center justify-center">
               <div className="flex min-w-[320px] max-w-[540px] flex-1 items-center justify-center rounded-full border border-[#D1D5DB] bg-white px-4 py-2 text-sm text-[#6B7280]">
-                snapquote.app/demo
+                snapquote.us/demo
               </div>
             </div>
           </div>

@@ -43,7 +43,7 @@ export function OnboardingWizard() {
   useEffect(() => {
     if (window.sessionStorage.getItem(OAUTH_SIGNUP_TOAST_KEY) !== "1") return;
     window.sessionStorage.removeItem(OAUTH_SIGNUP_TOAST_KEY);
-    toast.success("Account created! Welcome to SnapQuote.");
+    toast.success("Account created! Welcome to SnapQuote.", { duration: 5000 });
   }, []);
 
   const hasResolvedAddress = Boolean(

@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 
 type OnboardingTourProps = {
   enabled: boolean;
+  slug?: string | null;
 };
 
 type TourStep = {
@@ -44,14 +45,14 @@ const PREVIEW_CANVAS_WIDTH = 720;
 const PREVIEW_CANVAS_HEIGHT = 360;
 const ONBOARDING_TOUR_STORAGE_PREFIX = "snapquote:onboarding-tour-completed";
 
-function MiniMyLinkPreview() {
+function MiniMyLinkPreview({ slug }: { slug?: string | null }) {
   return (
     <div className="flex h-full items-center justify-center bg-[#F8F9FC] px-14">
       <div className="w-full max-w-[520px] rounded-[14px] border border-slate-200 bg-white p-8 shadow-[0_16px_40px_-24px_rgba(15,23,42,0.18)]">
         <p className="text-[14px] font-medium text-slate-500">Share your link</p>
         <div className="mt-4 flex items-center gap-3 rounded-[14px] border border-slate-200 bg-[#F8F9FC] p-3">
           <div className="flex-1 rounded-[12px] bg-white px-4 py-3 text-[16px] font-medium text-slate-700 shadow-sm">
-            snapquote.app/riveraspressure
+            snapquote.us/{slug || "your-link"}
           </div>
           <button
             type="button"
@@ -162,10 +163,10 @@ function MiniSettingsPreview() {
   );
 }
 
-function renderPreview(targetId: TourStep["targetId"]) {
+function renderPreview(targetId: TourStep["targetId"], slug?: string | null) {
   switch (targetId) {
     case "my-link":
-      return <MiniMyLinkPreview />;
+      return <MiniMyLinkPreview slug={slug} />;
     case "leads":
       return <MiniLeadsPreview />;
     case "estimates":
@@ -210,7 +211,7 @@ function highlightTarget(element: HTMLElement | null) {
     "0 0 0 2px #3B82F6, 0 0 0 7px rgba(59,130,246,0.18), 0 14px 30px -18px rgba(37,99,235,0.65)";
 }
 
-export function OnboardingTour({ enabled }: OnboardingTourProps) {
+export function OnboardingTour({ enabled, slug }: OnboardingTourProps) {
   const pathname = usePathname();
   const router = useRouter();
   const cardRef = useRef<HTMLDivElement | null>(null);
@@ -353,6 +354,7 @@ export function OnboardingTour({ enabled }: OnboardingTourProps) {
         toast.success("You're all set! Start by sharing your link.");
       }
       router.refresh();
+      router.push("/app");
     } catch {
       toast.error("Couldn't save onboarding progress. Please try again.");
     } finally {
@@ -392,7 +394,7 @@ export function OnboardingTour({ enabled }: OnboardingTourProps) {
                 fontFamily: 'var(--font-dm-sans), "DM Sans", sans-serif'
               }}
             >
-              {renderPreview(currentStep.targetId)}
+              {renderPreview(currentStep.targetId, slug)}
             </div>
           </div>
 

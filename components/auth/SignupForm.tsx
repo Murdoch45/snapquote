@@ -52,7 +52,7 @@ export function SignupForm() {
       return;
     }
 
-    toast.success("Account created! Welcome to SnapQuote.");
+    toast.success("Account created! Welcome to SnapQuote.", { duration: 5000 });
     router.replace("/onboarding");
   };
 

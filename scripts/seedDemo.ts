@@ -677,7 +677,7 @@ async function main() {
       business_lat: 33.496818,
       business_lng: -112.082642,
       services: [...DEMO_SERVICES],
-      social_caption: `Need an estimate? ${DEMO_BUSINESS_NAME} makes it easy - just fill out a quick form and we'll get back to you as soon as possible. https://snapquote.app/${DEMO_PUBLIC_SLUG}`,
+      social_caption: `Need an estimate? ${DEMO_BUSINESS_NAME} makes it easy - just fill out a quick form and we'll get back to you as soon as possible. https://snapquote.us/${DEMO_PUBLIC_SLUG}`,
       notification_lead_sms: true,
       notification_lead_email: true,
       notification_accept_sms: true,

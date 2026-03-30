@@ -26,6 +26,7 @@ function getPageTitle(pathname: string): string {
   if (pathname.startsWith("/app/settings")) return "Settings";
   if (pathname.startsWith("/dashboard/my-link")) return "My Link";
   if (pathname === "/app" || pathname === "/app/") return "Dashboard";
+  if (pathname.startsWith("/app/credits")) return "Credits";
 
   return "Dashboard";
 }

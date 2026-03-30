@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   BarChart3,
+  Coins,
   CreditCard,
   FileText,
   Home,
@@ -23,6 +24,7 @@ const navItems = [
   { href: "/app/quotes", label: "Estimates", icon: Receipt, tourId: "estimates" },
   { href: "/app/customers", label: "Customers", icon: UserCircle2 },
   { href: "/app/analytics", label: "Analytics", icon: BarChart3 },
+  { href: "/app/credits", label: "Credits", icon: Coins },
   { href: "/dashboard/my-link", label: "My Link", icon: Link2, tourId: "my-link" },
   { href: "/plan", label: "Plan", icon: CreditCard, matchPaths: ["/plan", "/app/plan"] },
   { href: "/app/team", label: "Team", icon: Users },

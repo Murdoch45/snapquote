@@ -25,7 +25,7 @@ export default async function AppLayout({
     supabase.auth.getUser(),
     supabase
       .from("contractor_profile")
-      .select("business_name")
+      .select("business_name, public_slug")
       .eq("org_id", auth.orgId)
       .single(),
     supabase
@@ -38,7 +38,10 @@ export default async function AppLayout({
 
   return (
     <>
-      <OnboardingTour enabled={!Boolean(organization?.onboarding_completed)} />
+      <OnboardingTour
+        enabled={!Boolean(organization?.onboarding_completed)}
+        slug={profile?.public_slug as string | null | undefined}
+      />
       <AppShell
         email={user?.email}
         orgId={auth.orgId}

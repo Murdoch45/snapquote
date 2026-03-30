@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { AddressAutocomplete } from "@/components/AddressAutocomplete";
 import { QuoteTemplateEditor } from "@/components/quote-template/QuoteTemplateEditor";
@@ -68,6 +69,7 @@ function ensureCustomerNameToken(template: string): string {
 }
 
 export function SettingsForm({ initial }: { initial: SettingsData }) {
+  const router = useRouter();
   const initialTemplate = initial.quote_sms_template ?? DEFAULT_QUOTE_SMS_TEMPLATE;
   const [savedTemplate, setSavedTemplate] = useState(initialTemplate);
   const [form, setForm] = useState({
@@ -179,7 +181,7 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
     }));
   };
 
-  const saveSettings = async (options?: { templateOnly?: boolean; reload?: boolean }) => {
+  const saveSettings = async (options?: { templateOnly?: boolean }) => {
     if (
       slugStatus.type === "invalid" ||
       slugStatus.type === "taken" ||
@@ -223,8 +225,8 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
       if (!res.ok) throw new Error(json.error || "Update failed.");
       toast.success("Settings updated.");
       setSavedTemplate(form.quoteSmsTemplate);
-      if (options?.reload) {
-        window.location.reload();
+      if (!options?.templateOnly && trimmedSlug !== initial.public_slug) {
+        router.refresh();
       }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Update failed.");
@@ -239,7 +241,7 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
   };
 
   const submit = async () => {
-    await saveSettings({ reload: true });
+    await saveSettings();
   };
 
   const saveTemplate = async () => {
@@ -309,7 +311,7 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
             }
           />
           <p className="text-sm text-[#6B7280]">
-            Your public URL: snapquote.app/{trimmedSlug || "[your-slug]"}
+            Your public URL: snapquote.us/{trimmedSlug || "[your-slug]"}
           </p>
           <p
             className={`rounded-[8px] border px-4 py-3 text-sm ${

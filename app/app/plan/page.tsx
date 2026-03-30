@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Check } from "lucide-react";
+import { AlertCircle, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { CreditsAddedToast } from "@/components/plan/CreditsAddedToast";
 import { ManageBillingButton } from "@/components/plan/ManageBillingButton";
@@ -101,9 +101,9 @@ export default async function PlanPage({ searchParams }: Props) {
     : null;
   const subscriptionStatusLabel = formatSubscriptionStatus(subscription.status, subscription.active);
   const planHighlights = [
-    `${monthlyCreditsLimit} monthly credits`,
-    `${usersLimit} ${usersLimit === 1 ? "team member" : "team members"}`,
-    subscription.active ? "Billing is active" : subscriptionStatusLabel
+    { label: `${monthlyCreditsLimit} monthly credits`, positive: true },
+    { label: `${usersLimit} ${usersLimit === 1 ? "team member" : "team members"}`, positive: true },
+    { label: subscription.active ? "Billing is active" : subscriptionStatusLabel, positive: subscription.active }
   ];
 
   return (
@@ -139,9 +139,13 @@ export default async function PlanPage({ searchParams }: Props) {
 
               <div className="space-y-3">
                 {planHighlights.map((item) => (
-                  <div key={item} className="flex items-start gap-3 text-sm text-[#111827]">
-                    <Check className="mt-0.5 h-4 w-4 text-[#2563EB]" />
-                    <span>{item}</span>
+                  <div key={item.label} className="flex items-start gap-3 text-sm text-[#111827]">
+                    {item.positive ? (
+                      <Check className="mt-0.5 h-4 w-4 text-[#2563EB]" />
+                    ) : (
+                      <AlertCircle className="mt-0.5 h-4 w-4 text-[#6B7280]" />
+                    )}
+                    <span>{item.label}</span>
                   </div>
                 ))}
               </div>
