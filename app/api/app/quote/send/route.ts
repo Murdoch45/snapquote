@@ -22,7 +22,7 @@ function roundToNearestFive(value: number): number {
 }
 
 export async function POST(request: Request) {
-  const auth = await requireMemberForApi();
+  const auth = await requireMemberForApi(request);
   if (!auth.ok) return auth.response;
 
   let createdQuoteId: string | null = null;

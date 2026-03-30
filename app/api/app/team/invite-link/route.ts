@@ -9,8 +9,8 @@ function makeInviteToken() {
   return randomBytes(24).toString("base64url");
 }
 
-export async function POST() {
-  const auth = await requireOwnerForApi();
+export async function POST(request: Request) {
+  const auth = await requireOwnerForApi(request);
   if (!auth.ok) return auth.response;
 
   try {

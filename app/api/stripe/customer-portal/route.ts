@@ -6,7 +6,7 @@ import { getStripe, getStripeAppUrl } from "@/lib/stripe";
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
-  const auth = await requireOwnerForApi();
+  const auth = await requireOwnerForApi(request);
   if (!auth.ok) return auth.response;
 
   try {
