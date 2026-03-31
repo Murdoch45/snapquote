@@ -213,7 +213,7 @@ function MobileSidebar({
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-3 pb-4">
+        <div className="flex-1">
           <button
             type="button"
             onClick={() => setNotificationsOpen((current) => !current)}

@@ -37,8 +37,14 @@ function subscribe(listener: () => void) {
   };
 }
 
+let cachedSnapshot: NotificationSnapshot = { feed: store.feed };
+
 function getSnapshot(): NotificationSnapshot {
-  return { feed: store.feed };
+  if (cachedSnapshot.feed !== store.feed) {
+    cachedSnapshot = { feed: store.feed };
+  }
+
+  return cachedSnapshot;
 }
 
 function setFeed(nextFeed: FeedItem[] | ((previousFeed: FeedItem[]) => FeedItem[])) {
