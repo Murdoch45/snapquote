@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,7 +51,7 @@ export function SignupForm() {
       return;
     }
 
-    toast.success("Account created! Welcome to SnapQuote.", { duration: 5000 });
+    window.sessionStorage.setItem(OAUTH_SIGNUP_TOAST_KEY, "1");
     router.replace("/onboarding");
   };
 
