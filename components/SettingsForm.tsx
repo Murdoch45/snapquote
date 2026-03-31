@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { AddressAutocomplete } from "@/components/AddressAutocomplete";
@@ -70,8 +71,10 @@ function ensureCustomerNameToken(template: string): string {
 
 export function SettingsForm({ initial }: { initial: SettingsData }) {
   const router = useRouter();
+  const { theme, setTheme } = useTheme();
   const initialTemplate = initial.quote_sms_template ?? DEFAULT_QUOTE_SMS_TEMPLATE;
   const [savedTemplate, setSavedTemplate] = useState(initialTemplate);
+  const [mounted, setMounted] = useState(false);
   const [form, setForm] = useState({
     businessName: initial.business_name,
     publicSlug: initial.public_slug,
@@ -93,6 +96,7 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
     initialTemplate.includes(CUSTOMER_NAME_TOKEN)
   );
   const [isEditingTemplate, setIsEditingTemplate] = useState(false);
+  const activeTheme = mounted ? theme ?? "light" : "light";
 
   const trimmedSlug = form.publicSlug.trim();
   const hasSelectedBusinessAddress = Boolean(
@@ -101,6 +105,10 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
       form.businessLat !== null &&
       form.businessLng !== null
   );
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const validationMessage = getSlugValidationMessage(trimmedSlug);
@@ -391,6 +399,34 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
           />
           <span>I operate mobile and do not want travel distance included in estimates.</span>
         </label>
+        </div>
+      </section>
+
+      <section className="rounded-[14px] border border-[#E5E7EB] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
+        <h2 className="mb-4 text-base font-semibold text-[#111827]">Appearance</h2>
+        <div className="space-y-3 rounded-[8px] border border-[#E5E7EB] bg-[#F8F9FC] p-4">
+          <p className="text-sm text-[#6B7280]">Choose how SnapQuote looks across the app.</p>
+          <div className="flex flex-wrap gap-3">
+            {["light", "dark"].map((option) => {
+              const selected = activeTheme === option;
+
+              return (
+                <button
+                  key={option}
+                  type="button"
+                  aria-pressed={selected}
+                  onClick={() => setTheme(option)}
+                  className={
+                    selected
+                      ? "inline-flex min-h-[44px] items-center justify-center rounded-[10px] border border-[#2563EB] bg-[#EFF6FF] px-4 text-sm font-medium capitalize text-[#2563EB] transition-colors"
+                      : "inline-flex min-h-[44px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 text-sm font-medium capitalize text-[#111827] transition-colors hover:bg-[#F8F9FC]"
+                  }
+                >
+                  {option}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </section>
 

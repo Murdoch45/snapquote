@@ -37,9 +37,10 @@ export function AppShell({ children, email, orgId, businessName }: AppShellProps
   }, [mobileNavOpen]);
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-[#F8F9FC]">
-      <Sidebar businessName={businessName} />
+    <div className="relative min-h-screen overflow-x-hidden bg-background">
+      <Sidebar orgId={orgId} businessName={businessName} />
       <Sidebar
+        orgId={orgId}
         businessName={businessName}
         mode="mobile"
         open={mobileNavOpen}
@@ -53,7 +54,7 @@ export function AppShell({ children, email, orgId, businessName }: AppShellProps
           businessName={businessName}
           onOpenSidebar={() => setMobileNavOpen(true)}
         />
-        <main className="flex-1 min-w-0 max-w-full space-y-6 bg-[#F8F9FC] p-4 sm:p-5 md:p-6">
+        <main className="min-w-0 max-w-full flex-1 space-y-6 bg-background p-4 sm:p-5 md:p-6">
           {children}
         </main>
       </div>

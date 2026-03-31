@@ -10,13 +10,21 @@
   --ring: 221.2 83.2% 53.3%;
 }
 
+.dark {
+  --background: 240 5.9% 10%;
+  --foreground: 240 5% 96%;
+  --border: 240 3.7% 20%;
+  --input: 240 3.7% 20%;
+  --ring: 217.2 91.2% 59.8%;
+}
+
 * {
   border-color: hsl(var(--border));
 }
 
 body {
-  background: #f8f9fc;
-  color: #111827;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
   @apply antialiased;
 }
 

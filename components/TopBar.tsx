@@ -5,16 +5,10 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Bell, LogOut, Menu } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
-import { toast } from "sonner";
+import { NotificationsFeed } from "@/components/NotificationsFeed";
 import { Button } from "@/components/ui/button";
-import { getAddressParts } from "@/lib/leadPresentation";
+import { useNotifications } from "@/hooks/useNotifications";
 import { createClient } from "@/lib/supabase/client";
-
-type FeedItem = {
-  id: string;
-  text: string;
-  createdAt: string;
-};
 
 function getPageTitle(pathname: string): string {
   if (pathname.startsWith("/app/analytics")) return "Analytics";
@@ -31,59 +25,6 @@ function getPageTitle(pathname: string): string {
   return "Dashboard";
 }
 
-function getTodayRange() {
-  const start = new Date();
-  start.setHours(0, 0, 0, 0);
-
-  const end = new Date(start);
-  end.setDate(end.getDate() + 1);
-
-  return { start, end };
-}
-
-function formatNotificationTime(value: string) {
-  return new Date(value).toLocaleTimeString([], {
-    hour: "numeric",
-    minute: "2-digit"
-  });
-}
-
-function createLeadNotification(
-  id: string,
-  address: string | null | undefined,
-  createdAt: string
-): FeedItem {
-  const locality = getAddressParts(address).locality;
-
-  return {
-    id,
-    text: `New lead received${locality ? ` at ${locality}` : "."}`,
-    createdAt
-  };
-}
-
-function createAcceptedNotification(id: string, createdAt: string): FeedItem {
-  return {
-    id,
-    text: "An estimate was accepted.",
-    createdAt
-  };
-}
-
-function mergeFeed(existing: FeedItem[], incoming: FeedItem[]): FeedItem[] {
-  const merged = new Map<string, FeedItem>();
-
-  [...incoming, ...existing].forEach((item) => {
-    if (!merged.has(item.id)) {
-      merged.set(item.id, item);
-    }
-  });
-
-  return [...merged.values()]
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, 20);
-}
-
 export function TopBar({
   email,
   orgId,
@@ -97,147 +38,8 @@ export function TopBar({
 }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const [feed, setFeed] = useState<FeedItem[]>([]);
-  const unreadCount = feed.length;
+  const { feed, unreadCount, dismissNotification } = useNotifications(orgId);
   const pageTitle = getPageTitle(pathname);
-
-  useEffect(() => {
-    const scheduleReset = () => {
-      const now = new Date();
-      const nextMidnight = new Date(now);
-      nextMidnight.setHours(24, 0, 0, 0);
-
-      return window.setTimeout(() => {
-        setFeed([]);
-        setOpen(false);
-        scheduleReset();
-      }, nextMidnight.getTime() - now.getTime());
-    };
-
-    const timeoutId = scheduleReset();
-    return () => window.clearTimeout(timeoutId);
-  }, []);
-
-  useEffect(() => {
-    const supabase = createClient();
-
-    const loadTodayNotifications = async () => {
-      const { start, end } = getTodayRange();
-
-      const [{ data: leads }, { data: acceptedEvents }] = await Promise.all([
-        supabase
-          .from("leads")
-          .select("id,address_full,submitted_at")
-          .eq("org_id", orgId)
-          .gte("submitted_at", start.toISOString())
-          .lt("submitted_at", end.toISOString())
-          .order("submitted_at", { ascending: false }),
-        supabase
-          .from("quote_events")
-          .select("id,quote_id,created_at")
-          .eq("org_id", orgId)
-          .eq("event_type", "ACCEPTED")
-          .gte("created_at", start.toISOString())
-          .lt("created_at", end.toISOString())
-          .order("created_at", { ascending: false })
-      ]);
-
-      const initialNotifications = [
-        ...(leads ?? []).map((lead) =>
-          createLeadNotification(
-            `lead-${lead.id as string}`,
-            lead.address_full as string | null,
-            lead.submitted_at as string
-          )
-        ),
-        ...(acceptedEvents ?? []).map((event) =>
-          createAcceptedNotification(
-            `accepted-quote-${event.quote_id as string}`,
-            event.created_at as string
-          )
-        )
-      ];
-
-      setFeed((prev) => mergeFeed(prev, initialNotifications));
-    };
-
-    void loadTodayNotifications();
-
-    const channel = supabase
-      .channel(`notifications-${orgId}`)
-      .on(
-        "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "leads", filter: `org_id=eq.${orgId}` },
-        (payload) => {
-          const previousStatus = (payload.old as { ai_status?: string }).ai_status;
-          const nextLead = payload.new as {
-            id?: string;
-            ai_status?: string;
-            address_full?: string;
-            submitted_at?: string;
-          };
-
-          if (previousStatus === "ready" || nextLead.ai_status !== "ready") return;
-
-          const item = createLeadNotification(
-            `lead-${nextLead.id ?? crypto.randomUUID()}`,
-            nextLead.address_full,
-            nextLead.submitted_at ?? new Date().toISOString()
-          );
-
-          setFeed((prev) => mergeFeed(prev, [item]));
-          toast(item.text);
-        }
-      )
-      .on(
-        "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "quotes", filter: `org_id=eq.${orgId}` },
-        (payload) => {
-          const previousStatus = (payload.old as { status?: string }).status;
-          const nextQuote = payload.new as { id?: string; status?: string; accepted_at?: string };
-
-          if (previousStatus === nextQuote.status || nextQuote.status !== "ACCEPTED") return;
-
-          const item = createAcceptedNotification(
-            `accepted-quote-${nextQuote.id ?? crypto.randomUUID()}`,
-            nextQuote.accepted_at ?? new Date().toISOString()
-          );
-
-          setFeed((prev) => mergeFeed(prev, [item]));
-          toast.success(item.text);
-        }
-      )
-      .on(
-        "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "quotes", filter: `org_id=eq.${orgId}` },
-        (payload) => {
-          const previousStatus = (payload.old as { status?: string }).status;
-          const nextStatus = (payload.new as { status?: string }).status;
-          if (previousStatus === nextStatus || nextStatus !== "VIEWED") return;
-          toast("A customer viewed your estimate.", { icon: "👀" });
-        }
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "pending_invites",
-          filter: `org_id=eq.${orgId}`
-        },
-        (payload) => {
-          const previousStatus = (payload.old as { status?: string }).status;
-          const nextStatus = (payload.new as { status?: string }).status;
-          if (previousStatus === nextStatus || nextStatus !== "ACCEPTED") return;
-          toast.success("A team member accepted your invite.");
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [orgId]);
 
   useEffect(() => {
     setOpen(false);
@@ -274,71 +76,35 @@ export function TopBar({
 
       {open ? (
         <div className={notificationPanelClassName}>
-          <p className="mb-2 text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280]">
-            Notifications
-          </p>
-          {feed.length === 0 ? (
-            <p className="text-sm text-[#6B7280]">No notifications today</p>
-          ) : (
-            <ul className="space-y-2">
-              {feed.map((item) => (
-                <li key={item.id}>
-                  <button
-                    type="button"
-                    className="min-h-[44px] w-full rounded-[10px] bg-[#F8F9FC] p-3 text-left text-sm text-[#111827] transition-colors hover:bg-[#EEF2FF]"
-                    onClick={() => setFeed((prev) => prev.filter((entry) => entry.id !== item.id))}
-                  >
-                    <p>{item.text}</p>
-                    <p className="mt-1 text-xs text-[#6B7280]">
-                      {formatNotificationTime(item.createdAt)}
-                    </p>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
+          <NotificationsFeed feed={feed} onDismiss={dismissNotification} />
         </div>
       ) : null}
     </div>
   );
 
   return (
-    <header className="sticky top-0 z-20 border-b border-[#E5E7EB] bg-white/95 backdrop-blur">
+    <header className="sticky top-0 z-20 border-b border-border bg-background backdrop-blur">
       <div className="space-y-3 px-4 py-3 md:hidden">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex min-w-0 items-center gap-2">
-            {onOpenSidebar ? (
-              <button
-                type="button"
-                className={notificationButtonClassName}
-                aria-label="Open navigation menu"
-                onClick={onOpenSidebar}
-              >
-                <Menu className="h-5 w-5" />
-              </button>
-            ) : null}
-
-            <Link href="/app" className="min-w-0">
-              <BrandLogo
-                size="sm"
-                className="max-w-full"
-                iconClassName="h-8 w-10"
-                wordmarkClassName="text-lg"
-              />
-            </Link>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {renderNotifications()}
-            <Button
-              variant="outline"
-              className="h-11 w-11 px-0"
-              onClick={onLogout}
-              aria-label="Sign out"
+        <div className="flex items-center gap-2">
+          {onOpenSidebar ? (
+            <button
+              type="button"
+              className="text-[#6B7280] hover:text-[#111827] p-1 transition-colors"
+              aria-label="Open navigation menu"
+              onClick={onOpenSidebar}
             >
-              <LogOut className="h-4 w-4" />
-            </Button>
-          </div>
+              <Menu className="h-5 w-5" />
+            </button>
+          ) : null}
+
+          <Link href="/app" className="min-w-0">
+            <BrandLogo
+              size="sm"
+              className="max-w-full"
+              iconClassName="h-8 w-10"
+              wordmarkClassName="text-lg"
+            />
+          </Link>
         </div>
 
         <div className="min-w-0">
