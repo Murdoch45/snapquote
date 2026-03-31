@@ -7,22 +7,35 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
-export default async function LeadsPage() {
+const LEADS_PER_PAGE = 25;
+
+type Props = {
+  searchParams: Promise<{ page?: string }>;
+};
+
+export default async function LeadsPage({ searchParams }: Props) {
+  const params = await searchParams;
   const auth = await requireAuth();
   const supabase = await createServerSupabaseClient();
-  const admin = createAdminClient();
-  const { data: leads } = await supabase
+  const adminClient = createAdminClient();
+  const requestedPage = Number.parseInt(params.page ?? "1", 10);
+  const currentPage = Number.isFinite(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+  const rangeFrom = (currentPage - 1) * LEADS_PER_PAGE;
+  const rangeTo = rangeFrom + LEADS_PER_PAGE - 1;
+
+  const { data: leads, count } = await supabase
     .from("leads")
     .select(
-      "id,address_full,customer_name,customer_phone,customer_email,services,submitted_at,ai_suggested_price,ai_estimate_low,ai_estimate_high,ai_job_summary"
+      "id,address_full,customer_name,customer_phone,customer_email,services,submitted_at,ai_suggested_price,ai_estimate_low,ai_estimate_high,ai_job_summary",
+      { count: "exact" }
     )
     .eq("org_id", auth.orgId)
     .eq("ai_status", "ready")
-    .order("submitted_at", { ascending: false });
+    .order("submitted_at", { ascending: false })
+    .range(rangeFrom, rangeTo);
 
   const leadIds = (leads ?? []).map((lead) => lead.id as string);
 
-  const adminClient = createAdminClient();
   let photos: Array<{ lead_id: string; storage_path: string | null; public_url: string | null }> = [];
   if (leadIds.length > 0) {
     const chunkSize = 50;
@@ -58,6 +71,8 @@ export default async function LeadsPage() {
     return acc;
   }, {});
   const unlockedLeadIds = new Set((unlockedRows ?? []).map((row) => row.lead_id as string));
+  const totalLeads = count ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalLeads / LEADS_PER_PAGE));
 
   const leadCards = (leads ?? []).map((lead) => {
     const leadId = lead.id as string;
@@ -89,6 +104,9 @@ export default async function LeadsPage() {
       orgId={auth.orgId}
       initialCreditsRemaining={credits.total}
       leads={leadCards}
+      currentPage={currentPage}
+      totalPages={totalPages}
+      totalLeads={totalLeads}
     />
   );
 }

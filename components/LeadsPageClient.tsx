@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { LeadsRealtimeWatcher } from "@/components/LeadsRealtimeWatcher";
@@ -26,11 +27,17 @@ type Lead = {
 export function LeadsPageClient({
   orgId,
   leads,
-  initialCreditsRemaining
+  initialCreditsRemaining,
+  currentPage,
+  totalPages,
+  totalLeads
 }: {
   orgId: string;
   leads: Lead[];
   initialCreditsRemaining: number;
+  currentPage: number;
+  totalPages: number;
+  totalLeads: number;
 }) {
   const router = useRouter();
   const [creditsRemaining, setCreditsRemaining] = useState(initialCreditsRemaining);
@@ -54,6 +61,39 @@ export function LeadsPageClient({
         </div>
       </div>
       <LeadList leads={leads} onLeadUnlocked={onLeadUnlocked} />
+      {totalLeads > 0 ? (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-[14px] border border-[#E5E7EB] bg-white px-4 py-3 text-sm text-[#6B7280] shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+          <p>
+            Page {currentPage} of {totalPages}
+          </p>
+          <div className="flex items-center gap-2">
+            {currentPage > 1 ? (
+              <Link
+                href={`/app/leads?page=${currentPage - 1}`}
+                className="rounded-[10px] border border-[#E5E7EB] px-4 py-2 font-medium text-[#111827] transition-colors hover:bg-[#F8F9FC]"
+              >
+                Previous
+              </Link>
+            ) : (
+              <span className="rounded-[10px] border border-[#E5E7EB] px-4 py-2 font-medium text-[#9CA3AF]">
+                Previous
+              </span>
+            )}
+            {currentPage < totalPages ? (
+              <Link
+                href={`/app/leads?page=${currentPage + 1}`}
+                className="rounded-[10px] border border-[#2563EB] bg-[#2563EB] px-4 py-2 font-medium text-white transition-colors hover:bg-[#1D4ED8]"
+              >
+                Next
+              </Link>
+            ) : (
+              <span className="rounded-[10px] border border-[#E5E7EB] px-4 py-2 font-medium text-[#9CA3AF]">
+                Next
+              </span>
+            )}
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
