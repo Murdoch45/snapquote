@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import { Bell, LogOut, Menu } from "lucide-react";
+import { Bell, CircleUser, LogOut, Menu } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { NotificationsFeed } from "@/components/NotificationsFeed";
 import { Button } from "@/components/ui/button";
@@ -37,13 +37,37 @@ export function TopBar({
   onOpenSidebar?: () => void;
 }) {
   const pathname = usePathname();
-  const [open, setOpen] = useState(false);
+  const [desktopNotificationsOpen, setDesktopNotificationsOpen] = useState(false);
+  const [mobilePopoverOpen, setMobilePopoverOpen] = useState(false);
+  const mobilePopoverRef = useRef<HTMLDivElement | null>(null);
   const { feed, unreadCount, dismissNotification } = useNotifications(orgId);
   const pageTitle = getPageTitle(pathname);
 
   useEffect(() => {
-    setOpen(false);
+    setDesktopNotificationsOpen(false);
+    setMobilePopoverOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    if (!mobilePopoverOpen) return;
+
+    const handlePointerDown = (event: MouseEvent | TouchEvent) => {
+      const target = event.target;
+
+      if (!(target instanceof Node)) return;
+      if (mobilePopoverRef.current?.contains(target)) return;
+
+      setMobilePopoverOpen(false);
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("touchstart", handlePointerDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("touchstart", handlePointerDown);
+    };
+  }, [mobilePopoverOpen]);
 
   const onLogout = async () => {
     const supabase = createClient();
@@ -63,8 +87,8 @@ export function TopBar({
         type="button"
         className={notificationButtonClassName}
         aria-label="Notifications"
-        aria-expanded={open}
-        onClick={() => setOpen((value) => !value)}
+        aria-expanded={desktopNotificationsOpen}
+        onClick={() => setDesktopNotificationsOpen((value) => !value)}
       >
         <Bell className="h-4 w-4" />
         {unreadCount > 0 ? (
@@ -74,7 +98,7 @@ export function TopBar({
         ) : null}
       </button>
 
-      {open ? (
+      {desktopNotificationsOpen ? (
         <div className={notificationPanelClassName}>
           <NotificationsFeed feed={feed} onDismiss={dismissNotification} />
         </div>
@@ -85,26 +109,57 @@ export function TopBar({
   return (
     <header className="sticky top-0 z-20 border-b border-border bg-background backdrop-blur">
       <div className="space-y-3 px-4 py-3 md:hidden">
-        <div className="flex items-center gap-2">
-          {onOpenSidebar ? (
+        <div className="relative flex items-center justify-between">
+          <div className="z-10 flex w-10 justify-start">
+            {onOpenSidebar ? (
+              <button
+                type="button"
+                className="text-[#6B7280] p-1 transition-colors hover:text-[#111827]"
+                aria-label="Open navigation menu"
+                onClick={onOpenSidebar}
+              >
+                <Menu className="h-5 w-5" />
+              </button>
+            ) : null}
+          </div>
+
+          <div className="pointer-events-none absolute inset-x-0 flex justify-center">
+            <Link href="/app" className="pointer-events-auto min-w-0">
+              <BrandLogo
+                size="sm"
+                className="max-w-full"
+                iconClassName="h-8 w-10"
+                wordmarkClassName="text-lg"
+              />
+            </Link>
+          </div>
+
+          <div ref={mobilePopoverRef} className="relative z-10 flex w-10 justify-end">
             <button
               type="button"
-              className="text-[#6B7280] hover:text-[#111827] p-1 transition-colors"
-              aria-label="Open navigation menu"
-              onClick={onOpenSidebar}
+              className="text-[#6B7280] p-1 transition-colors hover:text-[#111827]"
+              aria-label="Open account menu"
+              aria-expanded={mobilePopoverOpen}
+              onClick={() => setMobilePopoverOpen((value) => !value)}
             >
-              <Menu className="h-5 w-5" />
+              <CircleUser className="h-5 w-5" />
             </button>
-          ) : null}
 
-          <Link href="/app" className="min-w-0">
-            <BrandLogo
-              size="sm"
-              className="max-w-full"
-              iconClassName="h-8 w-10"
-              wordmarkClassName="text-lg"
-            />
-          </Link>
+            {mobilePopoverOpen ? (
+              <div className="absolute right-0 top-full z-30 mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-xl border border-[#E5E7EB] bg-white p-3 shadow-lg">
+                <NotificationsFeed feed={feed} onDismiss={dismissNotification} />
+                <div className="my-3 border-t border-[#E5E7EB]" />
+                <button
+                  type="button"
+                  className="inline-flex min-h-[44px] w-full items-center gap-2 rounded-[10px] px-3 text-left text-sm font-medium text-red-500 transition-colors hover:bg-[#F8F9FC] hover:text-red-600"
+                  onClick={() => void onLogout()}
+                >
+                  <LogOut className="h-4 w-4" />
+                  Sign Out
+                </button>
+              </div>
+            ) : null}
+          </div>
         </div>
 
         <div className="min-w-0">

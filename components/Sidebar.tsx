@@ -1,26 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
   BarChart3,
-  Bell,
   CreditCard,
   FileText,
   Home,
   Link2,
-  LogOut,
   Receipt,
   Settings,
   UserCircle2,
-  Users,
-  X
+  Users
 } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
-import { NotificationsFeed } from "@/components/NotificationsFeed";
-import { useNotifications } from "@/hooks/useNotifications";
-import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -92,15 +85,9 @@ function SidebarNav({
 
 function SidebarFooter({
   businessName,
-  showSignOut = false,
-  onSignOut,
-  signingOut = false,
   className
 }: {
   businessName?: string | null;
-  showSignOut?: boolean;
-  onSignOut?: () => void;
-  signingOut?: boolean;
   className?: string;
 }) {
   return (
@@ -115,57 +102,18 @@ function SidebarFooter({
           </p>
         </div>
       </div>
-
-      {showSignOut ? (
-        <button
-          type="button"
-          className="mt-4 inline-flex min-h-[44px] items-center gap-2 text-sm font-medium text-red-500 transition-colors hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-60"
-          onClick={onSignOut}
-          disabled={signingOut}
-        >
-          <LogOut className="h-4 w-4" />
-          {signingOut ? "Signing out..." : "Sign Out"}
-        </button>
-      ) : null}
     </div>
   );
 }
 
 function MobileSidebar({
-  businessName,
-  orgId,
   open,
   onClose
 }: {
-  businessName?: string | null;
-  orgId: string;
   open: boolean;
   onClose?: () => void;
 }) {
   const pathname = usePathname();
-  const router = useRouter();
-  const { feed, unreadCount, dismissNotification } = useNotifications(orgId);
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const [signingOut, setSigningOut] = useState(false);
-
-  useEffect(() => {
-    if (!open) {
-      setNotificationsOpen(false);
-    }
-  }, [open]);
-
-  const onSignOut = async () => {
-    setSigningOut(true);
-
-    try {
-      const supabase = createClient();
-      await supabase.auth.signOut();
-      router.push("/login");
-      router.refresh();
-    } finally {
-      setSigningOut(false);
-    }
-  };
 
   return (
     <div
@@ -193,65 +141,14 @@ function MobileSidebar({
         aria-modal="true"
         role="dialog"
       >
-        <div className="flex items-center justify-between gap-3 px-5 py-5">
-          <Link href="/app" className="min-w-0" onClick={onClose}>
-            <BrandLogo
-              size="sm"
-              className="max-w-full"
-              iconClassName="h-8 w-10"
-              wordmarkClassName="text-lg"
-            />
-          </Link>
-
-          <button
-            type="button"
-            className="inline-flex h-11 w-11 items-center justify-center rounded-[10px] border border-[#E5E7EB] text-[#6B7280] transition-colors hover:bg-[#F8F9FC] hover:text-[#111827]"
-            aria-label="Close navigation menu"
-            onClick={onClose}
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-
-        <div className="flex-1">
-          <button
-            type="button"
-            onClick={() => setNotificationsOpen((current) => !current)}
-            className="flex min-h-[44px] w-full items-center gap-3 rounded-[10px] border-l-[3px] border-l-transparent px-4 py-3 text-left text-sm font-medium text-[#6B7280] transition-colors hover:bg-[#F8F9FC] hover:text-[#111827]"
-          >
-            <span className="relative flex shrink-0">
-              <Bell className="h-4 w-4" />
-              {unreadCount > 0 ? (
-                <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-[#2563EB]" />
-              ) : null}
-            </span>
-            <span className="truncate">Notifications</span>
-          </button>
-
-          {notificationsOpen ? (
-            <div className="mx-4 mt-2 rounded-[14px] border border-[#E5E7EB] bg-white p-3">
-              <NotificationsFeed feed={feed} onDismiss={dismissNotification} />
-            </div>
-          ) : null}
-
-          <div className="mt-2">
-            <SidebarNav pathname={pathname} onNavigate={onClose} />
-          </div>
-        </div>
-
-        <SidebarFooter
-          businessName={businessName}
-          showSignOut
-          onSignOut={() => void onSignOut()}
-          signingOut={signingOut}
-        />
+        <SidebarNav pathname={pathname} onNavigate={onClose} />
       </aside>
     </div>
   );
 }
 
 export function Sidebar({
-  orgId,
+  orgId: _orgId,
   businessName,
   mode = "desktop",
   open = false,
@@ -260,9 +157,7 @@ export function Sidebar({
   const pathname = usePathname();
 
   if (mode === "mobile") {
-    return (
-      <MobileSidebar businessName={businessName} orgId={orgId} open={open} onClose={onClose} />
-    );
+    return <MobileSidebar open={open} onClose={onClose} />;
   }
 
   return (
