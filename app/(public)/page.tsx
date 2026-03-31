@@ -22,23 +22,12 @@ export default function HomePage() {
         <section className="relative overflow-hidden bg-[radial-gradient(circle_at_50%_-20%,#1e2a4a_0%,#101320_70%)]">
           <div className="pointer-events-none absolute left-1/2 top-24 h-[220px] w-[420px] -translate-x-1/2 rounded-full bg-[rgba(180,197,255,0.1)] blur-[90px] sm:top-1/4 sm:h-[300px] sm:w-[620px] sm:blur-[110px] lg:h-[400px] lg:w-[800px] lg:blur-[120px]" />
 
-          <nav className="fixed top-0 z-50 w-full bg-[#101320]/80 shadow-none backdrop-blur-md">
-            <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 sm:px-8">
+          <nav className="fixed top-0 z-50 w-full bg-transparent shadow-none backdrop-blur-0">
+            <div className="mx-auto flex h-20 max-w-7xl items-center px-6 sm:px-8">
               <Link href="/" className="inline-flex items-center gap-3">
                 <BrandLogo size="sm" showWordmark={false} iconClassName="text-white" />
                 <span className="text-2xl font-bold tracking-tight text-white">SnapQuote</span>
               </Link>
-              <div className="flex items-center gap-4">
-                <Link href="/login" className="text-sm font-medium text-white/80 hover:text-white">
-                  Login
-                </Link>
-                <Link
-                  href="/signup"
-                  className="rounded-lg bg-[#2563EB] px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
-                >
-                  Get Started
-                </Link>
-              </div>
             </div>
           </nav>
 
