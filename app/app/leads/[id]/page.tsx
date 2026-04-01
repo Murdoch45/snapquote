@@ -70,15 +70,6 @@ export default async function LeadDetailPage({ params }: Props) {
 
   if (!lead) notFound();
 
-  if (lead.status === "NEW") {
-    void supabase
-      .from("leads")
-      .update({ status: "OPENED" })
-      .eq("id", lead.id)
-      .eq("org_id", auth.orgId)
-      .then();
-  }
-
   const isUnlocked = Boolean(unlockRow?.id);
   const isLocked = !isUnlocked;
   const addressParts = getAddressParts((lead.address_full as string | null) ?? null);
