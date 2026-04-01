@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/murdo/SnapQuote-mobile/**)",
+      "Bash(npx.cmd tsc:*)"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\murdo\\SnapQuote-mobile\\app\\(tabs)",
+      "C:\\Users\\murdo\\SnapQuote-mobile\\lib",
+      "C:\\Users\\murdo\\SnapQuote-mobile\\components\\leads"
+    ]
+  }
+}
