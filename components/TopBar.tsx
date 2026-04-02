@@ -79,7 +79,6 @@ export function TopBar({
     "inline-flex h-11 w-11 items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#6B7280] transition-colors hover:bg-[#F8F9FC] hover:text-[#111827] md:h-10 md:w-10";
   const notificationPanelClassName =
     "absolute right-0 z-30 mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-[14px] border border-[#E5E7EB] bg-white p-3 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)]";
-  const mobileAccountLabel = businessName ?? email ?? "Account";
 
   const renderNotifications = () => (
     <div className="relative">
@@ -164,9 +163,6 @@ export function TopBar({
 
         <div className="min-w-0">
           <p className="truncate text-xl font-bold text-[#111827]">{pageTitle}</p>
-          {pageTitle !== "Plan" ? (
-            <p className="truncate text-sm text-[#6B7280]">{mobileAccountLabel}</p>
-          ) : null}
         </div>
       </div>
 
