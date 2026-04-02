@@ -198,8 +198,8 @@ export function PlanOptionsSection({ currentPlan }: Props) {
               key={option.plan}
               className={
                 isCurrent
-                  ? "relative flex h-full min-w-[80vw] shrink-0 snap-start flex-col overflow-hidden rounded-[14px] border border-[#BFDBFE] bg-[radial-gradient(circle_at_top_left,rgba(37,99,235,0.16),transparent_40%),linear-gradient(160deg,#ffffff_0%,#F5F9FF_100%)] shadow-[0_20px_40px_rgba(37,99,235,0.12),0_2px_8px_rgba(0,0,0,0.06)] xl:min-w-0 xl:shrink xl:snap-align-none xl:row-span-4 xl:grid xl:grid-rows-subgrid"
-                  : "relative flex h-full min-w-[80vw] shrink-0 snap-start flex-col overflow-hidden rounded-[14px] border border-[#E5E7EB] bg-[linear-gradient(180deg,#ffffff_0%,#F8F9FC_100%)] shadow-[0_16px_30px_rgba(15,23,42,0.06),0_2px_8px_rgba(0,0,0,0.04)] xl:min-w-0 xl:shrink xl:snap-align-none xl:row-span-4 xl:grid xl:grid-rows-subgrid"
+                  ? "relative flex h-full w-[80vw] shrink-0 snap-start flex-col overflow-hidden rounded-[14px] border border-[#BFDBFE] bg-[radial-gradient(circle_at_top_left,rgba(37,99,235,0.16),transparent_40%),linear-gradient(160deg,#ffffff_0%,#F5F9FF_100%)] shadow-[0_20px_40px_rgba(37,99,235,0.12),0_2px_8px_rgba(0,0,0,0.06)] xl:w-auto xl:min-w-0 xl:shrink xl:snap-align-none xl:row-span-4 xl:grid xl:grid-rows-subgrid"
+                  : "relative flex h-full w-[80vw] shrink-0 snap-start flex-col overflow-hidden rounded-[14px] border border-[#E5E7EB] bg-[linear-gradient(180deg,#ffffff_0%,#F8F9FC_100%)] shadow-[0_16px_30px_rgba(15,23,42,0.06),0_2px_8px_rgba(0,0,0,0.04)] xl:w-auto xl:min-w-0 xl:shrink xl:snap-align-none xl:row-span-4 xl:grid xl:grid-rows-subgrid"
               }
             >
               <div
