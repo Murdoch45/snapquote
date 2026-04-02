@@ -43,7 +43,7 @@ export function ManageBillingButton({
         type="button"
         onClick={() => void onManageBilling()}
         disabled={loadingPortal}
-        className={`text-sm text-[#6B7280] transition-colors hover:text-[#111827] ${className ?? ""}`}
+        className={`text-sm text-[#2563EB] transition-colors hover:text-[#1D4ED8] ${className ?? ""}`}
       >
         {loadingPortal ? "Opening..." : label}
       </button>
