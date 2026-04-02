@@ -1,8 +1,12 @@
 "use client";
 
-import { Fragment, useEffect, useMemo, useRef } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { CUSTOMER_NAME_TOKEN, QUOTE_LINK_TOKEN } from "@/lib/quote-template";
 import { Button } from "@/components/ui/button";
+
+function isTouchDevice(): boolean {
+  return typeof window !== "undefined" && "ontouchstart" in window;
+}
 
 const TOKEN_CONFIG = [
   {
@@ -99,10 +103,26 @@ export function QuoteTemplateEditor({
   onCancel
 }: Props) {
   const editorRef = useRef<HTMLDivElement | null>(null);
+  const [isTouch] = useState(() => isTouchDevice());
+  const lastCursorRef = useRef<number | null>(null);
 
   const availableTokens = TOKEN_CONFIG.filter(
     (token) => token.key !== "customer_name" || showCustomerNameChip
   );
+
+  const insertTokenIntoValue = (token: string) => {
+    const pos = lastCursorRef.current;
+    if (pos !== null && pos >= 0 && pos <= value.length) {
+      const before = value.slice(0, pos);
+      const after = value.slice(pos);
+      const spaceBefore = before.length > 0 && !before.endsWith(" ") && !before.endsWith("\n") ? " " : "";
+      const spaceAfter = after.length > 0 && !after.startsWith(" ") && !after.startsWith("\n") ? " " : "";
+      onChange(before + spaceBefore + token + spaceAfter + after);
+    } else {
+      const spacer = value.length > 0 && !value.endsWith(" ") && !value.endsWith("\n") ? " " : "";
+      onChange(value + spacer + token);
+    }
+  };
 
   const serializeEditor = () => {
     const editor = editorRef.current;
@@ -249,128 +269,154 @@ export function QuoteTemplateEditor({
       {isEditing ? (
         <>
           <div className="flex flex-wrap gap-2">
-            {availableTokens.map((token) => (
-              <button
-                key={token.key}
-                type="button"
-                className="inline-flex cursor-pointer select-none items-center rounded-full border border-blue-200 bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700 active:bg-blue-200"
-                onPointerDown={(event) => {
-                  // Prevent the editor from losing focus/selection on desktop
-                  event.preventDefault();
-                }}
-                onClick={() => {
-                  const editor = editorRef.current;
-                  if (!editor) return;
+            {availableTokens.map((token) =>
+              isTouch ? (
+                <button
+                  key={token.key}
+                  type="button"
+                  className="inline-flex select-none items-center rounded-full border border-blue-200 bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700 active:bg-blue-200"
+                  onClick={() => insertTokenIntoValue(token.token)}
+                >
+                  {token.label}
+                </button>
+              ) : (
+                <button
+                  key={token.key}
+                  type="button"
+                  className="inline-flex cursor-grab select-none items-center rounded-full border border-blue-200 bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700"
+                  draggable
+                  onDragStart={(event) => {
+                    event.dataTransfer.setData("application/x-snapquote-token", token.token);
+                    event.dataTransfer.effectAllowed = "move";
+                  }}
+                  onPointerDown={(event) => event.preventDefault()}
+                  onClick={() => {
+                    const editor = editorRef.current;
+                    if (!editor) return;
 
-                  // Remove existing chip of same token
-                  editor
-                    .querySelectorAll(`[data-token='${token.key}']`)
-                    .forEach((node) => node.remove());
+                    editor
+                      .querySelectorAll(`[data-token='${token.key}']`)
+                      .forEach((node) => node.remove());
 
-                  const chip = createTokenChip(token.key);
-                  const selection = window.getSelection();
-                  let range =
-                    selection && selection.rangeCount > 0
-                      ? selection.getRangeAt(0)
-                      : null;
+                    const chip = createTokenChip(token.key);
+                    const selection = window.getSelection();
+                    let range =
+                      selection && selection.rangeCount > 0
+                        ? selection.getRangeAt(0)
+                        : null;
 
-                  if (!range || !editor.contains(range.startContainer)) {
-                    // No cursor in editor — append at end
-                    range = document.createRange();
-                    range.selectNodeContents(editor);
-                    range.collapse(false);
-                  }
+                    if (!range || !editor.contains(range.startContainer)) {
+                      range = document.createRange();
+                      range.selectNodeContents(editor);
+                      range.collapse(false);
+                    }
 
-                  range.deleteContents();
-                  range.insertNode(chip);
-                  range.setStartAfter(chip);
-                  range.collapse(true);
-                  selection?.removeAllRanges();
-                  selection?.addRange(range);
+                    range.deleteContents();
+                    range.insertNode(chip);
+                    range.setStartAfter(chip);
+                    range.collapse(true);
+                    selection?.removeAllRanges();
+                    selection?.addRange(range);
 
-                  emitChange();
-                  editor.focus();
-                }}
-              >
-                {token.label}
-              </button>
-            ))}
+                    emitChange();
+                    editor.focus();
+                  }}
+                >
+                  {token.label}
+                </button>
+              )
+            )}
           </div>
 
-          <div
-            id={id}
-            ref={editorRef}
-            contentEditable
-            suppressContentEditableWarning
-            role="textbox"
-            aria-multiline="true"
-            className="min-h-40 w-full whitespace-pre-wrap rounded-[8px] border-2 border-[#2563EB] bg-white px-[14px] py-[10px] text-sm text-[#111827] shadow-[0_0_0_3px_rgba(37,99,235,0.1)] focus:outline-none"
-            onInput={() => emitChange()}
-            onBlur={() => emitChange()}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") {
+          {isTouch ? (
+            <textarea
+              id={id}
+              className="min-h-40 w-full whitespace-pre-wrap rounded-[8px] border-2 border-[#2563EB] bg-white px-[14px] py-[10px] text-sm text-[#111827] shadow-[0_0_0_3px_rgba(37,99,235,0.1)] focus:outline-none"
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              onClick={(e) => {
+                lastCursorRef.current = (e.target as HTMLTextAreaElement).selectionStart;
+              }}
+              onSelect={(e) => {
+                lastCursorRef.current = (e.target as HTMLTextAreaElement).selectionStart;
+              }}
+            />
+          ) : (
+            <div
+              id={id}
+              ref={editorRef}
+              contentEditable
+              suppressContentEditableWarning
+              role="textbox"
+              aria-multiline="true"
+              className="min-h-40 w-full whitespace-pre-wrap rounded-[8px] border-2 border-[#2563EB] bg-white px-[14px] py-[10px] text-sm text-[#111827] shadow-[0_0_0_3px_rgba(37,99,235,0.1)] focus:outline-none"
+              onInput={() => emitChange()}
+              onBlur={() => emitChange()}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  insertTextAtSelection("\n");
+                  emitChange();
+                }
+              }}
+              onPaste={(event) => {
                 event.preventDefault();
-                insertTextAtSelection("\n");
+                const text = event.clipboardData.getData("text/plain");
+                insertTextAtSelection(text);
                 emitChange();
-              }
-            }}
-            onPaste={(event) => {
-              event.preventDefault();
-              const text = event.clipboardData.getData("text/plain");
-              insertTextAtSelection(text);
-              emitChange();
-            }}
-            onDragStart={(event) => {
-              const target = event.target;
-              if (!(target instanceof HTMLElement) || !target.dataset.token) {
-                return;
-              }
+              }}
+              onDragStart={(event) => {
+                const target = event.target;
+                if (!(target instanceof HTMLElement) || !target.dataset.token) {
+                  return;
+                }
 
-              const tokenConfig = getTokenConfigByKey(target.dataset.token);
-              if (!tokenConfig) return;
+                const tokenConfig = getTokenConfigByKey(target.dataset.token);
+                if (!tokenConfig) return;
 
-              event.dataTransfer.setData("application/x-snapquote-token", tokenConfig.token);
-              event.dataTransfer.effectAllowed = "move";
-            }}
-            onDragOver={(event) => {
-              event.preventDefault();
-              event.dataTransfer.dropEffect = "move";
-            }}
-            onDrop={(event) => {
-              event.preventDefault();
+                event.dataTransfer.setData("application/x-snapquote-token", tokenConfig.token);
+                event.dataTransfer.effectAllowed = "move";
+              }}
+              onDragOver={(event) => {
+                event.preventDefault();
+                event.dataTransfer.dropEffect = "move";
+              }}
+              onDrop={(event) => {
+                event.preventDefault();
 
-              const token =
-                event.dataTransfer.getData("application/x-snapquote-token") ||
-                event.dataTransfer.getData("text/plain");
-              const tokenConfig = getTokenConfigByToken(token);
-              if (!tokenConfig) return;
-              if (tokenConfig.key === "customer_name" && !showCustomerNameChip) return;
+                const token =
+                  event.dataTransfer.getData("application/x-snapquote-token") ||
+                  event.dataTransfer.getData("text/plain");
+                const tokenConfig = getTokenConfigByToken(token);
+                if (!tokenConfig) return;
+                if (tokenConfig.key === "customer_name" && !showCustomerNameChip) return;
 
-              const editor = editorRef.current;
-              if (!editor) return;
+                const editor = editorRef.current;
+                if (!editor) return;
 
-              editor
-                .querySelectorAll(`[data-token='${tokenConfig.key}']`)
-                .forEach((node) => node.remove());
+                editor
+                  .querySelectorAll(`[data-token='${tokenConfig.key}']`)
+                  .forEach((node) => node.remove());
 
-              const chip = createTokenChip(tokenConfig.key);
-              const dropRange = getRangeFromPoint(event.clientX, event.clientY);
+                const chip = createTokenChip(tokenConfig.key);
+                const dropRange = getRangeFromPoint(event.clientX, event.clientY);
 
-              if (dropRange && editor.contains(dropRange.startContainer)) {
-                dropRange.deleteContents();
-                dropRange.insertNode(chip);
-                dropRange.setStartAfter(chip);
-                dropRange.collapse(true);
-                const selection = window.getSelection();
-                selection?.removeAllRanges();
-                selection?.addRange(dropRange);
-              } else {
-                editor.appendChild(chip);
-              }
+                if (dropRange && editor.contains(dropRange.startContainer)) {
+                  dropRange.deleteContents();
+                  dropRange.insertNode(chip);
+                  dropRange.setStartAfter(chip);
+                  dropRange.collapse(true);
+                  const selection = window.getSelection();
+                  selection?.removeAllRanges();
+                  selection?.addRange(dropRange);
+                } else {
+                  editor.appendChild(chip);
+                }
 
-              emitChange();
-            }}
-          />
+                emitChange();
+              }}
+            />
+          )}
         </>
       ) : (
         <div className="whitespace-pre-wrap rounded-[8px] border border-[#E5E7EB] bg-[#F8F9FC] p-4 text-sm text-[#111827]">
@@ -405,7 +451,9 @@ export function QuoteTemplateEditor({
       </div>
 
       <p className="text-xs text-[#6B7280]">
-        Tap a token to insert it at the cursor, or drag it into your message.
+        {isTouch
+          ? "Tap a token to insert it into your message."
+          : "Drag a token into your message, or click to insert at cursor."}
       </p>
     </div>
   );
