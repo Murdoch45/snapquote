@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-export default function PlanRedirectPage() {
+export default function CreditsRedirectPage() {
   const router = useRouter();
 
   useEffect(() => {
@@ -24,7 +24,7 @@ export default function PlanRedirectPage() {
         });
       }
 
-      router.replace("/app/plan");
+      router.replace("/app/credits");
     }
   }, [router]);
 
