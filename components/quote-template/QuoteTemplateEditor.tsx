@@ -259,6 +259,38 @@ export function QuoteTemplateEditor({
                   event.dataTransfer.setData("application/x-snapquote-token", token.token);
                   event.dataTransfer.effectAllowed = "move";
                 }}
+                onClick={() => {
+                  const editor = editorRef.current;
+                  if (!editor) return;
+
+                  // Remove existing chip of same token
+                  editor
+                    .querySelectorAll(`[data-token='${token.key}']`)
+                    .forEach((node) => node.remove());
+
+                  const chip = createTokenChip(token.key);
+                  const selection = window.getSelection();
+                  let range =
+                    selection && selection.rangeCount > 0
+                      ? selection.getRangeAt(0)
+                      : null;
+
+                  if (!range || !editor.contains(range.startContainer)) {
+                    // No cursor in editor — append at end
+                    range = document.createRange();
+                    range.selectNodeContents(editor);
+                    range.collapse(false);
+                  }
+
+                  range.deleteContents();
+                  range.insertNode(chip);
+                  range.setStartAfter(chip);
+                  range.collapse(true);
+                  selection?.removeAllRanges();
+                  selection?.addRange(range);
+
+                  emitChange();
+                }}
               >
                 {token.label}
               </button>
@@ -373,7 +405,7 @@ export function QuoteTemplateEditor({
       </div>
 
       <p className="text-xs text-[#6B7280]">
-        Customer Name and Estimate Link are draggable - place them anywhere in your message.
+        Tap a token to insert it at the cursor, or drag it into your message.
       </p>
     </div>
   );
