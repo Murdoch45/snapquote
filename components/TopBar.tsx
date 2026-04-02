@@ -15,7 +15,7 @@ function getPageTitle(pathname: string): string {
   if (pathname.startsWith("/app/leads")) return "Leads";
   if (pathname.startsWith("/app/quotes")) return "Estimates";
   if (pathname.startsWith("/app/customers")) return "Customers";
-  if (pathname.startsWith("/app/plan") || pathname === "/plan") return "My Plan";
+  if (pathname.startsWith("/app/plan") || pathname === "/plan") return "Plan";
   if (pathname.startsWith("/app/team")) return "Team";
   if (pathname.startsWith("/app/settings")) return "Settings";
   if (pathname.startsWith("/dashboard/my-link")) return "My Link";
@@ -164,7 +164,9 @@ export function TopBar({
 
         <div className="min-w-0">
           <p className="truncate text-xl font-bold text-[#111827]">{pageTitle}</p>
-          <p className="truncate text-sm text-[#6B7280]">{mobileAccountLabel}</p>
+          {pageTitle !== "Plan" ? (
+            <p className="truncate text-sm text-[#6B7280]">{mobileAccountLabel}</p>
+          ) : null}
         </div>
       </div>
 
