@@ -253,11 +253,10 @@ export function QuoteTemplateEditor({
               <button
                 key={token.key}
                 type="button"
-                className="inline-flex cursor-grab select-none items-center rounded-full border border-blue-200 bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700"
-                draggable
-                onDragStart={(event) => {
-                  event.dataTransfer.setData("application/x-snapquote-token", token.token);
-                  event.dataTransfer.effectAllowed = "move";
+                className="inline-flex cursor-pointer select-none items-center rounded-full border border-blue-200 bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700 active:bg-blue-200"
+                onPointerDown={(event) => {
+                  // Prevent the editor from losing focus/selection on desktop
+                  event.preventDefault();
                 }}
                 onClick={() => {
                   const editor = editorRef.current;
@@ -290,6 +289,7 @@ export function QuoteTemplateEditor({
                   selection?.addRange(range);
 
                   emitChange();
+                  editor.focus();
                 }}
               >
                 {token.label}
