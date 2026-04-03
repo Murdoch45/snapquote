@@ -181,7 +181,7 @@ export async function POST(request: Request) {
       ok: true,
       quoteId: quote.id,
       publicId: confirmedPublicId,
-      publicUrl: quoteLink,
+      publicUrl: estimateLink,
       resolvedMessage,
       usage,
       sentChannels,
