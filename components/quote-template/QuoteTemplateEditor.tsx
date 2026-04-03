@@ -103,6 +103,7 @@ export function QuoteTemplateEditor({
   onCancel
 }: Props) {
   const editorRef = useRef<HTMLDivElement | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const [isTouch] = useState(() => isTouchDevice());
   const lastCursorRef = useRef<number | null>(null);
 
@@ -275,7 +276,9 @@ export function QuoteTemplateEditor({
                   key={token.key}
                   type="button"
                   className="inline-flex select-none items-center rounded-full border border-blue-200 bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700 active:bg-blue-200"
-                  onClick={() => insertTokenIntoValue(token.token)}
+                  onClick={() => {
+                    setTimeout(() => insertTokenIntoValue(token.token), 0);
+                  }}
                 >
                   {token.label}
                 </button>
@@ -330,6 +333,7 @@ export function QuoteTemplateEditor({
 
           {isTouch ? (
             <textarea
+              ref={textareaRef}
               id={id}
               className="min-h-40 w-full whitespace-pre-wrap rounded-[8px] border-2 border-[#2563EB] bg-white px-[14px] py-[10px] text-sm text-[#111827] shadow-[0_0_0_3px_rgba(37,99,235,0.1)] focus:outline-none"
               value={value}
@@ -339,6 +343,12 @@ export function QuoteTemplateEditor({
               }}
               onSelect={(e) => {
                 lastCursorRef.current = (e.target as HTMLTextAreaElement).selectionStart;
+              }}
+              onTouchEnd={() => {
+                lastCursorRef.current = textareaRef.current?.selectionStart ?? null;
+              }}
+              onBlur={() => {
+                lastCursorRef.current = textareaRef.current?.selectionStart ?? null;
               }}
             />
           ) : (
