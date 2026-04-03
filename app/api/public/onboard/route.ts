@@ -2,39 +2,57 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { SERVICE_OPTIONS } from "@/lib/services";
 import { ensureUserHasOrganization } from "@/lib/onboarding";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
-const schema = z.object({
-  businessName: z.string().min(2).max(120),
-  services: z.array(z.enum(SERVICE_OPTIONS)).min(1),
-  mobileContractor: z.boolean(),
-  formattedAddress: z.string().trim().min(5).max(240).nullable(),
-  placeId: z.string().trim().min(1).max(255).nullable(),
-  latitude: z.number().nullable(),
-  longitude: z.number().nullable()
-}).superRefine((data, ctx) => {
-  if (data.mobileContractor) return;
+const schema = z
+  .object({
+    accessToken: z.string().trim().min(1).optional(),
+    businessName: z.string().min(2).max(120),
+    services: z.array(z.enum(SERVICE_OPTIONS)).min(1),
+    mobileContractor: z.boolean(),
+    formattedAddress: z.string().trim().min(5).max(240).nullable(),
+    placeId: z.string().trim().min(1).max(255).nullable(),
+    latitude: z.number().nullable(),
+    longitude: z.number().nullable()
+  })
+  .superRefine((data, ctx) => {
+    if (data.mobileContractor) return;
 
-  if (!data.formattedAddress || !data.placeId || data.latitude === null || data.longitude === null) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: "Select a valid business address."
-    });
-  }
-});
+    if (!data.formattedAddress || !data.placeId || data.latitude === null || data.longitude === null) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Select a valid business address."
+      });
+    }
+  });
 
 export async function POST(request: Request) {
   try {
-    const supabase = await createServerSupabaseClient();
-    const {
-      data: { user }
-    } = await supabase.auth.getUser();
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
     const body = schema.parse(await request.json());
+    let resolvedUser: { id: string; email?: string | null } | null = null;
+
+    if (body.accessToken) {
+      const admin = createAdminClient();
+      const {
+        data: { user }
+      } = await admin.auth.getUser(body.accessToken);
+      resolvedUser = user ? { id: user.id, email: user.email } : null;
+    }
+
+    if (!resolvedUser) {
+      const supabase = await createServerSupabaseClient();
+      const {
+        data: { user }
+      } = await supabase.auth.getUser();
+      resolvedUser = user ? { id: user.id, email: user.email } : null;
+    }
+
+    if (!resolvedUser) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
     const result = await ensureUserHasOrganization({
-      userId: user.id,
-      email: user.email,
+      userId: resolvedUser.id,
+      email: resolvedUser.email,
       businessName: body.businessName,
       services: body.services,
       mobileContractor: body.mobileContractor,
