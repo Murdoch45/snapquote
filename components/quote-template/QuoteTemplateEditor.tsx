@@ -103,27 +103,13 @@ export function QuoteTemplateEditor({
   onCancel
 }: Props) {
   const editorRef = useRef<HTMLDivElement | null>(null);
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const ghostRef = useRef<HTMLElement | null>(null);
+  const dragTokenRef = useRef<string | null>(null);
   const [isTouch] = useState(() => isTouchDevice());
-  const lastCursorRef = useRef<number | null>(null);
 
   const availableTokens = TOKEN_CONFIG.filter(
     (token) => token.key !== "customer_name" || showCustomerNameChip
   );
-
-  const insertTokenIntoValue = (token: string) => {
-    const pos = lastCursorRef.current;
-    if (pos !== null && pos >= 0 && pos <= value.length) {
-      const before = value.slice(0, pos);
-      const after = value.slice(pos);
-      const spaceBefore = before.length > 0 && !before.endsWith(" ") && !before.endsWith("\n") ? " " : "";
-      const spaceAfter = after.length > 0 && !after.startsWith(" ") && !after.startsWith("\n") ? " " : "";
-      onChange(before + spaceBefore + token + spaceAfter + after);
-    } else {
-      const spacer = value.length > 0 && !value.endsWith(" ") && !value.endsWith("\n") ? " " : "";
-      onChange(value + spacer + token);
-    }
-  };
 
   const serializeEditor = () => {
     const editor = editorRef.current;
@@ -275,9 +261,67 @@ export function QuoteTemplateEditor({
                 <button
                   key={token.key}
                   type="button"
-                  className="inline-flex select-none items-center rounded-full border border-blue-200 bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700 active:bg-blue-200"
-                  onClick={() => {
-                    setTimeout(() => insertTokenIntoValue(token.token), 0);
+                  className="inline-flex touch-none select-none items-center rounded-full border border-blue-200 bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700 active:bg-blue-200"
+                  onTouchStart={(e) => {
+                    const touch = e.touches[0];
+                    dragTokenRef.current = token.token;
+
+                    const ghost = document.createElement("span");
+                    ghost.className =
+                      "fixed z-50 pointer-events-none inline-flex items-center rounded-full border border-blue-200 bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700 shadow-lg opacity-90";
+                    ghost.textContent = token.label;
+                    ghost.style.left = `${touch.clientX - 40}px`;
+                    ghost.style.top = `${touch.clientY - 20}px`;
+                    document.body.appendChild(ghost);
+                    ghostRef.current = ghost;
+                  }}
+                  onTouchMove={(e) => {
+                    const ghost = ghostRef.current;
+                    if (!ghost) return;
+                    const touch = e.touches[0];
+                    ghost.style.left = `${touch.clientX - 40}px`;
+                    ghost.style.top = `${touch.clientY - 20}px`;
+                  }}
+                  onTouchEnd={(e) => {
+                    const ghost = ghostRef.current;
+                    if (ghost) {
+                      ghost.remove();
+                      ghostRef.current = null;
+                    }
+
+                    const tokenStr = dragTokenRef.current;
+                    dragTokenRef.current = null;
+                    if (!tokenStr) return;
+
+                    const tokenConfig = getTokenConfigByToken(tokenStr);
+                    if (!tokenConfig) return;
+                    if (tokenConfig.key === "customer_name" && !showCustomerNameChip) return;
+
+                    const editor = editorRef.current;
+                    if (!editor) return;
+
+                    const touch = e.changedTouches[0];
+
+                    editor
+                      .querySelectorAll(`[data-token='${tokenConfig.key}']`)
+                      .forEach((node) => node.remove());
+
+                    const chip = createTokenChip(tokenConfig.key);
+                    const dropRange = getRangeFromPoint(touch.clientX, touch.clientY);
+
+                    if (dropRange && editor.contains(dropRange.startContainer)) {
+                      dropRange.deleteContents();
+                      dropRange.insertNode(chip);
+                      dropRange.setStartAfter(chip);
+                      dropRange.collapse(true);
+                      const selection = window.getSelection();
+                      selection?.removeAllRanges();
+                      selection?.addRange(dropRange);
+                    } else {
+                      editor.appendChild(chip);
+                    }
+
+                    emitChange();
                   }}
                 >
                   {token.label}
@@ -331,27 +375,6 @@ export function QuoteTemplateEditor({
             )}
           </div>
 
-          {isTouch ? (
-            <textarea
-              ref={textareaRef}
-              id={id}
-              className="min-h-40 w-full whitespace-pre-wrap rounded-[8px] border-2 border-[#2563EB] bg-white px-[14px] py-[10px] text-sm text-[#111827] shadow-[0_0_0_3px_rgba(37,99,235,0.1)] focus:outline-none"
-              value={value}
-              onChange={(e) => onChange(e.target.value)}
-              onClick={(e) => {
-                lastCursorRef.current = (e.target as HTMLTextAreaElement).selectionStart;
-              }}
-              onSelect={(e) => {
-                lastCursorRef.current = (e.target as HTMLTextAreaElement).selectionStart;
-              }}
-              onTouchEnd={() => {
-                lastCursorRef.current = textareaRef.current?.selectionStart ?? null;
-              }}
-              onBlur={() => {
-                lastCursorRef.current = textareaRef.current?.selectionStart ?? null;
-              }}
-            />
-          ) : (
             <div
               id={id}
               ref={editorRef}
@@ -426,7 +449,6 @@ export function QuoteTemplateEditor({
                 emitChange();
               }}
             />
-          )}
         </>
       ) : (
         <div className="whitespace-pre-wrap rounded-[8px] border border-[#E5E7EB] bg-[#F8F9FC] p-4 text-sm text-[#111827]">
@@ -462,7 +484,7 @@ export function QuoteTemplateEditor({
 
       <p className="text-xs text-[#6B7280]">
         {isTouch
-          ? "Tap a token to insert it into your message."
+          ? "Drag a token into your message, or tap to insert at the end."
           : "Drag a token into your message, or click to insert at cursor."}
       </p>
     </div>
