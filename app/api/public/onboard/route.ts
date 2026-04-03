@@ -30,13 +30,19 @@ const schema = z
 export async function POST(request: Request) {
   try {
     const body = schema.parse(await request.json());
+
+    const accessToken =
+      body.accessToken ||
+      request.headers.get("Authorization")?.replace(/^Bearer\s+/i, "") ||
+      null;
+
     let resolvedUser: { id: string; email?: string | null } | null = null;
 
-    if (body.accessToken) {
+    if (accessToken) {
       const admin = createAdminClient();
       const {
         data: { user }
-      } = await admin.auth.getUser(body.accessToken);
+      } = await admin.auth.getUser(accessToken);
       resolvedUser = user ? { id: user.id, email: user.email } : null;
     }
 
