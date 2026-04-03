@@ -1,7 +1,13 @@
 "use client";
 
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
-import { CUSTOMER_NAME_TOKEN, ESTIMATE_LINK_TOKEN } from "@/lib/quote-template";
+import {
+  COMPANY_NAME_TOKEN,
+  CONTRACTOR_EMAIL_TOKEN,
+  CONTRACTOR_PHONE_TOKEN,
+  CUSTOMER_NAME_TOKEN,
+  ESTIMATE_LINK_TOKEN
+} from "@/lib/quote-template";
 import { Button } from "@/components/ui/button";
 
 function isTouchDevice(): boolean {
@@ -11,21 +17,42 @@ function isTouchDevice(): boolean {
 const TOKEN_CONFIG = [
   {
     key: "customer_name",
-    token: CUSTOMER_NAME_TOKEN,
-    label: "Customer Name"
+    label: "Customer Name",
+    token: CUSTOMER_NAME_TOKEN
   },
   {
     key: "estimate_link",
-    token: ESTIMATE_LINK_TOKEN,
-    label: "Estimate Link"
+    label: "Estimate Link",
+    token: ESTIMATE_LINK_TOKEN
+  },
+  {
+    key: "company_name",
+    label: "Company Name",
+    token: COMPANY_NAME_TOKEN
+  },
+  {
+    key: "contractor_phone",
+    label: "Phone",
+    token: CONTRACTOR_PHONE_TOKEN
+  },
+  {
+    key: "contractor_email",
+    label: "Email",
+    token: CONTRACTOR_EMAIL_TOKEN
   }
 ] as const;
 
 type TokenKey = (typeof TOKEN_CONFIG)[number]["key"];
+type TokenDisplayValues = {
+  companyName: string;
+  contractorPhone: string;
+  contractorEmail: string;
+};
 
 type Props = {
   id: string;
   value: string;
+  tokenDisplayValues: TokenDisplayValues;
   onChange: (value: string) => void;
   showCustomerNameChip?: boolean;
   isEditing: boolean;
@@ -43,11 +70,47 @@ function getTokenConfigByToken(token: string) {
   return TOKEN_CONFIG.find((item) => item.token === token);
 }
 
-function createTokenChip(tokenKey: TokenKey): HTMLSpanElement {
+function getTokenDisplayText(tokenKey: TokenKey, tokenDisplayValues: TokenDisplayValues): string {
+  switch (tokenKey) {
+    case "customer_name":
+      return "Customer Name";
+    case "estimate_link":
+      return "Estimate Link";
+    case "company_name":
+      return tokenDisplayValues.companyName;
+    case "contractor_phone":
+      return tokenDisplayValues.contractorPhone;
+    case "contractor_email":
+      return tokenDisplayValues.contractorEmail;
+    default:
+      return "";
+  }
+}
+
+function getChipTextSizeClass(displayText: string): string {
+  if (displayText.length > 34) return "text-[10px]";
+  if (displayText.length > 24) return "text-[11px]";
+  return "text-xs";
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+const TOKEN_SPLIT_PATTERN = new RegExp(
+  `(${TOKEN_CONFIG.map((item) => escapeRegExp(item.token)).join("|")})`,
+  "g"
+);
+
+function createTokenChip(
+  tokenKey: TokenKey,
+  tokenDisplayValues: TokenDisplayValues
+): HTMLSpanElement {
   const tokenConfig = getTokenConfigByKey(tokenKey);
   if (!tokenConfig) {
     throw new Error(`Unsupported estimate template token: ${tokenKey}`);
   }
+  const displayText = getTokenDisplayText(tokenKey, tokenDisplayValues);
 
   const chip = document.createElement("span");
   chip.dataset.token = tokenConfig.key;
@@ -55,13 +118,17 @@ function createTokenChip(tokenKey: TokenKey): HTMLSpanElement {
   chip.draggable = true;
   chip.className =
     "mx-0.5 inline-flex cursor-grab select-none items-center gap-0.5 rounded-full border border-blue-200 bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700 align-middle";
+  chip.title = displayText;
 
-  const label = document.createTextNode(tokenConfig.label);
+  const label = document.createElement("span");
+  label.className = `max-w-[12rem] truncate leading-tight ${getChipTextSizeClass(displayText)}`;
+  label.textContent = displayText;
   chip.appendChild(label);
 
   const xBtn = document.createElement("span");
   xBtn.dataset.removeToken = "true";
-  xBtn.className = "ml-0.5 cursor-pointer rounded-full text-blue-400 hover:text-blue-700 leading-none";
+  xBtn.className =
+    "ml-0.5 cursor-pointer rounded-full text-blue-400 hover:text-blue-700 leading-none shrink-0";
   xBtn.textContent = "\u00d7";
   chip.appendChild(xBtn);
 
@@ -97,6 +164,7 @@ function getRangeFromPoint(x: number, y: number): Range | null {
 export function EstimateTemplateEditor({
   id,
   value,
+  tokenDisplayValues,
   onChange,
   showCustomerNameChip = true,
   isEditing,
@@ -107,7 +175,18 @@ export function EstimateTemplateEditor({
 }: Props) {
   const editorRef = useRef<HTMLDivElement | null>(null);
   const savedRangeRef = useRef<Range | null>(null);
+  const renderedSignatureRef = useRef("");
   const [isTouch] = useState(() => isTouchDevice());
+  const renderSignature = useMemo(
+    () =>
+      `${showCustomerNameChip ? "1" : "0"}|${tokenDisplayValues.companyName}|${tokenDisplayValues.contractorPhone}|${tokenDisplayValues.contractorEmail}`,
+    [
+      showCustomerNameChip,
+      tokenDisplayValues.companyName,
+      tokenDisplayValues.contractorPhone,
+      tokenDisplayValues.contractorEmail
+    ]
+  );
 
   const availableTokens = TOKEN_CONFIG.filter(
     (token) => token.key !== "customer_name" || showCustomerNameChip
@@ -194,7 +273,7 @@ export function EstimateTemplateEditor({
     const editor = editorRef.current;
     if (!editor) return;
 
-    const chip = createTokenChip(tokenKey);
+    const chip = createTokenChip(tokenKey, tokenDisplayValues);
     const range = getInsertionRange();
 
     if (range) {
@@ -218,16 +297,13 @@ export function EstimateTemplateEditor({
     if (!editor) return;
     if (!isEditing) return;
 
-    if (serializeEditor() === value) {
+    const shouldRefreshChips = renderedSignatureRef.current !== renderSignature;
+    if (!shouldRefreshChips && serializeEditor() === value) {
       return;
     }
 
     editor.innerHTML = "";
-    const tokenPattern = new RegExp(
-      `(${TOKEN_CONFIG.map((item) => item.token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`,
-      "g"
-    );
-    const segments = value.split(tokenPattern).filter((segment) => segment.length > 0);
+    const segments = value.split(TOKEN_SPLIT_PATTERN).filter((segment) => segment.length > 0);
 
     segments.forEach((segment) => {
       const tokenConfig = getTokenConfigByToken(segment);
@@ -236,7 +312,7 @@ export function EstimateTemplateEditor({
           return;
         }
 
-        editor.appendChild(createTokenChip(tokenConfig.key));
+        editor.appendChild(createTokenChip(tokenConfig.key, tokenDisplayValues));
         return;
       }
 
@@ -246,7 +322,8 @@ export function EstimateTemplateEditor({
     if (value.length === 0) {
       editor.appendChild(document.createElement("br"));
     }
-  }, [isEditing, showCustomerNameChip, value]);
+    renderedSignatureRef.current = renderSignature;
+  }, [isEditing, renderSignature, showCustomerNameChip, tokenDisplayValues, value]);
 
   useEffect(() => {
     if (!isEditing) return;
@@ -254,29 +331,23 @@ export function EstimateTemplateEditor({
   }, [isEditing]);
 
   const previewSegments = useMemo(
-    () =>
-      value.split(
-        /(\{\{customer_name\}\}|\{\{estimate_link\}\})/g
-      ),
+    () => value.split(TOKEN_SPLIT_PATTERN).filter((segment) => segment.length > 0),
     [value]
   );
 
   const renderPreviewSegment = (segment: string, index: number) => {
-    if (segment === CUSTOMER_NAME_TOKEN) {
+    const tokenConfig = getTokenConfigByToken(segment);
+    if (tokenConfig) {
+      const displayText = getTokenDisplayText(tokenConfig.key, tokenDisplayValues);
       return (
         <span
           key={`${segment}-${index}`}
-          className="mx-0.5 inline-flex items-center rounded-full border border-blue-200 bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700 align-middle"
+          title={displayText}
+          className="mx-0.5 inline-flex items-center rounded-full border border-blue-200 bg-blue-100 px-2 py-0.5 font-medium text-blue-700 align-middle"
         >
-          Customer Name
-        </span>
-      );
-    }
-
-    if (segment === ESTIMATE_LINK_TOKEN) {
-      return (
-        <span key={`${segment}-${index}`} className="font-medium text-[#2563EB]">
-          estimate-link.com/example
+          <span className={`max-w-[12rem] truncate leading-tight ${getChipTextSizeClass(displayText)}`}>
+            {displayText}
+          </span>
         </span>
       );
     }
@@ -289,26 +360,33 @@ export function EstimateTemplateEditor({
       {isEditing ? (
         <>
           <div className="flex flex-wrap gap-2">
-            {availableTokens.map((token) => (
-              <button
-                key={token.key}
-                type="button"
-                className={`inline-flex select-none items-center rounded-full border border-blue-200 bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700 ${isTouch ? "active:bg-blue-200" : "cursor-grab"}`}
-                draggable={!isTouch}
-                onDragStart={
-                  !isTouch
-                    ? (event) => {
-                        event.dataTransfer.setData("application/x-snapquote-token", token.token);
-                        event.dataTransfer.effectAllowed = "move";
-                      }
-                    : undefined
-                }
-                onPointerDown={(event) => event.preventDefault()}
-                onClick={() => insertChipAtCursor(token.key as TokenKey)}
-              >
-                {token.label}
-              </button>
-            ))}
+            {availableTokens.map((token) => {
+              const displayText = getTokenDisplayText(token.key, tokenDisplayValues);
+
+              return (
+                <button
+                  key={token.key}
+                  type="button"
+                  title={displayText}
+                  className={`inline-flex max-w-full select-none items-center rounded-full border border-blue-200 bg-blue-100 px-3 py-1 font-medium text-blue-700 ${isTouch ? "active:bg-blue-200" : "cursor-grab"}`}
+                  draggable={!isTouch}
+                  onDragStart={
+                    !isTouch
+                      ? (event) => {
+                          event.dataTransfer.setData("application/x-snapquote-token", token.token);
+                          event.dataTransfer.effectAllowed = "move";
+                        }
+                      : undefined
+                  }
+                  onPointerDown={(event) => event.preventDefault()}
+                  onClick={() => insertChipAtCursor(token.key as TokenKey)}
+                >
+                  <span className={`max-w-[12rem] truncate leading-tight ${getChipTextSizeClass(displayText)}`}>
+                    {displayText}
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
           <div
@@ -388,7 +466,7 @@ export function EstimateTemplateEditor({
                 .querySelectorAll(`[data-token='${tokenConfig.key}']`)
                 .forEach((node) => node.remove());
 
-              const chip = createTokenChip(tokenConfig.key);
+              const chip = createTokenChip(tokenConfig.key, tokenDisplayValues);
               const dropRange = getRangeFromPoint(event.clientX, event.clientY);
 
               if (dropRange && editor.contains(dropRange.startContainer)) {

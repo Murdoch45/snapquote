@@ -12,8 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   CUSTOMER_NAME_TOKEN,
-  DEFAULT_ESTIMATE_SMS_TEMPLATE,
-  buildDefaultEstimateTemplate
+  DEFAULT_ESTIMATE_SMS_TEMPLATE
 } from "@/lib/quote-template";
 import { type ServiceType } from "@/lib/services";
 
@@ -73,11 +72,7 @@ function ensureCustomerNameToken(template: string): string {
 export function SettingsForm({ initial }: { initial: SettingsData }) {
   const router = useRouter();
   const { theme, setTheme } = useTheme();
-  const initialTemplate = initial.quote_sms_template ?? buildDefaultEstimateTemplate(
-    initial.business_name || "Your Company",
-    initial.phone || "Your Phone Number",
-    initial.email || "your@email.com"
-  );
+  const initialTemplate = initial.quote_sms_template ?? DEFAULT_ESTIMATE_SMS_TEMPLATE;
   const [savedTemplate, setSavedTemplate] = useState(initialTemplate);
   const [mounted, setMounted] = useState(false);
   const [form, setForm] = useState({
@@ -102,6 +97,11 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
   );
   const [isEditingTemplate, setIsEditingTemplate] = useState(false);
   const activeTheme = mounted ? theme ?? "light" : "light";
+  const tokenDisplayValues = {
+    companyName: form.businessName.trim() || "Your Company",
+    contractorPhone: form.phone.trim() || "Your Phone Number",
+    contractorEmail: form.email.trim() || "your@email.com"
+  };
 
   const trimmedSlug = form.publicSlug.trim();
   const hasSelectedBusinessAddress = Boolean(
@@ -463,13 +463,13 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
       </section>
 
       <section className="rounded-[14px] border border-[#E5E7EB] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
-        <h2 className="mb-4 text-base font-semibold text-[#111827]">Estimate SMS Template</h2>
+        <h2 className="mb-4 text-base font-semibold text-[#111827]">Estimate Message Template</h2>
         <div className="space-y-2">
         <Label
           htmlFor="quoteSmsTemplate"
           className="mb-1.5 block text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280]"
         >
-          Estimate SMS template
+          Estimate message template
         </Label>
         <div className="space-y-3 rounded-[8px] border border-[#E5E7EB] bg-[#F8F9FC] p-4">
           <label className="flex items-center gap-2 text-sm text-[#111827]">
@@ -485,6 +485,7 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
         <EstimateTemplateEditor
           id="quoteSmsTemplate"
           value={form.quoteSmsTemplate}
+          tokenDisplayValues={tokenDisplayValues}
           showCustomerNameChip={autoInsertCustomerName}
           isEditing={isEditingTemplate}
           isSaving={savingTemplate}

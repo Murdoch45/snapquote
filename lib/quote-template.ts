@@ -2,30 +2,22 @@ import { getAppUrl } from "@/lib/utils";
 
 export const CUSTOMER_NAME_TOKEN = "{{customer_name}}";
 export const ESTIMATE_LINK_TOKEN = "{{estimate_link}}";
+export const COMPANY_NAME_TOKEN = "{{company_name}}";
+export const CONTRACTOR_PHONE_TOKEN = "{{contractor_phone}}";
+export const CONTRACTOR_EMAIL_TOKEN = "{{contractor_email}}";
 
 // Backward compat
 export const QUOTE_LINK_TOKEN = ESTIMATE_LINK_TOKEN;
 
-export function buildDefaultEstimateTemplate(
-  companyName: string,
-  phone: string,
-  email: string
-): string {
-  return `Hi {{customer_name}},
-
-Here is your estimate from ${companyName}.
-
+export function buildDefaultEstimateTemplate(): string {
+  return `Hi ${CUSTOMER_NAME_TOKEN},
+Here is your estimate from ${COMPANY_NAME_TOKEN}.
 View your estimate:
-{{estimate_link}}
-
-Questions? Call or email ${phone} ${email}`;
+${ESTIMATE_LINK_TOKEN}
+Questions? Call or email ${CONTRACTOR_PHONE_TOKEN} ${CONTRACTOR_EMAIL_TOKEN}`;
 }
 
-export const DEFAULT_ESTIMATE_SMS_TEMPLATE = buildDefaultEstimateTemplate(
-  "Your Company",
-  "Your Phone Number",
-  "your@email.com"
-);
+export const DEFAULT_ESTIMATE_SMS_TEMPLATE = buildDefaultEstimateTemplate();
 
 // Backward compat
 export const DEFAULT_QUOTE_SMS_TEMPLATE = DEFAULT_ESTIMATE_SMS_TEMPLATE;
@@ -61,9 +53,9 @@ export function renderEstimateTemplate(template: string, vars: EstimateTemplateV
     .replaceAll(ESTIMATE_LINK_TOKEN, vars.estimateLink)
     .replaceAll("{{quote_link}}", vars.estimateLink);
 
-  if (vars.companyName != null) result = result.replaceAll("{{company_name}}", vars.companyName);
-  if (vars.contractorPhone != null) result = result.replaceAll("{{contractor_phone}}", vars.contractorPhone);
-  if (vars.contractorEmail != null) result = result.replaceAll("{{contractor_email}}", vars.contractorEmail);
+  if (vars.companyName != null) result = result.replaceAll(COMPANY_NAME_TOKEN, vars.companyName);
+  if (vars.contractorPhone != null) result = result.replaceAll(CONTRACTOR_PHONE_TOKEN, vars.contractorPhone);
+  if (vars.contractorEmail != null) result = result.replaceAll(CONTRACTOR_EMAIL_TOKEN, vars.contractorEmail);
 
   return result;
 }

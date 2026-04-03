@@ -101,7 +101,7 @@ export async function POST(request: Request) {
       estimateLink,
       companyName: (profile?.business_name as string) || "SnapQuote",
       contractorPhone: (profile?.phone as string) || "Not provided",
-      contractorEmail: user?.email || (profile?.email as string) || "Not provided"
+      contractorEmail: (profile?.email as string | null) || user?.email || "Not provided"
     });
 
     const { error: messageUpdateError } = await admin
@@ -133,7 +133,7 @@ export async function POST(request: Request) {
       const customerEmail = buildEstimateSentEmail({
         businessName: (profile?.business_name as string) || "SnapQuote",
         contractorPhone: (profile?.phone as string | null) ?? null,
-        contractorEmail: (user?.email as string | null) ?? (profile?.email as string | null) ?? null,
+        contractorEmail: (profile?.email as string | null) ?? (user?.email as string | null) ?? null,
         estimateLow: body.estimatedPriceLow,
         estimateHigh: body.estimatedPriceHigh,
         publicId: confirmedPublicId

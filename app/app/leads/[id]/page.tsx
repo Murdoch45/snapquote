@@ -13,7 +13,7 @@ import { requireAuth } from "@/lib/auth/requireAuth";
 import { getOrgCredits } from "@/lib/credits";
 import { getAddressParts, getVisibleAddress } from "@/lib/leadPresentation";
 import {
-  buildDefaultEstimateTemplate,
+  DEFAULT_ESTIMATE_SMS_TEMPLATE,
   buildEstimateLink,
   getDisplayCustomerName,
   renderEstimateTemplate
@@ -102,9 +102,10 @@ export default async function LeadDetailPage({ params }: Props) {
   const previewPublicId = (existingQuote?.public_id as string | null) ?? randomBytes(6).toString("base64url");
   const companyName = (profile?.business_name as string | null)?.trim() || "SnapQuote";
   const contractorPhone = (profile?.phone as string | null)?.trim() || "Not provided";
-  const contractorEmail = user?.email?.trim() || ((profile?.email as string | null)?.trim() || "Not provided");
+  const contractorEmail =
+    ((profile?.email as string | null)?.trim() || user?.email?.trim() || "Not provided");
   const estimateTemplate = (profile?.quote_sms_template as string | null)?.trim() ||
-    buildDefaultEstimateTemplate(companyName, contractorPhone, contractorEmail);
+    DEFAULT_ESTIMATE_SMS_TEMPLATE;
   const previewMessage = renderEstimateTemplate(estimateTemplate, {
     customerName: getDisplayCustomerName(lead.customer_name as string | null),
     estimateLink: buildEstimateLink(previewPublicId),
