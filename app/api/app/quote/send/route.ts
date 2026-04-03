@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { buildEstimateSentEmail } from "@/lib/emailTemplates";
 import { requireMemberForApi } from "@/lib/auth/requireRole";
 import { sendEmail } from "@/lib/notify";
-import { buildQuoteLink, renderQuoteTemplate } from "@/lib/quote-template";
+import { buildEstimateLink, renderEstimateTemplate } from "@/lib/quote-template";
 import { SubscriptionRequiredError, requireActiveSubscription } from "@/lib/subscription";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -95,11 +95,11 @@ export async function POST(request: Request) {
     if (quoteError || !quote) throw quoteError || new Error("Estimate send failed.");
     createdQuoteId = quote.id as string;
     const confirmedPublicId = quote.public_id as string;
-    const quoteLink = buildQuoteLink(confirmedPublicId);
-    const resolvedMessage = renderQuoteTemplate(body.message, {
+    const estimateLink = buildEstimateLink(confirmedPublicId);
+    const resolvedMessage = renderEstimateTemplate(body.message, {
       customerName: (lead.customer_name as string) || "Customer",
+      estimateLink,
       companyName: (profile?.business_name as string) || "SnapQuote",
-      quoteLink,
       contractorPhone: (profile?.phone as string) || "Not provided",
       contractorEmail: user?.email || (profile?.email as string) || "Not provided"
     });

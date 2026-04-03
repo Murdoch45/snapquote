@@ -1,7 +1,7 @@
 "use client";
 
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
-import { CUSTOMER_NAME_TOKEN, QUOTE_LINK_TOKEN } from "@/lib/quote-template";
+import { CUSTOMER_NAME_TOKEN, ESTIMATE_LINK_TOKEN } from "@/lib/quote-template";
 import { Button } from "@/components/ui/button";
 
 function isTouchDevice(): boolean {
@@ -15,8 +15,8 @@ const TOKEN_CONFIG = [
     label: "Customer Name"
   },
   {
-    key: "quote_link",
-    token: QUOTE_LINK_TOKEN,
+    key: "estimate_link",
+    token: ESTIMATE_LINK_TOKEN,
     label: "Estimate Link"
   }
 ] as const;
@@ -28,9 +28,6 @@ type Props = {
   value: string;
   onChange: (value: string) => void;
   showCustomerNameChip?: boolean;
-  previewBusinessName: string;
-  previewPhone: string;
-  previewEmail: string;
   isEditing: boolean;
   isSaving?: boolean;
   onEdit: () => void;
@@ -49,7 +46,7 @@ function getTokenConfigByToken(token: string) {
 function createTokenChip(tokenKey: TokenKey): HTMLSpanElement {
   const tokenConfig = getTokenConfigByKey(tokenKey);
   if (!tokenConfig) {
-    throw new Error(`Unsupported quote template token: ${tokenKey}`);
+    throw new Error(`Unsupported estimate template token: ${tokenKey}`);
   }
 
   const chip = document.createElement("span");
@@ -57,8 +54,17 @@ function createTokenChip(tokenKey: TokenKey): HTMLSpanElement {
   chip.contentEditable = "false";
   chip.draggable = true;
   chip.className =
-    "mx-0.5 inline-flex cursor-grab select-none items-center rounded-full border border-blue-200 bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700 align-middle";
-  chip.textContent = tokenConfig.label;
+    "mx-0.5 inline-flex cursor-grab select-none items-center gap-0.5 rounded-full border border-blue-200 bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700 align-middle";
+
+  const label = document.createTextNode(tokenConfig.label);
+  chip.appendChild(label);
+
+  const xBtn = document.createElement("span");
+  xBtn.dataset.removeToken = "true";
+  xBtn.className = "ml-0.5 cursor-pointer rounded-full text-blue-400 hover:text-blue-700 leading-none";
+  xBtn.textContent = "\u00d7";
+  chip.appendChild(xBtn);
+
   return chip;
 }
 
@@ -88,14 +94,11 @@ function getRangeFromPoint(x: number, y: number): Range | null {
   return null;
 }
 
-export function QuoteTemplateEditor({
+export function EstimateTemplateEditor({
   id,
   value,
   onChange,
   showCustomerNameChip = true,
-  previewBusinessName,
-  previewPhone,
-  previewEmail,
   isEditing,
   isSaving = false,
   onEdit,
@@ -103,27 +106,12 @@ export function QuoteTemplateEditor({
   onCancel
 }: Props) {
   const editorRef = useRef<HTMLDivElement | null>(null);
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const savedRangeRef = useRef<Range | null>(null);
   const [isTouch] = useState(() => isTouchDevice());
-  const lastCursorRef = useRef<number | null>(null);
 
   const availableTokens = TOKEN_CONFIG.filter(
     (token) => token.key !== "customer_name" || showCustomerNameChip
   );
-
-  const insertTokenIntoValue = (token: string) => {
-    const pos = lastCursorRef.current;
-    if (pos !== null && pos >= 0 && pos <= value.length) {
-      const before = value.slice(0, pos);
-      const after = value.slice(pos);
-      const spaceBefore = before.length > 0 && !before.endsWith(" ") && !before.endsWith("\n") ? " " : "";
-      const spaceAfter = after.length > 0 && !after.startsWith(" ") && !after.startsWith("\n") ? " " : "";
-      onChange(before + spaceBefore + token + spaceAfter + after);
-    } else {
-      const spacer = value.length > 0 && !value.endsWith(" ") && !value.endsWith("\n") ? " " : "";
-      onChange(value + spacer + token);
-    }
-  };
 
   const serializeEditor = () => {
     const editor = editorRef.current;
@@ -182,6 +170,49 @@ export function QuoteTemplateEditor({
     selection.addRange(range);
   };
 
+  const getInsertionRange = (): Range | null => {
+    const editor = editorRef.current;
+    if (!editor) return null;
+
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      if (editor.contains(range.startContainer)) return range;
+    }
+
+    if (savedRangeRef.current && editor.contains(savedRangeRef.current.startContainer)) {
+      return savedRangeRef.current;
+    }
+
+    const range = document.createRange();
+    range.selectNodeContents(editor);
+    range.collapse(false);
+    return range;
+  };
+
+  const insertChipAtCursor = (tokenKey: TokenKey) => {
+    const editor = editorRef.current;
+    if (!editor) return;
+
+    const chip = createTokenChip(tokenKey);
+    const range = getInsertionRange();
+
+    if (range) {
+      range.deleteContents();
+      range.insertNode(chip);
+      range.setStartAfter(chip);
+      range.collapse(true);
+      const sel = window.getSelection();
+      sel?.removeAllRanges();
+      sel?.addRange(range);
+    } else {
+      editor.appendChild(chip);
+    }
+
+    emitChange();
+    editor.focus();
+  };
+
   useEffect(() => {
     const editor = editorRef.current;
     if (!editor) return;
@@ -225,7 +256,7 @@ export function QuoteTemplateEditor({
   const previewSegments = useMemo(
     () =>
       value.split(
-        /(\{\{customer_name\}\}|\{\{quote_link\}\}|\{\{company_name\}\}|\{\{contractor_phone\}\}|\{\{contractor_email\}\})/g
+        /(\{\{customer_name\}\}|\{\{estimate_link\}\})/g
       ),
     [value]
   );
@@ -242,24 +273,12 @@ export function QuoteTemplateEditor({
       );
     }
 
-    if (segment === QUOTE_LINK_TOKEN) {
+    if (segment === ESTIMATE_LINK_TOKEN) {
       return (
         <span key={`${segment}-${index}`} className="font-medium text-[#2563EB]">
           estimate-link.com/example
         </span>
       );
-    }
-
-    if (segment === "{{company_name}}") {
-      return <Fragment key={`${segment}-${index}`}>{previewBusinessName || "Your Company"}</Fragment>;
-    }
-
-    if (segment === "{{contractor_phone}}") {
-      return <Fragment key={`${segment}-${index}`}>{previewPhone || "Your Phone Number"}</Fragment>;
-    }
-
-    if (segment === "{{contractor_email}}") {
-      return <Fragment key={`${segment}-${index}`}>{previewEmail || "your@email.com"}</Fragment>;
     }
 
     return <Fragment key={`${segment}-${index}`}>{segment}</Fragment>;
@@ -270,168 +289,127 @@ export function QuoteTemplateEditor({
       {isEditing ? (
         <>
           <div className="flex flex-wrap gap-2">
-            {availableTokens.map((token) =>
-              isTouch ? (
-                <button
-                  key={token.key}
-                  type="button"
-                  className="inline-flex select-none items-center rounded-full border border-blue-200 bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700 active:bg-blue-200"
-                  onClick={() => {
-                    setTimeout(() => insertTokenIntoValue(token.token), 0);
-                  }}
-                >
-                  {token.label}
-                </button>
-              ) : (
-                <button
-                  key={token.key}
-                  type="button"
-                  className="inline-flex cursor-grab select-none items-center rounded-full border border-blue-200 bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700"
-                  draggable
-                  onDragStart={(event) => {
-                    event.dataTransfer.setData("application/x-snapquote-token", token.token);
-                    event.dataTransfer.effectAllowed = "move";
-                  }}
-                  onPointerDown={(event) => event.preventDefault()}
-                  onClick={() => {
-                    const editor = editorRef.current;
-                    if (!editor) return;
-
-                    editor
-                      .querySelectorAll(`[data-token='${token.key}']`)
-                      .forEach((node) => node.remove());
-
-                    const chip = createTokenChip(token.key);
-                    const selection = window.getSelection();
-                    let range =
-                      selection && selection.rangeCount > 0
-                        ? selection.getRangeAt(0)
-                        : null;
-
-                    if (!range || !editor.contains(range.startContainer)) {
-                      range = document.createRange();
-                      range.selectNodeContents(editor);
-                      range.collapse(false);
-                    }
-
-                    range.deleteContents();
-                    range.insertNode(chip);
-                    range.setStartAfter(chip);
-                    range.collapse(true);
-                    selection?.removeAllRanges();
-                    selection?.addRange(range);
-
-                    emitChange();
-                    editor.focus();
-                  }}
-                >
-                  {token.label}
-                </button>
-              )
-            )}
+            {availableTokens.map((token) => (
+              <button
+                key={token.key}
+                type="button"
+                className={`inline-flex select-none items-center rounded-full border border-blue-200 bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700 ${isTouch ? "active:bg-blue-200" : "cursor-grab"}`}
+                draggable={!isTouch}
+                onDragStart={
+                  !isTouch
+                    ? (event) => {
+                        event.dataTransfer.setData("application/x-snapquote-token", token.token);
+                        event.dataTransfer.effectAllowed = "move";
+                      }
+                    : undefined
+                }
+                onPointerDown={(event) => event.preventDefault()}
+                onClick={() => insertChipAtCursor(token.key as TokenKey)}
+              >
+                {token.label}
+              </button>
+            ))}
           </div>
 
-          {isTouch ? (
-            <>
-              <textarea
-                ref={textareaRef}
-                id={id}
-                className="min-h-40 w-full whitespace-pre-wrap rounded-[8px] border-2 border-[#2563EB] bg-white px-[14px] py-[10px] text-sm text-[#111827] shadow-[0_0_0_3px_rgba(37,99,235,0.1)] focus:outline-none"
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
-                onClick={(e) => {
-                  lastCursorRef.current = (e.target as HTMLTextAreaElement).selectionStart;
-                }}
-                onSelect={(e) => {
-                  lastCursorRef.current = (e.target as HTMLTextAreaElement).selectionStart;
-                }}
-                onTouchEnd={() => {
-                  lastCursorRef.current = textareaRef.current?.selectionStart ?? null;
-                }}
-                onBlur={() => {
-                  lastCursorRef.current = textareaRef.current?.selectionStart ?? null;
-                }}
-              />
-              <p className="mt-1 text-xs text-[#9CA3AF]">
-                Tap where you want to insert, then tap a token.
-              </p>
-            </>
-          ) : (
-            <div
-              id={id}
-              ref={editorRef}
-              contentEditable
-              suppressContentEditableWarning
-              role="textbox"
-              aria-multiline="true"
-              className="min-h-40 w-full whitespace-pre-wrap rounded-[8px] border-2 border-[#2563EB] bg-white px-[14px] py-[10px] text-sm text-[#111827] shadow-[0_0_0_3px_rgba(37,99,235,0.1)] focus:outline-none"
-              onInput={() => emitChange()}
-              onBlur={() => emitChange()}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  event.preventDefault();
-                  insertTextAtSelection("\n");
+          <div
+            id={id}
+            ref={editorRef}
+            contentEditable
+            suppressContentEditableWarning
+            role="textbox"
+            aria-multiline="true"
+            className="min-h-40 w-full whitespace-pre-wrap rounded-[8px] border-2 border-[#2563EB] bg-white px-[14px] py-[10px] text-sm text-[#111827] shadow-[0_0_0_3px_rgba(37,99,235,0.1)] focus:outline-none"
+            onClick={(event) => {
+              const target = event.target as HTMLElement;
+              if (target.dataset.removeToken) {
+                event.preventDefault();
+                const chip = target.closest("[data-token]");
+                if (chip) {
+                  chip.remove();
                   emitChange();
                 }
-              }}
-              onPaste={(event) => {
+              }
+            }}
+            onInput={() => emitChange()}
+            onBlur={() => {
+              const selection = window.getSelection();
+              if (
+                selection &&
+                selection.rangeCount > 0 &&
+                editorRef.current?.contains(selection.getRangeAt(0).startContainer)
+              ) {
+                savedRangeRef.current = selection.getRangeAt(0).cloneRange();
+              }
+              emitChange();
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
                 event.preventDefault();
-                const text = event.clipboardData.getData("text/plain");
-                insertTextAtSelection(text);
+                insertTextAtSelection("\n");
                 emitChange();
-              }}
-              onDragStart={(event) => {
-                const target = event.target;
-                if (!(target instanceof HTMLElement) || !target.dataset.token) {
-                  return;
-                }
+              }
+            }}
+            onPaste={(event) => {
+              event.preventDefault();
+              const text = event.clipboardData.getData("text/plain");
+              insertTextAtSelection(text);
+              emitChange();
+            }}
+            onDragStart={(event) => {
+              const target = event.target;
+              if (!(target instanceof HTMLElement) || !target.dataset.token) {
+                return;
+              }
 
-                const tokenConfig = getTokenConfigByKey(target.dataset.token);
-                if (!tokenConfig) return;
+              const tokenConfig = getTokenConfigByKey(target.dataset.token);
+              if (!tokenConfig) return;
 
-                event.dataTransfer.setData("application/x-snapquote-token", tokenConfig.token);
-                event.dataTransfer.effectAllowed = "move";
-              }}
-              onDragOver={(event) => {
-                event.preventDefault();
-                event.dataTransfer.dropEffect = "move";
-              }}
-              onDrop={(event) => {
-                event.preventDefault();
+              event.dataTransfer.setData("application/x-snapquote-token", tokenConfig.token);
+              event.dataTransfer.effectAllowed = "move";
+            }}
+            onDragOver={(event) => {
+              event.preventDefault();
+              event.dataTransfer.dropEffect = "move";
+            }}
+            onDrop={(event) => {
+              event.preventDefault();
 
-                const token =
-                  event.dataTransfer.getData("application/x-snapquote-token") ||
-                  event.dataTransfer.getData("text/plain");
-                const tokenConfig = getTokenConfigByToken(token);
-                if (!tokenConfig) return;
-                if (tokenConfig.key === "customer_name" && !showCustomerNameChip) return;
+              const token =
+                event.dataTransfer.getData("application/x-snapquote-token") ||
+                event.dataTransfer.getData("text/plain");
+              const tokenConfig = getTokenConfigByToken(token);
+              if (!tokenConfig) return;
+              if (tokenConfig.key === "customer_name" && !showCustomerNameChip) return;
 
-                const editor = editorRef.current;
-                if (!editor) return;
+              const editor = editorRef.current;
+              if (!editor) return;
 
-                editor
-                  .querySelectorAll(`[data-token='${tokenConfig.key}']`)
-                  .forEach((node) => node.remove());
+              editor
+                .querySelectorAll(`[data-token='${tokenConfig.key}']`)
+                .forEach((node) => node.remove());
 
-                const chip = createTokenChip(tokenConfig.key);
-                const dropRange = getRangeFromPoint(event.clientX, event.clientY);
+              const chip = createTokenChip(tokenConfig.key);
+              const dropRange = getRangeFromPoint(event.clientX, event.clientY);
 
-                if (dropRange && editor.contains(dropRange.startContainer)) {
-                  dropRange.deleteContents();
-                  dropRange.insertNode(chip);
-                  dropRange.setStartAfter(chip);
-                  dropRange.collapse(true);
-                  const selection = window.getSelection();
-                  selection?.removeAllRanges();
-                  selection?.addRange(dropRange);
-                } else {
-                  editor.appendChild(chip);
-                }
+              if (dropRange && editor.contains(dropRange.startContainer)) {
+                dropRange.deleteContents();
+                dropRange.insertNode(chip);
+                dropRange.setStartAfter(chip);
+                dropRange.collapse(true);
+                const selection = window.getSelection();
+                selection?.removeAllRanges();
+                selection?.addRange(dropRange);
+              } else {
+                editor.appendChild(chip);
+              }
 
-                emitChange();
-              }}
-            />
-          )}
+              emitChange();
+            }}
+          />
+
+          <p className="text-xs text-[#9CA3AF]">
+            Tap where you want to insert, then tap a token.
+          </p>
         </>
       ) : (
         <div className="whitespace-pre-wrap rounded-[8px] border border-[#E5E7EB] bg-[#F8F9FC] p-4 text-sm text-[#111827]">
@@ -464,12 +442,9 @@ export function QuoteTemplateEditor({
           </button>
         ) : null}
       </div>
-
-      <p className="text-xs text-[#6B7280]">
-        {isTouch
-          ? "Tap where you want to insert, then tap a token."
-          : "Drag a token into your message, or click to insert at cursor."}
-      </p>
     </div>
   );
 }
+
+// Backward compat export
+export const QuoteTemplateEditor = EstimateTemplateEditor;

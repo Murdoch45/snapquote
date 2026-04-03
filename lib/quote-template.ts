@@ -1,25 +1,41 @@
 import { getAppUrl } from "@/lib/utils";
 
 export const CUSTOMER_NAME_TOKEN = "{{customer_name}}";
-export const QUOTE_LINK_TOKEN = "{{quote_link}}";
+export const ESTIMATE_LINK_TOKEN = "{{estimate_link}}";
 
-export const DEFAULT_QUOTE_SMS_TEMPLATE = `Hi {{customer_name}},
+// Backward compat
+export const QUOTE_LINK_TOKEN = ESTIMATE_LINK_TOKEN;
 
-Here is your estimate from {{company_name}}.
+export function buildDefaultEstimateTemplate(
+  companyName: string,
+  phone: string,
+  email: string
+): string {
+  return `Hi {{customer_name}},
+
+Here is your estimate from ${companyName}.
 
 View your estimate:
-{{quote_link}}
+{{estimate_link}}
 
-Questions? Call or email:
-{{contractor_phone}}
-{{contractor_email}}`;
+Questions? Call or email ${phone} ${email}`;
+}
 
-type QuoteTemplateVars = {
+export const DEFAULT_ESTIMATE_SMS_TEMPLATE = buildDefaultEstimateTemplate(
+  "Your Company",
+  "Your Phone Number",
+  "your@email.com"
+);
+
+// Backward compat
+export const DEFAULT_QUOTE_SMS_TEMPLATE = DEFAULT_ESTIMATE_SMS_TEMPLATE;
+
+type EstimateTemplateVars = {
   customerName: string;
-  companyName: string;
-  quoteLink: string;
-  contractorPhone: string;
-  contractorEmail: string;
+  estimateLink: string;
+  companyName?: string;
+  contractorPhone?: string;
+  contractorEmail?: string;
 };
 
 export function getDisplayCustomerName(customerName: string | null | undefined): string {
@@ -32,27 +48,33 @@ export function getCustomerFirstName(customerName: string | null | undefined): s
   return firstName && firstName.length > 0 ? firstName : "Customer";
 }
 
-export function buildQuoteLink(publicId: string): string {
+export function buildEstimateLink(publicId: string): string {
   return `${getAppUrl()}/q/${publicId}`;
 }
 
-export function renderQuoteTemplate(template: string, vars: QuoteTemplateVars): string {
-  return template
+// Backward compat
+export const buildQuoteLink = buildEstimateLink;
+
+export function renderEstimateTemplate(template: string, vars: EstimateTemplateVars): string {
+  let result = template
     .replaceAll(CUSTOMER_NAME_TOKEN, vars.customerName)
-    .replaceAll("{{company_name}}", vars.companyName)
-    .replaceAll(QUOTE_LINK_TOKEN, vars.quoteLink)
-    .replaceAll("{{contractor_phone}}", vars.contractorPhone)
-    .replaceAll("{{contractor_email}}", vars.contractorEmail);
+    .replaceAll(ESTIMATE_LINK_TOKEN, vars.estimateLink)
+    .replaceAll("{{quote_link}}", vars.estimateLink);
+
+  if (vars.companyName != null) result = result.replaceAll("{{company_name}}", vars.companyName);
+  if (vars.contractorPhone != null) result = result.replaceAll("{{contractor_phone}}", vars.contractorPhone);
+  if (vars.contractorEmail != null) result = result.replaceAll("{{contractor_email}}", vars.contractorEmail);
+
+  return result;
 }
 
-export function sanitizeQuoteTemplate(template: string | null | undefined): string {
+// Backward compat
+export const renderQuoteTemplate = renderEstimateTemplate;
+
+export function sanitizeEstimateTemplate(template: string | null | undefined): string {
   const trimmed = template?.trim();
-  return trimmed && trimmed.length > 0 ? trimmed : DEFAULT_QUOTE_SMS_TEMPLATE;
+  return trimmed && trimmed.length > 0 ? trimmed : DEFAULT_ESTIMATE_SMS_TEMPLATE;
 }
 
-export function renderCustomerNamePreview(
-  template: string,
-  customerName: string | null | undefined
-): string {
-  return template.replaceAll(CUSTOMER_NAME_TOKEN, getCustomerFirstName(customerName));
-}
+// Backward compat
+export const sanitizeQuoteTemplate = sanitizeEstimateTemplate;

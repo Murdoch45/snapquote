@@ -5,14 +5,15 @@ import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { AddressAutocomplete } from "@/components/AddressAutocomplete";
-import { QuoteTemplateEditor } from "@/components/quote-template/QuoteTemplateEditor";
+import { EstimateTemplateEditor } from "@/components/quote-template/QuoteTemplateEditor";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   CUSTOMER_NAME_TOKEN,
-  DEFAULT_QUOTE_SMS_TEMPLATE
+  DEFAULT_ESTIMATE_SMS_TEMPLATE,
+  buildDefaultEstimateTemplate
 } from "@/lib/quote-template";
 import { type ServiceType } from "@/lib/services";
 
@@ -72,7 +73,11 @@ function ensureCustomerNameToken(template: string): string {
 export function SettingsForm({ initial }: { initial: SettingsData }) {
   const router = useRouter();
   const { theme, setTheme } = useTheme();
-  const initialTemplate = initial.quote_sms_template ?? DEFAULT_QUOTE_SMS_TEMPLATE;
+  const initialTemplate = initial.quote_sms_template ?? buildDefaultEstimateTemplate(
+    initial.business_name || "Your Company",
+    initial.phone || "Your Phone Number",
+    initial.email || "your@email.com"
+  );
   const [savedTemplate, setSavedTemplate] = useState(initialTemplate);
   const [mounted, setMounted] = useState(false);
   const [form, setForm] = useState({
@@ -477,13 +482,10 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
           </label>
         </div>
 
-        <QuoteTemplateEditor
+        <EstimateTemplateEditor
           id="quoteSmsTemplate"
           value={form.quoteSmsTemplate}
           showCustomerNameChip={autoInsertCustomerName}
-          previewBusinessName={form.businessName.trim() || "Your Company"}
-          previewPhone={form.phone.trim() || "Your Phone Number"}
-          previewEmail={form.email.trim() || "your@email.com"}
           isEditing={isEditingTemplate}
           isSaving={savingTemplate}
           onEdit={() => setIsEditingTemplate(true)}

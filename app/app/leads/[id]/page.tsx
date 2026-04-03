@@ -13,11 +13,10 @@ import { requireAuth } from "@/lib/auth/requireAuth";
 import { getOrgCredits } from "@/lib/credits";
 import { getAddressParts, getVisibleAddress } from "@/lib/leadPresentation";
 import {
-  buildQuoteLink,
-  DEFAULT_QUOTE_SMS_TEMPLATE,
+  buildDefaultEstimateTemplate,
+  buildEstimateLink,
   getDisplayCustomerName,
-  renderQuoteTemplate,
-  sanitizeQuoteTemplate
+  renderEstimateTemplate
 } from "@/lib/quote-template";
 import { getServiceBadgeClassName } from "@/lib/serviceColors";
 import { formatServiceQuestionAnswers, parseServiceQuestionBundles } from "@/lib/serviceQuestions";
@@ -101,18 +100,18 @@ export default async function LeadDetailPage({ params }: Props) {
     ? getVisibleAddress(lead.address_full as string)
     : (lead.address_full as string);
   const previewPublicId = (existingQuote?.public_id as string | null) ?? randomBytes(6).toString("base64url");
-  const previewMessage = renderQuoteTemplate(
-    sanitizeQuoteTemplate((profile?.quote_sms_template as string | null) ?? DEFAULT_QUOTE_SMS_TEMPLATE),
-    {
-      customerName: getDisplayCustomerName(lead.customer_name as string | null),
-      companyName: (profile?.business_name as string | null)?.trim() || "SnapQuote",
-      quoteLink: buildQuoteLink(previewPublicId),
-      contractorPhone: (profile?.phone as string | null)?.trim() || "Not provided",
-      contractorEmail:
-        user?.email?.trim() ||
-        ((profile?.email as string | null)?.trim() || "Not provided")
-    }
-  );
+  const companyName = (profile?.business_name as string | null)?.trim() || "SnapQuote";
+  const contractorPhone = (profile?.phone as string | null)?.trim() || "Not provided";
+  const contractorEmail = user?.email?.trim() || ((profile?.email as string | null)?.trim() || "Not provided");
+  const estimateTemplate = (profile?.quote_sms_template as string | null)?.trim() ||
+    buildDefaultEstimateTemplate(companyName, contractorPhone, contractorEmail);
+  const previewMessage = renderEstimateTemplate(estimateTemplate, {
+    customerName: getDisplayCustomerName(lead.customer_name as string | null),
+    estimateLink: buildEstimateLink(previewPublicId),
+    companyName,
+    contractorPhone,
+    contractorEmail
+  });
   const aiEstimateDisplay = formatCurrencyRange(
     lead.ai_estimate_low as number | null,
     lead.ai_estimate_high as number | null,
