@@ -2,7 +2,7 @@ import Link from "next/link";
 import { AlertCircle, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { CreditsAddedToast } from "@/components/plan/CreditsAddedToast";
-import { ManageBillingButton } from "@/components/plan/ManageBillingButton";
+
 import { PlanOptionsSection } from "@/components/plan/PlanOptionsSection";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireAuth } from "@/lib/auth/requireAuth";
@@ -158,17 +158,10 @@ export default async function PlanPage({ searchParams }: Props) {
             </div>
           </div>
 
-          <div className="flex justify-end">
-            <ManageBillingButton
-              mode="text"
-              label="Manage billing & invoices ->"
-              className="font-medium"
-            />
-          </div>
         </CardContent>
       </Card>
 
-      <div className="space-y-3">
+      <div id="plan-options" className="space-y-3">
         <div className="space-y-1">
           <h2 className="text-base font-semibold text-[#111827]">Plan Options</h2>
           <p className="text-sm text-[#6B7280]">

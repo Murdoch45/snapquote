@@ -182,7 +182,7 @@ export function PlanOptionsSection({ currentPlan, hasUsedTrial }: Props) {
 
   return (
     <>
-      <div className="flex snap-x snap-mandatory gap-5 overflow-x-auto pb-4 xl:grid xl:snap-none xl:grid-cols-3 xl:grid-rows-[auto_auto_1fr_auto] xl:overflow-visible xl:pb-0">
+      <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-4 xl:grid xl:snap-none xl:grid-cols-3 xl:grid-rows-[auto_auto_1fr_auto] xl:gap-5 xl:overflow-visible xl:pb-0">
         {PLAN_OPTIONS.map((option) => {
           const isCurrent = option.plan === currentPlan;
           const isUpgrade = PLAN_ORDER[option.plan] > PLAN_ORDER[currentPlan];
@@ -211,8 +211,8 @@ export function PlanOptionsSection({ currentPlan, hasUsedTrial }: Props) {
                 }
               />
 
-              <CardHeader className="relative flex flex-col space-y-2.5 px-4 pt-4 pb-1">
-                <div className="flex min-h-[56px] items-start justify-between gap-2.5">
+              <CardHeader className="relative flex flex-col space-y-1.5 px-3 pt-3 pb-0.5 xl:space-y-2.5 xl:px-4 xl:pt-4 xl:pb-1">
+                <div className="flex min-h-[48px] items-start justify-between gap-2 xl:min-h-[56px] xl:gap-2.5">
                   <div className="space-y-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <CardTitle className="text-lg font-semibold text-[#111827]">
@@ -229,7 +229,7 @@ export function PlanOptionsSection({ currentPlan, hasUsedTrial }: Props) {
                         </Badge>
                       ) : null}
                     </div>
-                    <p className="max-w-[26ch] text-sm leading-6 text-[#6B7280]">
+                    <p className="max-w-[26ch] text-xs leading-5 text-[#6B7280] xl:text-sm xl:leading-6">
                       {option.description}
                     </p>
                   </div>
@@ -253,9 +253,9 @@ export function PlanOptionsSection({ currentPlan, hasUsedTrial }: Props) {
 
               </CardHeader>
 
-              <div className="mx-4 rounded-[14px] border border-[#E5E7EB] bg-white/80 px-4 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)] backdrop-blur">
+              <div className="mx-3 rounded-[14px] border border-[#E5E7EB] bg-white/80 px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)] backdrop-blur xl:mx-4 xl:px-4 xl:py-2.5">
                 <div className="flex items-end gap-2">
-                  <p className="text-4xl font-semibold tracking-[-0.04em] text-[#111827]">
+                  <p className="text-3xl font-semibold tracking-[-0.04em] text-[#111827] xl:text-4xl">
                     {displayPrice}
                   </p>
                 </div>
@@ -264,9 +264,9 @@ export function PlanOptionsSection({ currentPlan, hasUsedTrial }: Props) {
                 </p>
               </div>
 
-              <div className="relative flex flex-1 flex-col px-4">
-                <div className="mt-2 grid grid-cols-2 gap-2">
-                  <div className="rounded-[14px] border border-[#E5E7EB] bg-white px-3 py-3">
+              <div className="relative flex flex-1 flex-col px-3 xl:px-4">
+                <div className="mt-1.5 grid grid-cols-2 gap-1.5 xl:mt-2 xl:gap-2">
+                  <div className="rounded-[14px] border border-[#E5E7EB] bg-white px-2.5 py-2 xl:px-3 xl:py-3">
                     <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#6B7280]">
                       Credits
                     </p>
@@ -275,7 +275,7 @@ export function PlanOptionsSection({ currentPlan, hasUsedTrial }: Props) {
                       <span className="ml-1 text-sm font-medium text-[#6B7280]">/ month</span>
                     </p>
                   </div>
-                  <div className="rounded-[14px] border border-[#E5E7EB] bg-white px-3 py-3">
+                  <div className="rounded-[14px] border border-[#E5E7EB] bg-white px-2.5 py-2 xl:px-3 xl:py-3">
                     <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#6B7280]">
                       Users
                     </p>
@@ -283,11 +283,11 @@ export function PlanOptionsSection({ currentPlan, hasUsedTrial }: Props) {
                   </div>
                 </div>
 
-                <div className="mt-2 space-y-2 rounded-[14px] border border-[#E5E7EB] bg-white px-3 py-3">
+                <div className="mt-1.5 space-y-1.5 rounded-[14px] border border-[#E5E7EB] bg-white px-2.5 py-2 xl:mt-2 xl:space-y-2 xl:px-3 xl:py-3">
                   {option.highlights.map((item) => (
-                    <div key={item} className="flex items-start gap-2 text-sm text-[#111827]">
-                      <span className="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#EFF6FF]">
-                        <Check className="h-3.5 w-3.5 text-[#2563EB]" />
+                    <div key={item} className="flex items-start gap-1.5 text-xs text-[#111827] xl:gap-2 xl:text-sm">
+                      <span className="mt-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full bg-[#EFF6FF] xl:h-5 xl:w-5">
+                        <Check className="h-3 w-3 text-[#2563EB] xl:h-3.5 xl:w-3.5" />
                       </span>
                       <span>{item}</span>
                     </div>
@@ -295,7 +295,7 @@ export function PlanOptionsSection({ currentPlan, hasUsedTrial }: Props) {
                 </div>
               </div>
 
-              <div className="px-4 pb-3 pt-2 xl:self-end">
+              <div className="px-3 pb-2 pt-1.5 xl:px-4 xl:pb-3 xl:pt-2 xl:self-end">
                 {isCurrent ? (
                   <Button
                     type="button"
