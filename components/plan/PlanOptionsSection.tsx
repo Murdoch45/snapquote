@@ -114,6 +114,15 @@ export function PlanOptionsSection({ currentPlan, hasUsedTrial }: Props) {
   const [downgradeTarget, setDowngradeTarget] = useState<PlanOption | null>(null);
 
   useEffect(() => {
+    if (searchParams.get("scroll") === "plan-options") {
+      const el = document.getElementById("plan-options");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
     const updated = searchParams.get("updated");
     const change = searchParams.get("change");
     if (hasShownToastRef.current) return;
