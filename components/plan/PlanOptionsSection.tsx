@@ -25,6 +25,7 @@ type PlanOption = {
 
 type Props = {
   currentPlan: Plan;
+  hasUsedTrial: boolean;
 };
 
 const PLAN_ORDER: Record<Plan, number> = {
@@ -103,7 +104,7 @@ function BillingToggle({
   );
 }
 
-export function PlanOptionsSection({ currentPlan }: Props) {
+export function PlanOptionsSection({ currentPlan, hasUsedTrial }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const hasShownToastRef = useRef(false);
@@ -318,7 +319,11 @@ export function PlanOptionsSection({ currentPlan }: Props) {
                       }
                     }}
                   >
-                    {loadingPlan === option.plan ? "Opening..." : `Switch to ${option.name}`}
+                    {loadingPlan === option.plan
+                      ? "Opening..."
+                      : hasUsedTrial
+                        ? `Switch to ${option.name}`
+                        : "Start Free Trial"}
                     {loadingPlan === option.plan ? null : <ArrowRight className="ml-2 h-4 w-4" />}
                   </Button>
                 ) : isDowngrade ? (

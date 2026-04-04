@@ -60,13 +60,14 @@ export default async function PlanPage({ searchParams }: Props) {
 
   await getOrgCredits(orgId);
 
-  const [subscription, membersResult, organization] = await Promise.all([
+  const [subscription, membersResult, organization, orgTrialRow] = await Promise.all([
     getOrganizationSubscriptionStatus(orgId),
     admin
       .from("organization_members")
       .select("*", { count: "exact", head: true })
       .eq("org_id", orgId),
-    admin.rpc("get_org_credit_row", { p_org_id: orgId }).single()
+    admin.rpc("get_org_credit_row", { p_org_id: orgId }).single(),
+    admin.from("organizations").select("has_used_trial").eq("id", orgId).single()
   ]);
 
   if (organization.error || !organization.data) {
@@ -174,7 +175,7 @@ export default async function PlanPage({ searchParams }: Props) {
             Upgrade instantly or schedule a downgrade for the end of your billing cycle.
           </p>
         </div>
-        <PlanOptionsSection currentPlan={plan} />
+        <PlanOptionsSection currentPlan={plan} hasUsedTrial={orgTrialRow.data?.has_used_trial ?? false} />
         <p className="text-sm text-[#6B7280]">
           Need more credits?{" "}
           <Link href="/app/credits" className="font-medium text-[#2563EB] hover:text-[#1D4ED8]">
