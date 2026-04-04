@@ -110,7 +110,7 @@ export function SubscriptionStatusCard({ subscription }: Props) {
         <div className="flex w-full flex-col gap-3 md:w-auto">
           {inactive ? (
             <Button asChild className="w-full md:w-auto">
-              <Link href="/pricing">Upgrade Plan</Link>
+              <Link href="/app/plan">Upgrade Plan</Link>
             </Button>
           ) : null}
           <Button

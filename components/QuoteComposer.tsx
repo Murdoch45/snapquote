@@ -292,7 +292,7 @@ export function QuoteComposer({
           </Button>
           {isLocked ? (
             <Button asChild variant="outline">
-              <Link href="/pricing">Upgrade Plan</Link>
+              <Link href="/app/plan">Upgrade Plan</Link>
             </Button>
           ) : null}
           <Button

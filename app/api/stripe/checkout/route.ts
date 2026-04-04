@@ -211,7 +211,7 @@ export async function POST(request: Request) {
         }
       ],
       success_url: returnUrl,
-      cancel_url: `${appUrl}/pricing`,
+      cancel_url: `${appUrl}/app/plan`,
       client_reference_id: auth.userId,
       customer: latestSubscription?.stripe_customer_id || undefined,
       customer_email: latestSubscription?.stripe_customer_id ? undefined : user.email,

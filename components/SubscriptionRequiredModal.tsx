@@ -28,7 +28,7 @@ export function SubscriptionRequiredModal({ open, onClose }: Props) {
 
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
           <Button asChild className="flex-1">
-            <Link href="/pricing">Update Billing</Link>
+            <Link href="/app/plan">Update Billing</Link>
           </Button>
           <Button type="button" variant="outline" className="flex-1" onClick={onClose}>
             Close
