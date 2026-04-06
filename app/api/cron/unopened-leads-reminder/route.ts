@@ -38,8 +38,8 @@ export async function GET(request: Request) {
     if (!count || count < 10) continue;
 
     const ok = await sendExpoPush(token, {
-      title: "Leads Waiting",
-      body: `You have ${count} unopened leads waiting. Don't keep them waiting!`,
+      title: "You've Got Leads",
+      body: `You have ${count} unopened leads. Don't keep them waiting!`,
       data: { screen: "leads" }
     });
 
