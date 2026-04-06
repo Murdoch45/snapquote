@@ -292,7 +292,7 @@ export function OnboardingTour({ enabled, slug }: OnboardingTourProps) {
         setTooltipStyle({
           left: 16,
           top: Math.max(16, mobileTop),
-          width: "calc(100vw - 32px)",
+          right: 16,
           maxWidth: CARD_WIDTH
         });
         setTailOffset(null);
@@ -365,7 +365,7 @@ export function OnboardingTour({ enabled, slug }: OnboardingTourProps) {
   if (!hasResolvedVisibility || !visible || !enabled || !isDashboard) return null;
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-[70]">
+    <div className="pointer-events-none fixed inset-0 z-[70] overflow-hidden">
       <div className="relative h-full w-full">
         <div
           ref={cardRef}
@@ -384,9 +384,10 @@ export function OnboardingTour({ enabled, slug }: OnboardingTourProps) {
             {stepIndex + 1} of {steps.length}
           </p>
 
-          <div className="mt-4 h-[220px] overflow-hidden rounded-[12px] border border-slate-600 bg-[#F8F9FC]">
+          <div className="relative mt-4 h-[220px] overflow-hidden rounded-[12px] border border-slate-600 bg-[#F8F9FC]">
             <div
               style={{
+                position: "absolute",
                 width: PREVIEW_CANVAS_WIDTH,
                 height: PREVIEW_CANVAS_HEIGHT,
                 transform: `scale(${PREVIEW_SCALE})`,
