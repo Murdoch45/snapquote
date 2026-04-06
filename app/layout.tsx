@@ -27,6 +27,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans`}>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `document.addEventListener('gesturestart',function(e){e.preventDefault()});`
+          }}
+        />
         <ThemeProvider>
           {children}
           <Toaster />

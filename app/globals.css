@@ -22,11 +22,19 @@
 *::before,
 *::after {
   box-sizing: border-box;
-  max-width: 100%;
   border-color: hsl(var(--border));
 }
 
+html {
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
+}
+
 body {
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
+  touch-action: manipulation;
+  -webkit-text-size-adjust: 100%;
   background: hsl(var(--background));
   color: hsl(var(--foreground));
   @apply antialiased;
