@@ -16,14 +16,6 @@ import { leadSubmitSchema, parseLeadSubmitQuestionAnswers } from "@/lib/validati
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: "25mb"
-    }
-  }
-};
-
 const MAX_PHOTO_UPLOADS = 10;
 
 function parseNumber(input: FormDataEntryValue | null): number | undefined {

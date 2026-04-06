@@ -1,8 +1,12 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, useState } from "react";
 import { UploadCloud, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+const MAX_DIMENSION = 2048;
+const JPEG_QUALITY = 0.8;
+const MAX_FILE_SIZE = 8 * 1024 * 1024;
 
 type PhotoUploaderProps = {
   files: File[];
@@ -11,6 +15,71 @@ type PhotoUploaderProps = {
   required?: boolean;
 };
 
+function compressImage(file: File): Promise<File> {
+  return new Promise((resolve) => {
+    // Skip non-image files
+    if (!file.type.startsWith("image/")) {
+      resolve(file);
+      return;
+    }
+
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+
+      let { width, height } = img;
+
+      // Skip compression if already small enough
+      if (file.size <= 500_000 && width <= MAX_DIMENSION && height <= MAX_DIMENSION) {
+        resolve(file);
+        return;
+      }
+
+      // Scale down to fit within MAX_DIMENSION
+      if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
+        const scale = MAX_DIMENSION / Math.max(width, height);
+        width = Math.round(width * scale);
+        height = Math.round(height * scale);
+      }
+
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        resolve(file);
+        return;
+      }
+
+      ctx.drawImage(img, 0, 0, width, height);
+
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) {
+            resolve(file);
+            return;
+          }
+
+          const name = file.name.replace(/\.[^.]+$/, ".jpg");
+          resolve(new File([blob], name, { type: "image/jpeg", lastModified: Date.now() }));
+        },
+        "image/jpeg",
+        JPEG_QUALITY
+      );
+    };
+
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolve(file);
+    };
+
+    img.src = url;
+  });
+}
+
 export function PhotoUploader({
   files,
   setFiles,
@@ -18,21 +87,30 @@ export function PhotoUploader({
   required = false
 }: PhotoUploaderProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const [compressing, setCompressing] = useState(false);
 
   const previews = useMemo(
     () => files.map((file) => ({ file, url: URL.createObjectURL(file) })),
     [files]
   );
 
-  const onAddFiles = (incoming: FileList | null) => {
+  const onAddFiles = async (incoming: FileList | null) => {
     if (!incoming) return;
-    const current = [...files];
-    for (const file of Array.from(incoming)) {
-      if (current.length >= maxFiles) break;
-      if (file.size > 8 * 1024 * 1024) continue;
-      current.push(file);
+
+    setCompressing(true);
+    try {
+      const current = [...files];
+      for (const raw of Array.from(incoming)) {
+        if (current.length >= maxFiles) break;
+        if (raw.size > MAX_FILE_SIZE) continue;
+        // eslint-disable-next-line no-await-in-loop
+        const compressed = await compressImage(raw);
+        current.push(compressed);
+      }
+      setFiles(current.slice(0, maxFiles));
+    } finally {
+      setCompressing(false);
     }
-    setFiles(current.slice(0, maxFiles));
     if (inputRef.current) inputRef.current.value = "";
   };
 
@@ -49,17 +127,17 @@ export function PhotoUploader({
           type="file"
           accept="image/*"
           multiple
-          onChange={(e) => onAddFiles(e.target.files)}
+          onChange={(e) => void onAddFiles(e.target.files)}
           className="hidden"
           id="photo-upload-input"
         />
         <Button
           type="button"
           onClick={() => inputRef.current?.click()}
-          disabled={files.length >= maxFiles}
+          disabled={files.length >= maxFiles || compressing}
         >
           <UploadCloud className="mr-2 h-4 w-4" />
-          Upload photos
+          {compressing ? "Compressing..." : "Upload photos"}
         </Button>
       </div>
       {previews.length > 0 && (
