@@ -14,6 +14,16 @@ import { getAppUrl } from "@/lib/utils";
 import { leadSubmitSchema, parseLeadSubmitQuestionAnswers } from "@/lib/validations";
 
 export const runtime = "nodejs";
+export const maxDuration = 60;
+
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: "25mb"
+    }
+  }
+};
+
 const MAX_PHOTO_UPLOADS = 10;
 
 function parseNumber(input: FormDataEntryValue | null): number | undefined {
