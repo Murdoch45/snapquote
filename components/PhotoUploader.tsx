@@ -4,9 +4,12 @@ import { useMemo, useRef, useState } from "react";
 import { UploadCloud, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const MAX_DIMENSION = 2048;
-const JPEG_QUALITY = 0.8;
+const MAX_DIMENSION = 1600;
+const JPEG_QUALITY = 0.65;
 const MAX_FILE_SIZE = 8 * 1024 * 1024;
+const MAX_COMPRESSED_SIZE = 400_000;
+const RETRY_DIMENSION = 1200;
+const RETRY_QUALITY = 0.5;
 
 type PhotoUploaderProps = {
   files: File[];
@@ -15,60 +18,71 @@ type PhotoUploaderProps = {
   required?: boolean;
 };
 
-function compressImage(file: File): Promise<File> {
+function renderToBlob(
+  img: HTMLImageElement,
+  maxDim: number,
+  quality: number
+): Promise<Blob | null> {
   return new Promise((resolve) => {
-    // Skip non-image files
-    if (!file.type.startsWith("image/")) {
-      resolve(file);
+    let { width, height } = img;
+
+    if (width > maxDim || height > maxDim) {
+      const scale = maxDim / Math.max(width, height);
+      width = Math.round(width * scale);
+      height = Math.round(height * scale);
+    }
+
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      resolve(null);
       return;
     }
 
+    ctx.drawImage(img, 0, 0, width, height);
+    canvas.toBlob((blob) => resolve(blob), "image/jpeg", quality);
+  });
+}
+
+function compressImage(file: File): Promise<File> {
+  return new Promise((resolve) => {
     const img = new Image();
     const url = URL.createObjectURL(file);
 
-    img.onload = () => {
+    img.onload = async () => {
       URL.revokeObjectURL(url);
 
-      let { width, height } = img;
-
       // Skip compression if already small enough
-      if (file.size <= 500_000 && width <= MAX_DIMENSION && height <= MAX_DIMENSION) {
+      if (file.size <= MAX_COMPRESSED_SIZE && img.width <= MAX_DIMENSION && img.height <= MAX_DIMENSION) {
         resolve(file);
         return;
       }
 
-      // Scale down to fit within MAX_DIMENSION
-      if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
-        const scale = MAX_DIMENSION / Math.max(width, height);
-        width = Math.round(width * scale);
-        height = Math.round(height * scale);
+      const name = file.name.replace(/\.[^.]+$/, ".jpg");
+
+      // First pass
+      let blob = await renderToBlob(img, MAX_DIMENSION, JPEG_QUALITY);
+
+      // If toBlob returned null (iOS memory pressure), retry at smaller size
+      if (!blob) {
+        blob = await renderToBlob(img, RETRY_DIMENSION, RETRY_QUALITY);
       }
 
-      const canvas = document.createElement("canvas");
-      canvas.width = width;
-      canvas.height = height;
+      // If still over size limit, re-compress more aggressively
+      if (blob && blob.size > MAX_COMPRESSED_SIZE) {
+        const secondPass = await renderToBlob(img, RETRY_DIMENSION, RETRY_QUALITY);
+        if (secondPass) blob = secondPass;
+      }
 
-      const ctx = canvas.getContext("2d");
-      if (!ctx) {
+      if (!blob) {
         resolve(file);
         return;
       }
 
-      ctx.drawImage(img, 0, 0, width, height);
-
-      canvas.toBlob(
-        (blob) => {
-          if (!blob) {
-            resolve(file);
-            return;
-          }
-
-          const name = file.name.replace(/\.[^.]+$/, ".jpg");
-          resolve(new File([blob], name, { type: "image/jpeg", lastModified: Date.now() }));
-        },
-        "image/jpeg",
-        JPEG_QUALITY
-      );
+      resolve(new File([blob], name, { type: "image/jpeg", lastModified: Date.now() }));
     };
 
     img.onerror = () => {
