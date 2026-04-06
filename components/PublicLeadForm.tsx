@@ -358,7 +358,7 @@ export function PublicLeadForm({ contractorSlug }: Props) {
           </Label>
           <Input
             id="customer-email"
-            type="email"
+            type="text"
             value={customerEmail}
             onChange={(e) => setCustomerEmail(e.target.value)}
             required
