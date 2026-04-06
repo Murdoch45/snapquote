@@ -3,6 +3,7 @@ import { buildEstimateAcceptedEmail } from "@/lib/emailTemplates";
 import { notifyContractor } from "@/lib/notify";
 import { sendEmail } from "@/lib/notify";
 import { getOwnerEmailForOrg } from "@/lib/organizationOwners";
+import { sendPushToOrg } from "@/lib/pushNotifications";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAppUrl, publicQuoteExpiry } from "@/lib/utils";
 
@@ -121,6 +122,13 @@ export async function POST(_request: Request, { params }: Props) {
     smsBody: `Estimate accepted: ${services} at ${lead?.address_full}. View: ${quoteLink}`,
     emailSubject: "Estimate accepted",
     emailBody: `Estimate accepted: ${services} at ${lead?.address_full}. View: ${quoteLink}`
+  });
+
+  const customerName = (lead?.customer_name as string) || "A customer";
+  void sendPushToOrg(acceptedQuote.org_id as string, {
+    title: "Estimate Accepted",
+    body: `Great news! ${customerName} accepted your estimate. Tap to view.`,
+    data: { screen: "quotes" }
   });
 
   if (profile?.notification_accept_email) {
