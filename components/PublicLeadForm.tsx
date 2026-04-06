@@ -250,7 +250,7 @@ export function PublicLeadForm({ contractorSlug }: Props) {
 
   return (
     <>
-      <form className="space-y-5" onSubmit={onSubmit}>
+      <form className="space-y-5" noValidate onSubmit={onSubmit}>
         <p className="text-xs text-[#6B7280]">* Required fields</p>
         <AddressAutocomplete
           variant="public"
