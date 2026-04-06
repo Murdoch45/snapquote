@@ -86,7 +86,7 @@ export function AddressAutocomplete({
   }, []);
 
   return (
-    <div className="space-y-2">
+    <div className="min-w-0 max-w-full space-y-2">
       <Label
         htmlFor={inputId}
         className={
@@ -123,7 +123,7 @@ export function AddressAutocomplete({
       <p
         className={
           variant === "public"
-            ? `text-xs ${invalid || loadError ? "text-[#DC2626]" : "text-[#6B7280]"}`
+            ? `max-w-full break-words text-xs ${invalid || loadError ? "text-[#DC2626]" : "text-[#6B7280]"}`
             : `rounded-[8px] border px-4 py-3 text-sm ${
                 invalid || loadError
                   ? "border-[#FECACA] bg-[#FEF2F2] text-[#DC2626]"

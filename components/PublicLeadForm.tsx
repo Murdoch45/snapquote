@@ -250,7 +250,7 @@ export function PublicLeadForm({ contractorSlug }: Props) {
 
   return (
     <>
-      <form className="space-y-5" noValidate onSubmit={onSubmit}>
+      <form className="min-w-0 max-w-full space-y-5 overflow-x-hidden" noValidate onSubmit={onSubmit}>
         <p className="text-xs text-[#6B7280]">* Required fields</p>
         <AddressAutocomplete
           variant="public"
@@ -301,8 +301,8 @@ export function PublicLeadForm({ contractorSlug }: Props) {
 
         <PhotoUploader files={photos} setFiles={setPhotos} maxFiles={MAX_PHOTO_UPLOADS} required />
 
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="space-y-2">
+        <div className="grid min-w-0 max-w-full gap-3 sm:grid-cols-2">
+          <div className="min-w-0 space-y-2">
             <Label
               htmlFor="customer-first-name"
               className="mb-1.5 block text-[13px] font-semibold text-[#374151]"
@@ -317,7 +317,7 @@ export function PublicLeadForm({ contractorSlug }: Props) {
               className="h-auto rounded-[8px] border-[#E5E7EB] bg-white px-[14px] py-3 text-sm text-[#111827] placeholder:text-[#6B7280] focus-visible:ring-[rgba(37,99,235,0.1)]"
             />
           </div>
-          <div className="space-y-2">
+          <div className="min-w-0 space-y-2">
             <Label
               htmlFor="customer-last-name"
               className="mb-1.5 block text-[13px] font-semibold text-[#374151]"
@@ -333,8 +333,8 @@ export function PublicLeadForm({ contractorSlug }: Props) {
           </div>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="space-y-2">
+        <div className="grid min-w-0 max-w-full gap-3 sm:grid-cols-2">
+          <div className="min-w-0 space-y-2">
             <Label
               htmlFor="customer-phone"
               className="mb-1.5 block text-[13px] font-semibold text-[#374151]"
@@ -367,7 +367,7 @@ export function PublicLeadForm({ contractorSlug }: Props) {
         </div>
 
         {turnstileSiteKey ? (
-          <div className="pt-2">
+          <div className="max-w-full overflow-x-hidden pt-2">
             <Turnstile
               siteKey={turnstileSiteKey}
               onSuccess={(token) => setTurnstileToken(token)}

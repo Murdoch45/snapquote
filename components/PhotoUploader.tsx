@@ -129,8 +129,8 @@ export function PhotoUploader({
   };
 
   return (
-    <div className="space-y-3">
-      <div className="rounded-[12px] border-2 border-dashed border-[#BFDBFE] bg-[#F8FBFF] p-6 text-center">
+    <div className="min-w-0 max-w-full space-y-3 overflow-x-hidden">
+      <div className="max-w-full overflow-x-hidden rounded-[12px] border-2 border-dashed border-[#BFDBFE] bg-[#F8FBFF] p-6 text-center">
         <p className="mb-4 text-sm text-[#6B7280]">
           {required
             ? `Upload at least 1 photo for an estimate request (up to ${maxFiles}).`
@@ -149,17 +149,21 @@ export function PhotoUploader({
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={files.length >= maxFiles || compressing}
+          className="max-w-full"
         >
           <UploadCloud className="mr-2 h-4 w-4" />
           {compressing ? "Compressing..." : "Upload photos"}
         </Button>
       </div>
       {previews.length > 0 && (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <div className="grid min-w-0 max-w-full grid-cols-2 gap-3 sm:grid-cols-3">
           {previews.map(({ file, url }, index) => (
-            <div key={`${file.name}-${index}`} className="group relative overflow-hidden rounded-[12px] border border-[#E5E7EB] bg-white">
+            <div
+              key={`${file.name}-${index}`}
+              className="group relative min-w-0 max-w-full overflow-hidden rounded-[12px] border border-[#E5E7EB] bg-white"
+            >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={url} alt={file.name} className="h-24 w-full object-cover" />
+              <img src={url} alt={file.name} className="h-24 w-full max-w-full object-cover" />
               <button
                 type="button"
                 className="absolute right-1 top-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-black/65 text-white opacity-0 transition group-hover:opacity-100"

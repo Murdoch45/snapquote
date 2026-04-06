@@ -56,7 +56,11 @@ export function ServiceQuestion({
   };
 
   return (
-    <div className={`space-y-3 rounded-[12px] border border-[#E5E7EB] bg-white p-4 ${disabled ? "opacity-60" : ""}`}>
+    <div
+      className={`min-w-0 max-w-full space-y-3 rounded-[12px] border border-[#E5E7EB] bg-white p-4 ${
+        disabled ? "opacity-60" : ""
+      }`}
+    >
       <Label className="text-[13px] font-semibold text-[#374151]">
         {question.question} <span className="text-[#2563EB]">*</span>
       </Label>
@@ -89,7 +93,7 @@ export function ServiceQuestion({
               <label
                 key={option}
                 htmlFor={optionId}
-                className={`flex cursor-pointer items-center gap-3 rounded-[10px] border p-3 text-sm transition-colors ${
+                className={`flex min-w-0 max-w-full cursor-pointer items-center gap-3 rounded-[10px] border p-3 text-sm transition-colors ${
                   checked
                     ? "border-[#2563EB] bg-[#EFF6FF] text-[#111827]"
                     : "border-[#E5E7EB] bg-white text-[#374151] hover:border-[#BFDBFE]"
@@ -102,7 +106,7 @@ export function ServiceQuestion({
                   disabled={disabled}
                   className="border-[#D1D5DB] data-[state=checked]:border-[#2563EB] data-[state=checked]:bg-[#2563EB]"
                 />
-                <span>{option}</span>
+                <span className="min-w-0 break-words">{option}</span>
               </label>
             );
           })}
@@ -115,7 +119,7 @@ export function ServiceQuestion({
               <label
                 key={option}
                 htmlFor={optionId}
-                className={`flex cursor-pointer items-center gap-3 rounded-[10px] border p-3 text-sm transition-colors ${
+                className={`flex min-w-0 max-w-full cursor-pointer items-center gap-3 rounded-[10px] border p-3 text-sm transition-colors ${
                   value === option
                     ? "border-[#2563EB] bg-[#EFF6FF] text-[#111827]"
                     : "border-[#E5E7EB] bg-white text-[#374151] hover:border-[#BFDBFE]"
@@ -135,7 +139,7 @@ export function ServiceQuestion({
                   }}
                   className="h-4 w-4 border-[#D1D5DB] text-[#2563EB] focus:ring-[#2563EB]"
                 />
-                <span>{option}</span>
+                <span className="min-w-0 break-words">{option}</span>
               </label>
             );
           })}

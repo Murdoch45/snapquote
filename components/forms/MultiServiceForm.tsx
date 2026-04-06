@@ -26,13 +26,13 @@ export function MultiServiceForm({
   onAddAnotherChange
 }: Props) {
   return (
-    <div className="space-y-10">
+    <div className="min-w-0 max-w-full space-y-10">
       {services.map((serviceEntry, index) => {
         const sectionNumber = index + 1;
         const idPrefix = `service-${sectionNumber}`;
 
         return (
-          <section key={idPrefix} className="space-y-4">
+          <section key={idPrefix} className="min-w-0 max-w-full space-y-4">
             <div className="space-y-1">
               <h3 className="text-[13px] font-semibold text-[#374151]">
                 Service {sectionNumber} <span className="text-[#2563EB]">*</span>
@@ -53,7 +53,7 @@ export function MultiServiceForm({
             />
 
             {serviceEntry.service ? (
-              <div className="space-y-3 rounded-[12px] border border-[#E5E7EB] bg-white p-4">
+              <div className="min-w-0 max-w-full space-y-3 rounded-[12px] border border-[#E5E7EB] bg-white p-4">
                 <Label className="text-[13px] font-semibold text-[#374151]">
                   Do you need help with another service? <span className="text-[#2563EB]">*</span>
                 </Label>
@@ -67,7 +67,7 @@ export function MultiServiceForm({
                       <label
                         key={option.value}
                         htmlFor={optionId}
-                        className={`flex cursor-pointer items-center gap-3 rounded-[10px] border p-3 text-sm transition-colors ${
+                        className={`flex min-w-0 max-w-full cursor-pointer items-center gap-3 rounded-[10px] border p-3 text-sm transition-colors ${
                           serviceEntry.addAnother === option.value
                             ? "border-[#2563EB] bg-[#EFF6FF] text-[#111827]"
                             : "border-[#E5E7EB] bg-white text-[#374151] hover:border-[#BFDBFE]"
