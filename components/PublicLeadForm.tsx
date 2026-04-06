@@ -250,7 +250,7 @@ export function PublicLeadForm({ contractorSlug }: Props) {
 
   return (
     <>
-      <form className="min-w-0 max-w-full space-y-5 overflow-x-hidden" noValidate onSubmit={onSubmit}>
+      <form className="min-w-0 max-w-full space-y-5" noValidate onSubmit={onSubmit}>
         <p className="text-xs text-[#6B7280]">* Required fields</p>
         <AddressAutocomplete
           variant="public"
@@ -367,7 +367,7 @@ export function PublicLeadForm({ contractorSlug }: Props) {
         </div>
 
         {turnstileSiteKey ? (
-          <div className="max-w-full overflow-x-hidden pt-2">
+          <div className="pt-2">
             <Turnstile
               siteKey={turnstileSiteKey}
               onSuccess={(token) => setTurnstileToken(token)}

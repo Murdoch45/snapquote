@@ -20,8 +20,8 @@ export default async function ContractorPublicPage({ params }: Props) {
   if (!profile) notFound();
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-[linear-gradient(135deg,#EFF6FF_0%,#F8F9FC_50%,#EFF6FF_100%)] px-4 py-10 sm:py-16">
-      <div className="mx-auto w-full max-w-[600px] overflow-x-hidden rounded-[16px] border border-[#E5E7EB] bg-white p-4 shadow-[0_4px_24px_rgba(37,99,235,0.08)] sm:p-8">
+    <main className="min-h-screen bg-[linear-gradient(135deg,#EFF6FF_0%,#F8F9FC_50%,#EFF6FF_100%)] px-4 py-10 sm:py-16">
+      <div className="mx-auto w-full max-w-[600px] rounded-[16px] border border-[#E5E7EB] bg-white p-4 shadow-[0_4px_24px_rgba(37,99,235,0.08)] sm:p-8">
         <div className="mb-6">
           <BrandLogo size="sm" />
         </div>
