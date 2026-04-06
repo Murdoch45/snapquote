@@ -156,6 +156,12 @@ export async function POST(request: Request) {
     }
 
     await admin
+      .from("quotes")
+      .update({ sent_via: sentChannels })
+      .eq("id", quote.id)
+      .eq("org_id", auth.orgId);
+
+    await admin
       .from("leads")
       .update({
         status: "QUOTED"
