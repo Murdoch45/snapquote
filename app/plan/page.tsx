@@ -24,7 +24,8 @@ export default function PlanRedirectPage() {
         });
       }
 
-      router.replace("/app/plan");
+      const search = window.location.search;
+      router.replace(`/app/plan${search}`);
     }
   }, [router]);
 

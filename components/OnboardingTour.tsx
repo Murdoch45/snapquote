@@ -369,7 +369,7 @@ export function OnboardingTour({ enabled, slug }: OnboardingTourProps) {
       <div className="relative h-full w-full">
         <div
           ref={cardRef}
-          className={`pointer-events-auto fixed rounded-[14px] border border-slate-700/80 bg-[#1e293b] p-5 text-white shadow-[0_24px_60px_-30px_rgba(15,23,42,0.65)] transition-all duration-300 ${
+          className={`pointer-events-auto fixed rounded-[14px] border border-slate-700/80 bg-[#1e293b] p-4 text-white shadow-[0_24px_60px_-30px_rgba(15,23,42,0.65)] transition-all duration-300 md:p-5 ${
             isStepVisible ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"
           }`}
           style={tooltipStyle}
@@ -384,7 +384,7 @@ export function OnboardingTour({ enabled, slug }: OnboardingTourProps) {
             {stepIndex + 1} of {steps.length}
           </p>
 
-          <div className="relative mt-4 h-[220px] overflow-hidden rounded-[12px] border border-slate-600 bg-[#F8F9FC]">
+          <div className="relative mt-3 hidden h-[220px] overflow-hidden rounded-[12px] border border-slate-600 bg-[#F8F9FC] md:block">
             <div
               style={{
                 position: "absolute",
@@ -399,12 +399,12 @@ export function OnboardingTour({ enabled, slug }: OnboardingTourProps) {
             </div>
           </div>
 
-          <h3 className="mt-5 text-[24px] font-semibold tracking-[-0.02em] text-white">
+          <h3 className="mt-3 text-[18px] font-semibold tracking-[-0.02em] text-white md:mt-5 md:text-[24px]">
             {currentStep.title}
           </h3>
-          <p className="mt-3 text-[15px] leading-7 text-slate-200">{currentStep.body}</p>
+          <p className="mt-2 text-[13px] leading-5 text-slate-200 md:mt-3 md:text-[15px] md:leading-7">{currentStep.body}</p>
 
-          <div className="mt-6 flex items-center justify-between gap-3">
+          <div className="mt-4 flex items-center justify-between gap-3 md:mt-6">
             <button
               type="button"
               onClick={() => void completeTour()}
