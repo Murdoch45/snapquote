@@ -18,7 +18,11 @@
   --ring: 217.2 91.2% 59.8%;
 }
 
-* {
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  max-width: 100%;
   border-color: hsl(var(--border));
 }
 
