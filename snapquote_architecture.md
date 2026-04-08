@@ -9,7 +9,7 @@ IMPORTANT:
 - Use Next.js (App Router) + TypeScript.
 - Use Supabase for Postgres DB, Auth, Storage, Realtime.
 - Use OpenAI API for AI estimate generation and quote draft text.
-- Support SMS via Twilio (optional per contractor settings).
+- Support SMS via Telnyx (optional per contractor settings).
 - Support Email notifications + quote delivery (optional per contractor settings) using Resend (preferred) OR Supabase email if you decide; pick one and implement.
 - Customer-facing pages must be minimal and fast.
 - AI NEVER sends quotes automatically. AI suggests; contractor must approve & send.
@@ -118,7 +118,7 @@ Notifications:
   - acceptance notifications: sms on/off, email on/off
 - In-dashboard notifications:
   - show a small non-modal toast + a notification bell feed (do NOT block UI with modal popups)
-- SMS via Twilio
+- SMS via Telnyx
 - Email via Resend
 
 Slug:
@@ -432,7 +432,7 @@ OpenAI prompt guidance:
 NOTIFICATIONS
 
 Implement /lib/notify.ts:
-- sendSms(to, body) via Twilio (if env configured)
+- sendSms(to, body) via Telnyx (if env configured)
 - sendEmail(to, subject, html/text) via Resend (if env configured)
 - pick channel:
   - For customer messages: if phone present -> SMS else email
@@ -542,9 +542,7 @@ OPENAI_API_KEY=
 
 GOOGLE_MAPS_API_KEY=
 
-TWILIO_ACCOUNT_SID=
-TWILIO_AUTH_TOKEN=
-TWILIO_FROM_NUMBER=
+TELNYX_API_KEY=
 
 RESEND_API_KEY=
 RESEND_FROM_EMAIL=

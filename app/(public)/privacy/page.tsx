@@ -56,7 +56,7 @@ export default function PrivacyPage() {
             <p>We use your information to generate AI-powered job estimates using OpenAI.</p>
             <p>
               We use your information to send estimates and communications via email
-              through Resend and SMS through Twilio.
+              through Resend and SMS through Telnyx.
             </p>
             <p>We use your information to process payments via Stripe.</p>
             <p>We use your information to improve the service.</p>
@@ -71,7 +71,7 @@ export default function PrivacyPage() {
               <li>Stripe (payment processing) — stripe.com/privacy</li>
               <li>Supabase (database and authentication) — supabase.com/privacy</li>
               <li>OpenAI (AI estimate generation) — openai.com/privacy</li>
-              <li>Twilio (SMS delivery) — twilio.com/legal/privacy</li>
+              <li>Telnyx (SMS delivery) — telnyx.com/legal-center/privacy-policy</li>
               <li>Resend (email delivery) — resend.com/privacy</li>
               <li>Google Maps (address verification) — policies.google.com/privacy</li>
               <li>Cloudflare (bot protection) — cloudflare.com/privacypolicy</li>

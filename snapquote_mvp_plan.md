@@ -3,7 +3,7 @@
 ### Summary
 - Build a greenfield Next.js App Router + TypeScript web app with TailwindCSS and shadcn/ui, using Supabase for Auth/Postgres/Storage/Realtime.
 - Implement full lead intake → AI estimate suggestion → contractor approval/send → customer accept flow, with multi-tenant org security via RLS.
-- Implement notifications with Twilio (SMS) and Resend (email), with graceful no-op when env vars are missing.
+- Implement notifications with Telnyx (SMS) and Resend (email), with graceful no-op when env vars are missing.
 - Locked decisions: `Email+Password` auth, OpenAI model default `gpt-4.1-mini`, and backend-enforced `7-day` quote expiry.
 
 ### Key Implementation Changes
@@ -33,7 +33,7 @@
 
 ### Test Plan
 1. Unit tests for zod validation, slug generation uniqueness retries, usage limit math, quote expiry logic, and AI output parser fallback.
-2. Integration tests for API handlers with mocked OpenAI/Twilio/Resend and Supabase test DB: lead submit, quote send, view/accept, invite, settings update, and RLS-protected access.
+2. Integration tests for API handlers with mocked OpenAI/Telnyx/Resend and Supabase test DB: lead submit, quote send, view/accept, invite, settings update, and RLS-protected access.
 3. Manual E2E pass for all 12 acceptance criteria: signup→org, slug edit, public lead submit with photos, AI data persisted, lead list/detail visibility, quote compose/send, public quote view/accept, contractor notification, analytics metrics/charts, team invite flow, and monthly limit warning/block behavior.
 4. Quality checks: `npm run lint`, `npm run typecheck`, and production build before completion.
 

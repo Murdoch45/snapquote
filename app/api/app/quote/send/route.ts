@@ -7,7 +7,7 @@ import { buildEstimateLink, renderEstimateTemplate } from "@/lib/quote-template"
 import { SubscriptionRequiredError, requireActiveSubscription } from "@/lib/subscription";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { sendQuoteSms } from "@/lib/twilio";
+import { sendQuoteSms } from "@/lib/telnyx";
 import { incrementUsageOnQuoteSend } from "@/lib/usage";
 import { sendQuoteSchema } from "@/lib/validations";
 

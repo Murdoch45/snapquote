@@ -1,6 +1,6 @@
 # SnapQuote MVP
 
-SnapQuote is an AI-assisted quoting and lead intake platform for outdoor service contractors. This project is a responsive web app built with Next.js App Router, TypeScript, TailwindCSS + shadcn-style UI components, Supabase, OpenAI, Twilio, and Resend.
+SnapQuote is an AI-assisted quoting and lead intake platform for outdoor service contractors. This project is a responsive web app built with Next.js App Router, TypeScript, TailwindCSS + shadcn-style UI components, Supabase, OpenAI, Telnyx, and Resend.
 
 ## Stack
 
@@ -8,7 +8,7 @@ SnapQuote is an AI-assisted quoting and lead intake platform for outdoor service
 - TailwindCSS + reusable UI components in `components/ui`
 - Supabase (Postgres, Auth, Storage, Realtime)
 - OpenAI Responses API (`gpt-4.1-mini` default)
-- Twilio (SMS notifications)
+- Telnyx (SMS notifications)
 - Resend (email notifications)
 - Recharts (analytics charts)
 - Zod (validation)
@@ -40,9 +40,7 @@ OPENAI_MODEL=gpt-4.1-mini
 GOOGLE_MAPS_API_KEY=
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=
 
-TWILIO_ACCOUNT_SID=
-TWILIO_AUTH_TOKEN=
-TWILIO_FROM_NUMBER=
+TELNYX_API_KEY=
 
 RESEND_API_KEY=
 RESEND_FROM_EMAIL=
@@ -51,7 +49,8 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
 Notes:
-- Twilio and Resend are optional. If missing, notifications no-op.
+- `TELNYX_API_KEY` is required for SMS delivery. If missing, SMS notifications no-op.
+- Resend is optional. If missing, email notifications no-op.
 - `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` is required for the public address field because leads must be submitted from a Google Places selection.
 
 ## Supabase Setup

@@ -1,4 +1,3 @@
-import twilio from "twilio";
 import { Resend } from "resend";
 
 type SendEmailInput = {
@@ -8,26 +7,13 @@ type SendEmailInput = {
   html?: string;
 };
 
-const twilioConfigured = Boolean(
-  process.env.TWILIO_ACCOUNT_SID &&
-    process.env.TWILIO_AUTH_TOKEN &&
-    process.env.TWILIO_PHONE_NUMBER
-);
+const TELNYX_API_URL = "https://api.telnyx.com/v2/messages";
+const TELNYX_FROM_NUMBER = "+17169938159";
 
+const telnyxConfigured = Boolean(process.env.TELNYX_API_KEY);
 const resendConfigured = Boolean(process.env.RESEND_API_KEY);
 
-let twilioClient: ReturnType<typeof twilio> | null = null;
 let resendClient: Resend | null = null;
-
-function getTwilioClient(): ReturnType<typeof twilio> {
-  if (!twilioClient) {
-    twilioClient = twilio(
-      process.env.TWILIO_ACCOUNT_SID as string,
-      process.env.TWILIO_AUTH_TOKEN as string
-    );
-  }
-  return twilioClient;
-}
 
 function getResendClient(): Resend {
   if (!resendClient) resendClient = new Resend(process.env.RESEND_API_KEY as string);
@@ -35,19 +21,41 @@ function getResendClient(): Resend {
 }
 
 export async function sendSms(to: string, body: string): Promise<boolean> {
-  if (!twilioConfigured) {
-    console.warn("Twilio sendSms skipped: Twilio is not fully configured.");
+  if (!telnyxConfigured) {
+    console.warn("Telnyx sendSms skipped: TELNYX_API_KEY missing.");
     return false;
   }
   try {
-    await getTwilioClient().messages.create({
-      to,
-      from: process.env.TWILIO_PHONE_NUMBER as string,
-      body
+    const response = await fetch(TELNYX_API_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.TELNYX_API_KEY as string}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        from: TELNYX_FROM_NUMBER,
+        to,
+        text: body
+      })
     });
+
+    if (!response.ok) {
+      let detail = "";
+      try {
+        const errBody = await response.json();
+        detail = JSON.stringify(errBody);
+      } catch {
+        detail = await response.text().catch(() => "");
+      }
+      console.error(
+        `Telnyx sendSms failed (${response.status} ${response.statusText}): ${detail}`
+      );
+      return false;
+    }
+
     return true;
   } catch (error) {
-    console.error("Twilio sendSms error:", error);
+    console.error("Telnyx sendSms error:", error);
     return false;
   }
 }
@@ -116,8 +124,8 @@ export async function notifyContractor(opts: {
 }): Promise<("sms" | "email")[]> {
   const sent: ("sms" | "email")[] = [];
   if (opts.smsEnabled && opts.phone) {
-    if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN) {
-      console.warn("Twilio SMS skipped: missing TWILIO_ACCOUNT_SID or TWILIO_AUTH_TOKEN.");
+    if (!process.env.TELNYX_API_KEY) {
+      console.warn("Telnyx SMS skipped: missing TELNYX_API_KEY.");
     } else {
       const ok = await sendSms(opts.phone, opts.smsBody);
       if (ok) sent.push("sms");

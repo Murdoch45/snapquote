@@ -13,10 +13,7 @@ const serverEnvSchema = clientEnvSchema.extend({
   OPENAI_API_KEY: z.string().optional(),
   OPENAI_MODEL: z.string().optional(),
   GOOGLE_MAPS_API_KEY: z.string().optional(),
-  TWILIO_ACCOUNT_SID: z.string().optional(),
-  TWILIO_AUTH_TOKEN: z.string().optional(),
-  TWILIO_PHONE_NUMBER: z.string().optional(),
-  TWILIO_FROM_NUMBER: z.string().optional(),
+  TELNYX_API_KEY: z.string().min(1),
   RESEND_API_KEY: z.string().optional(),
   RESEND_FROM_EMAIL: z.string().optional()
 });
