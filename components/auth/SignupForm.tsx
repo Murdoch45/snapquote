@@ -100,7 +100,7 @@ export function SignupForm() {
       oauthTimeoutRef.current = null;
       setLoadingProvider(null);
       window.sessionStorage.removeItem(OAUTH_SIGNUP_TOAST_KEY);
-    }, 5000);
+    }, 2000);
 
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider,

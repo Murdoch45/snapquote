@@ -65,21 +65,6 @@ export function OAuthButtons({
       </div>
 
       <div className="space-y-3">
-        {/* Google Sign-In button — follows Google brand guidelines:
-            white background, #747775 border, full-color G logo,
-            14px Roboto-equivalent system font, 40px+ height. */}
-        <button
-          type="button"
-          onClick={() => onProviderClick("google")}
-          disabled={disabled}
-          aria-label={googleLabel}
-          className="flex h-11 w-full items-center justify-center gap-3 rounded-xl border border-[#747775] bg-white px-4 font-medium text-[#1f1f1f] transition-colors hover:bg-[#f8f9fa] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1a73e8] disabled:cursor-not-allowed disabled:opacity-60"
-          style={{ fontFamily: '"Roboto","Helvetica Neue",Arial,sans-serif', fontSize: "14px", letterSpacing: "0.25px" }}
-        >
-          <GoogleLogo />
-          <span>{loadingProvider === "google" ? "Redirecting..." : googleLabel}</span>
-        </button>
-
         {/* Apple Sign-In button — follows Apple Human Interface Guidelines:
             black background, white Apple logo, white SF-equivalent system text. */}
         <button
@@ -96,6 +81,21 @@ export function OAuthButtons({
         >
           <AppleLogo />
           <span>{loadingProvider === "apple" ? "Redirecting..." : appleLabel}</span>
+        </button>
+
+        {/* Google Sign-In button — follows Google brand guidelines:
+            white background, #747775 border, full-color G logo,
+            14px Roboto-equivalent system font, 40px+ height. */}
+        <button
+          type="button"
+          onClick={() => onProviderClick("google")}
+          disabled={disabled}
+          aria-label={googleLabel}
+          className="flex h-11 w-full items-center justify-center gap-3 rounded-xl border border-[#747775] bg-white px-4 font-medium text-[#1f1f1f] transition-colors hover:bg-[#f8f9fa] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1a73e8] disabled:cursor-not-allowed disabled:opacity-60"
+          style={{ fontFamily: '"Roboto","Helvetica Neue",Arial,sans-serif', fontSize: "14px", letterSpacing: "0.25px" }}
+        >
+          <GoogleLogo />
+          <span>{loadingProvider === "google" ? "Redirecting..." : googleLabel}</span>
         </button>
       </div>
     </div>

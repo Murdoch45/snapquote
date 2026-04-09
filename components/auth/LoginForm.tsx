@@ -77,7 +77,7 @@ export function LoginForm() {
     oauthTimeoutRef.current = window.setTimeout(() => {
       oauthTimeoutRef.current = null;
       setLoadingProvider(null);
-    }, 5000);
+    }, 2000);
 
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider,
