@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Copy, Download, ExternalLink, Link2 } from "lucide-react";
+import { Copy, Download, ExternalLink, Link2, Share2 } from "lucide-react";
 import { QRCodeCanvas } from "qrcode.react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -76,6 +76,36 @@ export function MyLinkPageClient({
     }
   };
 
+  const onShareLink = async () => {
+    // Prefer the native share sheet (mobile Safari, mobile Chrome, etc.).
+    // Fall back to clipboard on desktop browsers that don't implement
+    // navigator.share.
+    if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+      try {
+        await navigator.share({
+          title: businessName,
+          text: socialCaption,
+          url: requestLink
+        });
+        return;
+      } catch (error) {
+        // The user dismissing the share sheet rejects with AbortError —
+        // treat it as a silent no-op rather than a failure.
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+        // Any other failure falls through to the clipboard path below.
+      }
+    }
+
+    try {
+      await copyText(requestLink);
+      toast.success("Sharing isn't available here — link copied instead.");
+    } catch {
+      toast.error("Could not share or copy link.");
+    }
+  };
+
   const onCopyCaption = async () => {
     try {
       await copyText(socialCaption);
@@ -139,6 +169,22 @@ export function MyLinkPageClient({
 
   return (
     <div className="space-y-6">
+      <Card className="shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
+        <CardHeader className="pb-4">
+          <p className="text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280]">Share</p>
+          <CardDescription>Share your link with your caption via text or social</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Button type="button" onClick={onShareLink}>
+            <Share2 className="mr-2 h-4 w-4" />
+            Share Link
+          </Button>
+          <div className="rounded-[8px] border border-[#FCD34D] bg-[#FFFBEB] px-4 py-3 text-sm text-[#92400E]">
+            Your link updates automatically if you change your Public URL in Settings.
+          </div>
+        </CardContent>
+      </Card>
+
       <Card className="shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
         <CardHeader className="pb-4">
           <p className="text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280]">Your Link</p>
