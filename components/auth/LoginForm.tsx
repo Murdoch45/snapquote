@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
@@ -21,9 +21,34 @@ export function LoginForm() {
   const [submitting, setSubmitting] = useState(false);
   const [loadingProvider, setLoadingProvider] = useState<Provider | null>(null);
 
-  // Reset the "Redirecting..." state if the user backs out of the OAuth flow
-  // and the page is restored from BFCache (mobile back button).
-  useOAuthLoadingReset(useCallback(() => setLoadingProvider(null), []));
+  // Per-click reset timer. Every OAuth click installs a fresh 5s timeout that
+  // wipes the loading state if the user is still on this page when it fires.
+  // This is the primary defense against the "stuck on Redirecting..." bug on
+  // iPhone Safari, where window-level event listeners are unreliable across
+  // repeated cancellations.
+  const oauthTimeoutRef = useRef<number | null>(null);
+  const clearOAuthTimeout = useCallback(() => {
+    if (oauthTimeoutRef.current !== null) {
+      window.clearTimeout(oauthTimeoutRef.current);
+      oauthTimeoutRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (oauthTimeoutRef.current !== null) {
+        window.clearTimeout(oauthTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Window-level safety net (BFCache restore, popstate, focus, etc.).
+  useOAuthLoadingReset(
+    useCallback(() => {
+      clearOAuthTimeout();
+      setLoadingProvider(null);
+    }, [clearOAuthTimeout])
+  );
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -45,7 +70,14 @@ export function LoginForm() {
   };
 
   const handleOAuth = async (provider: Provider) => {
+    // Clear any in-flight reset timer from a previous click before arming a
+    // new one. Each click gets its own independent 5s window.
+    clearOAuthTimeout();
     setLoadingProvider(provider);
+    oauthTimeoutRef.current = window.setTimeout(() => {
+      oauthTimeoutRef.current = null;
+      setLoadingProvider(null);
+    }, 5000);
 
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider,
@@ -58,6 +90,7 @@ export function LoginForm() {
     });
 
     if (oauthError) {
+      clearOAuthTimeout();
       toast.error(oauthError.message);
       setLoadingProvider(null);
     }
