@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { OAuthButtons } from "@/components/auth/OAuthButtons";
 import { PasswordField } from "@/components/auth/PasswordField";
+import { useOAuthLoadingReset } from "@/components/auth/useOAuthLoadingReset";
 
 type Provider = "google" | "apple";
 
@@ -19,6 +20,10 @@ export function LoginForm() {
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [loadingProvider, setLoadingProvider] = useState<Provider | null>(null);
+
+  // Reset the "Redirecting..." state if the user backs out of the OAuth flow
+  // and the page is restored from BFCache (mobile back button).
+  useOAuthLoadingReset(useCallback(() => setLoadingProvider(null), []));
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -45,7 +50,10 @@ export function LoginForm() {
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: `${window.location.origin}/app`
+        // Point at the PKCE callback route, which exchanges ?code=... for a
+        // session before forwarding to /app. Without this hop the user lands
+        // on /app with no session and gets bounced to /login.
+        redirectTo: `${window.location.origin}/auth/callback?next=/app`
       }
     });
 
