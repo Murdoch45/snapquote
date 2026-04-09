@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Lock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { getAnalytics } from "@/lib/db";
+import { getOrgCredits } from "@/lib/credits";
 import { requireAuth } from "@/lib/auth/requireAuth";
 import { getAddressParts } from "@/lib/leadPresentation";
 import { getServiceBadgeClassName } from "@/lib/serviceColors";
@@ -64,9 +65,26 @@ function getEstimateLabel(lead: DashboardLead): string {
   return range ?? "AI estimate pending";
 }
 
+// The fixed-width 140px stat cards have ~100px of inner content space; at
+// 26px bold roughly 6 characters fit. Step the font size down for longer
+// values like "$1,234" or "$1,234,567" so they don't get truncated. This
+// is the web equivalent of `adjustsFontSizeToFit` on native — same logic
+// runs at every screen size since the card width is fixed.
+function getStatValueSizeClass(value: string): string {
+  const len = value.length;
+  if (len >= 11) return "text-[14px]";
+  if (len >= 9) return "text-[17px]";
+  if (len >= 7) return "text-[20px]";
+  if (len >= 6) return "text-[23px]";
+  return "text-[26px]";
+}
+
 export default async function DashboardPage() {
   const auth = await requireAuth();
-  const analytics = await getAnalytics(auth.orgId);
+  const [analytics, credits] = await Promise.all([
+    getAnalytics(auth.orgId),
+    getOrgCredits(auth.orgId)
+  ]);
 
   const supabase = await createServerSupabaseClient();
   const [{ data: latestLeads }, { data: unlockedRows }] = await Promise.all([
@@ -104,11 +122,12 @@ export default async function DashboardPage() {
   const { totals } = analytics;
 
   const stats = [
+    { label: "Credits Remaining", value: String(credits.total) },
     { label: "Leads This Month", value: String(totals.totalLeads) },
-    { label: "Quotes Sent", value: String(totals.quotesSent) },
+    { label: "Estimates Sent", value: String(totals.quotesSent) },
     { label: "Estimates Accepted", value: String(totals.quotesAccepted) },
     { label: "Acceptance Rate", value: `${totals.acceptanceRate}%` },
-    { label: "Avg Quote Value", value: toCurrency(totals.avgQuoteValue) },
+    { label: "Avg Estimate Value", value: toCurrency(totals.avgQuoteValue) },
     { label: "Avg Response Time", value: formatResponseTime(totals.avgResponseMinutes) }
   ];
 
@@ -192,7 +211,11 @@ export default async function DashboardPage() {
               <p className="text-[13px] font-semibold uppercase leading-[18px] tracking-[0.04em] text-[#9CA3AF]">
                 {stat.label}
               </p>
-              <p className="mt-2 truncate text-[26px] font-bold text-[#111827]">{stat.value}</p>
+              <p
+                className={`mt-2 truncate font-bold text-[#2563EB] ${getStatValueSizeClass(stat.value)}`}
+              >
+                {stat.value}
+              </p>
             </div>
           ))}
         </div>
