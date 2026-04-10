@@ -22,8 +22,8 @@ function formatPlanName(plan: "SOLO" | "TEAM" | "BUSINESS"): string {
 
 function getPlanPrice(plan: "SOLO" | "TEAM" | "BUSINESS"): string {
   if (plan === "SOLO") return "Free";
-  if (plan === "TEAM") return "$19/month";
-  return "$39/month";
+  if (plan === "TEAM") return "$19.99/month";
+  return "$39.99/month";
 }
 
 function getUsagePercent(used: number, limit: number): number {
