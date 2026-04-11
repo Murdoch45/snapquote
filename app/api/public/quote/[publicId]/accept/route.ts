@@ -70,20 +70,17 @@ export async function POST(_request: Request, { params }: Props) {
 
   await admin.from("leads").update({ status: "ACCEPTED" }).eq("id", acceptedQuote.lead_id);
 
-  const { error: quoteEventError } = await admin.from("quote_events").upsert(
-    {
+  // Record the ACCEPTED event for the notification feed. This is best-effort
+  // — if it fails (e.g. missing unique constraint from unapplied migration),
+  // the acceptance itself is already committed and should not be blocked.
+  try {
+    await admin.from("quote_events").insert({
       org_id: acceptedQuote.org_id,
       quote_id: acceptedQuote.id,
       event_type: "ACCEPTED"
-    },
-    {
-      onConflict: "quote_id,event_type",
-      ignoreDuplicates: true
-    }
-  );
-
-  if (quoteEventError) {
-    return NextResponse.json({ error: "Unable to record estimate acceptance." }, { status: 500 });
+    });
+  } catch (eventError) {
+    console.warn("quote_events ACCEPTED insert failed (non-blocking):", eventError);
   }
 
   const [
@@ -104,12 +101,12 @@ export async function POST(_request: Request, { params }: Props) {
       .single()
   ]);
 
-  if (leadError || !lead) {
-    return NextResponse.json({ error: "Lead not found for estimate." }, { status: 404 });
-  }
-
-  if (profileError || !profile) {
-    return NextResponse.json({ error: "Contractor profile not found." }, { status: 404 });
+  // Notifications are best-effort — the acceptance is already committed.
+  // If we can't load the lead or profile, skip notifications but still
+  // return success to the customer.
+  if (leadError || !lead || profileError || !profile) {
+    console.warn("Could not load lead/profile for acceptance notifications.");
+    return NextResponse.json({ accepted: true, acceptedAt: acceptedQuote.accepted_at });
   }
 
   const services = ((lead?.services ?? []) as string[]).join(", ");

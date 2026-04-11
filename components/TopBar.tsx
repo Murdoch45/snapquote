@@ -38,6 +38,7 @@ export function TopBar({
 }) {
   const pathname = usePathname();
   const [desktopNotificationsOpen, setDesktopNotificationsOpen] = useState(false);
+  const [notificationVisible, setNotificationVisible] = useState(false);
   const [mobilePopoverOpen, setMobilePopoverOpen] = useState(false);
   const mobilePopoverRef = useRef<HTMLDivElement | null>(null);
   const { feed, unreadCount, dismissNotification } = useNotifications(orgId);
@@ -86,22 +87,43 @@ export function TopBar({
     }
   }, []);
 
+  const fadeTimeoutRef = useRef<number | null>(null);
+
   const startNotificationTimer = useCallback(() => {
     clearNotificationTimer();
     notificationTimerRef.current = window.setTimeout(() => {
-      setDesktopNotificationsOpen(false);
       notificationTimerRef.current = null;
+      // Start fade-out: set visible to false (triggers opacity transition),
+      // then remove from DOM after the transition completes.
+      setNotificationVisible(false);
+      fadeTimeoutRef.current = window.setTimeout(() => {
+        setDesktopNotificationsOpen(false);
+        fadeTimeoutRef.current = null;
+      }, 300);
     }, 5000);
   }, [clearNotificationTimer]);
 
   // Start timer when dropdown opens, clean up when it closes
   useEffect(() => {
     if (desktopNotificationsOpen) {
+      // Small delay to ensure the element is in the DOM before triggering opacity
+      requestAnimationFrame(() => setNotificationVisible(true));
       startNotificationTimer();
     } else {
+      setNotificationVisible(false);
       clearNotificationTimer();
+      if (fadeTimeoutRef.current !== null) {
+        window.clearTimeout(fadeTimeoutRef.current);
+        fadeTimeoutRef.current = null;
+      }
     }
-    return clearNotificationTimer;
+    return () => {
+      clearNotificationTimer();
+      if (fadeTimeoutRef.current !== null) {
+        window.clearTimeout(fadeTimeoutRef.current);
+        fadeTimeoutRef.current = null;
+      }
+    };
   }, [desktopNotificationsOpen, startNotificationTimer, clearNotificationTimer]);
 
   const notificationButtonClassName =
@@ -116,7 +138,18 @@ export function TopBar({
         className={notificationButtonClassName}
         aria-label="Notifications"
         aria-expanded={desktopNotificationsOpen}
-        onClick={() => setDesktopNotificationsOpen((value) => !value)}
+        onClick={() => {
+          setDesktopNotificationsOpen((value) => {
+            if (!value) {
+              // Opening: cancel any in-flight fade
+              if (fadeTimeoutRef.current !== null) {
+                window.clearTimeout(fadeTimeoutRef.current);
+                fadeTimeoutRef.current = null;
+              }
+            }
+            return !value;
+          });
+        }}
       >
         <Bell className="h-4 w-4" />
         {unreadCount > 0 ? (
@@ -130,7 +163,19 @@ export function TopBar({
         <div
           ref={notificationPanelRef}
           className={notificationPanelClassName}
-          onMouseEnter={clearNotificationTimer}
+          style={{
+            opacity: notificationVisible ? 1 : 0,
+            transition: "opacity 300ms ease-out"
+          }}
+          onMouseEnter={() => {
+            clearNotificationTimer();
+            // Cancel any in-flight fade
+            if (fadeTimeoutRef.current !== null) {
+              window.clearTimeout(fadeTimeoutRef.current);
+              fadeTimeoutRef.current = null;
+            }
+            setNotificationVisible(true);
+          }}
           onMouseLeave={startNotificationTimer}
         >
           <NotificationsFeed feed={feed} onDismiss={dismissNotification} />
