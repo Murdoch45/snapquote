@@ -48,6 +48,7 @@ export function QuoteComposer({
   }));
   const [message, setMessage] = useState(initialMessage);
   const [messageGenerated, setMessageGenerated] = useState(false);
+  const [hasGeneratedBefore, setHasGeneratedBefore] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [quoteLink, setQuoteLink] = useState<string | null>(null);
@@ -149,6 +150,7 @@ export function QuoteComposer({
 
   const onGenerateMessage = () => {
     setMessageGenerated(true);
+    setHasGeneratedBefore(true);
   };
 
   const onEditEstimate = () => {
@@ -249,7 +251,7 @@ export function QuoteComposer({
             disabled={!canSend}
             className="h-11 w-full rounded-[10px] bg-[#2563EB] text-sm font-semibold text-white hover:bg-[#1D4ED8]"
           >
-            Generate Estimate
+            {hasGeneratedBefore ? "Regenerate Estimate" : "Generate Estimate"}
           </Button>
         ) : null}
 
@@ -308,7 +310,8 @@ export function QuoteComposer({
               </Button>
               <Button
                 type="button"
-                variant="ghost"
+                variant="outline"
+                className="border-gray-300 bg-gray-100 text-gray-700 hover:bg-gray-200"
                 onClick={onEditEstimate}
               >
                 Edit Estimate
