@@ -9,7 +9,7 @@ export type OrgPlan = (typeof ORG_PLANS)[number];
 export const MEMBER_ROLES = ["OWNER", "MEMBER"] as const;
 export type MemberRole = (typeof MEMBER_ROLES)[number];
 
-export const LEAD_STATUS = ["NEW", "QUOTED", "ACCEPTED", "ARCHIVED"] as const;
+export const LEAD_STATUS = ["NEW", "QUOTED", "ACCEPTED"] as const;
 export type LeadStatus = (typeof LEAD_STATUS)[number];
 
 export const QUOTE_STATUS = ["SENT", "VIEWED", "ACCEPTED", "EXPIRED"] as const;

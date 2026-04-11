@@ -64,7 +64,7 @@ type LeadSeed = {
   description: string;
   summary: string;
   answers: Record<string, string | string[]>;
-  status: "NEW" | "QUOTED" | "ACCEPTED" | "ARCHIVED";
+  status: "NEW" | "QUOTED" | "ACCEPTED";
   unlocked: boolean;
   photoCount: number;
   travelMiles: number;
@@ -432,7 +432,7 @@ const leadSeeds: LeadSeed[] = [
       junk_location: "Inside the home",
       junk_heavy_items: "Yes, a few"
     },
-    status: "ARCHIVED",
+    status: "NEW",
     unlocked: false,
     photoCount: 6,
     travelMiles: 15.9,

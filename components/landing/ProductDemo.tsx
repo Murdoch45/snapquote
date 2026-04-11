@@ -74,8 +74,6 @@ function getLeadStatusBadgeClass(status: string): string {
       return "border-transparent bg-[#F0FDF4] text-[#16A34A]";
     case "QUOTED":
       return "border-transparent bg-[#EFF6FF] text-[#2563EB]";
-    case "ARCHIVED":
-      return "border-transparent bg-[#F9FAFB] text-[#6B7280]";
     default:
       return "border-transparent bg-[#FFF7ED] text-[#EA580C]";
   }

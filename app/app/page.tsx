@@ -34,8 +34,7 @@ function formatDate(value: string): string {
 const STATUS_BADGE_COLORS: Record<string, string> = {
   NEW: "bg-[#DCFCE7] text-[#16A34A]",
   QUOTED: "bg-[#DBEAFE] text-[#2563EB]",
-  ACCEPTED: "bg-[#CCFBF1] text-[#0F766E]",
-  ARCHIVED: "bg-[#F3F4F6] text-[#6B7280]"
+  ACCEPTED: "bg-[#CCFBF1] text-[#0F766E]"
 };
 
 type DashboardLead = {

@@ -245,7 +245,7 @@ leads:
 - lng (double precision nullable)
 - services (text[] not null) // multi-select
 - description (text nullable)
-- status (text enum: NEW, QUOTED, ACCEPTED, ARCHIVED) default NEW
+- status (text enum: NEW, QUOTED, ACCEPTED) default NEW
 - submitted_at (timestamptz default now())
 - ai_job_summary (text nullable)
 - ai_estimate_low (numeric nullable)
