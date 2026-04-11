@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { timingSafeEqual } from "crypto";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getPlanMonthlyCredits } from "@/lib/plans";
+import { sendPlanEndedEmail, sendPlanUpgradedEmail } from "@/lib/planChangeEmails";
 import { claimWebhookEvent, releaseWebhookEvent } from "@/lib/webhookEvents";
 import type { OrgPlan } from "@/lib/types";
 
@@ -35,6 +36,8 @@ type RevenueCatEvent = {
   store?: string;
   transaction_id?: string;
   original_transaction_id?: string;
+  /** Trial expiration timestamp in milliseconds since epoch (RC convention). */
+  expiration_at_ms?: number | null;
 };
 
 type RevenueCatPayload = {
@@ -99,6 +102,29 @@ async function markOrganizationTrialUsed(orgId: string) {
     .update({ has_used_trial: true })
     .eq("id", orgId);
   if (error) throw error;
+}
+
+async function setOrganizationTrialEnd(orgId: string, trialEnd: Date) {
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from("organizations")
+    .update({
+      trial_ends_at: trialEnd.toISOString(),
+      // Reset notified flag so a re-trial gets a fresh email.
+      trial_ending_notified_at: null
+    })
+    .eq("id", orgId);
+  if (error) console.warn("Failed to set trial_ends_at from RC webhook:", error);
+}
+
+async function getCurrentOrgPlan(orgId: string): Promise<OrgPlan | null> {
+  const admin = createAdminClient();
+  const { data } = await admin
+    .from("organizations")
+    .select("plan")
+    .eq("id", orgId)
+    .maybeSingle();
+  return (data?.plan as OrgPlan | undefined) ?? null;
 }
 
 async function recordCreditPackPurchase(
@@ -207,7 +233,11 @@ export async function POST(request: Request) {
         await resetOrganizationCredits(orgId, plan);
         if (event.is_trial_period) {
           await markOrganizationTrialUsed(orgId);
+          if (event.expiration_at_ms) {
+            await setOrganizationTrialEnd(orgId, new Date(event.expiration_at_ms));
+          }
         }
+        void sendPlanUpgradedEmail(orgId, plan);
         break;
       }
 
@@ -222,6 +252,7 @@ export async function POST(request: Request) {
         }
         await setOrganizationPlan(orgId, plan);
         await resetOrganizationCredits(orgId, plan);
+        void sendPlanUpgradedEmail(orgId, plan);
         break;
       }
 
@@ -252,8 +283,12 @@ export async function POST(request: Request) {
 
       case "EXPIRATION":
       case "REFUND": {
+        const previousPlan = await getCurrentOrgPlan(orgId);
         await setOrganizationPlan(orgId, "SOLO");
         await resetOrganizationCredits(orgId, "SOLO");
+        if (previousPlan && previousPlan !== "SOLO") {
+          void sendPlanEndedEmail(orgId, previousPlan);
+        }
         break;
       }
 

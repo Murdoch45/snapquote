@@ -5,6 +5,7 @@ import { getPlanMonthlyCredits } from "@/lib/usage";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getPlanFromPriceId, getStripe, getStripeWebhookSecret } from "@/lib/stripe";
 import { claimWebhookEvent, releaseWebhookEvent } from "@/lib/webhookEvents";
+import { sendPlanUpgradedEmail, sendPlanEndedEmail } from "@/lib/planChangeEmails";
 import type { OrgPlan } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -117,6 +118,33 @@ async function markOrganizationTrialUsed(orgId: string) {
   if (error) throw error;
 }
 
+async function setOrganizationTrialEnd(
+  orgId: string,
+  trialEnd: Date | null
+): Promise<void> {
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from("organizations")
+    .update({
+      trial_ends_at: trialEnd ? trialEnd.toISOString() : null,
+      // Reset the notified flag whenever the trial window changes so a
+      // re-trial (rare on Stripe, possible on Apple) gets a fresh email.
+      trial_ending_notified_at: null
+    })
+    .eq("id", orgId);
+  if (error) console.warn("Failed to set trial_ends_at:", error);
+}
+
+async function getCurrentOrgPlan(orgId: string): Promise<OrgPlan | null> {
+  const admin = createAdminClient();
+  const { data } = await admin
+    .from("organizations")
+    .select("plan")
+    .eq("id", orgId)
+    .maybeSingle();
+  return (data?.plan as OrgPlan | undefined) ?? null;
+}
+
 async function handleCreditPackCheckoutCompleted(session: Stripe.Checkout.Session) {
   const orgId = session.metadata?.orgId;
   const creditAmountRaw = session.metadata?.creditAmount;
@@ -181,9 +209,13 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
   if (subscription.status === "trialing" || subscription.trial_end) {
     await markOrganizationTrialUsed(orgId);
+    if (subscription.trial_end) {
+      await setOrganizationTrialEnd(orgId, new Date(subscription.trial_end * 1000));
+    }
   }
 
   await setOrganizationPlan(orgId, plan);
+  void sendPlanUpgradedEmail(orgId, plan);
 }
 
 async function handleSubscriptionChanged(subscription: Stripe.Subscription) {
@@ -219,10 +251,17 @@ async function handleSubscriptionChanged(subscription: Stripe.Subscription) {
     return;
   }
 
+  // Capture the prior plan BEFORE we overwrite it so the downgrade email
+  // can mention what the user is being moved off of.
+  const previousPlan = downgradedToSolo ? await getCurrentOrgPlan(orgId) : null;
+
   await setOrganizationPlan(orgId, plan);
 
   if (downgradedToSolo) {
     await resetOrganizationCredits(orgId, "SOLO");
+    if (previousPlan && previousPlan !== "SOLO") {
+      void sendPlanEndedEmail(orgId, previousPlan);
+    }
   }
 }
 
@@ -236,6 +275,12 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
     console.warn("Invoice payment skipped: missing subscription reference.");
     return;
   }
+
+  // billing_reason "subscription_cycle" = recurring renewal (vs.
+  // "subscription_create" = first invoice). We only fire the renewal
+  // upgrade email on cycles so the initial purchase doesn't double-send
+  // (handleCheckoutCompleted already sent it for the first invoice).
+  const isRenewalCycle = invoice.billing_reason === "subscription_cycle";
 
   try {
     const subscription = await stripe.subscriptions.retrieve(subscriptionId);
@@ -270,6 +315,11 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
     }
 
     await resetOrganizationCredits(orgId, effectivePlan);
+
+    // Recurring renewal email — only on cycle invoices, not the first one.
+    if (isRenewalCycle && (effectivePlan === "TEAM" || effectivePlan === "BUSINESS")) {
+      void sendPlanUpgradedEmail(orgId, effectivePlan);
+    }
   } catch (error) {
     console.warn("Invoice payment skipped: unable to retrieve subscription.", error);
   }
@@ -304,8 +354,16 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     return;
   }
 
+  // Capture the prior plan BEFORE we move them to SOLO so the email
+  // can mention what they had before.
+  const previousPlan = await getCurrentOrgPlan(orgId);
+
   await setOrganizationPlan(orgId, "SOLO");
   await resetOrganizationCredits(orgId, "SOLO");
+
+  if (previousPlan && previousPlan !== "SOLO") {
+    void sendPlanEndedEmail(orgId, previousPlan);
+  }
 }
 
 export async function POST(request: Request) {

@@ -167,10 +167,12 @@ export async function POST(request: Request) {
     }
 
     if (body.sendEmail) {
+      const contractorReplyEmail =
+        (profile?.email as string | null) ?? (user?.email as string | null) ?? null;
       const customerEmail = buildEstimateSentEmail({
         businessName: (profile?.business_name as string) || "SnapQuote",
         contractorPhone: (profile?.phone as string | null) ?? null,
-        contractorEmail: (profile?.email as string | null) ?? (user?.email as string | null) ?? null,
+        contractorEmail: contractorReplyEmail,
         estimateLow: body.estimatedPriceLow,
         estimateHigh: body.estimatedPriceHigh,
         publicId: confirmedPublicId
@@ -179,7 +181,9 @@ export async function POST(request: Request) {
         to: lead.customer_email as string,
         subject: customerEmail.subject,
         text: customerEmail.text,
-        html: customerEmail.html
+        html: customerEmail.html,
+        // Replies go straight to the contractor, not to estimates@.
+        replyTo: contractorReplyEmail
       });
       if (!emailSent) {
         deliveryErrors.push("Failed to send estimate by email.");

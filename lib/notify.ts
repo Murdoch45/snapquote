@@ -1,10 +1,24 @@
 import { Resend } from "resend";
 
+type SenderKey = "transactional" | "noreply";
+
 type SendEmailInput = {
   to: string;
   subject: string;
   text: string;
   html?: string;
+  /**
+   * Which configured sender to use. "transactional" (default) is the
+   * customer-facing estimates@ address; "noreply" is for contractor
+   * lifecycle emails (welcome, plan changes, trial ending) where reply
+   * should be discouraged.
+   */
+  sender?: SenderKey;
+  /**
+   * Optional Reply-To header. Used on customer-facing emails so a reply
+   * routes back to the contractor's own inbox instead of estimates@.
+   */
+  replyTo?: string | null;
 };
 
 const TELNYX_API_URL = "https://api.telnyx.com/v2/messages";
@@ -60,24 +74,34 @@ export async function sendSms(to: string, body: string): Promise<boolean> {
   }
 }
 
-export async function sendEmail(input: SendEmailInput): Promise<boolean> {
-  const fromEmail =
-    process.env.RESEND_FROM_EMAIL && !process.env.RESEND_FROM_EMAIL.includes("@resend.dev")
-      ? process.env.RESEND_FROM_EMAIL
-      : "SnapQuote <estimates@snapquote.us>";
+function resolveFromAddress(sender: SenderKey): string {
+  if (sender === "noreply") {
+    const noreply = process.env.RESEND_FROM_EMAIL_NOREPLY;
+    if (noreply && !noreply.includes("@resend.dev")) return noreply;
+    return "SnapQuote <noreply@snapquote.us>";
+  }
 
+  const transactional = process.env.RESEND_FROM_EMAIL;
+  if (transactional && !transactional.includes("@resend.dev")) return transactional;
+  return "SnapQuote <estimates@snapquote.us>";
+}
+
+export async function sendEmail(input: SendEmailInput): Promise<boolean> {
   if (!resendConfigured) {
     console.warn("Resend sendEmail skipped: RESEND_API_KEY missing.");
     return false;
   }
 
+  const fromEmail = resolveFromAddress(input.sender ?? "transactional");
+
   try {
     const result = await getResendClient().emails.send({
-      from: fromEmail as string,
+      from: fromEmail,
       to: input.to,
       subject: input.subject,
       text: input.text,
-      html: input.html
+      html: input.html,
+      ...(input.replyTo ? { replyTo: input.replyTo } : {})
     });
     if (result.error) {
       console.error("Resend sendEmail API error:", result.error);

@@ -378,7 +378,9 @@ export async function POST(request: Request) {
         to: payload.customerEmail,
         subject: customerConfirmationEmail.subject,
         text: customerConfirmationEmail.text,
-        html: customerConfirmationEmail.html
+        html: customerConfirmationEmail.html,
+        // Replies route back to the contractor instead of estimates@.
+        replyTo: (contractor.email as string | null) ?? null
       });
 
       if (customerEmailSent) {

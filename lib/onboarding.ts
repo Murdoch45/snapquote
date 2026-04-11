@@ -1,6 +1,8 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { type ServiceType } from "@/lib/services";
 import { randomSuffix, slugify } from "@/lib/utils";
+import { buildWelcomeEmail } from "@/lib/emailTemplates";
+import { sendEmail } from "@/lib/notify";
 
 function getDefaultOrganizationName(email?: string | null): string {
   const localPart = email?.split("@")[0]?.trim();
@@ -114,6 +116,22 @@ export async function ensureOrganizationMembershipForUser(opts: {
   if (!confirmedMembership?.org_id) {
     console.error("No organization found for user.");
     throw new Error("No organization found for user.");
+  }
+
+  // Welcome email — only fires on the first-time bootstrap path. We have
+  // the user's email in opts.email so we don't need to look it up. Best
+  // effort: a failure here should not block onboarding.
+  if (opts.email) {
+    const welcome = buildWelcomeEmail();
+    void sendEmail({
+      to: opts.email,
+      subject: welcome.subject,
+      text: welcome.text,
+      html: welcome.html,
+      sender: "noreply"
+    }).catch((error) => {
+      console.warn("Welcome email send failed:", error);
+    });
   }
 
   return { orgId: confirmedMembership.org_id as string, created: true };

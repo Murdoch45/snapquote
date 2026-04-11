@@ -302,6 +302,16 @@ function startNotifications(orgId: string) {
     )
     .on(
       "postgres_changes",
+      { event: "UPDATE", schema: "public", table: "quotes", filter: `org_id=eq.${orgId}` },
+      (payload) => {
+        const previousStatus = (payload.old as { status?: string }).status;
+        const nextStatus = (payload.new as { status?: string }).status;
+        if (previousStatus === nextStatus || nextStatus !== "EXPIRED") return;
+        toast("An estimate expired. Follow up before the customer cools off.");
+      }
+    )
+    .on(
+      "postgres_changes",
       {
         event: "UPDATE",
         schema: "public",
