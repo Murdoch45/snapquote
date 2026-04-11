@@ -72,7 +72,7 @@ export async function POST(request: Request) {
     // Credits purchase
     const { data, error } = await admin.rpc("record_credit_purchase", {
       p_org_id: auth.orgId,
-      p_stripe_checkout_session_id: body.transactionId,
+      p_purchase_reference: body.transactionId,
       p_credit_amount: body.creditAmount
     });
 

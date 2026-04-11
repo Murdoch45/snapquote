@@ -130,7 +130,7 @@ async function handleCreditPackCheckoutCompleted(session: Stripe.Checkout.Sessio
   const admin = createAdminClient();
   const { data, error } = await admin.rpc("record_credit_purchase", {
     p_org_id: orgId,
-    p_stripe_checkout_session_id: session.id,
+    p_purchase_reference: session.id,
     p_credit_amount: creditAmount
   });
 

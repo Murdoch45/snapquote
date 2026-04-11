@@ -115,7 +115,7 @@ async function recordCreditPackPurchase(
   const admin = createAdminClient();
   const { error } = await admin.rpc("record_credit_purchase", {
     p_org_id: orgId,
-    p_stripe_checkout_session_id: `rc_${eventId}`,
+    p_purchase_reference: `rc_${eventId}`,
     p_credit_amount: creditAmount
   });
   if (error) throw error;
