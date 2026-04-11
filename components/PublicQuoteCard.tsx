@@ -19,7 +19,7 @@ type QuoteData = {
   estimatedPriceLow: number | string | null;
   estimatedPriceHigh: number | string | null;
   message: string;
-  status: "SENT" | "VIEWED" | "ACCEPTED" | "EXPIRED";
+  status: "DRAFT" | "SENT" | "VIEWED" | "ACCEPTED" | "EXPIRED";
   sentAt: string;
   expiresAt: string;
 };
@@ -32,9 +32,14 @@ export function PublicQuoteCard({ quote }: { quote: QuoteData }) {
     formatCurrencyRange(quote.estimatedPriceLow, quote.estimatedPriceHigh, quote.estimatedPrice) ??
     toCurrency(quote.price);
 
+  const isDraft = quote.status === "DRAFT";
+
+  // Don't fire the viewed POST for DRAFT quotes — the estimate hasn't been
+  // delivered yet, so recording a view would be misleading.
   useEffect(() => {
+    if (isDraft) return;
     fetch(`/api/public/quote/${quote.publicId}/viewed`, { method: "POST" }).catch(() => undefined);
-  }, [quote.publicId]);
+  }, [quote.publicId, isDraft]);
 
   const isExpired = useMemo(() => new Date() > new Date(quote.expiresAt), [quote.expiresAt]);
 
@@ -118,7 +123,11 @@ export function PublicQuoteCard({ quote }: { quote: QuoteData }) {
             </p>
           </div>
 
-          {status === "ACCEPTED" ? (
+          {isDraft ? (
+            <div className="rounded-[14px] border border-[#DBEAFE] bg-[#EFF6FF] p-4 text-center text-sm text-[#2563EB]">
+              This estimate is being finalized. Check back shortly.
+            </div>
+          ) : status === "ACCEPTED" ? (
             <div className="rounded-[14px] border border-[#BBF7D0] bg-[#F0FDF4] p-4 text-sm text-[#166534]">
               Interested request received. {quote.businessName} will contact you shortly.
               {acceptedAt ? ` (${new Date(acceptedAt).toLocaleString()})` : ""}

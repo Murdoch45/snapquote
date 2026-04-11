@@ -25,8 +25,9 @@ export async function POST(request: Request) {
   const auth = await requireMemberForApi(request);
   if (!auth.ok) return auth.response;
 
-  let createdQuoteId: string | null = null;
+  let quoteId: string | null = null;
   let bodyLeadId: string | null = null;
+  let wasDraft = false;
 
   try {
     const body = sendQuoteSchema.parse(await request.json());
@@ -56,15 +57,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Customer phone is missing for text delivery." }, { status: 400 });
     }
 
-    const { data: existingQuote } = await admin
-      .from("quotes")
-      .select("id")
-      .eq("lead_id", body.leadId)
-      .maybeSingle();
-    if (existingQuote) {
-      return NextResponse.json({ error: "Estimate already exists for this lead." }, { status: 400 });
-    }
-
     const { data: profile, error: profileError } = await admin
       .from("contractor_profile")
       .select("business_name,phone,email")
@@ -76,25 +68,68 @@ export async function POST(request: Request) {
     const {
       data: { user }
     } = await supabase.auth.getUser();
-    const requestedPublicId = body.publicId ?? makePublicId();
-    const { data: quote, error: quoteError } = await admin
-      .from("quotes")
-      .insert({
-        org_id: auth.orgId,
-        lead_id: body.leadId,
-        public_id: requestedPublicId,
-        price: roundToNearestFive((body.estimatedPriceLow + body.estimatedPriceHigh) / 2),
-        estimated_price_low: body.estimatedPriceLow,
-        estimated_price_high: body.estimatedPriceHigh,
-        message: body.message,
-        status: "SENT"
-      })
-      .select("id,public_id")
-      .single();
 
-    if (quoteError || !quote) throw quoteError || new Error("Estimate send failed.");
-    createdQuoteId = quote.id as string;
-    const confirmedPublicId = quote.public_id as string;
+    // Check for an existing DRAFT quote (created at unlock time).
+    // If one exists, UPDATE it to SENT. If not, fall back to INSERT for
+    // backward compatibility with pre-existing unlocked leads.
+    const { data: existingQuote } = await admin
+      .from("quotes")
+      .select("id,public_id,status")
+      .eq("lead_id", body.leadId)
+      .eq("org_id", auth.orgId)
+      .maybeSingle();
+
+    if (existingQuote && existingQuote.status !== "DRAFT") {
+      return NextResponse.json({ error: "Estimate already sent for this lead." }, { status: 400 });
+    }
+
+    let confirmedPublicId: string;
+
+    if (existingQuote) {
+      // DRAFT exists — update it to SENT
+      wasDraft = true;
+      quoteId = existingQuote.id as string;
+      confirmedPublicId = existingQuote.public_id as string;
+
+      const { error: updateError } = await admin
+        .from("quotes")
+        .update({
+          price: roundToNearestFive((body.estimatedPriceLow + body.estimatedPriceHigh) / 2),
+          estimated_price_low: body.estimatedPriceLow,
+          estimated_price_high: body.estimatedPriceHigh,
+          message: body.message,
+          status: "SENT",
+          sent_at: new Date().toISOString()
+        })
+        .eq("id", quoteId)
+        .eq("org_id", auth.orgId);
+
+      if (updateError) throw updateError;
+    } else {
+      // No draft — fall back to INSERT (backward compat for pre-existing unlocked leads)
+      const requestedPublicId = body.publicId ?? makePublicId();
+      const { data: quote, error: quoteError } = await admin
+        .from("quotes")
+        .insert({
+          org_id: auth.orgId,
+          lead_id: body.leadId,
+          public_id: requestedPublicId,
+          price: roundToNearestFive((body.estimatedPriceLow + body.estimatedPriceHigh) / 2),
+          estimated_price_low: body.estimatedPriceLow,
+          estimated_price_high: body.estimatedPriceHigh,
+          message: body.message,
+          status: "SENT",
+          sent_at: new Date().toISOString()
+        })
+        .select("id,public_id")
+        .single();
+
+      if (quoteError || !quote) throw quoteError || new Error("Estimate send failed.");
+      quoteId = quote.id as string;
+      confirmedPublicId = quote.public_id as string;
+    }
+
+    // Resolve message template with the real permanent URL
     const estimateLink = buildEstimateLink(confirmedPublicId);
     const resolvedMessage = renderEstimateTemplate(body.message, {
       customerName: (lead.customer_name as string) || "Customer",
@@ -107,7 +142,7 @@ export async function POST(request: Request) {
     const { error: messageUpdateError } = await admin
       .from("quotes")
       .update({ message: resolvedMessage })
-      .eq("id", quote.id)
+      .eq("id", quoteId)
       .eq("org_id", auth.orgId);
 
     if (messageUpdateError) throw messageUpdateError;
@@ -158,20 +193,18 @@ export async function POST(request: Request) {
     await admin
       .from("quotes")
       .update({ sent_via: sentChannels })
-      .eq("id", quote.id)
+      .eq("id", quoteId)
       .eq("org_id", auth.orgId);
 
     await admin
       .from("leads")
-      .update({
-        status: "QUOTED"
-      })
+      .update({ status: "QUOTED" })
       .eq("id", body.leadId)
       .eq("org_id", auth.orgId);
 
     await admin.from("quote_events").insert({
       org_id: auth.orgId,
-      quote_id: quote.id,
+      quote_id: quoteId,
       event_type: "SENT"
     });
 
@@ -185,7 +218,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       ok: true,
-      quoteId: quote.id,
+      quoteId,
       publicId: confirmedPublicId,
       publicUrl: estimateLink,
       resolvedMessage,
@@ -194,10 +227,24 @@ export async function POST(request: Request) {
       warning: deliveryErrors.length > 0 ? deliveryErrors.join(" ") : null
     });
   } catch (error) {
-    if (createdQuoteId && bodyLeadId) {
+    // Rollback: if this was a DRAFT→SENT transition, revert to DRAFT.
+    // If it was a fresh INSERT, delete the quote entirely.
+    if (quoteId && bodyLeadId) {
       const admin = createAdminClient();
-      await admin.from("quote_events").delete().eq("quote_id", createdQuoteId);
-      await admin.from("quotes").delete().eq("id", createdQuoteId).eq("org_id", auth.orgId);
+
+      if (wasDraft) {
+        // Revert back to DRAFT — do NOT delete, or the permanent URL breaks
+        await admin
+          .from("quotes")
+          .update({ status: "DRAFT", sent_at: null, sent_via: [] })
+          .eq("id", quoteId)
+          .eq("org_id", auth.orgId);
+      } else {
+        // Fresh insert — safe to delete
+        await admin.from("quote_events").delete().eq("quote_id", quoteId);
+        await admin.from("quotes").delete().eq("id", quoteId).eq("org_id", auth.orgId);
+      }
+
       await admin
         .from("leads")
         .update({ status: "NEW" })

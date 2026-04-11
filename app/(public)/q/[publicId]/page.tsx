@@ -20,7 +20,7 @@ export default async function PublicQuotePage({ params }: Props) {
     estimated_price_high: number | null;
     message: string | null;
     status: string | null;
-    sent_at: string;
+    sent_at: string | null;
   };
   let quote: QuoteRow | null = null;
 
@@ -74,14 +74,21 @@ export default async function PublicQuotePage({ params }: Props) {
   }
 
   const lead = Array.isArray(quote.lead) ? quote.lead[0] : quote.lead;
-  const expiresAt = publicQuoteExpiry(quote.sent_at).toISOString();
+  const isDraft = quote.status === "DRAFT";
+  const businessName = (profile?.business_name as string | null) ?? "SnapQuote";
+
+  // For DRAFT quotes sent_at is null — use a far-future expiry so the page
+  // doesn't show "expired" before the estimate has even been delivered.
+  const expiresAt = quote.sent_at
+    ? publicQuoteExpiry(quote.sent_at).toISOString()
+    : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
 
   return (
     <main className="min-h-screen bg-[#F8F9FC] px-4 py-8 sm:py-12">
       <PublicQuoteCard
         quote={{
           publicId: quote.public_id as string,
-          businessName: (profile?.business_name as string | null) ?? "SnapQuote",
+          businessName,
           businessPhone: (profile?.phone as string | null) ?? null,
           businessEmail: (profile?.email as string | null) ?? null,
           services: (lead?.services ?? []) as string[],
@@ -90,9 +97,11 @@ export default async function PublicQuotePage({ params }: Props) {
           estimatedPrice: null,
           estimatedPriceLow: quote.estimated_price_low as number | string | null,
           estimatedPriceHigh: quote.estimated_price_high as number | string | null,
-          message: (quote.message as string | null) ?? "",
-          status: quote.status as "SENT" | "VIEWED" | "ACCEPTED" | "EXPIRED",
-          sentAt: quote.sent_at as string,
+          message: isDraft
+            ? `Your estimate is being prepared by ${businessName}.`
+            : ((quote.message as string | null) ?? ""),
+          status: isDraft ? "DRAFT" : (quote.status as "SENT" | "VIEWED" | "ACCEPTED" | "EXPIRED"),
+          sentAt: quote.sent_at ?? new Date().toISOString(),
           expiresAt
         }}
       />

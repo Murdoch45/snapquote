@@ -99,16 +99,22 @@ export default async function LeadDetailPage({ params }: Props) {
   const displayAddress = isLocked
     ? getVisibleAddress(lead.address_full as string)
     : (lead.address_full as string);
-  const previewPublicId = (existingQuote?.public_id as string | null) ?? randomBytes(6).toString("base64url");
+  const draftPublicId = (existingQuote?.public_id as string | null) ?? null;
+  const existingQuoteStatus = (existingQuote?.status as string | null) ?? null;
+  const isDraftQuote = existingQuoteStatus === "DRAFT";
+  const isSentQuote = existingQuote && !isDraftQuote;
   const companyName = (profile?.business_name as string | null)?.trim() || "SnapQuote";
   const contractorPhone = (profile?.phone as string | null)?.trim() || "Not provided";
   const contractorEmail =
     ((profile?.email as string | null)?.trim() || user?.email?.trim() || "Not provided");
   const estimateTemplate = (profile?.quote_sms_template as string | null)?.trim() ||
     DEFAULT_ESTIMATE_SMS_TEMPLATE;
+  // For the message preview, use the real permanent publicId if a draft exists,
+  // otherwise fall back to a placeholder that will be replaced at send time.
+  const activePublicId = draftPublicId ?? randomBytes(6).toString("base64url");
   const previewMessage = renderEstimateTemplate(estimateTemplate, {
     customerName: getDisplayCustomerName(lead.customer_name as string | null),
-    estimateLink: buildEstimateLink(previewPublicId),
+    estimateLink: buildEstimateLink(activePublicId),
     companyName,
     contractorPhone,
     contractorEmail
@@ -312,7 +318,7 @@ export default async function LeadDetailPage({ params }: Props) {
               <CardTitle>Send Estimate</CardTitle>
             </CardHeader>
             <CardContent>
-              {existingQuote ? (
+              {isSentQuote ? (
                 <div className="space-y-2 text-sm">
                   <p className="text-gray-700">Estimate already sent for this lead.</p>
                   <p className="text-gray-700">
@@ -333,18 +339,16 @@ export default async function LeadDetailPage({ params }: Props) {
               ) : (
                 <QuoteComposer
                   leadId={lead.id as string}
-                  publicId={previewPublicId}
+                  publicId={activePublicId}
                   snapQuote={Number(lead.ai_suggested_price ?? 900)}
-                  estimateLow={(lead.ai_estimate_low as number | null) ?? null}
-                  estimateHigh={(lead.ai_estimate_high as number | null) ?? null}
+                  estimateLow={isDraftQuote ? Number(existingQuote.estimated_price_low ?? lead.ai_estimate_low ?? null) : ((lead.ai_estimate_low as number | null) ?? null)}
+                  estimateHigh={isDraftQuote ? Number(existingQuote.estimated_price_high ?? lead.ai_estimate_high ?? null) : ((lead.ai_estimate_high as number | null) ?? null)}
                   serviceEstimates={aiServiceEstimates}
                   initialMessage={previewMessage}
                   customerName={(lead.customer_name as string | null) ?? null}
                   customerPhone={(lead.customer_phone as string | null) ?? null}
                   customerEmail={(lead.customer_email as string | null) ?? null}
-                  customerAddress={(lead.address_full as string | null) ?? null}
                   canSend
-                  isLocked={false}
                 />
               )}
             </CardContent>
