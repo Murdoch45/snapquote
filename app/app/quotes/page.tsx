@@ -14,7 +14,7 @@ import {
 import { requireAuth } from "@/lib/auth/requireAuth";
 import { getServiceBadgeClassName } from "@/lib/serviceColors";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { formatCurrencyRange } from "@/lib/utils";
+import { formatCurrencyRange, publicQuoteExpiry } from "@/lib/utils";
 
 // Force dynamic rendering so freshly sent estimates appear immediately.
 export const dynamic = "force-dynamic";
@@ -66,10 +66,20 @@ export default async function QuotesPage() {
       formatCurrencyRange(null, null, quote.price as number | string | null | undefined) ??
       "-";
 
+    // Inline expiry detection — if the cron hasn't run yet but 7 days have
+    // passed since sent_at, show EXPIRED status in the UI.
+    const rawStatus = quote.status as string | null | undefined;
+    const sentAt = quote.sent_at as string | null;
+    const isExpired =
+      sentAt &&
+      (rawStatus === "SENT" || rawStatus === "VIEWED") &&
+      new Date() > publicQuoteExpiry(sentAt);
+    const effectiveStatus = isExpired ? "EXPIRED" : rawStatus;
+
     return {
       id: quote.id as string,
       publicId: quote.public_id as string,
-      status: quote.status as string | null | undefined,
+      status: effectiveStatus,
       customerName,
       primaryService: services[0] ?? "Service",
       services,

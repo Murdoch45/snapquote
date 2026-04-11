@@ -83,10 +83,19 @@ function createLeadNotification(
   };
 }
 
-function createAcceptedNotification(id: string, createdAt: string): FeedItem {
+function createAcceptedNotification(
+  id: string,
+  createdAt: string,
+  customerName?: string | null,
+  service?: string | null,
+  city?: string | null
+): FeedItem {
+  const name = customerName?.trim() || "A customer";
+  const servicePart = service ? ` for ${service}` : "";
+  const cityPart = city ? ` in ${city}` : "";
   return {
     id,
-    text: "An estimate was accepted.",
+    text: `${name} accepted your estimate${servicePart}${cityPart}.`,
     createdAt
   };
 }
@@ -142,7 +151,7 @@ async function loadTodayNotifications(orgId: string) {
       .order("submitted_at", { ascending: false }),
     supabase
       .from("quote_events")
-      .select("id,quote_id,created_at")
+      .select("id,quote_id,created_at,quote:quotes(lead:leads(customer_name,services,address_full))")
       .eq("org_id", orgId)
       .eq("event_type", "ACCEPTED")
       .gte("created_at", start.toISOString())
@@ -160,12 +169,22 @@ async function loadTodayNotifications(orgId: string) {
         lead.submitted_at as string
       )
     ),
-    ...(acceptedEvents ?? []).map((event) =>
-      createAcceptedNotification(
+    ...(acceptedEvents ?? []).map((event) => {
+      const quoteData = Array.isArray(event.quote) ? event.quote[0] : event.quote;
+      const leadData = quoteData ? (Array.isArray(quoteData.lead) ? quoteData.lead[0] : quoteData.lead) : null;
+      const customerName = (leadData?.customer_name as string | null) ?? null;
+      const service = ((leadData?.services as string[] | null) ?? [])[0] ?? null;
+      const addressParts = ((leadData?.address_full as string) ?? "").split(",").map((p: string) => p.trim());
+      const city = addressParts.length >= 2 ? addressParts[addressParts.length - 2] : null;
+
+      return createAcceptedNotification(
         `accepted-quote-${event.quote_id as string}`,
-        event.created_at as string
-      )
-    )
+        event.created_at as string,
+        customerName,
+        service,
+        city
+      );
+    })
   ];
 
   setFeed((previousFeed) => mergeFeed(previousFeed, initialNotifications));
@@ -227,17 +246,48 @@ function startNotifications(orgId: string) {
       { event: "UPDATE", schema: "public", table: "quotes", filter: `org_id=eq.${orgId}` },
       (payload) => {
         const previousStatus = (payload.old as { status?: string }).status;
-        const nextQuote = payload.new as { id?: string; status?: string; accepted_at?: string };
+        const nextQuote = payload.new as { id?: string; lead_id?: string; status?: string; accepted_at?: string };
 
         if (previousStatus === nextQuote.status || nextQuote.status !== "ACCEPTED") return;
 
-        const item = createAcceptedNotification(
-          `accepted-quote-${nextQuote.id ?? crypto.randomUUID()}`,
-          nextQuote.accepted_at ?? new Date().toISOString()
-        );
+        // Fetch lead data for a richer notification message
+        const enrichAndNotify = async () => {
+          let customerName: string | null = null;
+          let service: string | null = null;
+          let city: string | null = null;
 
-        setFeed((previousFeed) => mergeFeed(previousFeed, [item]));
-        toast.success(item.text);
+          if (nextQuote.lead_id) {
+            try {
+              const { data: lead } = await supabase
+                .from("leads")
+                .select("customer_name,services,address_full")
+                .eq("id", nextQuote.lead_id)
+                .maybeSingle();
+
+              if (lead) {
+                customerName = (lead.customer_name as string | null) ?? null;
+                service = ((lead.services as string[] | null) ?? [])[0] ?? null;
+                const parts = ((lead.address_full as string) ?? "").split(",").map((p: string) => p.trim());
+                city = parts.length >= 2 ? parts[parts.length - 2] : null;
+              }
+            } catch {
+              // Fall back to generic notification
+            }
+          }
+
+          const item = createAcceptedNotification(
+            `accepted-quote-${nextQuote.id ?? crypto.randomUUID()}`,
+            nextQuote.accepted_at ?? new Date().toISOString(),
+            customerName,
+            service,
+            city
+          );
+
+          setFeed((previousFeed) => mergeFeed(previousFeed, [item]));
+          toast.success(item.text);
+        };
+
+        void enrichAndNotify();
       }
     )
     .on(

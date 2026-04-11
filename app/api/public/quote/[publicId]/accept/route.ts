@@ -40,28 +40,26 @@ export async function POST(_request: Request, { params }: Props) {
   }
 
   const acceptedAt = new Date().toISOString();
+
+  // Use a simple update without extra status conditions. We already confirmed
+  // the quote is not ACCEPTED at line 29. The .neq("status","ACCEPTED") guard
+  // in the old code caused race-condition failures when the /viewed endpoint
+  // was simultaneously updating the same row — the concurrent transaction
+  // would cause .maybeSingle() to return null, failing the first click.
   const { data: acceptedQuote, error: acceptedQuoteError } = await admin
     .from("quotes")
     .update({ status: "ACCEPTED", accepted_at: acceptedAt })
     .eq("id", quote.id)
-    .neq("status", "ACCEPTED")
     .select("id,org_id,lead_id,status,sent_at,accepted_at,price")
-    .maybeSingle();
+    .single();
 
-  if (acceptedQuoteError) {
-    return NextResponse.json({ error: "Unable to accept estimate." }, { status: 500 });
-  }
-
-  if (!acceptedQuote) {
-    const { data: currentQuote, error: currentQuoteError } = await admin
+  if (acceptedQuoteError || !acceptedQuote) {
+    // Re-fetch to check if it was accepted by a concurrent request
+    const { data: currentQuote } = await admin
       .from("quotes")
       .select("accepted_at,status")
       .eq("id", quote.id)
       .maybeSingle();
-
-    if (currentQuoteError) {
-      return NextResponse.json({ error: "Unable to load accepted estimate." }, { status: 500 });
-    }
 
     if (currentQuote?.status === "ACCEPTED") {
       return NextResponse.json({ accepted: true, acceptedAt: currentQuote.accepted_at });

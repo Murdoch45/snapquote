@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Bell, CircleUser, LogOut, Menu } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
@@ -75,6 +75,35 @@ export function TopBar({
     window.location.href = "/login";
   };
 
+  // Auto-dismiss notification dropdown after 5 seconds of no hover
+  const notificationTimerRef = useRef<number | null>(null);
+  const notificationPanelRef = useRef<HTMLDivElement | null>(null);
+
+  const clearNotificationTimer = useCallback(() => {
+    if (notificationTimerRef.current !== null) {
+      window.clearTimeout(notificationTimerRef.current);
+      notificationTimerRef.current = null;
+    }
+  }, []);
+
+  const startNotificationTimer = useCallback(() => {
+    clearNotificationTimer();
+    notificationTimerRef.current = window.setTimeout(() => {
+      setDesktopNotificationsOpen(false);
+      notificationTimerRef.current = null;
+    }, 5000);
+  }, [clearNotificationTimer]);
+
+  // Start timer when dropdown opens, clean up when it closes
+  useEffect(() => {
+    if (desktopNotificationsOpen) {
+      startNotificationTimer();
+    } else {
+      clearNotificationTimer();
+    }
+    return clearNotificationTimer;
+  }, [desktopNotificationsOpen, startNotificationTimer, clearNotificationTimer]);
+
   const notificationButtonClassName =
     "inline-flex h-11 w-11 items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white text-[#6B7280] transition-colors hover:bg-[#F8F9FC] hover:text-[#111827] md:h-10 md:w-10";
   const notificationPanelClassName =
@@ -98,7 +127,12 @@ export function TopBar({
       </button>
 
       {desktopNotificationsOpen ? (
-        <div className={notificationPanelClassName}>
+        <div
+          ref={notificationPanelRef}
+          className={notificationPanelClassName}
+          onMouseEnter={clearNotificationTimer}
+          onMouseLeave={startNotificationTimer}
+        >
           <NotificationsFeed feed={feed} onDismiss={dismissNotification} />
         </div>
       ) : null}
