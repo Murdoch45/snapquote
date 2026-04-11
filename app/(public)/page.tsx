@@ -37,7 +37,7 @@ export default function HomePage() {
                 More jobs. Less stress.
               </h1>
               <p className="mt-6 max-w-2xl text-lg leading-8 text-[#c3c6d7] sm:text-xl">
-                Less time estimating with instant AI-powered tools.
+                Choose the best jobs with AI-powered estimates.
               </p>
 
               <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
