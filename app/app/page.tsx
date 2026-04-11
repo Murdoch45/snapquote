@@ -238,7 +238,7 @@ export default async function DashboardPage() {
         <div className="rounded-[14px] border border-[#E5E7EB] bg-white p-8 text-center shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
           <p className="text-lg font-bold text-[#111827]">No Leads Yet</p>
           <p className="mt-2 text-sm text-[#6B7280]">
-            Share your link to start receiving quote requests
+            Share your link to start receiving estimate requests
           </p>
           <Link
             href="/app/settings"

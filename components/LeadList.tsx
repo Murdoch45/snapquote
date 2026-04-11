@@ -28,7 +28,7 @@ export function LeadList({
   if (leads.length === 0) {
     return (
       <div className="rounded-[14px] border border-dashed border-[#E5E7EB] bg-white p-8 text-center text-sm text-[#6B7280] shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-        No leads yet. Share your public slug to start receiving requests.
+        No leads yet. Share your public URL to start receiving requests.
       </div>
     );
   }
