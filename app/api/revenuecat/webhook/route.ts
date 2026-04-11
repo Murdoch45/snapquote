@@ -141,7 +141,6 @@ export async function POST(request: Request) {
         await handleRenewal(event, orgId);
         break;
 
-      case "CANCELLATION":
       case "EXPIRATION":
       case "REFUND":
         await handleDowngrade(orgId);
