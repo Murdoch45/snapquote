@@ -11,7 +11,7 @@ import { getOwnerEmailForOrg } from "@/lib/organizationOwners";
 import { normalizeServiceTypes } from "@/lib/services";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAppUrl } from "@/lib/utils";
-import { sendExpoPush } from "@/lib/pushNotifications";
+import { sendPushToOrg } from "@/lib/pushNotifications";
 import { leadSubmitSchema, parseLeadSubmitQuestionAnswers } from "@/lib/validations";
 
 export const runtime = "nodejs";
@@ -89,7 +89,7 @@ export async function POST(request: Request) {
     const { data: contractor, error: contractorError } = await admin
       .from("contractor_profile")
       .select(
-        "org_id,business_name,public_slug,phone,email,business_address_full,business_lat,business_lng,travel_pricing_disabled,notification_lead_sms,notification_lead_email,expo_push_token"
+        "org_id,business_name,public_slug,phone,email,business_address_full,business_lat,business_lng,travel_pricing_disabled,notification_lead_sms,notification_lead_email"
       )
       .eq("public_slug", payload.contractorSlug)
       .single();
@@ -352,9 +352,9 @@ export async function POST(request: Request) {
       emailBody: `New estimate request: ${serviceText} at ${payload.addressFull}. Open: ${leadLink}`
     });
 
-    if (contractor.expo_push_token) {
+    {
       const city = payload.addressFull.split(",")[1]?.trim() || "your area";
-      void sendExpoPush(contractor.expo_push_token as string, {
+      void sendPushToOrg(contractor.org_id as string, {
         title: "New Lead",
         body: `You have a new lead in ${city}! Tap to unlock.`,
         data: { screen: "lead", id: leadId }

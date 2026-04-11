@@ -1,15 +1,31 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import {
+  createServerSupabaseClient,
+  createSupabaseClientFromToken
+} from "@/lib/supabase/server";
 
 const acceptInviteSchema = z.object({
   token: z.string().min(12)
 });
 
+function getBearerToken(request: Request): string | null {
+  const authorization = request.headers.get("authorization");
+  if (!authorization) return null;
+  const match = authorization.match(/^Bearer\s+(.+)$/i);
+  return match?.[1]?.trim() || null;
+}
+
 export async function POST(request: Request) {
   try {
-    const supabase = await createServerSupabaseClient();
+    // Accept either a cookie-based session (web) or a Supabase Bearer token
+    // (mobile) so both clients can use the same endpoint.
+    const bearerToken = getBearerToken(request);
+    const supabase = bearerToken
+      ? createSupabaseClientFromToken(bearerToken)
+      : await createServerSupabaseClient();
+
     const {
       data: { user }
     } = await supabase.auth.getUser();

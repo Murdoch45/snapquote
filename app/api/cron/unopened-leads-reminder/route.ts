@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { sendExpoPush } from "@/lib/pushNotifications";
+import { sendPushToOrg } from "@/lib/pushNotifications";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const runtime = "nodejs";
@@ -14,21 +14,21 @@ export async function GET(request: Request) {
 
   const admin = createAdminClient();
 
-  const { data: profiles, error } = await admin
-    .from("contractor_profile")
-    .select("org_id, expo_push_token")
-    .not("expo_push_token", "is", null);
+  // Find every org that has at least one registered push device. Iterating
+  // by org (not by token) lets sendPushToOrg fan out to every team member's
+  // device in a single batch.
+  const { data: tokenRows, error: tokenError } = await admin
+    .from("push_tokens")
+    .select("org_id");
 
-  if (error || !profiles || profiles.length === 0) {
+  if (tokenError || !tokenRows || tokenRows.length === 0) {
     return NextResponse.json({ sent: 0 });
   }
 
-  let sent = 0;
+  const uniqueOrgIds = Array.from(new Set(tokenRows.map((row) => row.org_id as string)));
+  let orgsNotified = 0;
 
-  for (const profile of profiles) {
-    const orgId = profile.org_id as string;
-    const token = profile.expo_push_token as string;
-
+  for (const orgId of uniqueOrgIds) {
     const { count } = await admin
       .from("leads")
       .select("id", { count: "exact", head: true })
@@ -37,14 +37,14 @@ export async function GET(request: Request) {
 
     if (!count || count < 10) continue;
 
-    const ok = await sendExpoPush(token, {
+    const result = await sendPushToOrg(orgId, {
       title: "You've Got Leads",
       body: `You have ${count} unopened leads. Don't keep them waiting!`,
       data: { screen: "leads" }
     });
 
-    if (ok) sent++;
+    if (result.sent > 0) orgsNotified += 1;
   }
 
-  return NextResponse.json({ sent });
+  return NextResponse.json({ sent: orgsNotified });
 }
