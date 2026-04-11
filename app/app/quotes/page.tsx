@@ -16,6 +16,9 @@ import { getServiceBadgeClassName } from "@/lib/serviceColors";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { formatCurrencyRange } from "@/lib/utils";
 
+// Force dynamic rendering so freshly sent estimates appear immediately.
+export const dynamic = "force-dynamic";
+
 function getStatusBadgeClass(status: string | null | undefined): string {
   switch (status) {
     case "SENT":
@@ -24,11 +27,8 @@ function getStatusBadgeClass(status: string | null | undefined): string {
       return "border-transparent bg-[#F5F3FF] text-[#7C3AED]";
     case "ACCEPTED":
       return "border-transparent bg-[#F0FDF4] text-[#16A34A]";
-    case "DECLINED":
-      return "border-transparent bg-[#FEF2F2] text-[#DC2626]";
     case "EXPIRED":
       return "border-transparent bg-[#FFF7ED] text-[#EA580C]";
-    case "DRAFT":
     default:
       return "border-transparent bg-[#F9FAFB] text-[#6B7280]";
   }
@@ -37,12 +37,15 @@ function getStatusBadgeClass(status: string | null | undefined): string {
 export default async function QuotesPage() {
   const auth = await requireAuth();
   const supabase = await createServerSupabaseClient();
+
+  // Only show sent estimates — DRAFT quotes are internal and should not appear.
   const { data: quotes } = await supabase
     .from("quotes")
     .select(
       "id,public_id,price,estimated_price_low,estimated_price_high,status,sent_at,accepted_at,lead:leads(address_full,services,customer_name)"
     )
     .eq("org_id", auth.orgId)
+    .neq("status", "DRAFT")
     .order("sent_at", { ascending: false });
 
   const quoteRows = (quotes ?? []).map((quote) => {
@@ -67,7 +70,6 @@ export default async function QuotesPage() {
       id: quote.id as string,
       publicId: quote.public_id as string,
       status: quote.status as string | null | undefined,
-      sentAt: quote.sent_at as string | null,
       customerName,
       primaryService: services[0] ?? "Service",
       services,
@@ -86,6 +88,7 @@ export default async function QuotesPage() {
         <CardContent className="pt-0">
           {quoteRows.length > 0 ? (
             <>
+              {/* Mobile card layout */}
               <div className="space-y-3 md:hidden">
                 {quoteRows.map((quote) => (
                   <div
@@ -104,7 +107,7 @@ export default async function QuotesPage() {
                           quote.status
                         )}`}
                       >
-                        {quote.status ?? "DRAFT"}
+                        {quote.status ?? "-"}
                       </Badge>
                     </div>
 
@@ -119,23 +122,13 @@ export default async function QuotesPage() {
                       ))}
                     </div>
 
-                    <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                      <div>
-                        <p className="text-[11px] font-medium uppercase tracking-[0.05em] text-[#6B7280]">
-                          Price
-                        </p>
-                        <p className="mt-1 text-xl font-bold text-[#111827]">
-                          {quote.displayPrice}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-[11px] font-medium uppercase tracking-[0.05em] text-[#6B7280]">
-                          Sent
-                        </p>
-                        <p className="mt-1 text-sm text-[#111827]">
-                          {quote.sentAt ? new Date(quote.sentAt).toLocaleString() : "-"}
-                        </p>
-                      </div>
+                    <div className="mt-4">
+                      <p className="text-[11px] font-medium uppercase tracking-[0.05em] text-[#6B7280]">
+                        Price
+                      </p>
+                      <p className="mt-1 text-xl font-bold text-[#111827]">
+                        {quote.displayPrice}
+                      </p>
                     </div>
 
                     <div className="mt-4">
@@ -169,6 +162,7 @@ export default async function QuotesPage() {
                 ))}
               </div>
 
+              {/* Desktop table layout */}
               <div className="hidden md:block">
                 <div className="overflow-hidden rounded-[12px] border border-[#E5E7EB]">
                   <Table>
@@ -185,9 +179,6 @@ export default async function QuotesPage() {
                         </TableHead>
                         <TableHead className="h-auto px-5 py-3 text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280]">
                           Status
-                        </TableHead>
-                        <TableHead className="h-auto px-5 py-3 text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280]">
-                          Sent
                         </TableHead>
                         <TableHead className="h-auto px-5 py-3 text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280]">
                           Open public estimate
@@ -238,11 +229,8 @@ export default async function QuotesPage() {
                                 quote.status
                               )}`}
                             >
-                              {quote.status ?? "DRAFT"}
+                              {quote.status ?? "-"}
                             </Badge>
-                          </TableCell>
-                          <TableCell className="px-5 py-4 text-sm text-[#6B7280]">
-                            {quote.sentAt ? new Date(quote.sentAt).toLocaleString() : "-"}
                           </TableCell>
                           <TableCell className="px-5 py-4">
                             <Button

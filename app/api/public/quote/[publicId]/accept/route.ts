@@ -30,6 +30,9 @@ export async function POST(_request: Request, { params }: Props) {
     return NextResponse.json({ accepted: true, acceptedAt: quote.accepted_at });
   }
 
+  if (!quote.sent_at) {
+    return NextResponse.json({ error: "Estimate has not been sent yet." }, { status: 400 });
+  }
   const expiresAt = publicQuoteExpiry(quote.sent_at as string);
   if (new Date() > expiresAt) {
     await admin.from("quotes").update({ status: "EXPIRED" }).eq("id", quote.id);
@@ -125,10 +128,14 @@ export async function POST(_request: Request, { params }: Props) {
   });
 
   const customerName = (lead?.customer_name as string) || "A customer";
+  const primaryService = ((lead?.services ?? []) as string[])[0] ?? "estimate";
+  const addressParts = ((lead?.address_full as string) ?? "").split(",").map((p: string) => p.trim());
+  const city = addressParts.length >= 2 ? addressParts[addressParts.length - 2] : "";
+  const locationSuffix = city ? ` for ${primaryService} in ${city}` : ` for ${primaryService}`;
   void sendPushToOrg(acceptedQuote.org_id as string, {
     title: "Estimate Accepted",
-    body: `Great news! ${customerName} accepted your estimate. Tap to view.`,
-    data: { screen: "quotes" }
+    body: `${customerName} accepted your estimate${locationSuffix}.`,
+    data: { screen: "lead", id: acceptedQuote.lead_id as string }
   });
 
   if (profile?.notification_accept_email) {

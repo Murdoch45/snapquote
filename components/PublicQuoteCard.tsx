@@ -75,20 +75,20 @@ export function PublicQuoteCard({ quote }: { quote: QuoteData }) {
               </p>
               <h1 className="mt-1 text-2xl font-semibold text-[#111827]">{quote.businessName}</h1>
               <div className="mt-3 space-y-2 text-sm text-[#4B5563]">
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-[#2563EB]" />
-                  <span>{quote.address}</span>
+                <div className="flex items-start gap-2">
+                  <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[#2563EB]" />
+                  <span className="break-words" style={{ overflowWrap: "anywhere" }}>{quote.address}</span>
                 </div>
                 {quote.businessPhone ? (
-                  <div className="flex items-center gap-2">
-                    <Phone className="h-4 w-4 text-[#2563EB]" />
-                    <span>{quote.businessPhone}</span>
+                  <div className="flex items-start gap-2">
+                    <Phone className="mt-0.5 h-4 w-4 shrink-0 text-[#2563EB]" />
+                    <span className="break-words">{quote.businessPhone}</span>
                   </div>
                 ) : null}
                 {quote.businessEmail ? (
-                  <div className="flex items-center gap-2">
-                    <Mail className="h-4 w-4 text-[#2563EB]" />
-                    <span>{quote.businessEmail}</span>
+                  <div className="flex items-start gap-2">
+                    <Mail className="mt-0.5 h-4 w-4 shrink-0 text-[#2563EB]" />
+                    <span className="break-words" style={{ overflowWrap: "anywhere" }}>{quote.businessEmail}</span>
                   </div>
                 ) : null}
               </div>
@@ -111,14 +111,14 @@ export function PublicQuoteCard({ quote }: { quote: QuoteData }) {
             <p className="text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280]">
               Included Services
             </p>
-            <p className="mt-2 text-sm leading-6 text-[#111827]">{quote.services.join(", ")}</p>
+            <p className="mt-2 break-words text-sm leading-6 text-[#111827]">{quote.services.join(", ")}</p>
           </div>
 
           <div className="rounded-[14px] border border-[#E5E7EB] bg-white p-5">
             <p className="text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280]">
               Estimate Message
             </p>
-            <p className="mt-2 whitespace-pre-wrap text-sm leading-7 text-[#111827]">
+            <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-7 text-[#111827]" style={{ overflowWrap: "anywhere" }}>
               {quote.message}
             </p>
           </div>

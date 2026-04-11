@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { SubscriptionRequiredModal } from "@/components/SubscriptionRequiredModal";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -53,6 +53,12 @@ export function QuoteComposer({
   const [quoteLink, setQuoteLink] = useState<string | null>(null);
   const [copiedMessage, setCopiedMessage] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
+
+  // Delivery preference — persisted per-org via Supabase contractor_profile
+  const [sendEmail, setSendEmail] = useState(true);
+  const [sendText, setSendText] = useState(false);
+  const [prefsLoaded, setPrefsLoaded] = useState(false);
+
   const sendingRange =
     formatCurrencyRange(priceRange.low, priceRange.high) ??
     `${priceRange.low} - ${priceRange.high}`;
@@ -62,6 +68,75 @@ export function QuoteComposer({
       typeof estimate.lowEstimate === "number" &&
       typeof estimate.highEstimate === "number"
   );
+
+  // Load delivery preferences from contractor_profile
+  useEffect(() => {
+    let cancelled = false;
+
+    const load = async () => {
+      try {
+        const supabase = createClient();
+        const { data } = await supabase
+          .from("contractor_profile")
+          .select("estimate_send_email,estimate_send_text")
+          .limit(1)
+          .maybeSingle();
+
+        if (cancelled) return;
+
+        if (data) {
+          const prefEmail = data.estimate_send_email;
+          const prefText = data.estimate_send_text;
+          // Only apply if at least one is true
+          if (prefEmail === true || prefText === true) {
+            setSendEmail(prefEmail === true);
+            setSendText(prefText === true);
+          }
+        }
+      } catch {
+        // Fall back to defaults
+      } finally {
+        if (!cancelled) setPrefsLoaded(true);
+      }
+    };
+
+    void load();
+    return () => { cancelled = true; };
+  }, []);
+
+  // Save delivery preferences when they change
+  useEffect(() => {
+    if (!prefsLoaded) return;
+
+    const save = async () => {
+      try {
+        const supabase = createClient();
+        // Best-effort save — don't block the UI if the columns don't exist yet
+        await supabase
+          .from("contractor_profile")
+          .update({
+            estimate_send_email: sendEmail,
+            estimate_send_text: sendText
+          })
+          .limit(1);
+      } catch {
+        // Non-critical — preference will still work locally for this session
+      }
+    };
+
+    void save();
+  }, [sendEmail, sendText, prefsLoaded]);
+
+  const toggleEmail = (checked: boolean) => {
+    // Prevent unchecking both
+    if (!checked && !sendText) return;
+    setSendEmail(checked);
+  };
+
+  const toggleText = (checked: boolean) => {
+    if (!checked && !sendEmail) return;
+    setSendText(checked);
+  };
 
   const copyText = async (value: string, successLabel: string) => {
     try {
@@ -76,12 +151,20 @@ export function QuoteComposer({
     setMessageGenerated(true);
   };
 
-  const onSend = async (channel: "email" | "text") => {
-    if (channel === "email" && !customerEmail) {
+  const onEditEstimate = () => {
+    setMessageGenerated(false);
+  };
+
+  const onSend = async () => {
+    if (!sendEmail && !sendText) {
+      toast.error("Select email, text, or both before sending.");
+      return;
+    }
+    if (sendEmail && !customerEmail) {
       toast.error("No customer email available.");
       return;
     }
-    if (channel === "text" && !customerPhone) {
+    if (sendText && !customerPhone) {
       toast.error("No customer phone number available.");
       return;
     }
@@ -97,8 +180,8 @@ export function QuoteComposer({
           estimatedPriceLow: priceRange.low,
           estimatedPriceHigh: priceRange.high,
           message,
-          sendEmail: channel === "email",
-          sendText: channel === "text"
+          sendEmail,
+          sendText
         })
       });
       const json = await res.json();
@@ -110,10 +193,12 @@ export function QuoteComposer({
       setQuoteLink(json.publicUrl ?? null);
       setCopiedMessage(json.resolvedMessage ?? message);
       setSent(true);
+      const channels = (json.sentChannels ?? []) as string[];
+      const channelLabel = channels.join(" and ") || "successfully";
       if (json.warning) {
         toast.warning(json.warning);
       } else {
-        toast.success(`Estimate sent via ${channel === "email" ? "email" : "text"}.`);
+        toast.success(`Estimate sent via ${channelLabel}.`);
       }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to send estimate.");
@@ -125,34 +210,38 @@ export function QuoteComposer({
   return (
     <>
       <div className="space-y-4">
-        {/* Price range editor — always visible */}
-        <div className="space-y-3 rounded-lg border border-blue-200 bg-blue-50 p-4">
-          <p className="text-sm font-semibold text-blue-900">Estimate price range:</p>
-          <p className="mt-1 text-3xl font-bold leading-none text-blue-600">{sendingRange}</p>
-          {multiServiceBreakdown.length > 1 ? (
-            <div className="space-y-2 rounded-lg border border-blue-100 bg-white/60 p-3">
-              {multiServiceBreakdown.map((estimate) => (
-                <div
-                  key={`${estimate.service}-${estimate.lowEstimate}-${estimate.highEstimate}`}
-                  className="flex items-center justify-between gap-4 text-sm text-gray-600"
-                >
-                  <span>{estimate.service as string}</span>
-                  <span>
-                    {formatCurrencyRange(estimate.lowEstimate as number, estimate.highEstimate as number)}
-                  </span>
-                </div>
-              ))}
-            </div>
-          ) : null}
-          <PriceSlider
-            snapQuote={snapQuote}
-            low={priceRange.low}
-            high={priceRange.high}
-            onChange={setPriceRange}
-          />
-        </div>
+        {/* Price range editor — visible in Phase 1 and while not sent */}
+        {!sent ? (
+          <div className="space-y-3 rounded-lg border border-blue-200 bg-blue-50 p-4">
+            <p className="text-sm font-semibold text-blue-900">Estimate price range:</p>
+            <p className="mt-1 text-3xl font-bold leading-none text-blue-600">{sendingRange}</p>
+            {multiServiceBreakdown.length > 1 ? (
+              <div className="space-y-2 rounded-lg border border-blue-100 bg-white/60 p-3">
+                {multiServiceBreakdown.map((estimate) => (
+                  <div
+                    key={`${estimate.service}-${estimate.lowEstimate}-${estimate.highEstimate}`}
+                    className="flex items-center justify-between gap-4 text-sm text-gray-600"
+                  >
+                    <span>{estimate.service as string}</span>
+                    <span>
+                      {formatCurrencyRange(estimate.lowEstimate as number, estimate.highEstimate as number)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+            {!messageGenerated ? (
+              <PriceSlider
+                snapQuote={snapQuote}
+                low={priceRange.low}
+                high={priceRange.high}
+                onChange={setPriceRange}
+              />
+            ) : null}
+          </div>
+        ) : null}
 
-        {/* Phase 1: Generate button — visible before message is generated */}
+        {/* Phase 1: Generate button */}
         {!messageGenerated && !sent ? (
           <Button
             type="button"
@@ -164,73 +253,107 @@ export function QuoteComposer({
           </Button>
         ) : null}
 
-        {/* Phase 2: Message + delivery options — visible after Generate or after sent */}
-        {messageGenerated || sent ? (
+        {/* Phase 2: Message + delivery options */}
+        {messageGenerated && !sent ? (
           <>
             <div className="space-y-2">
               <Label htmlFor="quote-message">Estimate message</Label>
               <Textarea
                 id="quote-message"
-                value={sent ? (copiedMessage ?? message) : message}
+                value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 rows={7}
-                readOnly={sent}
-                className={sent ? "pointer-events-none bg-gray-50" : undefined}
               />
             </div>
 
-            {sent ? (
-              <div className="space-y-3">
-                <p className="text-sm text-emerald-700">
-                  Estimate sent. You can copy the link or message below.
-                </p>
-                <div className="flex flex-wrap gap-3">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      if (quoteLink) {
-                        void copyText(quoteLink, "Estimate link copied.");
-                      }
-                    }}
-                  >
-                    Copy Link
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => void copyText(copiedMessage ?? message, "Estimate message copied.")}
-                  >
-                    Copy Message
-                  </Button>
-                </div>
+            {/* Delivery checkboxes */}
+            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+              <p className="mb-3 text-sm font-medium text-gray-700">Delivery method</p>
+              <div className="flex flex-wrap gap-6">
+                <label className="flex items-center gap-2 text-sm">
+                  <Checkbox
+                    checked={sendEmail}
+                    disabled={!customerEmail}
+                    onCheckedChange={(checked) => toggleEmail(checked === true)}
+                  />
+                  <span>Email{!customerEmail ? " (no customer email)" : ""}</span>
+                </label>
+                <label className="flex items-center gap-2 text-sm">
+                  <Checkbox
+                    checked={sendText}
+                    disabled={!customerPhone}
+                    onCheckedChange={(checked) => toggleText(checked === true)}
+                  />
+                  <span>Text{!customerPhone ? " (no customer phone)" : ""}</span>
+                </label>
               </div>
-            ) : (
-              <div className="flex flex-wrap gap-3">
-                <Button
-                  type="button"
-                  onClick={() => void onSend("email")}
-                  disabled={loading || !canSend || !customerEmail}
-                >
-                  {loading ? "Sending..." : "Send via Email"}
-                </Button>
-                <Button
-                  type="button"
-                  onClick={() => void onSend("text")}
-                  disabled={loading || !canSend || !customerPhone}
-                >
-                  {loading ? "Sending..." : "Send via SMS"}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => void copyText(message, "Estimate message copied.")}
-                >
-                  Copy Message
-                </Button>
-              </div>
-            )}
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex flex-wrap gap-3">
+              <Button
+                type="button"
+                onClick={() => void onSend()}
+                disabled={loading || !canSend || (!sendEmail && !sendText)}
+                className="bg-[#2563EB] text-white hover:bg-[#1D4ED8]"
+              >
+                {loading ? "Sending..." : "Send Estimate"}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => void copyText(message, "Estimate message copied.")}
+              >
+                Copy Message
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={onEditEstimate}
+              >
+                Edit Estimate
+              </Button>
+            </div>
           </>
+        ) : null}
+
+        {/* Post-send state */}
+        {sent ? (
+          <div className="space-y-3">
+            <div className="space-y-2">
+              <Label htmlFor="quote-message-sent">Estimate message</Label>
+              <Textarea
+                id="quote-message-sent"
+                value={copiedMessage ?? message}
+                rows={7}
+                readOnly
+                className="pointer-events-none bg-gray-50"
+              />
+            </div>
+            <p className="text-sm text-emerald-700">
+              Estimate sent. You can copy the link or message below.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  if (quoteLink) {
+                    void copyText(quoteLink, "Estimate link copied.");
+                  }
+                }}
+              >
+                Copy Link
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => void copyText(copiedMessage ?? message, "Estimate message copied.")}
+              >
+                Copy Message
+              </Button>
+            </div>
+          </div>
         ) : null}
 
         {!canSend && (
