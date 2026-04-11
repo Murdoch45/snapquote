@@ -14,7 +14,9 @@ import { sendQuoteSchema } from "@/lib/validations";
 export const runtime = "nodejs";
 
 function makePublicId(): string {
-  return randomBytes(6).toString("base64url");
+  // 96 bits of entropy. Public quote pages expose customer name, address,
+  // and pricing — strong enough to be effectively unguessable.
+  return randomBytes(12).toString("base64url");
 }
 
 function roundToNearestFive(value: number): number {
