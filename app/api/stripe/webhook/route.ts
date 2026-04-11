@@ -4,6 +4,7 @@ import Stripe from "stripe";
 import { getPlanMonthlyCredits } from "@/lib/usage";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getPlanFromPriceId, getStripe, getStripeWebhookSecret } from "@/lib/stripe";
+import { claimWebhookEvent, releaseWebhookEvent } from "@/lib/webhookEvents";
 import type { OrgPlan } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -328,6 +329,17 @@ export async function POST(request: Request) {
     );
   }
 
+  let claimed: boolean;
+  try {
+    claimed = await claimWebhookEvent("stripe", event.id, event.type);
+  } catch (error) {
+    console.error("Failed to claim Stripe webhook event.", error);
+    return NextResponse.json({ error: "Failed to record event." }, { status: 500 });
+  }
+  if (!claimed) {
+    return NextResponse.json({ received: true, duplicate: true });
+  }
+
   try {
     switch (event.type) {
       case "checkout.session.completed":
@@ -349,6 +361,10 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ received: true });
   } catch (error) {
+    console.error("Stripe webhook handler failed.", error);
+    await releaseWebhookEvent("stripe", event.id).catch((releaseErr) => {
+      console.error("Failed to release webhook event after handler error.", releaseErr);
+    });
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Webhook handling failed." },
       { status: 500 }

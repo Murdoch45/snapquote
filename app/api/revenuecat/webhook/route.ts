@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { timingSafeEqual } from "crypto";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getPlanMonthlyCredits } from "@/lib/plans";
+import { claimWebhookEvent, releaseWebhookEvent } from "@/lib/webhookEvents";
 import type { OrgPlan } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -16,13 +17,24 @@ const PRODUCT_TO_PLAN: Record<string, OrgPlan> = {
   snapquote_business_annual: "BUSINESS"
 };
 
+const CREDIT_PACK_AMOUNTS: Record<string, number> = {
+  snapquote_credits_10: 10,
+  snapquote_credits_50: 50,
+  snapquote_credits_100: 100
+};
+
 type RevenueCatEvent = {
+  id?: string;
   type: string;
   app_user_id?: string;
   original_app_user_id?: string;
   product_id?: string;
   entitlement_ids?: string[] | null;
   entitlement_id?: string | null;
+  is_trial_period?: boolean;
+  store?: string;
+  transaction_id?: string;
+  original_transaction_id?: string;
 };
 
 type RevenueCatPayload = {
@@ -44,7 +56,8 @@ function safeEqual(a: string, b: string): boolean {
 }
 
 function resolvePlanFromEvent(event: RevenueCatEvent): OrgPlan | null {
-  const entitlements = event.entitlement_ids ?? (event.entitlement_id ? [event.entitlement_id] : []);
+  const entitlements =
+    event.entitlement_ids ?? (event.entitlement_id ? [event.entitlement_id] : []);
   if (entitlements.some((id) => id?.toLowerCase() === "business")) return "BUSINESS";
   if (entitlements.some((id) => id?.toLowerCase() === "team")) return "TEAM";
 
@@ -79,25 +92,57 @@ async function resetOrganizationCredits(orgId: string, plan: OrgPlan) {
   if (error) throw error;
 }
 
-async function applyPlan(orgId: string, plan: OrgPlan) {
-  await setOrganizationPlan(orgId, plan);
-  await resetOrganizationCredits(orgId, plan);
+async function markOrganizationTrialUsed(orgId: string) {
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from("organizations")
+    .update({ has_used_trial: true })
+    .eq("id", orgId);
+  if (error) throw error;
 }
 
-async function handleRenewal(event: RevenueCatEvent, orgId: string) {
-  const plan = resolvePlanFromEvent(event);
-  if (!plan) {
-    console.warn("RevenueCat renewal skipped: unable to resolve plan.", {
-      productId: event.product_id,
-      entitlements: event.entitlement_ids
-    });
+async function recordCreditPackPurchase(
+  orgId: string,
+  productId: string,
+  eventId: string
+) {
+  const creditAmount = CREDIT_PACK_AMOUNTS[productId];
+  if (!creditAmount) {
+    console.warn("RevenueCat credit pack skipped: unknown product id.", { productId });
     return;
   }
-  await applyPlan(orgId, plan);
+
+  const admin = createAdminClient();
+  const { error } = await admin.rpc("record_credit_purchase", {
+    p_org_id: orgId,
+    p_stripe_checkout_session_id: `rc_${eventId}`,
+    p_credit_amount: creditAmount
+  });
+  if (error) throw error;
 }
 
-async function handleDowngrade(orgId: string) {
-  await applyPlan(orgId, "SOLO");
+async function logIapEvent(
+  orgId: string | null,
+  event: RevenueCatEvent,
+  plan: OrgPlan | null,
+  raw: unknown
+) {
+  const admin = createAdminClient();
+  const { error } = await admin.from("iap_subscription_events").insert({
+    org_id: orgId,
+    event_id: event.id ?? "unknown",
+    event_type: event.type,
+    plan,
+    product_id: event.product_id ?? null,
+    store: event.store ?? null,
+    is_trial_period: event.is_trial_period ?? null,
+    store_transaction_id: event.transaction_id ?? event.original_transaction_id ?? null,
+    app_user_id: event.app_user_id ?? null,
+    raw_event: raw
+  });
+  if (error) {
+    console.error("Failed to write iap_subscription_events row.", error);
+  }
 }
 
 export async function POST(request: Request) {
@@ -120,31 +165,97 @@ export async function POST(request: Request) {
   }
 
   const event = payload?.event;
-  if (!event?.type) {
-    return NextResponse.json({ error: "Missing event." }, { status: 400 });
+  if (!event?.type || !event?.id) {
+    return NextResponse.json({ error: "Missing event id or type." }, { status: 400 });
   }
 
-  const orgId = resolveOrgId(event);
-  if (!orgId) {
-    console.warn("RevenueCat event skipped: app_user_id is not a valid org UUID.", {
-      type: event.type,
-      appUserId: event.app_user_id
-    });
-    return NextResponse.json({ received: true, skipped: "no_org" });
+  let claimed: boolean;
+  try {
+    claimed = await claimWebhookEvent("revenuecat", event.id, event.type);
+  } catch (error) {
+    console.error("Failed to claim RevenueCat webhook event.", error);
+    return NextResponse.json({ error: "Failed to record event." }, { status: 500 });
+  }
+  if (!claimed) {
+    return NextResponse.json({ received: true, duplicate: true });
   }
 
   try {
+    const orgId = resolveOrgId(event);
+    const planForLog = resolvePlanFromEvent(event);
+    await logIapEvent(orgId, event, planForLog, payload);
+
+    if (!orgId) {
+      console.warn("RevenueCat event skipped: app_user_id is not a valid org UUID.", {
+        type: event.type,
+        appUserId: event.app_user_id
+      });
+      return NextResponse.json({ received: true, skipped: "no_org" });
+    }
+
     switch (event.type) {
-      case "INITIAL_PURCHASE":
-      case "RENEWAL":
-      case "PRODUCT_CHANGE":
-        await handleRenewal(event, orgId);
+      case "INITIAL_PURCHASE": {
+        const plan = resolvePlanFromEvent(event);
+        if (!plan) {
+          console.warn("RevenueCat INITIAL_PURCHASE skipped: unable to resolve plan.", {
+            productId: event.product_id,
+            entitlements: event.entitlement_ids
+          });
+          break;
+        }
+        await setOrganizationPlan(orgId, plan);
+        await resetOrganizationCredits(orgId, plan);
+        if (event.is_trial_period) {
+          await markOrganizationTrialUsed(orgId);
+        }
         break;
+      }
+
+      case "RENEWAL": {
+        const plan = resolvePlanFromEvent(event);
+        if (!plan) {
+          console.warn("RevenueCat RENEWAL skipped: unable to resolve plan.", {
+            productId: event.product_id,
+            entitlements: event.entitlement_ids
+          });
+          break;
+        }
+        await setOrganizationPlan(orgId, plan);
+        await resetOrganizationCredits(orgId, plan);
+        break;
+      }
+
+      case "PRODUCT_CHANGE": {
+        // Update plan only — Apple may not have charged yet, so resetting
+        // credits here can over-grant on a mid-cycle upgrade. Credits will
+        // refresh on the next RENEWAL.
+        const plan = resolvePlanFromEvent(event);
+        if (!plan) {
+          console.warn("RevenueCat PRODUCT_CHANGE skipped: unable to resolve plan.", {
+            productId: event.product_id,
+            entitlements: event.entitlement_ids
+          });
+          break;
+        }
+        await setOrganizationPlan(orgId, plan);
+        break;
+      }
+
+      case "NON_RENEWING_PURCHASE": {
+        if (!event.product_id) {
+          console.warn("RevenueCat NON_RENEWING_PURCHASE skipped: missing product id.");
+          break;
+        }
+        await recordCreditPackPurchase(orgId, event.product_id, event.id);
+        break;
+      }
 
       case "EXPIRATION":
-      case "REFUND":
-        await handleDowngrade(orgId);
+      case "REFUND": {
+        await setOrganizationPlan(orgId, "SOLO");
+        await resetOrganizationCredits(orgId, "SOLO");
         break;
+      }
 
       default:
         return NextResponse.json({ received: true, ignored: event.type });
@@ -153,6 +264,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ received: true });
   } catch (error) {
     console.error("RevenueCat webhook handler failed.", error);
+    await releaseWebhookEvent("revenuecat", event.id).catch((releaseErr) => {
+      console.error("Failed to release webhook event after handler error.", releaseErr);
+    });
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Webhook handling failed." },
       { status: 500 }
