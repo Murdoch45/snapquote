@@ -34,10 +34,10 @@ export default function HomePage() {
           <div className="relative mx-auto max-w-6xl px-6 pb-16 pt-6 sm:px-8 lg:px-10">
             <div className="mx-auto flex max-w-4xl flex-col items-center pb-10 pt-32 text-center sm:pt-40">
               <h1 className="text-[clamp(3.2rem,8vw,6rem)] font-semibold leading-[0.92] tracking-[-0.07em] text-white">
-                Less time estimating. More time earning.
+                More jobs. Less stress.
               </h1>
               <p className="mt-6 max-w-2xl text-lg leading-8 text-[#c3c6d7] sm:text-xl">
-                Instant AI estimates on every job. See exactly what&apos;s worth your time.
+                Less time estimating with instant AI-powered tools.
               </p>
 
               <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
