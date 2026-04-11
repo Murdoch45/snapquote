@@ -76,10 +76,14 @@ export function SignupForm() {
       method: "POST"
     });
     const bootstrapJson = (await bootstrapResponse.json().catch(() => null)) as
-      | { error?: string }
+      | { error?: string; code?: string }
       | null;
 
-    if (!bootstrapResponse.ok) {
+    // EMAIL_NOT_CONFIRMED is the expected outcome when Supabase email
+    // confirmations are enabled — the user exists but won't have a session
+    // until they click the confirm link. Send them to onboarding which
+    // will render the "confirm your email" screen.
+    if (!bootstrapResponse.ok && bootstrapJson?.code !== "EMAIL_NOT_CONFIRMED") {
       setError(bootstrapJson?.error || "Unable to finish setting up your account.");
       setSubmitting(false);
       return;

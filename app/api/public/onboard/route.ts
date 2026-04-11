@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { SERVICE_OPTIONS } from "@/lib/services";
-import { ensureUserHasOrganization } from "@/lib/onboarding";
+import { EmailNotConfirmedError, ensureUserHasOrganization } from "@/lib/onboarding";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -36,14 +36,20 @@ export async function POST(request: Request) {
       request.headers.get("Authorization")?.replace(/^Bearer\s+/i, "") ||
       null;
 
-    let resolvedUser: { id: string; email?: string | null } | null = null;
+    let resolvedUser: {
+      id: string;
+      email?: string | null;
+      emailConfirmedAt: string | null;
+    } | null = null;
 
     if (accessToken) {
       const admin = createAdminClient();
       const {
         data: { user }
       } = await admin.auth.getUser(accessToken);
-      resolvedUser = user ? { id: user.id, email: user.email } : null;
+      resolvedUser = user
+        ? { id: user.id, email: user.email, emailConfirmedAt: user.email_confirmed_at ?? null }
+        : null;
     }
 
     if (!resolvedUser) {
@@ -51,7 +57,9 @@ export async function POST(request: Request) {
       const {
         data: { user }
       } = await supabase.auth.getUser();
-      resolvedUser = user ? { id: user.id, email: user.email } : null;
+      resolvedUser = user
+        ? { id: user.id, email: user.email, emailConfirmedAt: user.email_confirmed_at ?? null }
+        : null;
     }
 
     if (!resolvedUser) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -59,6 +67,7 @@ export async function POST(request: Request) {
     const result = await ensureUserHasOrganization({
       userId: resolvedUser.id,
       email: resolvedUser.email,
+      emailConfirmedAt: resolvedUser.emailConfirmedAt,
       businessName: body.businessName,
       services: body.services,
       mobileContractor: body.mobileContractor,
@@ -70,6 +79,12 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ ok: true, orgId: result.orgId, slug: result.slug });
   } catch (error) {
+    if (error instanceof EmailNotConfirmedError) {
+      return NextResponse.json(
+        { error: error.message, code: "EMAIL_NOT_CONFIRMED" },
+        { status: 403 }
+      );
+    }
     console.error("ONBOARDING ERROR:", error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Onboarding failed." },

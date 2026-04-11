@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { ensureOrganizationMembershipForUser } from "@/lib/onboarding";
+import { EmailNotConfirmedError, ensureOrganizationMembershipForUser } from "@/lib/onboarding";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export async function POST() {
@@ -15,11 +15,18 @@ export async function POST() {
 
     const result = await ensureOrganizationMembershipForUser({
       userId: user.id,
-      email: user.email
+      email: user.email,
+      emailConfirmedAt: user.email_confirmed_at ?? null
     });
 
     return NextResponse.json({ ok: true, orgId: result.orgId });
   } catch (error) {
+    if (error instanceof EmailNotConfirmedError) {
+      return NextResponse.json(
+        { error: error.message, code: "EMAIL_NOT_CONFIRMED" },
+        { status: 403 }
+      );
+    }
     console.error("SIGNUP BOOTSTRAP ERROR:", error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Unable to create organization." },

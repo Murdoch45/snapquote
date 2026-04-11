@@ -40,10 +40,26 @@ export async function generateUniquePublicSlug(businessName: string): Promise<st
   return `${base}-${Date.now().toString().slice(-4)}`;
 }
 
+export class EmailNotConfirmedError extends Error {
+  constructor() {
+    super("Please confirm your email address before continuing.");
+    this.name = "EmailNotConfirmedError";
+  }
+}
+
 export async function ensureOrganizationMembershipForUser(opts: {
   userId: string;
   email?: string | null;
-}): Promise<{ orgId: string }> {
+  emailConfirmedAt: string | null | undefined;
+}): Promise<{ orgId: string; created: boolean }> {
+  // Refuse to provision an org until the user has actually confirmed their
+  // email. OAuth signups (Apple, Google) auto-confirm via the provider, so
+  // this only blocks unverified email/password signups — those would
+  // otherwise leave a permanent org row behind for every typo or bot.
+  if (!opts.emailConfirmedAt) {
+    throw new EmailNotConfirmedError();
+  }
+
   const admin = createAdminClient();
 
   const { data: membership, error: membershipError } = await admin
@@ -59,7 +75,7 @@ export async function ensureOrganizationMembershipForUser(opts: {
   }
 
   if (membership?.org_id) {
-    return { orgId: membership.org_id as string };
+    return { orgId: membership.org_id as string, created: false };
   }
 
   console.warn("No organization found for user, creating fallback organization.");
@@ -116,12 +132,13 @@ export async function ensureOrganizationMembershipForUser(opts: {
     throw new Error("No organization found for user.");
   }
 
-  return { orgId: confirmedMembership.org_id as string };
+  return { orgId: confirmedMembership.org_id as string, created: true };
 }
 
 export async function ensureUserHasOrganization(opts: {
   userId: string;
   email?: string | null;
+  emailConfirmedAt: string | null | undefined;
   businessName: string;
   services: ServiceType[];
   mobileContractor: boolean;
@@ -132,49 +149,54 @@ export async function ensureUserHasOrganization(opts: {
 }): Promise<{ orgId: string; slug: string }> {
   const admin = createAdminClient();
 
-  const { orgId } = await ensureOrganizationMembershipForUser({
+  const { orgId, created: createdMembership } = await ensureOrganizationMembershipForUser({
     userId: opts.userId,
-    email: opts.email
+    email: opts.email,
+    emailConfirmedAt: opts.emailConfirmedAt
   });
 
-  const { data: profile, error: profileLookupError } = await admin
-    .from("contractor_profile")
-    .select("public_slug")
-    .eq("org_id", orgId)
-    .maybeSingle();
-
-  if (profileLookupError) {
-    console.error("ONBOARDING ERROR: profile lookup failed", profileLookupError);
-    throw new Error(profileLookupError.message);
-  }
-
-  const slug = profile?.public_slug ?? (await generateUniquePublicSlug(opts.businessName));
-
-  const profilePayload = {
-    org_id: orgId,
-    business_name: opts.businessName,
-    public_slug: slug,
-    email: opts.email ?? null,
-    services: opts.services,
-    business_address_full: opts.formattedAddress,
-    business_address_place_id: opts.placeId,
-    business_lat: opts.latitude,
-    business_lng: opts.longitude,
-    mobile_contractor: opts.mobileContractor,
-    travel_pricing_disabled: opts.mobileContractor,
-    notification_lead_email: Boolean(opts.email)
-  };
-
-  const { error: profileError } = await admin
-    .from("contractor_profile")
-    .upsert(profilePayload, { onConflict: "org_id" });
-
-  if (profileError) {
-    console.error("ONBOARDING ERROR:", profileError);
-    throw new Error(profileError.message);
-  }
-
+  // Compensating-rollback boundary. If anything below fails AND the
+  // membership was created in this call, undo it so the user is never
+  // left as a member of an org with no contractor_profile (which would
+  // crash every screen that calls getProfile.single()).
   try {
+    const { data: profile, error: profileLookupError } = await admin
+      .from("contractor_profile")
+      .select("public_slug")
+      .eq("org_id", orgId)
+      .maybeSingle();
+
+    if (profileLookupError) {
+      console.error("ONBOARDING ERROR: profile lookup failed", profileLookupError);
+      throw new Error(profileLookupError.message);
+    }
+
+    const slug = profile?.public_slug ?? (await generateUniquePublicSlug(opts.businessName));
+
+    const profilePayload = {
+      org_id: orgId,
+      business_name: opts.businessName,
+      public_slug: slug,
+      email: opts.email ?? null,
+      services: opts.services,
+      business_address_full: opts.formattedAddress,
+      business_address_place_id: opts.placeId,
+      business_lat: opts.latitude,
+      business_lng: opts.longitude,
+      mobile_contractor: opts.mobileContractor,
+      travel_pricing_disabled: opts.mobileContractor,
+      notification_lead_email: Boolean(opts.email)
+    };
+
+    const { error: profileError } = await admin
+      .from("contractor_profile")
+      .upsert(profilePayload, { onConflict: "org_id" });
+
+    if (profileError) {
+      console.error("ONBOARDING ERROR:", profileError);
+      throw new Error(profileError.message);
+    }
+
     const { error: updateOrgError } = await admin
       .from("organizations")
       .update({ name: opts.businessName })
@@ -183,9 +205,26 @@ export async function ensureUserHasOrganization(opts: {
     if (updateOrgError) {
       console.warn("ONBOARDING WARNING: organization update failed", updateOrgError);
     }
-  } catch (error) {
-    console.warn("ONBOARDING WARNING: organization update threw", error);
-  }
 
-  return { orgId, slug };
+    return { orgId, slug };
+  } catch (error) {
+    if (createdMembership) {
+      const { error: rollbackMemberError } = await admin
+        .from("organization_members")
+        .delete()
+        .eq("user_id", opts.userId)
+        .eq("org_id", orgId);
+      if (rollbackMemberError) {
+        console.error("ONBOARDING ROLLBACK: membership delete failed", rollbackMemberError);
+      }
+      const { error: rollbackOrgError } = await admin
+        .from("organizations")
+        .delete()
+        .eq("id", orgId);
+      if (rollbackOrgError) {
+        console.error("ONBOARDING ROLLBACK: organization delete failed", rollbackOrgError);
+      }
+    }
+    throw error;
+  }
 }
