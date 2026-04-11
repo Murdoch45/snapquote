@@ -40,26 +40,10 @@ export async function generateUniquePublicSlug(businessName: string): Promise<st
   return `${base}-${Date.now().toString().slice(-4)}`;
 }
 
-export class EmailNotConfirmedError extends Error {
-  constructor() {
-    super("Please confirm your email address before continuing.");
-    this.name = "EmailNotConfirmedError";
-  }
-}
-
 export async function ensureOrganizationMembershipForUser(opts: {
   userId: string;
   email?: string | null;
-  emailConfirmedAt: string | null | undefined;
 }): Promise<{ orgId: string; created: boolean }> {
-  // Refuse to provision an org until the user has actually confirmed their
-  // email. OAuth signups (Apple, Google) auto-confirm via the provider, so
-  // this only blocks unverified email/password signups — those would
-  // otherwise leave a permanent org row behind for every typo or bot.
-  if (!opts.emailConfirmedAt) {
-    throw new EmailNotConfirmedError();
-  }
-
   const admin = createAdminClient();
 
   const { data: membership, error: membershipError } = await admin
@@ -138,7 +122,6 @@ export async function ensureOrganizationMembershipForUser(opts: {
 export async function ensureUserHasOrganization(opts: {
   userId: string;
   email?: string | null;
-  emailConfirmedAt: string | null | undefined;
   businessName: string;
   services: ServiceType[];
   mobileContractor: boolean;
@@ -151,8 +134,7 @@ export async function ensureUserHasOrganization(opts: {
 
   const { orgId, created: createdMembership } = await ensureOrganizationMembershipForUser({
     userId: opts.userId,
-    email: opts.email,
-    emailConfirmedAt: opts.emailConfirmedAt
+    email: opts.email
   });
 
   // Compensating-rollback boundary. If anything below fails AND the

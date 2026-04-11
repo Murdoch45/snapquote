@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Turnstile } from "@marsidev/react-turnstile";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +14,7 @@ import { useOAuthLoadingReset } from "@/components/auth/useOAuthLoadingReset";
 
 type Provider = "google" | "apple";
 const OAUTH_SIGNUP_TOAST_KEY = "snapquote-oauth-signup-success";
+const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
 export function SignupForm() {
   const router = useRouter();
@@ -22,6 +24,7 @@ export function SignupForm() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [loadingProvider, setLoadingProvider] = useState<Provider | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   // Per-click reset timer. Every OAuth click installs a fresh 5s timeout that
   // wipes the loading state if the user is still on this page when it fires.
@@ -59,6 +62,12 @@ export function SignupForm() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
+
+    if (!turnstileToken) {
+      setError("Bot verification is still loading. Please wait a moment and try again.");
+      return;
+    }
+
     setSubmitting(true);
 
     const { error: signUpError } = await supabase.auth.signUp({
@@ -73,17 +82,15 @@ export function SignupForm() {
     }
 
     const bootstrapResponse = await fetch("/api/public/auth/bootstrap", {
-      method: "POST"
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ turnstileToken })
     });
     const bootstrapJson = (await bootstrapResponse.json().catch(() => null)) as
-      | { error?: string; code?: string }
+      | { error?: string }
       | null;
 
-    // EMAIL_NOT_CONFIRMED is the expected outcome when Supabase email
-    // confirmations are enabled — the user exists but won't have a session
-    // until they click the confirm link. Send them to onboarding which
-    // will render the "confirm your email" screen.
-    if (!bootstrapResponse.ok && bootstrapJson?.code !== "EMAIL_NOT_CONFIRMED") {
+    if (!bootstrapResponse.ok) {
       setError(bootstrapJson?.error || "Unable to finish setting up your account.");
       setSubmitting(false);
       return;
@@ -147,9 +154,19 @@ export function SignupForm() {
         onChange={setPassword}
       />
 
+      {turnstileSiteKey ? (
+        <Turnstile
+          siteKey={turnstileSiteKey}
+          options={{ appearance: "interaction-only" }}
+          onSuccess={(token) => setTurnstileToken(token)}
+          onExpire={() => setTurnstileToken(null)}
+          onError={() => setTurnstileToken(null)}
+        />
+      ) : null}
+
       <Button
         type="submit"
-        disabled={submitting || loadingProvider !== null}
+        disabled={submitting || loadingProvider !== null || !turnstileToken}
         className="h-11 w-full rounded-xl text-sm font-semibold"
       >
         {submitting ? "Creating account..." : "Create Account"}
