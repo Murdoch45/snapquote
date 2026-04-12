@@ -15,6 +15,7 @@ export type OrganizationSubscriptionStatus = {
   active: boolean;
   stripeSubscriptionId: string | null;
   trialEndDate: string | null;
+  billingInterval: string | null;
 };
 
 export class SubscriptionRequiredError extends Error {
@@ -57,13 +58,14 @@ export async function getOrganizationSubscriptionStatus(
       plan: null,
       active: false,
       stripeSubscriptionId: null,
-      trialEndDate: null
+      trialEndDate: null,
+      billingInterval: null
     };
   }
 
   const { data: subscriptions, error: subscriptionsError } = await admin
     .from("subscriptions")
-    .select("plan,status,stripe_subscription_id,created_at")
+    .select("plan,status,stripe_subscription_id,billing_interval,created_at")
     .in("user_id", userIds)
     .order("created_at", { ascending: false })
     .limit(20);
@@ -82,7 +84,8 @@ export async function getOrganizationSubscriptionStatus(
       plan: null,
       active: false,
       stripeSubscriptionId: null,
-      trialEndDate: null
+      trialEndDate: null,
+      billingInterval: null
     };
   }
 
@@ -108,7 +111,8 @@ export async function getOrganizationSubscriptionStatus(
     plan: (current.plan as OrgPlan | null | undefined) ?? null,
     active: isActiveStatus(status),
     stripeSubscriptionId,
-    trialEndDate
+    trialEndDate,
+    billingInterval: (current.billing_interval as string | null | undefined) ?? null
   };
 }
 

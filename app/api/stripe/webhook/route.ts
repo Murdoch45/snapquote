@@ -79,6 +79,7 @@ async function saveSubscriptionRecord(args: {
   stripeSubscriptionId: string;
   plan: OrgPlan;
   status: string;
+  billingInterval?: string | null;
 }) {
   const admin = createAdminClient();
   const { error } = await admin.from("subscriptions").upsert(
@@ -87,7 +88,8 @@ async function saveSubscriptionRecord(args: {
       stripe_customer_id: args.stripeCustomerId,
       stripe_subscription_id: args.stripeSubscriptionId,
       plan: args.plan,
-      status: args.status
+      status: args.status,
+      billing_interval: args.billingInterval ?? null
     },
     { onConflict: "stripe_subscription_id" }
   );
@@ -193,14 +195,6 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     return;
   }
 
-  await saveSubscriptionRecord({
-    userId,
-    stripeCustomerId,
-    stripeSubscriptionId,
-    plan,
-    status: "active"
-  });
-
   const stripe = getStripe();
   let subscription: Stripe.Subscription;
   try {
@@ -209,6 +203,17 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     console.warn("Checkout session skipped: unable to retrieve subscription.", error);
     return;
   }
+
+  const billingInterval = subscription.items.data[0]?.price?.recurring?.interval ?? null;
+
+  await saveSubscriptionRecord({
+    userId,
+    stripeCustomerId,
+    stripeSubscriptionId,
+    plan,
+    status: "active",
+    billingInterval
+  });
 
   if (subscription.status === "trialing" || subscription.trial_end) {
     await markOrganizationTrialUsed(orgId);
@@ -240,12 +245,15 @@ async function handleSubscriptionChanged(subscription: Stripe.Subscription) {
     return;
   }
 
+  const billingInterval = subscription.items.data[0]?.price?.recurring?.interval ?? null;
+
   await saveSubscriptionRecord({
     userId,
     stripeCustomerId,
     stripeSubscriptionId: subscription.id,
     plan,
-    status: subscription.status
+    status: subscription.status,
+    billingInterval
   });
 
   const orgId = metadataOrgId || (await getOrgIdForUser(userId));
@@ -348,7 +356,8 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     stripeCustomerId,
     stripeSubscriptionId: subscription.id,
     plan: "SOLO",
-    status: subscription.status
+    status: subscription.status,
+    billingInterval: null
   });
 
   const orgId = subscription.metadata.orgId || (await getOrgIdForUser(userId));

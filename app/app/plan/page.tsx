@@ -20,10 +20,15 @@ function formatPlanName(plan: "SOLO" | "TEAM" | "BUSINESS"): string {
   return "Business";
 }
 
-function getPlanPrice(plan: "SOLO" | "TEAM" | "BUSINESS"): string {
+function getPlanPrice(
+  plan: "SOLO" | "TEAM" | "BUSINESS",
+  billingInterval: string | null
+): string {
   if (plan === "SOLO") return "Free";
-  if (plan === "TEAM") return "$19.99/month";
-  return "$39.99/month";
+  if (billingInterval === "year") {
+    return plan === "TEAM" ? "$191.99/year" : "$383.99/year";
+  }
+  return plan === "TEAM" ? "$19.99/month" : "$39.99/month";
 }
 
 function getUsagePercent(used: number, limit: number): number {
@@ -76,7 +81,7 @@ export default async function PlanPage({ searchParams }: Props) {
 
   const orgCreditRow = organization.data as { plan: string; monthly_credits: number; bonus_credits: number; credits_reset_at: string | null };
   const plan = orgCreditRow.plan as "SOLO" | "TEAM" | "BUSINESS";
-  const price = getPlanPrice(plan);
+  const price = getPlanPrice(plan, subscription.billingInterval);
   const monthlyCreditsRemaining = Number(orgCreditRow.monthly_credits ?? 0);
   const bonusCredits = Number(orgCreditRow.bonus_credits ?? 0);
   const totalCredits = monthlyCreditsRemaining + bonusCredits;
