@@ -1,13 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export function ForgotPasswordForm() {
-  const supabase = createClient();
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -18,20 +16,17 @@ export function ForgotPasswordForm() {
     setError(null);
     setSubmitting(true);
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? window.location.origin;
-
-    const { error: resetError } = await supabase.auth.resetPasswordForEmail(
-      email.trim().toLowerCase(),
-      { redirectTo: `${appUrl}/auth/callback?next=/reset-password` }
-    );
-
-    setSubmitting(false);
-
-    if (resetError) {
-      setError(resetError.message);
-      return;
+    try {
+      await fetch("/api/public/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim().toLowerCase() })
+      });
+    } catch {
+      // Swallow — always show the success state to avoid email enumeration.
     }
 
+    setSubmitting(false);
     setSent(true);
   };
 
