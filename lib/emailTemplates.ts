@@ -289,6 +289,40 @@ Want to keep your full access? Upgrade before your trial ends: ${planUrl}
   };
 }
 
+export function buildPaymentFailedEmail() {
+  const title = "Your SnapQuote payment failed";
+  const planUrl = "https://snapquote.us/app/plan";
+
+  return {
+    subject: title,
+    text: `${title}
+
+Hey there, we weren't able to process your latest payment. Please update your payment method to keep your plan active.
+
+Update your payment method: ${planUrl}
+
+If you've already resolved this, you can safely ignore this email.
+
+— The SnapQuote Team`,
+    html: renderEmailShell(
+      title,
+      `
+        <p style="margin:0 0 16px;font-size:15px;line-height:1.7;color:#334155;">
+          Hey there, we weren't able to process your latest payment. Please update
+          your payment method to keep your plan active.
+        </p>
+        <p style="margin:0 0 16px;font-size:15px;line-height:1.7;color:#334155;">
+          If you've already resolved this, you can safely ignore this email.
+        </p>
+        ${renderButton("Update Payment Method", planUrl)}
+        <p style="margin:24px 0 0;font-size:15px;line-height:1.7;color:#334155;">
+          — The SnapQuote Team
+        </p>
+      `
+    )
+  };
+}
+
 export function buildEstimateAcceptedEmail(input: {
   customerName: string;
   serviceType: string;
