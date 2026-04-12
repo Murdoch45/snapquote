@@ -5,6 +5,10 @@
       "schedule": "0 14 * * *"
     },
     {
+      "path": "/api/cron/estimate-expiry-warning",
+      "schedule": "0 2 * * *"
+    },
+    {
       "path": "/api/cron/auto-expire-stale-quotes",
       "schedule": "0 3 * * *"
     },

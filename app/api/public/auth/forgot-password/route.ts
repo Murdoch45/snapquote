@@ -2,12 +2,21 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendEmail } from "@/lib/notify";
 import { renderEmailShell, renderButton } from "@/lib/emailTemplates";
+import { rateLimit } from "@/lib/rateLimit";
+
+const ONE_HOUR = 60 * 60 * 1000;
 
 export async function POST(request: Request) {
   try {
     const { email } = (await request.json()) as { email?: string };
 
     if (typeof email === "string" && email.includes("@")) {
+      const normalizedEmail = email.trim().toLowerCase();
+
+      if (!rateLimit(`forgot:${normalizedEmail}`, 3, ONE_HOUR)) {
+        // Silently return 200 — don't reveal rate limiting to avoid enumeration.
+        return NextResponse.json({ ok: true });
+      }
       const admin = createAdminClient();
       const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://snapquote.us";
 

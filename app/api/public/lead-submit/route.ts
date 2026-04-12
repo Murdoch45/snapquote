@@ -8,6 +8,7 @@ import {
 import { haversineMiles } from "@/lib/maps";
 import { notifyContractor, notifyCustomer, sendEmail } from "@/lib/notify";
 import { getOwnerEmailForOrg } from "@/lib/organizationOwners";
+import { rateLimit } from "@/lib/rateLimit";
 import { normalizeServiceTypes } from "@/lib/services";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAppUrl } from "@/lib/utils";
@@ -35,8 +36,15 @@ function parseJsonField<T>(input: FormDataEntryValue | null, fallback: T): T {
   }
 }
 
+const ONE_HOUR = 60 * 60 * 1000;
+
 export async function POST(request: Request) {
   try {
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+    if (!rateLimit(`lead-submit:${ip}`, 20, ONE_HOUR)) {
+      return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429 });
+    }
+
     const formData = await request.formData();
     const turnstileToken = String(formData.get("turnstileToken") ?? "");
 

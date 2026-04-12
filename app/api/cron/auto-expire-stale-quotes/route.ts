@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
+import { buildEstimateExpiredEmail } from "@/lib/emailTemplates";
+import { sendEmail } from "@/lib/notify";
+import { getOwnerEmailForOrg } from "@/lib/organizationOwners";
 import { sendPushToOrg } from "@/lib/pushNotifications";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getAppUrl } from "@/lib/utils";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -27,7 +31,7 @@ export async function GET(request: Request) {
 
   const { data: expiringQuotes, error: queryError } = await admin
     .from("quotes")
-    .select("id, org_id")
+    .select("id, org_id, lead_id")
     .in("status", ["SENT", "VIEWED"])
     .lt("sent_at", cutoff.toISOString());
 
@@ -74,6 +78,32 @@ export async function GET(request: Request) {
     });
 
     if (result.sent > 0) orgsNotified += 1;
+  }
+
+  // Send an expiry email to each affected org's owner. Use the first expired
+  // quote's lead_id as the CTA link — multiple expirations still get one email.
+  const appUrl = getAppUrl();
+  for (const [orgId] of orgCounts.entries()) {
+    try {
+      const ownerEmail = await getOwnerEmailForOrg(admin, orgId);
+      if (!ownerEmail) continue;
+
+      const firstQuote = expiringQuotes.find((q) => (q.org_id as string) === orgId);
+      const leadUrl = firstQuote?.lead_id
+        ? `${appUrl}/app/leads/${firstQuote.lead_id}`
+        : `${appUrl}/app/leads`;
+
+      const email = buildEstimateExpiredEmail({ leadUrl });
+      await sendEmail({
+        to: ownerEmail,
+        subject: email.subject,
+        text: email.text,
+        html: email.html,
+        sender: "noreply"
+      });
+    } catch (emailError) {
+      console.warn("auto-expire email failed for org", orgId, emailError);
+    }
   }
 
   return NextResponse.json({ expired: expiringIds.length, orgsNotified });

@@ -29,6 +29,12 @@ export async function POST(_request: Request, { params }: Props) {
   if (quote.status === "ACCEPTED") {
     return NextResponse.json({ accepted: true, acceptedAt: quote.accepted_at });
   }
+  if (quote.status === "EXPIRED") {
+    return NextResponse.json({ error: "Estimate has expired." }, { status: 400 });
+  }
+  if (quote.status === "DRAFT") {
+    return NextResponse.json({ error: "Estimate has not been sent yet." }, { status: 400 });
+  }
 
   if (!quote.sent_at) {
     return NextResponse.json({ error: "Estimate has not been sent yet." }, { status: 400 });

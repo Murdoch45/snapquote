@@ -349,3 +349,47 @@ export function buildEstimateAcceptedEmail(input: {
     )
   };
 }
+
+export function buildEstimateExpiringSoonEmail(input: { quoteUrl: string }) {
+  const title = "Your estimate is expiring soon";
+
+  return {
+    subject: title,
+    text: `${title}\n\nHey there, a customer hasn't responded to your estimate yet and it expires in 24 hours. You may want to follow up directly.\n\nView estimate: ${input.quoteUrl}\n\n— The SnapQuote Team`,
+    html: renderEmailShell(
+      title,
+      `
+        <p style="margin:0 0 16px;font-size:15px;line-height:1.7;color:#334155;">
+          Hey there, a customer hasn't responded to your estimate yet and it expires in <strong>24 hours</strong>.
+          You may want to follow up directly.
+        </p>
+        ${renderButton("View Estimate", input.quoteUrl)}
+        <p style="margin:24px 0 0;font-size:15px;line-height:1.7;color:#334155;">
+          — The SnapQuote Team
+        </p>
+      `
+    )
+  };
+}
+
+export function buildEstimateExpiredEmail(input: { leadUrl: string }) {
+  const title = "Your estimate has expired";
+
+  return {
+    subject: title,
+    text: `${title}\n\nHey there, your estimate was not accepted before it expired. If you'd still like to win this job, consider reaching out to the customer directly.\n\nView lead: ${input.leadUrl}\n\n— The SnapQuote Team`,
+    html: renderEmailShell(
+      title,
+      `
+        <p style="margin:0 0 16px;font-size:15px;line-height:1.7;color:#334155;">
+          Hey there, your estimate was not accepted before it expired. If you'd still like to
+          win this job, consider reaching out to the customer directly.
+        </p>
+        ${renderButton("View Lead", input.leadUrl)}
+        <p style="margin:24px 0 0;font-size:15px;line-height:1.7;color:#334155;">
+          — The SnapQuote Team
+        </p>
+      `
+    )
+  };
+}
