@@ -281,13 +281,55 @@ export async function POST(request: Request) {
         break;
       }
 
-      case "EXPIRATION":
-      case "REFUND": {
+      case "EXPIRATION": {
         const previousPlan = await getCurrentOrgPlan(orgId);
         await setOrganizationPlan(orgId, "SOLO");
         await resetOrganizationCredits(orgId, "SOLO");
         if (previousPlan && previousPlan !== "SOLO") {
           void sendPlanEndedEmail(orgId, previousPlan);
+        }
+        break;
+      }
+
+      case "REFUND": {
+        const creditAmount = event.product_id
+          ? CREDIT_PACK_AMOUNTS[event.product_id] ?? null
+          : null;
+
+        if (creditAmount) {
+          // Credit pack refund — deduct the bonus credits, leave plan untouched.
+          const admin = createAdminClient();
+          const { data: org } = await admin
+            .from("organizations")
+            .select("bonus_credits")
+            .eq("id", orgId)
+            .single();
+
+          const currentBonus = Number(
+            (org as { bonus_credits?: number } | null)?.bonus_credits ?? 0
+          );
+          const newBonus = Math.max(0, currentBonus - creditAmount);
+
+          const { error: deductError } = await admin
+            .from("organizations")
+            .update({ bonus_credits: newBonus })
+            .eq("id", orgId);
+
+          if (deductError) {
+            console.error("RC credit pack refund deduction failed:", deductError);
+          } else {
+            console.log(
+              `RC credit pack refund: org ${orgId} bonus_credits ${currentBonus} → ${newBonus} (deducted ${creditAmount})`
+            );
+          }
+        } else {
+          // Subscription refund — downgrade to Solo.
+          const previousPlan = await getCurrentOrgPlan(orgId);
+          await setOrganizationPlan(orgId, "SOLO");
+          await resetOrganizationCredits(orgId, "SOLO");
+          if (previousPlan && previousPlan !== "SOLO") {
+            void sendPlanEndedEmail(orgId, previousPlan);
+          }
         }
         break;
       }
