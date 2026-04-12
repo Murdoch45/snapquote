@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createServerClient } from "@supabase/ssr";
 
 function safeNextPath(value: string | null): string {
   if (!value) return "/app";
@@ -24,7 +24,33 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  const supabase = await createServerSupabaseClient();
+  const forwardedHost = request.headers.get("x-forwarded-host");
+  const isLocalEnv = process.env.NODE_ENV === "development";
+  const redirectBase =
+    !isLocalEnv && forwardedHost ? `https://${forwardedHost}` : url.origin;
+
+  // Build the redirect response FIRST so the Supabase client can write auth
+  // cookies directly onto it. Using cookieStore from next/headers does not
+  // reliably propagate cookies onto a separately-created NextResponse.redirect().
+  const response = NextResponse.redirect(`${redirectBase}${next}`);
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet: { name: string; value: string; options?: Record<string, unknown> }[]) {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            response.cookies.set(name, value, options as any);
+          });
+        }
+      }
+    }
+  );
+
   const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type });
 
   if (error) {
@@ -33,10 +59,5 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  const forwardedHost = request.headers.get("x-forwarded-host");
-  const isLocalEnv = process.env.NODE_ENV === "development";
-  if (!isLocalEnv && forwardedHost) {
-    return NextResponse.redirect(`https://${forwardedHost}${next}`);
-  }
-  return NextResponse.redirect(`${url.origin}${next}`);
+  return response;
 }
