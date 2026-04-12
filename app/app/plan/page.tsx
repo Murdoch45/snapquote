@@ -2,6 +2,7 @@ import Link from "next/link";
 import { AlertCircle, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { CreditsAddedToast } from "@/components/plan/CreditsAddedToast";
+import { ManageBillingButton } from "@/components/plan/ManageBillingButton";
 
 import { PlanOptionsSection } from "@/components/plan/PlanOptionsSection";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -150,6 +151,12 @@ export default async function PlanPage({ searchParams }: Props) {
                   </div>
                 ))}
               </div>
+
+              {subscription.active ? (
+                <div className="pt-2">
+                  <ManageBillingButton />
+                </div>
+              ) : null}
             </div>
 
             <div className="rounded-[14px] border border-[#E5E7EB] bg-[#F8F9FC] p-6">
