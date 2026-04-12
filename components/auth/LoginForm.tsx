@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -118,6 +119,15 @@ export function LoginForm() {
         value={password}
         onChange={setPassword}
       />
+
+      <div className="flex justify-end -mt-2">
+        <Link
+          href="/forgot-password"
+          className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+        >
+          Forgot password?
+        </Link>
+      </div>
 
       <Button
         type="submit"

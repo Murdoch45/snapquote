@@ -1,3 +1,4 @@
+import { ChangePasswordCard } from "@/components/ChangePasswordCard";
 import { SettingsForm } from "@/components/SettingsForm";
 import { requireAuth } from "@/lib/auth/requireAuth";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -19,5 +20,12 @@ export default async function SettingsPage() {
     return <p className="text-sm text-red-600">Contractor profile not found.</p>;
   }
 
-  return <SettingsForm initial={profile as any} />;
+  return (
+    <>
+      <SettingsForm initial={profile as any} />
+      <div className="mt-6">
+        <ChangePasswordCard />
+      </div>
+    </>
+  );
 }
