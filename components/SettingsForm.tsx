@@ -539,7 +539,7 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
                   value={newPassword}
                   onChange={(e) => { setNewPassword(e.target.value); setPasswordError(null); }}
                   minLength={8}
-                  placeholder="Leave blank to keep current"
+                  placeholder="New password"
                   className="h-11 rounded-[8px] border-[#E5E7EB] bg-white pr-11 px-[14px] text-sm text-[#111827] placeholder:text-[#6B7280] focus-visible:ring-[#2563EB]"
                 />
                 <button
@@ -567,7 +567,7 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
                   value={confirmPassword}
                   onChange={(e) => { setConfirmPassword(e.target.value); setPasswordError(null); }}
                   minLength={8}
-                  placeholder="Leave blank to keep current"
+                  placeholder="Confirm new password"
                   className="h-11 rounded-[8px] border-[#E5E7EB] bg-white pr-11 px-[14px] text-sm text-[#111827] placeholder:text-[#6B7280] focus-visible:ring-[#2563EB]"
                 />
                 <button
