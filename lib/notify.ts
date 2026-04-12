@@ -93,25 +93,38 @@ export async function sendEmail(input: SendEmailInput): Promise<boolean> {
   }
 
   const fromEmail = resolveFromAddress(input.sender ?? "transactional");
+  const maxAttempts = 3;
 
-  try {
-    const result = await getResendClient().emails.send({
-      from: fromEmail,
-      to: input.to,
-      subject: input.subject,
-      text: input.text,
-      html: input.html,
-      ...(input.replyTo ? { replyTo: input.replyTo } : {})
-    });
-    if (result.error) {
-      console.error("Resend sendEmail API error:", result.error);
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      const result = await getResendClient().emails.send({
+        from: fromEmail,
+        to: input.to,
+        subject: input.subject,
+        text: input.text,
+        html: input.html,
+        ...(input.replyTo ? { replyTo: input.replyTo } : {})
+      });
+      if (result.error) {
+        console.error(`Resend sendEmail API error (attempt ${attempt}/${maxAttempts}):`, result.error);
+        if (attempt < maxAttempts) {
+          await new Promise((resolve) => setTimeout(resolve, 500 * attempt));
+          continue;
+        }
+        return false;
+      }
+      return Boolean(result.data?.id);
+    } catch (error) {
+      console.error(`Resend sendEmail error (attempt ${attempt}/${maxAttempts}):`, error);
+      if (attempt < maxAttempts) {
+        await new Promise((resolve) => setTimeout(resolve, 500 * attempt));
+        continue;
+      }
       return false;
     }
-    return Boolean(result.data?.id);
-  } catch (error) {
-    console.error("Resend sendEmail error:", error);
-    return false;
   }
+
+  return false;
 }
 
 export async function notifyCustomer(opts: {
