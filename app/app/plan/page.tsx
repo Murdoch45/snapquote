@@ -3,7 +3,6 @@ import { AlertCircle, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { CreditsAddedToast } from "@/components/plan/CreditsAddedToast";
 import { ManageBillingButton } from "@/components/plan/ManageBillingButton";
-
 import { PlanOptionsSection } from "@/components/plan/PlanOptionsSection";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireAuth } from "@/lib/auth/requireAuth";
@@ -152,11 +151,6 @@ export default async function PlanPage({ searchParams }: Props) {
                 ))}
               </div>
 
-              {subscription.active ? (
-                <div className="pt-2">
-                  <ManageBillingButton />
-                </div>
-              ) : null}
             </div>
 
             <div className="rounded-[14px] border border-[#E5E7EB] bg-[#F8F9FC] p-6">
@@ -167,6 +161,14 @@ export default async function PlanPage({ searchParams }: Props) {
 
         </CardContent>
       </Card>
+
+      {subscription.active ? (
+        <p className="text-sm text-[#6B7280]">
+          To manage your billing,{" "}
+          <ManageBillingButton label="click here" mode="text" />
+          .
+        </p>
+      ) : null}
 
       <div id="plan-options" className="space-y-3">
         <div className="space-y-1">
