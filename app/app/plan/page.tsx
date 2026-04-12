@@ -163,7 +163,7 @@ export default async function PlanPage({ searchParams }: Props) {
       </Card>
 
       {subscription.active ? (
-        <p className="text-sm text-[#6B7280]">
+        <p className="-mt-3 text-sm text-[#6B7280]">
           To manage your billing,{" "}
           <ManageBillingButton label="click here" mode="text" />
           .
