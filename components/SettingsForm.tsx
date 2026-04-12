@@ -435,32 +435,6 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
         </div>
       </section>
 
-      <section className="rounded-[14px] border border-[#E5E7EB] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
-        <h2 className="mb-4 text-base font-semibold text-[#111827]">Notifications</h2>
-      <div className="grid gap-3 md:grid-cols-2">
-        <label className="flex items-center gap-2 text-sm text-[#111827]">
-          <Checkbox
-            className="data-[state=checked]:border-[#2563EB] data-[state=checked]:bg-[#2563EB]"
-            checked={form.notificationAcceptEmail}
-            onCheckedChange={(checked) =>
-              setForm((prev) => ({ ...prev, notificationAcceptEmail: checked === true }))
-            }
-          />
-          Acceptance notifications by email
-        </label>
-
-        <label className="flex items-center gap-2 text-sm text-[#111827]">
-          <Checkbox
-            className="data-[state=checked]:border-[#2563EB] data-[state=checked]:bg-[#2563EB]"
-            checked={form.notificationLeadEmail}
-            onCheckedChange={(checked) =>
-              setForm((prev) => ({ ...prev, notificationLeadEmail: checked === true }))
-            }
-          />
-          Lead notifications by email
-        </label>
-      </div>
-      </section>
 
       <section className="rounded-[14px] border border-[#E5E7EB] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
         <h2 className="mb-4 text-base font-semibold text-[#111827]">Estimate Message Template</h2>
