@@ -40,6 +40,7 @@ function getInitials(name?: string | null): string {
 type SidebarProps = {
   orgId: string;
   businessName?: string | null;
+  email?: string | null;
   mode?: "desktop" | "mobile";
   open?: boolean;
   onClose?: () => void;
@@ -85,21 +86,26 @@ function SidebarNav({
 
 function SidebarFooter({
   businessName,
+  email,
   className
 }: {
   businessName?: string | null;
+  email?: string | null;
   className?: string;
 }) {
   return (
     <div className={cn("border-t border-border px-6 py-5", className)}>
       <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent text-sm font-semibold text-primary">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-semibold text-primary">
           {getInitials(businessName)}
         </div>
         <div className="min-w-0">
           <p className="truncate text-sm font-medium text-foreground">
             {businessName ?? "SnapQuote"}
           </p>
+          {email ? (
+            <p className="truncate text-xs text-muted-foreground">{email}</p>
+          ) : null}
         </div>
       </div>
     </div>
@@ -108,10 +114,14 @@ function SidebarFooter({
 
 function MobileSidebar({
   open,
-  onClose
+  onClose,
+  businessName,
+  email
 }: {
   open: boolean;
   onClose?: () => void;
+  businessName?: string | null;
+  email?: string | null;
 }) {
   const pathname = usePathname();
 
@@ -142,6 +152,9 @@ function MobileSidebar({
         role="dialog"
       >
         <SidebarNav pathname={pathname} onNavigate={onClose} />
+        {businessName || email ? (
+          <SidebarFooter businessName={businessName} email={email} className="mt-auto" />
+        ) : null}
       </aside>
     </div>
   );
@@ -150,6 +163,7 @@ function MobileSidebar({
 export function Sidebar({
   orgId: _orgId,
   businessName,
+  email,
   mode = "desktop",
   open = false,
   onClose
@@ -157,7 +171,7 @@ export function Sidebar({
   const pathname = usePathname();
 
   if (mode === "mobile") {
-    return <MobileSidebar open={open} onClose={onClose} />;
+    return <MobileSidebar open={open} onClose={onClose} businessName={businessName} email={email} />;
   }
 
   return (
@@ -171,7 +185,7 @@ export function Sidebar({
 
         <SidebarNav pathname={pathname} />
 
-        <SidebarFooter businessName={businessName} className="mt-auto" />
+        <SidebarFooter businessName={businessName} email={email} className="mt-auto" />
       </div>
     </aside>
   );

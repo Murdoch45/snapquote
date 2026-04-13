@@ -3,12 +3,10 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Bell, CircleUser, Menu } from "lucide-react";
+import { Bell, Menu } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { NotificationsFeed } from "@/components/NotificationsFeed";
-import { Button } from "@/components/ui/button";
 import { type FeedItem, useNotifications } from "@/hooks/useNotifications";
-import { createClient } from "@/lib/supabase/client";
 
 function getPageTitle(pathname: string): string {
   if (pathname.startsWith("/app/analytics")) return "Analytics";
@@ -26,14 +24,10 @@ function getPageTitle(pathname: string): string {
 }
 
 export function TopBar({
-  email,
   orgId,
-  businessName,
   onOpenSidebar
 }: {
-  email?: string | null;
   orgId: string;
-  businessName?: string | null;
   onOpenSidebar?: () => void;
 }) {
   const pathname = usePathname();
@@ -87,12 +81,6 @@ export function TopBar({
     };
   }, [mobilePopoverOpen]);
 
-  const onLogout = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    window.location.href = "/login";
-  };
-
   // Auto-dismiss notification dropdown after 5 seconds of no hover
   const notificationTimerRef = useRef<number | null>(null);
   const notificationPanelRef = useRef<HTMLDivElement | null>(null);
@@ -110,8 +98,6 @@ export function TopBar({
     clearNotificationTimer();
     notificationTimerRef.current = window.setTimeout(() => {
       notificationTimerRef.current = null;
-      // Start fade-out: set visible to false (triggers opacity transition),
-      // then remove from DOM after the transition completes.
       setNotificationVisible(false);
       fadeTimeoutRef.current = window.setTimeout(() => {
         setDesktopNotificationsOpen(false);
@@ -120,10 +106,8 @@ export function TopBar({
     }, 5000);
   }, [clearNotificationTimer]);
 
-  // Start timer when dropdown opens, clean up when it closes
   useEffect(() => {
     if (desktopNotificationsOpen) {
-      // Small delay to ensure the element is in the DOM before triggering opacity
       requestAnimationFrame(() => setNotificationVisible(true));
       startNotificationTimer();
     } else {
@@ -144,7 +128,7 @@ export function TopBar({
   }, [desktopNotificationsOpen, startNotificationTimer, clearNotificationTimer]);
 
   const notificationButtonClassName =
-    "inline-flex h-11 w-11 items-center justify-center rounded-[10px] border border-border bg-card text-muted-foreground transition-colors hover:bg-muted hover:text-foreground md:h-10 md:w-10";
+    "relative inline-flex h-11 w-11 items-center justify-center rounded-[10px] border border-border bg-card text-muted-foreground transition-colors hover:bg-muted hover:text-foreground md:h-10 md:w-10";
   const notificationPanelClassName =
     "absolute right-0 z-30 mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-[14px] border border-border bg-card p-3 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)]";
 
@@ -158,7 +142,6 @@ export function TopBar({
         onClick={() => {
           setDesktopNotificationsOpen((value) => {
             if (!value) {
-              // Opening: mark as read and cancel any in-flight fade
               void markAllRead();
               if (fadeTimeoutRef.current !== null) {
                 window.clearTimeout(fadeTimeoutRef.current);
@@ -187,7 +170,6 @@ export function TopBar({
           }}
           onMouseEnter={() => {
             clearNotificationTimer();
-            // Cancel any in-flight fade
             if (fadeTimeoutRef.current !== null) {
               window.clearTimeout(fadeTimeoutRef.current);
               fadeTimeoutRef.current = null;
@@ -233,8 +215,8 @@ export function TopBar({
           <div ref={mobilePopoverRef} className="relative z-10 flex w-10 justify-end">
             <button
               type="button"
-              className="text-muted-foreground p-1 transition-colors hover:text-foreground"
-              aria-label="Open account menu"
+              className="relative text-muted-foreground p-1 transition-colors hover:text-foreground"
+              aria-label="Notifications"
               aria-expanded={mobilePopoverOpen}
               onClick={() => {
                 setMobilePopoverOpen((value) => {
@@ -243,20 +225,17 @@ export function TopBar({
                 });
               }}
             >
-              <CircleUser className="h-5 w-5" />
+              <Bell className="h-5 w-5" />
+              {unreadCount > 0 ? (
+                <span className="absolute -right-1 -top-1 rounded-full bg-primary px-1.5 text-[10px] text-white">
+                  {unreadCount}
+                </span>
+              ) : null}
             </button>
 
             {mobilePopoverOpen ? (
               <div className="absolute right-0 top-full z-30 mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-xl border border-border bg-card p-3 shadow-lg">
                 <NotificationsFeed feed={feed} onItemClick={handleNotificationClick} />
-                <div className="my-3 border-t border-border" />
-                <button
-                  type="button"
-                  className="inline-flex min-h-[44px] w-full items-center justify-center rounded-[10px] bg-red-600 px-3 text-sm font-semibold text-white transition-colors hover:bg-red-700"
-                  onClick={() => void onLogout()}
-                >
-                  Sign Out
-                </button>
               </div>
             ) : null}
           </div>
@@ -272,20 +251,7 @@ export function TopBar({
           <p className="text-2xl font-bold text-foreground">{pageTitle}</p>
         </div>
 
-        <div className="flex items-center gap-4">
-          {renderNotifications()}
-
-          <div className="min-w-0 text-right">
-            <p className="truncate text-sm font-medium text-foreground">
-              {businessName ?? "SnapQuote"}
-            </p>
-            <p className="truncate text-sm text-muted-foreground">{email ?? "Account"}</p>
-          </div>
-
-          <Button variant="destructive" className="h-10 px-4" onClick={onLogout}>
-            Sign out
-          </Button>
-        </div>
+        {renderNotifications()}
       </div>
     </header>
   );

@@ -1,4 +1,4 @@
-import { DeleteAccountCard, SettingsForm } from "@/components/SettingsForm";
+import { DeleteAccountCard, SignOutCard, SettingsForm } from "@/components/SettingsForm";
 import { requireAuth } from "@/lib/auth/requireAuth";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -34,6 +34,7 @@ export default async function SettingsPage() {
           support@snapquote.us
         </a>
       </section>
+      <SignOutCard />
       <DeleteAccountCard />
     </div>
   );

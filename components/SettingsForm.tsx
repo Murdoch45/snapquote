@@ -605,6 +605,26 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
   );
 }
 
+export function SignOutCard() {
+  const router = useRouter();
+  const supabase = createClient();
+
+  return (
+    <section className="rounded-[14px] border border-red-200 dark:border-red-800 bg-card p-4">
+      <button
+        type="button"
+        onClick={async () => {
+          await supabase.auth.signOut();
+          router.push("/login");
+        }}
+        className="inline-flex w-full items-center justify-center rounded-[10px] border border-red-300 dark:border-red-700 bg-card px-5 py-3 text-sm font-semibold text-red-600 dark:text-red-400 transition-colors hover:bg-red-50 dark:hover:bg-red-950/30 disabled:opacity-60"
+      >
+        Sign Out
+      </button>
+    </section>
+  );
+}
+
 export function DeleteAccountCard() {
   const router = useRouter();
   const supabase = createClient();
