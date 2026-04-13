@@ -240,7 +240,7 @@ export default async function DashboardPage() {
             Share your link to start receiving estimate requests
           </p>
           <Link
-            href="/app/my-link"
+            href="/dashboard/my-link"
             className="mt-4 inline-block text-sm font-semibold text-[#2563EB] hover:text-[#1D4ED8]"
           >
             Share My Link
