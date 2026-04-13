@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { requireMemberForApi } from "@/lib/auth/requireRole";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-export async function POST() {
-  const auth = await requireMemberForApi();
+export async function POST(request: Request) {
+  const auth = await requireMemberForApi(request);
   if (!auth.ok) return auth.response;
 
   try {

@@ -4,7 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { removeTeamSchema } from "@/lib/validations";
 
 export async function POST(request: Request) {
-  const auth = await requireOwnerForApi();
+  const auth = await requireOwnerForApi(request);
   if (!auth.ok) return auth.response;
 
   try {
