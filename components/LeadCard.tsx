@@ -53,49 +53,49 @@ export function LeadCard({ lead, onLeadUnlocked }: LeadCardProps) {
               ))}
             </div>
             <div className="space-y-1">
-              <p className="text-sm font-medium text-[#111827]">{lead.locality}</p>
-              <p className="text-sm text-[#6B7280]">
+              <p className="text-sm font-medium text-foreground">{lead.locality}</p>
+              <p className="text-sm text-muted-foreground">
                 Submitted {toRelativeMinutes(lead.submitted_at)}
               </p>
             </div>
           </div>
           <div className="flex flex-wrap items-center justify-end gap-2">
-            <Badge className="border-transparent bg-[#F9FAFB] text-[#6B7280]">
+            <Badge className="border-transparent bg-muted text-muted-foreground">
               {lead.photo_count ?? 0} photos
             </Badge>
             {lead.isUnlocked ? (
-              <Badge className="border-transparent bg-[#EFF6FF] text-[#2563EB]">Unlocked</Badge>
+              <Badge className="border-transparent bg-accent text-primary">Unlocked</Badge>
             ) : null}
           </div>
         </div>
 
         <div className="space-y-2">
-          <p className="text-[11px] font-medium uppercase tracking-[0.05em] text-[#6B7280]">
+          <p className="text-[11px] font-medium uppercase tracking-[0.05em] text-muted-foreground">
             AI Estimate
           </p>
-          <p className="text-[28px] font-bold leading-none text-[#2563EB]">
+          <p className="text-[28px] font-bold leading-none text-primary">
             {displayEstimate}
           </p>
         </div>
 
         <div className="space-y-3">
-          <p className="text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280]">
+          <p className="text-xs font-medium uppercase tracking-[0.05em] text-muted-foreground">
             Job Details
           </p>
           {previewSummary ? (
-            <p className="text-sm text-[#111827]">{previewSummary}</p>
+            <p className="text-sm text-foreground">{previewSummary}</p>
           ) : null}
         </div>
 
-        <div className="rounded-[8px] border border-[#E5E7EB] bg-[#F8F9FC] p-3">
+        <div className="rounded-[8px] border border-border bg-muted p-3">
           <div className="mb-3 flex items-center gap-2">
-            <Lock className="h-4 w-4 text-[#6B7280]" />
-            <p className="text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280]">
+            <Lock className="h-4 w-4 text-muted-foreground" />
+            <p className="text-xs font-medium uppercase tracking-[0.05em] text-muted-foreground">
               Contact Info
             </p>
           </div>
           {lead.isUnlocked ? (
-            <div className="space-y-1 text-sm text-[#111827]">
+            <div className="space-y-1 text-sm text-foreground">
               <p>{lead.customerName || "No name provided"}</p>
               <p>{lead.customerPhone || "No phone provided"}</p>
               <p>{lead.customerEmail || "No email provided"}</p>
@@ -103,7 +103,7 @@ export function LeadCard({ lead, onLeadUnlocked }: LeadCardProps) {
             </div>
           ) : (
             <div className="space-y-3">
-              <div className="select-none rounded-[10px] border border-[#E5E7EB] bg-white px-3 py-3 text-sm text-[#6B7280] blur-sm">
+              <div className="select-none rounded-[10px] border border-border bg-card px-3 py-3 text-sm text-muted-foreground blur-sm">
                 <p>Customer name hidden</p>
                 <p>Phone hidden</p>
                 <p>Email hidden</p>
@@ -121,13 +121,13 @@ export function LeadCard({ lead, onLeadUnlocked }: LeadCardProps) {
             <Button
               asChild
               variant="outline"
-              className="h-auto border-2 border-[#2563EB] bg-transparent px-5 py-2 font-semibold text-[#2563EB] hover:bg-[#EFF6FF]"
+              className="h-auto border-2 border-primary bg-transparent px-5 py-2 font-semibold text-primary hover:bg-accent"
             >
               <Link href={`/app/leads/${lead.id}`}>View</Link>
             </Button>
           ) : (
             <Link
-              className="inline-flex text-sm font-medium text-[#2563EB] transition-colors hover:text-[#1D4ED8]"
+              className="inline-flex text-sm font-medium text-primary transition-colors hover:text-primary/90"
               href={`/app/leads/${lead.id}`}
             >
               Open lead

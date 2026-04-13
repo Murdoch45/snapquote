@@ -91,8 +91,8 @@ export function AddressAutocomplete({
         htmlFor={inputId}
         className={
           variant === "public"
-            ? "mb-1.5 block text-[13px] font-semibold text-[#374151]"
-            : "mb-1.5 block text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280]"
+            ? "mb-1.5 block text-[13px] font-semibold text-foreground"
+            : "mb-1.5 block text-xs font-medium uppercase tracking-[0.05em] text-muted-foreground"
         }
       >
         {label}
@@ -113,21 +113,21 @@ export function AddressAutocomplete({
         className={
           variant === "public"
             ? invalid
-              ? "h-auto rounded-[8px] border-[#DC2626] bg-white px-[14px] py-3 text-sm text-[#111827] placeholder:text-[#6B7280] focus-visible:ring-[rgba(220,38,38,0.12)]"
-              : "h-auto rounded-[8px] border-[#E5E7EB] bg-white px-[14px] py-3 text-sm text-[#111827] placeholder:text-[#6B7280] focus-visible:ring-[rgba(37,99,235,0.1)]"
+              ? "h-auto rounded-[8px] border-[#DC2626] bg-card px-[14px] py-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-[rgba(220,38,38,0.12)]"
+              : "h-auto rounded-[8px] border-border bg-card px-[14px] py-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-[rgba(37,99,235,0.1)]"
             : invalid
-              ? "h-11 rounded-[8px] border-[#FECACA] bg-white px-[14px] text-sm text-[#111827] placeholder:text-[#6B7280] focus-visible:ring-[#DC2626]"
-              : "h-11 rounded-[8px] border-[#E5E7EB] bg-white px-[14px] text-sm text-[#111827] placeholder:text-[#6B7280] focus-visible:ring-[#2563EB]"
+              ? "h-11 rounded-[8px] border-red-200 dark:border-red-800 bg-card px-[14px] text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-[#DC2626]"
+              : "h-11 rounded-[8px] border-border bg-card px-[14px] text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-ring"
         }
       />
       <p
         className={
           variant === "public"
-            ? `max-w-full break-words text-xs ${invalid || loadError ? "text-[#DC2626]" : "text-[#6B7280]"}`
+            ? `max-w-full break-words text-xs ${invalid || loadError ? "text-red-600 dark:text-red-400" : "text-muted-foreground"}`
             : `rounded-[8px] border px-4 py-3 text-sm ${
                 invalid || loadError
-                  ? "border-[#FECACA] bg-[#FEF2F2] text-[#DC2626]"
-                  : "border-[#E5E7EB] bg-white text-[#6B7280]"
+                  ? "border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400"
+                  : "border-border bg-card text-muted-foreground"
               }`
         }
       >

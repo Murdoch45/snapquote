@@ -84,7 +84,7 @@ export default async function PublicQuotePage({ params }: Props) {
     : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
 
   return (
-    <main className="min-h-screen bg-[#F8F9FC] px-4 py-8 sm:py-12">
+    <main className="min-h-screen bg-muted px-4 py-8 sm:py-12">
       <PublicQuoteCard
         quote={{
           publicId: quote.public_id as string,

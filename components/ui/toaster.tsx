@@ -7,11 +7,7 @@ export function Toaster() {
     <SonnerToaster
       position="top-right"
       toastOptions={{
-        style: {
-          background: "white",
-          color: "#111827",
-          border: "1px solid #E5E7EB"
-        }
+        className: "!bg-card !text-foreground !border-border"
       }}
     />
   );

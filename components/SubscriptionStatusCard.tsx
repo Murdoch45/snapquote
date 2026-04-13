@@ -80,23 +80,23 @@ export function SubscriptionStatusCard({ subscription }: Props) {
       <CardContent className="grid gap-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-1">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
               Current Plan
             </p>
-            <p className="text-lg font-semibold text-gray-900">{planLabel}</p>
+            <p className="text-lg font-semibold text-foreground">{planLabel}</p>
           </div>
           <div className="space-y-1">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
               Subscription Status
             </p>
-            <p className="text-lg font-semibold text-gray-900">{statusLabel}</p>
+            <p className="text-lg font-semibold text-foreground">{statusLabel}</p>
           </div>
           {subscription.status === "trialing" && trialEndDate ? (
             <div className="space-y-1 sm:col-span-2">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                 Trial End Date
               </p>
-              <p className="text-sm font-medium text-gray-800">Trial ends: {trialEndDate}</p>
+              <p className="text-sm font-medium text-foreground">Trial ends: {trialEndDate}</p>
             </div>
           ) : null}
           {inactive ? (

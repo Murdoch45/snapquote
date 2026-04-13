@@ -59,14 +59,14 @@ export function CreditPackCheckoutButton({
   return (
     <button
       type="button"
-      className="group block h-full w-full cursor-pointer rounded-[14px] border border-[#E5E7EB] bg-[#F8F9FC] p-6 text-left transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-2 hover:border-[#2563EB] hover:bg-[#EFF6FF] hover:shadow-[0_4px_20px_rgba(37,99,235,0.15)]"
+      className="group block h-full w-full cursor-pointer rounded-[14px] border border-border bg-muted p-6 text-left transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-2 hover:border-primary hover:bg-accent hover:shadow-[0_4px_20px_rgba(37,99,235,0.15)]"
       onClick={() => void onCheckout()}
       disabled={loading}
     >
       <div className="flex h-full flex-col">
         {children}
         <div className="mt-4 flex justify-end">
-          <span className="text-sm font-medium text-[#2563EB] opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+          <span className="text-sm font-medium text-primary opacity-0 transition-opacity duration-200 group-hover:opacity-100">
             {loading ? "Opening..." : "Purchase ->"}
           </span>
         </div>

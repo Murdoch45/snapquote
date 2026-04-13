@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 
-export default function AppError({
+export default function ContractorPageError({
   error,
   reset
 }: {
@@ -11,7 +11,7 @@ export default function AppError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("App error boundary caught:", error);
+    console.error("Contractor page error boundary caught:", error);
   }, [error]);
 
   return (
@@ -19,7 +19,8 @@ export default function AppError({
       <div className="mx-auto max-w-md space-y-4">
         <h2 className="text-xl font-semibold text-foreground">Something went wrong</h2>
         <p className="text-sm text-muted-foreground">
-          An unexpected error occurred. Try refreshing the page or contact support if the problem persists.
+          We couldn&apos;t load this page. Please try again or contact support if the problem
+          persists.
         </p>
         <Button onClick={reset}>Try again</Button>
       </div>

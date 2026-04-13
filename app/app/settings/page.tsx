@@ -22,14 +22,14 @@ export default async function SettingsPage() {
   return (
     <div className="space-y-6">
       <SettingsForm initial={profile as any} />
-      <section className="rounded-[14px] border border-[#E5E7EB] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
-        <h2 className="text-base font-semibold text-[#111827]">Need help?</h2>
-        <p className="mt-2 text-sm text-[#6B7280]">
+      <section className="rounded-[14px] border border-border bg-card p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
+        <h2 className="text-base font-semibold text-foreground">Need help?</h2>
+        <p className="mt-2 text-sm text-muted-foreground">
           Have a question or running into an issue? We&apos;re here to help.
         </p>
         <a
           href="mailto:support@snapquote.us"
-          className="mt-4 inline-flex rounded-[10px] text-sm font-medium text-[#2563EB] transition-colors hover:text-[#1D4ED8]"
+          className="mt-4 inline-flex rounded-[10px] text-sm font-medium text-primary transition-colors hover:text-primary/90"
         >
           support@snapquote.us
         </a>

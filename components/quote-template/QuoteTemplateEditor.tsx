@@ -396,7 +396,7 @@ export function EstimateTemplateEditor({
             suppressContentEditableWarning
             role="textbox"
             aria-multiline="true"
-            className="min-h-40 w-full whitespace-pre-wrap rounded-[8px] border-2 border-[#2563EB] bg-white px-[14px] py-[10px] text-sm text-[#111827] shadow-[0_0_0_3px_rgba(37,99,235,0.1)] focus:outline-none"
+            className="min-h-40 w-full whitespace-pre-wrap rounded-[8px] border-2 border-primary bg-card px-[14px] py-[10px] text-sm text-foreground shadow-[0_0_0_3px_rgba(37,99,235,0.1)] focus:outline-none"
             onClick={(event) => {
               const target = event.target as HTMLElement;
               if (target.dataset.removeToken) {
@@ -485,12 +485,12 @@ export function EstimateTemplateEditor({
             }}
           />
 
-          <p className="text-xs text-[#9CA3AF]">
+          <p className="text-xs text-muted-foreground/70">
             Tap where you want to insert, then tap a token.
           </p>
         </>
       ) : (
-        <div className="whitespace-pre-wrap rounded-[8px] border border-[#E5E7EB] bg-[#F8F9FC] p-4 text-sm text-[#111827]">
+        <div className="whitespace-pre-wrap rounded-[8px] border border-border bg-muted p-4 text-sm text-foreground">
           {previewSegments.map((segment, index) => renderPreviewSegment(segment, index))}
         </div>
       )}
@@ -502,7 +502,7 @@ export function EstimateTemplateEditor({
           className={
             isEditing
               ? "font-semibold"
-              : "border-2 border-[#2563EB] bg-transparent font-semibold text-[#2563EB] hover:bg-[#EFF6FF] hover:text-[#2563EB]"
+              : "border-2 border-primary bg-transparent font-semibold text-primary hover:bg-accent hover:text-primary"
           }
           onClick={isEditing ? onSave : onEdit}
           disabled={isSaving}
@@ -512,7 +512,7 @@ export function EstimateTemplateEditor({
         {isEditing ? (
           <button
             type="button"
-            className="text-sm text-[#6B7280] transition-colors hover:text-[#111827]"
+            className="text-sm text-muted-foreground transition-colors hover:text-foreground"
             onClick={onCancel}
             disabled={isSaving}
           >

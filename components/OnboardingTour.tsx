@@ -47,16 +47,16 @@ const ONBOARDING_TOUR_STORAGE_PREFIX = "snapquote:onboarding-tour-completed";
 
 function MiniMyLinkPreview({ slug }: { slug?: string | null }) {
   return (
-    <div className="flex h-full items-center justify-center bg-[#F8F9FC] px-14">
-      <div className="w-full max-w-[520px] rounded-[14px] border border-slate-200 bg-white p-8 shadow-[0_16px_40px_-24px_rgba(15,23,42,0.18)]">
-        <p className="text-[14px] font-medium text-slate-500">Share your link</p>
-        <div className="mt-4 flex items-center gap-3 rounded-[14px] border border-slate-200 bg-[#F8F9FC] p-3">
-          <div className="flex-1 rounded-[12px] bg-white px-4 py-3 text-[16px] font-medium text-slate-700 shadow-sm">
+    <div className="flex h-full items-center justify-center bg-muted px-14">
+      <div className="w-full max-w-[520px] rounded-[14px] border border-border bg-card p-8 shadow-[0_16px_40px_-24px_rgba(15,23,42,0.18)]">
+        <p className="text-[14px] font-medium text-muted-foreground">Share your link</p>
+        <div className="mt-4 flex items-center gap-3 rounded-[14px] border border-border bg-muted p-3">
+          <div className="flex-1 rounded-[12px] bg-card px-4 py-3 text-[16px] font-medium text-slate-700 shadow-sm">
             snapquote.us/{slug || "your-link"}
           </div>
           <button
             type="button"
-            className="rounded-[12px] bg-[#2563EB] px-5 py-3 text-[14px] font-semibold text-white"
+            className="rounded-[12px] bg-primary px-5 py-3 text-[14px] font-semibold text-white"
           >
             Copy Link
           </button>
@@ -68,28 +68,28 @@ function MiniMyLinkPreview({ slug }: { slug?: string | null }) {
 
 function MiniLeadsPreview() {
   return (
-    <div className="h-full bg-[#F8F9FC] p-10">
-      <div className="rounded-[14px] border border-slate-200 bg-white p-6 shadow-[0_16px_40px_-24px_rgba(15,23,42,0.18)]">
+    <div className="h-full bg-muted p-10">
+      <div className="rounded-[14px] border border-border bg-card p-6 shadow-[0_16px_40px_-24px_rgba(15,23,42,0.18)]">
         <div className="flex items-start justify-between gap-4">
           <div>
             <span className="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-[13px] font-semibold text-emerald-700">
               Pressure Washing
             </span>
-            <p className="mt-4 text-[22px] font-semibold text-slate-900">Scottsdale, AZ</p>
-            <p className="mt-2 text-[15px] text-slate-500">4 photos</p>
+            <p className="mt-4 text-[22px] font-semibold text-foreground">Scottsdale, AZ</p>
+            <p className="mt-2 text-[15px] text-muted-foreground">4 photos</p>
           </div>
           <button
             type="button"
-            className="rounded-[12px] border border-slate-200 bg-white px-4 py-2 text-[14px] font-semibold text-slate-700"
+            className="rounded-[12px] border border-border bg-card px-4 py-2 text-[14px] font-semibold text-slate-700"
           >
             Unlock
           </button>
         </div>
-        <div className="mt-6 rounded-[14px] bg-[#EFF6FF] px-5 py-4">
-          <p className="text-[13px] font-medium uppercase tracking-[0.08em] text-[#2563EB]">
+        <div className="mt-6 rounded-[14px] bg-accent px-5 py-4">
+          <p className="text-[13px] font-medium uppercase tracking-[0.08em] text-primary">
             AI Estimate
           </p>
-          <p className="mt-2 text-[26px] font-semibold text-[#2563EB]">$325 - $450</p>
+          <p className="mt-2 text-[26px] font-semibold text-primary">$325 - $450</p>
         </div>
       </div>
     </div>
@@ -104,9 +104,9 @@ function MiniEstimatesPreview() {
   ];
 
   return (
-    <div className="h-full bg-[#F8F9FC] p-8">
-      <div className="overflow-hidden rounded-[14px] border border-slate-200 bg-white shadow-[0_16px_40px_-24px_rgba(15,23,42,0.18)]">
-        <div className="grid grid-cols-[2.2fr_1.5fr_1fr_1fr] gap-4 border-b border-slate-200 px-5 py-4 text-[12px] font-semibold uppercase tracking-[0.08em] text-slate-500">
+    <div className="h-full bg-muted p-8">
+      <div className="overflow-hidden rounded-[14px] border border-border bg-card shadow-[0_16px_40px_-24px_rgba(15,23,42,0.18)]">
+        <div className="grid grid-cols-[2.2fr_1.5fr_1fr_1fr] gap-4 border-b border-border px-5 py-4 text-[12px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
           <span>Customer</span>
           <span>Service</span>
           <span>Amount</span>
@@ -117,16 +117,16 @@ function MiniEstimatesPreview() {
             key={row[0]}
             className="grid grid-cols-[2.2fr_1.5fr_1fr_1fr] gap-4 border-b border-slate-100 px-5 py-4 text-[14px] text-slate-700 last:border-b-0"
           >
-            <span className="font-semibold text-slate-900">{row[0]}</span>
+            <span className="font-semibold text-foreground">{row[0]}</span>
             <span>{row[1]}</span>
-            <span className="font-semibold text-slate-900">{row[2]}</span>
+            <span className="font-semibold text-foreground">{row[2]}</span>
             <span
               className={
                 row[3] === "Accepted"
                   ? "font-semibold text-emerald-600"
                   : row[3] === "Viewed"
                     ? "font-semibold text-amber-600"
-                    : "font-semibold text-slate-500"
+                    : "font-semibold text-muted-foreground"
               }
             >
               {row[3]}
@@ -146,13 +146,13 @@ function MiniSettingsPreview() {
   ];
 
   return (
-    <div className="h-full bg-[#F8F9FC] p-10">
-      <div className="rounded-[14px] border border-slate-200 bg-white p-6 shadow-[0_16px_40px_-24px_rgba(15,23,42,0.18)]">
+    <div className="h-full bg-muted p-10">
+      <div className="rounded-[14px] border border-border bg-card p-6 shadow-[0_16px_40px_-24px_rgba(15,23,42,0.18)]">
         <div className="space-y-4">
           {fields.map(([label, value]) => (
             <div key={label}>
-              <p className="mb-2 text-[13px] font-medium text-slate-500">{label}</p>
-              <div className="rounded-[12px] border border-slate-200 bg-[#F8F9FC] px-4 py-3 text-[15px] text-slate-800">
+              <p className="mb-2 text-[13px] font-medium text-muted-foreground">{label}</p>
+              <div className="rounded-[12px] border border-border bg-muted px-4 py-3 text-[15px] text-slate-800">
                 {value}
               </div>
             </div>
@@ -384,7 +384,7 @@ export function OnboardingTour({ enabled, slug }: OnboardingTourProps) {
             {stepIndex + 1} of {steps.length}
           </p>
 
-          <div className="relative mt-3 hidden h-[220px] overflow-hidden rounded-[12px] border border-slate-600 bg-[#F8F9FC] md:block">
+          <div className="relative mt-3 hidden h-[220px] overflow-hidden rounded-[12px] border border-slate-600 bg-muted md:block">
             <div
               style={{
                 position: "absolute",
@@ -424,7 +424,7 @@ export function OnboardingTour({ enabled, slug }: OnboardingTourProps) {
                 setStepIndex((current) => Math.min(current + 1, steps.length - 1));
               }}
               disabled={isSubmitting}
-              className="rounded-[10px] bg-[#2563EB] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#1D4ED8] disabled:opacity-60"
+              className="rounded-[10px] bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/90 disabled:opacity-60"
             >
               {stepIndex === steps.length - 1 ? "Done" : "Next"}
             </button>

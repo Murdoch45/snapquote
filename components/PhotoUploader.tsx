@@ -130,8 +130,8 @@ export function PhotoUploader({
 
   return (
     <div className="min-w-0 max-w-full space-y-3 overflow-x-hidden">
-      <div className="max-w-full overflow-x-hidden rounded-[12px] border-2 border-dashed border-[#BFDBFE] bg-[#F8FBFF] p-6 text-center">
-        <p className="mb-4 text-sm text-[#6B7280]">
+      <div className="max-w-full overflow-x-hidden rounded-[12px] border-2 border-dashed border-primary/40 bg-muted p-6 text-center">
+        <p className="mb-4 text-sm text-muted-foreground">
           {required
             ? `Upload at least 1 photo for an estimate request (up to ${maxFiles}).`
             : `Add photos for more accurate estimate (up to ${maxFiles}).`}
@@ -160,7 +160,7 @@ export function PhotoUploader({
           {previews.map(({ file, url }, index) => (
             <div
               key={`${file.name}-${index}`}
-              className="group relative min-w-0 max-w-full overflow-hidden rounded-[12px] border border-[#E5E7EB] bg-white"
+              className="group relative min-w-0 max-w-full overflow-hidden rounded-[12px] border border-border bg-card"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={url} alt={file.name} className="h-24 w-full max-w-full object-cover" />
@@ -176,7 +176,7 @@ export function PhotoUploader({
         </div>
       )}
       {required && files.length === 0 ? (
-        <p className="text-xs text-[#DC2626]">At least one photo is required before submission.</p>
+        <p className="text-xs text-red-600 dark:text-red-400">At least one photo is required before submission.</p>
       ) : null}
     </div>
   );

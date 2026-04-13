@@ -32,8 +32,8 @@ function formatDate(value: string): string {
 }
 
 const STATUS_BADGE_COLORS: Record<string, string> = {
-  NEW: "bg-[#DCFCE7] text-[#16A34A]",
-  QUOTED: "bg-[#DBEAFE] text-[#2563EB]",
+  NEW: "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400",
+  QUOTED: "bg-accent/80 text-primary",
   ACCEPTED: "bg-[#CCFBF1] text-[#0F766E]"
 };
 
@@ -134,18 +134,18 @@ export default async function DashboardPage() {
     <Link
       key={lead.id}
       href={`/app/leads/${lead.id}`}
-      className="block rounded-[14px] border border-[#E5E7EB] bg-white p-4 shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-shadow hover:shadow-[0_4px_16px_rgba(0,0,0,0.10)]"
+      className="block rounded-[14px] border border-border bg-card p-4 shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-shadow hover:shadow-[0_4px_16px_rgba(0,0,0,0.10)]"
     >
       {/* Header: name + status badge */}
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
-            {!lead.isUnlocked ? <Lock className="h-4 w-4 shrink-0 text-[#9CA3AF]" /> : null}
-            <p className="truncate text-lg font-bold text-[#111827]">
+            {!lead.isUnlocked ? <Lock className="h-4 w-4 shrink-0 text-muted-foreground/70" /> : null}
+            <p className="truncate text-lg font-bold text-foreground">
               {lead.isUnlocked ? (lead.customer_name ?? "Lead") : "Locked Lead"}
             </p>
           </div>
-          <p className="mt-1 text-sm text-[#6B7280]">{getLocationLabel(lead)}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{getLocationLabel(lead)}</p>
         </div>
         <Badge
           className={`shrink-0 border-transparent px-3 py-1 text-xs font-semibold ${STATUS_BADGE_COLORS[lead.status] ?? STATUS_BADGE_COLORS.NEW}`}
@@ -167,18 +167,18 @@ export default async function DashboardPage() {
       </div>
 
       {/* Footer: estimate + date */}
-      <div className="mt-4 flex items-end justify-between border-t border-[#E5E7EB] pt-3.5">
+      <div className="mt-4 flex items-end justify-between border-t border-border pt-3.5">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.04em] text-[#9CA3AF]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.04em] text-muted-foreground/70">
             AI Estimate
           </p>
-          <p className="mt-1 text-lg font-bold text-[#2563EB]">{getEstimateLabel(lead)}</p>
+          <p className="mt-1 text-lg font-bold text-primary">{getEstimateLabel(lead)}</p>
         </div>
         <div className="text-right">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.04em] text-[#9CA3AF]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.04em] text-muted-foreground/70">
             Submitted
           </p>
-          <p className="mt-1 text-sm font-semibold text-[#6B7280]">
+          <p className="mt-1 text-sm font-semibold text-muted-foreground">
             {formatDate(lead.submitted_at)}
           </p>
         </div>
@@ -190,8 +190,8 @@ export default async function DashboardPage() {
     <div className="space-y-4">
       {/* Date header */}
       <div className="text-center">
-        <p className="text-base font-semibold text-[#111827]">{formatToday()}</p>
-        <p className="mt-1 text-sm text-[#6B7280]">
+        <p className="text-base font-semibold text-foreground">{formatToday()}</p>
+        <p className="mt-1 text-sm text-muted-foreground">
           {newLeadsThisWeek > 0
             ? `${newLeadsThisWeek} new lead${newLeadsThisWeek === 1 ? "" : "s"} this week`
             : "No new leads this week"}
@@ -200,18 +200,18 @@ export default async function DashboardPage() {
 
       {/* Stats — horizontal scroll */}
       <div>
-        <p className="mb-2 text-lg font-semibold text-[#111827]">Stats</p>
+        <p className="mb-2 text-lg font-semibold text-foreground">Stats</p>
         <div className="flex gap-3 overflow-x-auto pb-2">
           {stats.map((stat) => (
             <div
               key={stat.label}
-              className="w-[140px] shrink-0 rounded-[14px] border border-[#E5E7EB] bg-white p-5 shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
+              className="w-[140px] shrink-0 rounded-[14px] border border-border bg-card p-5 shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
             >
-              <p className="text-[13px] font-semibold uppercase leading-[18px] tracking-[0.04em] text-[#9CA3AF]">
+              <p className="text-[13px] font-semibold uppercase leading-[18px] tracking-[0.04em] text-muted-foreground/70">
                 {stat.label}
               </p>
               <p
-                className={`mt-2 truncate font-bold text-[#2563EB] ${getStatValueSizeClass(stat.value)}`}
+                className={`mt-2 truncate font-bold text-primary ${getStatValueSizeClass(stat.value)}`}
               >
                 {stat.value}
               </p>
@@ -222,10 +222,10 @@ export default async function DashboardPage() {
 
       {/* Recent Leads */}
       <div className="flex items-center justify-between">
-        <p className="text-lg font-semibold text-[#111827]">Recent Leads</p>
+        <p className="text-lg font-semibold text-foreground">Recent Leads</p>
         <Link
           href="/app/leads"
-          className="text-sm font-semibold text-[#2563EB] hover:text-[#1D4ED8]"
+          className="text-sm font-semibold text-primary hover:text-primary/90"
         >
           View All
         </Link>
@@ -234,14 +234,14 @@ export default async function DashboardPage() {
       {leadCards.length > 0 ? (
         <DashboardLeadList cards={leadCards} total={allLeads.length} />
       ) : (
-        <div className="rounded-[14px] border border-[#E5E7EB] bg-white p-8 text-center shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
-          <p className="text-lg font-bold text-[#111827]">No Leads Yet</p>
-          <p className="mt-2 text-sm text-[#6B7280]">
+        <div className="rounded-[14px] border border-border bg-card p-8 text-center shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
+          <p className="text-lg font-bold text-foreground">No Leads Yet</p>
+          <p className="mt-2 text-sm text-muted-foreground">
             Share your link to start receiving estimate requests
           </p>
           <Link
             href="/dashboard/my-link"
-            className="mt-4 inline-block text-sm font-semibold text-[#2563EB] hover:text-[#1D4ED8]"
+            className="mt-4 inline-block text-sm font-semibold text-primary hover:text-primary/90"
           >
             Share My Link
           </Link>

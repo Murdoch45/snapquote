@@ -33,7 +33,7 @@ export default async function OnboardingPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 px-4 py-10 md:px-6 md:py-14">
+    <main className="min-h-screen bg-muted px-4 py-10 md:px-6 md:py-14">
       <div className="mx-auto flex min-h-[calc(100svh-5rem)] max-w-5xl flex-col justify-center">
         <Link
           href="/"

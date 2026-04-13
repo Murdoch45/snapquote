@@ -108,7 +108,7 @@ export function LoginForm() {
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           required
-          className="h-11 rounded-xl border-slate-300 focus-visible:ring-primary/30"
+          className="h-11 rounded-xl border-border focus-visible:ring-primary/30"
         />
       </div>
 

@@ -8,25 +8,25 @@ const manrope = Manrope({
 
 export default function PrivacyPage() {
   return (
-    <main className={`${manrope.className} min-h-screen bg-white text-slate-900`}>
-      <nav className="border-b border-slate-200 bg-white">
+    <main className={`${manrope.className} min-h-screen bg-card text-foreground`}>
+      <nav className="border-b border-border bg-card">
         <div className="mx-auto flex h-20 max-w-6xl items-center px-6 sm:px-8">
           <Link href="/" className="inline-flex items-center gap-3">
             <BrandLogo size="sm" showWordmark={false} />
-            <span className="text-2xl font-bold tracking-tight text-slate-900">SnapQuote</span>
+            <span className="text-2xl font-bold tracking-tight text-foreground">SnapQuote</span>
           </Link>
         </div>
       </nav>
 
       <div className="mx-auto max-w-4xl px-6 py-16 sm:px-8">
-        <p className="text-sm font-medium text-slate-500">Last updated: March 2026</p>
-        <h1 className="mt-4 text-4xl font-semibold tracking-tight text-slate-900">
+        <p className="text-sm font-medium text-muted-foreground">Last updated: March 2026</p>
+        <h1 className="mt-4 text-4xl font-semibold tracking-tight text-foreground">
           Privacy Policy
         </h1>
 
         <div className="mt-10 space-y-10 text-[15px] leading-8 text-slate-700">
           <section className="space-y-3">
-            <h2 className="text-xl font-semibold text-slate-900">1. Introduction</h2>
+            <h2 className="text-xl font-semibold text-foreground">1. Introduction</h2>
             <p>
               SnapQuote (&quot;we&quot;, &quot;us&quot;, &quot;our&quot;) operates snapquote.us.
               This policy explains how we collect, use, and protect your information.
@@ -34,7 +34,7 @@ export default function PrivacyPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-xl font-semibold text-slate-900">2. Information We Collect</h2>
+            <h2 className="text-xl font-semibold text-foreground">2. Information We Collect</h2>
             <p>
               We collect information from contractors, including name, email, business name,
               phone number, address, and payment information processed by Stripe.
@@ -51,7 +51,7 @@ export default function PrivacyPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-xl font-semibold text-slate-900">3. How We Use Your Information</h2>
+            <h2 className="text-xl font-semibold text-foreground">3. How We Use Your Information</h2>
             <p>We use your information to provide and operate the SnapQuote platform.</p>
             <p>We use your information to generate AI-powered job estimates using OpenAI.</p>
             <p>
@@ -63,7 +63,7 @@ export default function PrivacyPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-xl font-semibold text-slate-900">4. Third-Party Services</h2>
+            <h2 className="text-xl font-semibold text-foreground">4. Third-Party Services</h2>
             <p>
               We share data with the following third parties to operate the service:
             </p>
@@ -79,7 +79,7 @@ export default function PrivacyPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-xl font-semibold text-slate-900">5. Data Retention</h2>
+            <h2 className="text-xl font-semibold text-foreground">5. Data Retention</h2>
             <p>
               We retain your data for as long as your account is active. You may request
               deletion by contacting us.
@@ -87,7 +87,7 @@ export default function PrivacyPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-xl font-semibold text-slate-900">6. California Privacy Rights (CCPA)</h2>
+            <h2 className="text-xl font-semibold text-foreground">6. California Privacy Rights (CCPA)</h2>
             <p>
               California residents have the right to know what personal data we collect,
               request deletion, and opt out of sale. We do not sell personal data. To
@@ -96,28 +96,28 @@ export default function PrivacyPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-xl font-semibold text-slate-900">7. Cookies</h2>
+            <h2 className="text-xl font-semibold text-foreground">7. Cookies</h2>
             <p>We use cookies for authentication and session management only.</p>
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-xl font-semibold text-slate-900">8. Children&apos;s Privacy</h2>
+            <h2 className="text-xl font-semibold text-foreground">8. Children&apos;s Privacy</h2>
             <p>SnapQuote is not intended for users under 18.</p>
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-xl font-semibold text-slate-900">9. Changes to This Policy</h2>
+            <h2 className="text-xl font-semibold text-foreground">9. Changes to This Policy</h2>
             <p>
               We may update this policy and will notify users of significant changes.
             </p>
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-xl font-semibold text-slate-900">10. Contact</h2>
+            <h2 className="text-xl font-semibold text-foreground">10. Contact</h2>
             <p>
               <a
                 href="mailto:support@snapquote.us"
-                className="font-medium text-[#2563EB] hover:text-[#1D4ED8]"
+                className="font-medium text-primary hover:text-primary/90"
               >
                 support@snapquote.us
               </a>

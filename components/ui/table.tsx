@@ -13,18 +13,18 @@ export function TableBody({ className, ...props }: React.ComponentProps<"tbody">
 }
 
 export function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
-  return <tr className={cn("border-b border-gray-200", className)} {...props} />;
+  return <tr className={cn("border-b border-border", className)} {...props} />;
 }
 
 export function TableHead({ className, ...props }: React.ComponentProps<"th">) {
   return (
     <th
-      className={cn("h-10 px-2 text-left align-middle font-medium text-gray-500", className)}
+      className={cn("h-10 px-2 text-left align-middle font-medium text-muted-foreground", className)}
       {...props}
     />
   );
 }
 
 export function TableCell({ className, ...props }: React.ComponentProps<"td">) {
-  return <td className={cn("p-2 align-middle text-gray-800", className)} {...props} />;
+  return <td className={cn("p-2 align-middle text-foreground", className)} {...props} />;
 }

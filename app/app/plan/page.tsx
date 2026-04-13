@@ -38,9 +38,9 @@ function getUsagePercent(used: number, limit: number): number {
 
 function UsageBar({ used, limit }: { used: number; limit: number }) {
   return (
-    <div className="h-2.5 w-full overflow-hidden rounded-full bg-[#E5E7EB]">
+    <div className="h-2.5 w-full overflow-hidden rounded-full bg-border">
       <div
-        className="h-full rounded-full bg-[#2563EB] transition-all"
+        className="h-full rounded-full bg-primary transition-all"
         style={{ width: `${getUsagePercent(used, limit)}%` }}
       />
     </div>
@@ -118,38 +118,38 @@ export default async function PlanPage({ searchParams }: Props) {
 
       <Card className="shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
         <CardHeader className="pb-4">
-          <CardTitle className="text-base font-semibold text-[#111827]">Current Plan</CardTitle>
+          <CardTitle className="text-base font-semibold text-foreground">Current Plan</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] lg:items-start">
             <div className="space-y-4">
               <div className="flex flex-wrap items-center gap-3">
-                <p className="text-3xl font-bold text-[#111827]">{formatPlanName(plan)}</p>
+                <p className="text-3xl font-bold text-foreground">{formatPlanName(plan)}</p>
                 <Badge
                   className={
                     subscription.active
-                      ? "border-transparent bg-[#EFF6FF] text-[#2563EB]"
-                      : "border-transparent bg-[#F9FAFB] text-[#6B7280]"
+                      ? "border-transparent bg-accent text-primary"
+                      : "border-transparent bg-muted text-muted-foreground"
                   }
                 >
                   {subscriptionStatusLabel}
                 </Badge>
               </div>
-              <p className="text-xl font-semibold text-[#111827]">{price}</p>
-              <p className="text-sm text-[#6B7280]">
+              <p className="text-xl font-semibold text-foreground">{price}</p>
+              <p className="text-sm text-muted-foreground">
                 {usersUsed} / {usersLimit} users
               </p>
               {trialEndLabel ? (
-                <p className="text-sm text-[#6B7280]">Trial ends {trialEndLabel}</p>
+                <p className="text-sm text-muted-foreground">Trial ends {trialEndLabel}</p>
               ) : null}
 
               <div className="space-y-3">
                 {planHighlights.map((item) => (
-                  <div key={item.label} className="flex items-start gap-3 text-sm text-[#111827]">
+                  <div key={item.label} className="flex items-start gap-3 text-sm text-foreground">
                     {item.positive ? (
-                      <Check className="mt-0.5 h-4 w-4 text-[#2563EB]" />
+                      <Check className="mt-0.5 h-4 w-4 text-primary" />
                     ) : (
-                      <AlertCircle className="mt-0.5 h-4 w-4 text-[#6B7280]" />
+                      <AlertCircle className="mt-0.5 h-4 w-4 text-muted-foreground" />
                     )}
                     <span>{item.label}</span>
                   </div>
@@ -158,9 +158,9 @@ export default async function PlanPage({ searchParams }: Props) {
 
             </div>
 
-            <div className="rounded-[14px] border border-[#E5E7EB] bg-[#F8F9FC] p-6">
-              <p className="text-4xl font-bold leading-none text-[#2563EB]">{totalCredits}</p>
-              <p className="mt-2 text-sm text-[#6B7280]">Total credits available</p>
+            <div className="rounded-[14px] border border-border bg-muted p-6">
+              <p className="text-4xl font-bold leading-none text-primary">{totalCredits}</p>
+              <p className="mt-2 text-sm text-muted-foreground">Total credits available</p>
             </div>
           </div>
 
@@ -168,7 +168,7 @@ export default async function PlanPage({ searchParams }: Props) {
       </Card>
 
       {subscription.active ? (
-        <p className="-mt-3 text-sm text-[#6B7280]">
+        <p className="-mt-3 text-sm text-muted-foreground">
           To manage your billing,{" "}
           <ManageBillingButton label="click here" mode="text" />
           .
@@ -177,15 +177,15 @@ export default async function PlanPage({ searchParams }: Props) {
 
       <div id="plan-options" className="space-y-3">
         <div className="space-y-1">
-          <h2 className="text-base font-semibold text-[#111827]">Plan Options</h2>
-          <p className="text-sm text-[#6B7280]">
+          <h2 className="text-base font-semibold text-foreground">Plan Options</h2>
+          <p className="text-sm text-muted-foreground">
             Upgrade instantly or schedule a downgrade for the end of your billing cycle.
           </p>
         </div>
         <PlanOptionsSection currentPlan={plan} hasUsedTrial={orgTrialRow.data?.has_used_trial ?? false} />
-        <p className="text-sm text-[#6B7280]">
+        <p className="text-sm text-muted-foreground">
           Need more credits?{" "}
-          <Link href="/app/credits" className="font-medium text-[#2563EB] hover:text-[#1D4ED8]">
+          <Link href="/app/credits" className="font-medium text-primary hover:text-primary/90">
             Buy here →
           </Link>
         </p>
@@ -193,18 +193,18 @@ export default async function PlanPage({ searchParams }: Props) {
 
       <Card className="shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
         <CardHeader className="space-y-1 pb-4">
-          <CardTitle className="text-base font-semibold text-[#111827]">Credits & Usage</CardTitle>
+          <CardTitle className="text-base font-semibold text-foreground">Credits & Usage</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-4">
-              <p className="text-base font-semibold text-[#111827]">Monthly credits</p>
-              <p className="text-sm text-[#6B7280]">
+              <p className="text-base font-semibold text-foreground">Monthly credits</p>
+              <p className="text-sm text-muted-foreground">
                 {monthlyCreditsRemaining} / {monthlyCreditsLimit} remaining
               </p>
             </div>
             <UsageBar used={monthlyCreditsRemaining} limit={monthlyCreditsLimit} />
-            <p className="text-sm text-[#6B7280]">
+            <p className="text-sm text-muted-foreground">
               {monthlyCreditsRemaining} / {monthlyCreditsLimit} monthly credits
               {creditsResetLabel ? ` - resets ${creditsResetLabel}` : ""}
             </p>
@@ -212,15 +212,15 @@ export default async function PlanPage({ searchParams }: Props) {
 
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-4">
-              <p className="text-sm font-medium text-[#111827]">Bonus credits</p>
-              <p className="text-sm text-[#6B7280]">{bonusCredits} available</p>
+              <p className="text-sm font-medium text-foreground">Bonus credits</p>
+              <p className="text-sm text-muted-foreground">{bonusCredits} available</p>
             </div>
-            <p className="text-sm text-[#111827]">{bonusCredits} bonus credits (never expire)</p>
+            <p className="text-sm text-foreground">{bonusCredits} bonus credits (never expire)</p>
           </div>
 
-          <div className="rounded-[14px] border border-[#E5E7EB] bg-[#F8F9FC] px-4 py-4">
-            <p className="text-3xl font-bold text-[#2563EB]">{totalCredits}</p>
-            <p className="mt-1 text-sm text-[#6B7280]">Total credits available</p>
+          <div className="rounded-[14px] border border-border bg-muted px-4 py-4">
+            <p className="text-3xl font-bold text-primary">{totalCredits}</p>
+            <p className="mt-1 text-sm text-muted-foreground">Total credits available</p>
           </div>
         </CardContent>
       </Card>

@@ -32,10 +32,10 @@ export function ServiceQuestions({
     answers[OTHER_OUTDOOR_QUESTION_KEY] === "No";
 
   return (
-    <div className="space-y-4 rounded-[12px] border border-[#E5E7EB] bg-[#F8FBFF] p-5">
+    <div className="space-y-4 rounded-[12px] border border-border bg-muted p-5">
       <div className="space-y-1">
-        <Label className="text-[13px] font-semibold text-[#374151]">Estimator Questions</Label>
-        <p className="text-xs text-[#6B7280]">
+        <Label className="text-[13px] font-semibold text-foreground">Estimator Questions</Label>
+        <p className="text-xs text-muted-foreground">
           Answer a few quick questions so the estimate request includes service-specific details.
         </p>
       </div>

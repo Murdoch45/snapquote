@@ -63,72 +63,72 @@ export function PublicQuoteCard({ quote }: { quote: QuoteData }) {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <div className="rounded-[14px] border border-[#E5E7EB] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
-        <div className="border-b border-[#E5E7EB] bg-[#F8F9FC] px-5 py-5 sm:px-8">
+      <div className="rounded-[14px] border border-border bg-card shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
+        <div className="border-b border-border bg-muted px-5 py-5 sm:px-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <div className="mb-3">
                 <BrandLogo size="sm" />
               </div>
-              <p className="text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280]">
+              <p className="text-xs font-medium uppercase tracking-[0.05em] text-muted-foreground">
                 Estimate from
               </p>
-              <h1 className="mt-1 text-2xl font-semibold text-[#111827]">{quote.businessName}</h1>
-              <div className="mt-3 space-y-2 text-sm text-[#4B5563]">
+              <h1 className="mt-1 text-2xl font-semibold text-foreground">{quote.businessName}</h1>
+              <div className="mt-3 space-y-2 text-sm text-muted-foreground">
                 <div className="flex items-start gap-2">
-                  <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[#2563EB]" />
+                  <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                   <span className="break-words" style={{ overflowWrap: "anywhere" }}>{quote.address}</span>
                 </div>
                 {quote.businessPhone ? (
                   <div className="flex items-start gap-2">
-                    <Phone className="mt-0.5 h-4 w-4 shrink-0 text-[#2563EB]" />
+                    <Phone className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                     <span className="break-words">{quote.businessPhone}</span>
                   </div>
                 ) : null}
                 {quote.businessEmail ? (
                   <div className="flex items-start gap-2">
-                    <Mail className="mt-0.5 h-4 w-4 shrink-0 text-[#2563EB]" />
+                    <Mail className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                     <span className="break-words" style={{ overflowWrap: "anywhere" }}>{quote.businessEmail}</span>
                   </div>
                 ) : null}
               </div>
             </div>
 
-            <div className="rounded-[14px] border border-[#DBEAFE] bg-[#EFF6FF] px-5 py-4 sm:min-w-[220px]">
-              <p className="text-xs font-medium uppercase tracking-[0.05em] text-[#2563EB]">
+            <div className="rounded-[14px] border border-[#DBEAFE] bg-accent px-5 py-4 sm:min-w-[220px]">
+              <p className="text-xs font-medium uppercase tracking-[0.05em] text-primary">
                 Estimate Range
               </p>
-              <p className="mt-2 text-3xl font-semibold tracking-[-0.03em] text-[#2563EB]">
+              <p className="mt-2 text-3xl font-semibold tracking-[-0.03em] text-primary">
                 {displayPrice}
               </p>
-              <p className="mt-2 text-sm text-[#4B5563]">Valid for 7 days from delivery.</p>
+              <p className="mt-2 text-sm text-muted-foreground">Valid for 7 days from delivery.</p>
             </div>
           </div>
         </div>
 
         <div className="space-y-6 px-5 py-5 sm:px-8 sm:py-8">
-          <div className="rounded-[14px] border border-[#E5E7EB] bg-white p-5">
-            <p className="text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280]">
+          <div className="rounded-[14px] border border-border bg-card p-5">
+            <p className="text-xs font-medium uppercase tracking-[0.05em] text-muted-foreground">
               Included Services
             </p>
-            <p className="mt-2 break-words text-sm leading-6 text-[#111827]">{quote.services.join(", ")}</p>
+            <p className="mt-2 break-words text-sm leading-6 text-foreground">{quote.services.join(", ")}</p>
           </div>
 
-          <div className="rounded-[14px] border border-[#E5E7EB] bg-white p-5">
-            <p className="text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280]">
+          <div className="rounded-[14px] border border-border bg-card p-5">
+            <p className="text-xs font-medium uppercase tracking-[0.05em] text-muted-foreground">
               Estimate Message
             </p>
-            <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-7 text-[#111827]" style={{ overflowWrap: "anywhere" }}>
+            <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-7 text-foreground" style={{ overflowWrap: "anywhere" }}>
               {quote.message}
             </p>
           </div>
 
           {isDraft ? (
-            <div className="rounded-[14px] border border-[#DBEAFE] bg-[#EFF6FF] p-4 text-center text-sm text-[#2563EB]">
+            <div className="rounded-[14px] border border-[#DBEAFE] bg-accent p-4 text-center text-sm text-primary">
               This estimate is being finalized. Check back shortly.
             </div>
           ) : status === "ACCEPTED" ? (
-            <div className="rounded-[14px] border border-[#BBF7D0] bg-[#F0FDF4] p-4 text-sm text-[#166534]">
+            <div className="rounded-[14px] border border-[#BBF7D0] bg-green-50 dark:bg-green-950/30 p-4 text-sm text-[#166534]">
               Interested request received. {quote.businessName} will contact you shortly.
               {acceptedAt ? ` (${new Date(acceptedAt).toLocaleString()})` : ""}
             </div>
@@ -136,7 +136,7 @@ export function PublicQuoteCard({ quote }: { quote: QuoteData }) {
             <Button
               onClick={onAccept}
               disabled={loading || isExpired}
-              className="h-12 w-full rounded-[10px] bg-[#2563EB] text-sm font-semibold hover:bg-[#1D4ED8]"
+              className="h-12 w-full rounded-[10px] bg-primary text-sm font-semibold hover:bg-primary/90"
             >
               {isExpired
                 ? "Estimate expired"

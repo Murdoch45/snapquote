@@ -94,11 +94,11 @@ export function LeadPropertyPreview({ address, lat, lng }: Props) {
 
   return (
     <div className="mt-2 space-y-3">
-      <p className="text-sm text-gray-700">{address}</p>
+      <p className="text-sm text-foreground/80">{address}</p>
 
       {showFallback ? (
-        <div className="rounded-lg border border-dashed border-gray-200 bg-gray-50 p-4">
-          <p className="text-xs text-gray-500">
+        <div className="rounded-lg border border-dashed border-border bg-muted p-4">
+          <p className="text-xs text-muted-foreground">
             Interactive map unavailable. Check `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` and that the
             Google Maps JavaScript API is enabled.
           </p>
@@ -112,19 +112,19 @@ export function LeadPropertyPreview({ address, lat, lng }: Props) {
           </a>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
-          <div className="flex items-center justify-between gap-3 border-b border-gray-200 px-3 py-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+        <div className="overflow-hidden rounded-lg border border-border bg-card">
+          <div className="flex items-center justify-between gap-3 border-b border-border px-3 py-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
               Property Map
             </p>
-            <div className="inline-flex rounded-md border border-gray-200 bg-gray-50 p-1">
+            <div className="inline-flex rounded-md border border-border bg-muted p-1">
               <button
                 type="button"
                 onClick={() => setMapType("roadmap")}
                 className={`rounded px-3 py-1 text-xs font-medium transition ${
                   mapType === "roadmap"
-                    ? "bg-white text-gray-900 shadow-sm"
-                    : "text-gray-500 hover:text-gray-700"
+                    ? "bg-card text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground/80"
                 }`}
               >
                 Map
@@ -134,15 +134,15 @@ export function LeadPropertyPreview({ address, lat, lng }: Props) {
                 onClick={() => setMapType("satellite")}
                 className={`rounded px-3 py-1 text-xs font-medium transition ${
                   mapType === "satellite"
-                    ? "bg-white text-gray-900 shadow-sm"
-                    : "text-gray-500 hover:text-gray-700"
+                    ? "bg-card text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground/80"
                 }`}
               >
                 Satellite
               </button>
             </div>
           </div>
-          <div ref={mapElementRef} className="h-80 w-full bg-gray-100" />
+          <div ref={mapElementRef} className="h-80 w-full bg-muted" />
         </div>
       )}
     </div>

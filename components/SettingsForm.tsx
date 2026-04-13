@@ -99,6 +99,7 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
     notificationAcceptEmail: initial.notification_accept_email
   });
   const [loading, setLoading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [savingTemplate, setSavingTemplate] = useState(false);
   const [slugStatus, setSlugStatus] = useState<SlugStatus>({ type: "idle", message: null });
   const [autoInsertCustomerName, setAutoInsertCustomerName] = useState(
@@ -314,13 +315,13 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-[14px] border border-[#E5E7EB] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
-        <h2 className="mb-4 text-base font-semibold text-[#111827]">Business Details</h2>
+      <section className="rounded-[14px] border border-border bg-card p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
+        <h2 className="mb-4 text-base font-semibold text-foreground">Business Details</h2>
         <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label
             htmlFor="businessName"
-            className="mb-1.5 block text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280]"
+            className="mb-1.5 block text-xs font-medium uppercase tracking-[0.05em] text-muted-foreground"
           >
             Business name
           </Label>
@@ -328,14 +329,14 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
             id="businessName"
             value={form.businessName}
             onChange={(e) => setForm((prev) => ({ ...prev, businessName: e.target.value }))}
-            className="h-11 rounded-[8px] border-[#E5E7EB] bg-white px-[14px] text-sm text-[#111827] placeholder:text-[#6B7280] focus-visible:ring-[#2563EB]"
+            className="h-11 rounded-[8px] border-border bg-card px-[14px] text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-ring"
           />
         </div>
 
         <div className="space-y-2">
           <Label
             htmlFor="phone"
-            className="mb-1.5 block text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280]"
+            className="mb-1.5 block text-xs font-medium uppercase tracking-[0.05em] text-muted-foreground"
           >
             Phone
           </Label>
@@ -343,14 +344,14 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
             id="phone"
             value={form.phone}
             onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))}
-            className="h-11 rounded-[8px] border-[#E5E7EB] bg-white px-[14px] text-sm text-[#111827] placeholder:text-[#6B7280] focus-visible:ring-[#2563EB]"
+            className="h-11 rounded-[8px] border-border bg-card px-[14px] text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-ring"
           />
         </div>
 
         <div className="space-y-2 md:col-span-2">
           <Label
             htmlFor="publicSlug"
-            className="mb-1.5 block text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280]"
+            className="mb-1.5 block text-xs font-medium uppercase tracking-[0.05em] text-muted-foreground"
           >
             Public URL
           </Label>
@@ -361,20 +362,20 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
             aria-invalid={slugStatus.type === "invalid" || slugStatus.type === "taken"}
             className={
               slugStatus.type === "invalid" || slugStatus.type === "taken"
-                ? "h-11 rounded-[8px] border-[#FECACA] bg-white px-[14px] text-sm text-[#111827] focus-visible:ring-[#DC2626]"
-                : "h-11 rounded-[8px] border-[#E5E7EB] bg-white px-[14px] text-sm text-[#111827] focus-visible:ring-[#2563EB]"
+                ? "h-11 rounded-[8px] border-red-200 dark:border-red-800 bg-card px-[14px] text-sm text-foreground focus-visible:ring-[#DC2626]"
+                : "h-11 rounded-[8px] border-border bg-card px-[14px] text-sm text-foreground focus-visible:ring-ring"
             }
           />
-          <p className="text-sm text-[#6B7280]">
+          <p className="text-sm text-muted-foreground">
             Your public URL: snapquote.us/{trimmedSlug || "[your-slug]"}
           </p>
           <p
             className={`rounded-[8px] border px-4 py-3 text-sm ${
               slugStatus.type === "invalid" || slugStatus.type === "taken"
-                ? "border-[#FECACA] bg-[#FEF2F2] text-[#DC2626]"
+                ? "border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400"
                 : slugStatus.type === "available"
-                  ? "border-[#BBF7D0] bg-[#F0FDF4] text-[#16A34A]"
-                  : "border-[#E5E7EB] bg-white text-[#6B7280]"
+                  ? "border-[#BBF7D0] bg-green-50 dark:bg-green-950/30 text-green-600 dark:text-green-400"
+                  : "border-border bg-card text-muted-foreground"
             }`}
           >
             {slugStatus.message || "Use lowercase letters, numbers, and hyphens only."}
@@ -384,7 +385,7 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
         <div className="space-y-2 md:col-span-2">
           <Label
             htmlFor="email"
-            className="mb-1.5 block text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280]"
+            className="mb-1.5 block text-xs font-medium uppercase tracking-[0.05em] text-muted-foreground"
           >
             Email
           </Label>
@@ -393,17 +394,17 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
             type="email"
             value={form.email}
             onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
-            className="h-11 rounded-[8px] border-[#E5E7EB] bg-white px-[14px] text-sm text-[#111827] placeholder:text-[#6B7280] focus-visible:ring-[#2563EB]"
+            className="h-11 rounded-[8px] border-border bg-card px-[14px] text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-ring"
           />
         </div>
       </div>
       </section>
 
-      <section className="rounded-[14px] border border-[#E5E7EB] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
-        <h2 className="mb-4 text-base font-semibold text-[#111827]">Business Address</h2>
-        <div className="space-y-3 rounded-[8px] border border-[#E5E7EB] bg-[#F8F9FC] p-4">
+      <section className="rounded-[14px] border border-border bg-card p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
+        <h2 className="mb-4 text-base font-semibold text-foreground">Business Address</h2>
+        <div className="space-y-3 rounded-[8px] border border-border bg-muted p-4">
         <div className="space-y-1">
-          <p className="text-sm text-[#6B7280]">
+          <p className="text-sm text-muted-foreground">
             Used to estimate travel distance for new leads when mobile-only pricing is off.
           </p>
         </div>
@@ -436,9 +437,9 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
           }
         />
 
-        <label className="flex items-start gap-2 text-sm text-[#111827]">
+        <label className="flex items-start gap-2 text-sm text-foreground">
           <Checkbox
-            className="mt-0.5 data-[state=checked]:border-[#2563EB] data-[state=checked]:bg-[#2563EB]"
+            className="mt-0.5 data-[state=checked]:border-primary data-[state=checked]:bg-primary"
             checked={form.travelPricingDisabled}
             onCheckedChange={(checked) =>
               setForm((prev) => ({ ...prev, travelPricingDisabled: checked === true }))
@@ -449,10 +450,10 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
         </div>
       </section>
 
-      <section className="rounded-[14px] border border-[#E5E7EB] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
-        <h2 className="mb-4 text-base font-semibold text-[#111827]">Appearance</h2>
-        <div className="space-y-3 rounded-[8px] border border-[#E5E7EB] bg-[#F8F9FC] p-4">
-          <p className="text-sm text-[#6B7280]">Choose how SnapQuote looks across the app.</p>
+      <section className="rounded-[14px] border border-border bg-card p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
+        <h2 className="mb-4 text-base font-semibold text-foreground">Appearance</h2>
+        <div className="space-y-3 rounded-[8px] border border-border bg-muted p-4">
+          <p className="text-sm text-muted-foreground">Choose how SnapQuote looks across the app.</p>
           <div className="flex flex-wrap gap-3">
             {["light", "dark"].map((option) => {
               const selected = activeTheme === option;
@@ -465,8 +466,8 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
                   onClick={() => setTheme(option)}
                   className={
                     selected
-                      ? "inline-flex min-h-[44px] items-center justify-center rounded-[10px] border border-[#2563EB] bg-[#EFF6FF] px-4 text-sm font-medium capitalize text-[#2563EB] transition-colors"
-                      : "inline-flex min-h-[44px] items-center justify-center rounded-[10px] border border-[#E5E7EB] bg-white px-4 text-sm font-medium capitalize text-[#111827] transition-colors hover:bg-[#F8F9FC]"
+                      ? "inline-flex min-h-[44px] items-center justify-center rounded-[10px] border border-primary bg-accent px-4 text-sm font-medium capitalize text-primary transition-colors"
+                      : "inline-flex min-h-[44px] items-center justify-center rounded-[10px] border border-border bg-card px-4 text-sm font-medium capitalize text-foreground transition-colors hover:bg-muted"
                   }
                 >
                   {option}
@@ -478,19 +479,19 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
       </section>
 
 
-      <section className="rounded-[14px] border border-[#E5E7EB] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
-        <h2 className="mb-4 text-base font-semibold text-[#111827]">Estimate Message Template</h2>
+      <section className="rounded-[14px] border border-border bg-card p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
+        <h2 className="mb-4 text-base font-semibold text-foreground">Estimate Message Template</h2>
         <div className="space-y-2">
         <Label
           htmlFor="quoteSmsTemplate"
-          className="mb-1.5 block text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280]"
+          className="mb-1.5 block text-xs font-medium uppercase tracking-[0.05em] text-muted-foreground"
         >
           Estimate message template
         </Label>
-        <div className="space-y-3 rounded-[8px] border border-[#E5E7EB] bg-[#F8F9FC] p-4">
-          <label className="flex items-center gap-2 text-sm text-[#111827]">
+        <div className="space-y-3 rounded-[8px] border border-border bg-muted p-4">
+          <label className="flex items-center gap-2 text-sm text-foreground">
             <Checkbox
-              className="data-[state=checked]:border-[#2563EB] data-[state=checked]:bg-[#2563EB]"
+              className="data-[state=checked]:border-primary data-[state=checked]:bg-primary"
               checked={autoInsertCustomerName}
               onCheckedChange={(checked) => handleCustomerNameToggle(checked === true)}
             />
@@ -521,13 +522,13 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
       </section>
 
       {isEmailUser ? (
-        <section className="rounded-[14px] border border-[#E5E7EB] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
-          <h2 className="mb-4 text-base font-semibold text-[#111827]">Change Password</h2>
+        <section className="rounded-[14px] border border-border bg-card p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
+          <h2 className="mb-4 text-base font-semibold text-foreground">Change Password</h2>
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label
                 htmlFor="newPassword"
-                className="mb-1.5 block text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280]"
+                className="mb-1.5 block text-xs font-medium uppercase tracking-[0.05em] text-muted-foreground"
               >
                 New password
               </Label>
@@ -540,12 +541,12 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
                   onChange={(e) => { setNewPassword(e.target.value); setPasswordError(null); }}
                   minLength={8}
                   placeholder="New password"
-                  className="h-11 rounded-[8px] border-[#E5E7EB] bg-white pr-11 px-[14px] text-sm text-[#111827] placeholder:text-[#6B7280] focus-visible:ring-[#2563EB]"
+                  className="h-11 rounded-[8px] border-border bg-card pr-11 px-[14px] text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-ring"
                 />
                 <button
                   type="button"
                   onClick={() => setShowNew((v) => !v)}
-                  className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-[#9CA3AF] transition-colors hover:text-[#6B7280]"
+                  className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-muted-foreground/70 transition-colors hover:text-muted-foreground"
                   aria-label={showNew ? "Hide password" : "Show password"}
                 >
                   {showNew ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -555,7 +556,7 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
             <div className="space-y-2">
               <Label
                 htmlFor="confirmPassword"
-                className="mb-1.5 block text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280]"
+                className="mb-1.5 block text-xs font-medium uppercase tracking-[0.05em] text-muted-foreground"
               >
                 Confirm password
               </Label>
@@ -568,12 +569,12 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
                   onChange={(e) => { setConfirmPassword(e.target.value); setPasswordError(null); }}
                   minLength={8}
                   placeholder="Confirm new password"
-                  className="h-11 rounded-[8px] border-[#E5E7EB] bg-white pr-11 px-[14px] text-sm text-[#111827] placeholder:text-[#6B7280] focus-visible:ring-[#2563EB]"
+                  className="h-11 rounded-[8px] border-border bg-card pr-11 px-[14px] text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-ring"
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirm((v) => !v)}
-                  className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-[#9CA3AF] transition-colors hover:text-[#6B7280]"
+                  className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-muted-foreground/70 transition-colors hover:text-muted-foreground"
                   aria-label={showConfirm ? "Hide password" : "Show password"}
                 >
                   {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -582,7 +583,7 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
             </div>
           </div>
           {passwordError ? (
-            <p className="mt-4 rounded-[8px] border border-[#FECACA] bg-[#FEF2F2] px-4 py-3 text-sm text-[#DC2626]">
+            <p className="mt-4 rounded-[8px] border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 px-4 py-3 text-sm text-red-600 dark:text-red-400">
               {passwordError}
             </p>
           ) : null}
@@ -600,6 +601,47 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
       >
         {loading ? "Saving..." : "Save settings"}
       </Button>
+
+      <section className="rounded-[14px] border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
+        <h2 className="mb-2 text-base font-semibold text-red-600 dark:text-red-400">Danger Zone</h2>
+        <p className="mb-4 text-sm text-red-600/80 dark:text-red-400/80">
+          Permanently delete your account and all associated data. This action cannot be undone.
+        </p>
+        <Button
+          variant="destructive"
+          disabled={deleting}
+          onClick={async () => {
+            const confirmed = window.confirm(
+              "Are you sure you want to delete your account? This will permanently delete all your data, cancel any active subscriptions, and cannot be undone."
+            );
+            if (!confirmed) return;
+
+            setDeleting(true);
+            try {
+              const { data: { session } } = await supabase.auth.getSession();
+              const res = await fetch("/api/app/account/delete", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  ...(session?.access_token
+                    ? { Authorization: `Bearer ${session.access_token}` }
+                    : {}),
+                },
+              });
+              const json = await res.json();
+              if (!res.ok) throw new Error(json.error || "Failed to delete account.");
+
+              await supabase.auth.signOut();
+              router.push("/login");
+            } catch (error) {
+              toast.error(error instanceof Error ? error.message : "Failed to delete account.");
+              setDeleting(false);
+            }
+          }}
+        >
+          {deleting ? "Deleting..." : "Delete Account"}
+        </Button>
+      </section>
 
     </div>
   );

@@ -88,10 +88,10 @@ export function TeamManager({ isOwner, members, invites }: TeamManagerProps) {
   return (
     <div className="space-y-6">
       {isOwner && (
-        <div className="flex flex-col gap-3 rounded-[14px] border border-[#E5E7EB] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)] sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 rounded-[14px] border border-border bg-card p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)] sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm font-semibold text-[#111827]">Invite a team member</p>
-            <p className="mt-1 text-sm text-[#6B7280]">
+            <p className="text-sm font-semibold text-foreground">Invite a team member</p>
+            <p className="mt-1 text-sm text-muted-foreground">
               Generate a secure invite link that expires in 7 days.
             </p>
           </div>
@@ -100,55 +100,55 @@ export function TeamManager({ isOwner, members, invites }: TeamManagerProps) {
           </Button>
         </div>
       )}
-      <div className="rounded-[14px] border border-[#E5E7EB] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
-        <h2 className="mb-4 text-base font-semibold text-[#111827]">Members</h2>
+      <div className="rounded-[14px] border border-border bg-card p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
+        <h2 className="mb-4 text-base font-semibold text-foreground">Members</h2>
         <div className="space-y-3 md:hidden">
           {members.map((member) => (
             <div
               key={member.user_id}
-              className="rounded-[12px] border border-[#E5E7EB] bg-[#F8F9FC] p-4"
+              className="rounded-[12px] border border-border bg-muted p-4"
             >
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#EFF6FF] text-sm font-bold text-[#2563EB]">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent text-sm font-bold text-primary">
                   {getInitials(member.user_email ?? member.user_id)}
                 </div>
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-[#111827]">
+                  <p className="truncate text-sm font-semibold text-foreground">
                     {member.user_email?.split("@")[0] ?? "Team member"}
                   </p>
                   {member.user_email ? (
                     <a
                       href={`mailto:${member.user_email}`}
-                      className="break-all text-sm text-[#6B7280] transition-colors hover:text-[#2563EB] hover:underline"
+                      className="break-all text-sm text-muted-foreground transition-colors hover:text-primary hover:underline"
                     >
                       {member.user_email}
                     </a>
                   ) : (
-                    <p className="break-all text-sm text-[#6B7280]">{member.user_id}</p>
+                    <p className="break-all text-sm text-muted-foreground">{member.user_id}</p>
                   )}
                 </div>
               </div>
 
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 <div>
-                  <p className="text-[11px] font-medium uppercase tracking-[0.05em] text-[#6B7280]">
+                  <p className="text-[11px] font-medium uppercase tracking-[0.05em] text-muted-foreground">
                     Role
                   </p>
                   <span
                     className={
                       member.role === "OWNER"
-                        ? "mt-1 inline-flex rounded-full bg-[#EFF6FF] px-3 py-1 text-[12px] font-semibold text-[#2563EB]"
-                        : "mt-1 inline-flex rounded-full bg-[#F0FDF4] px-3 py-1 text-[12px] font-semibold text-[#16A34A]"
+                        ? "mt-1 inline-flex rounded-full bg-accent px-3 py-1 text-[12px] font-semibold text-primary"
+                        : "mt-1 inline-flex rounded-full bg-green-50 dark:bg-green-950/30 px-3 py-1 text-[12px] font-semibold text-green-600 dark:text-green-400"
                     }
                   >
                     {formatRole(member.role)}
                   </span>
                 </div>
                 <div>
-                  <p className="text-[11px] font-medium uppercase tracking-[0.05em] text-[#6B7280]">
+                  <p className="text-[11px] font-medium uppercase tracking-[0.05em] text-muted-foreground">
                     Joined
                   </p>
-                  <p className="mt-1 text-sm text-[#111827]">
+                  <p className="mt-1 text-sm text-foreground">
                     {new Date(member.created_at).toLocaleDateString()}
                   </p>
                 </div>
@@ -158,13 +158,13 @@ export function TeamManager({ isOwner, members, invites }: TeamManagerProps) {
                 {isOwner && member.role !== "OWNER" ? (
                   <Button
                     variant="outline"
-                    className="h-11 w-full border-2 border-[#2563EB] bg-transparent text-[#2563EB] hover:bg-[#EFF6FF]"
+                    className="h-11 w-full border-2 border-primary bg-transparent text-primary hover:bg-accent"
                     onClick={() => remove(member.user_id)}
                   >
                     Remove
                   </Button>
                 ) : (
-                  <p className="text-sm text-[#6B7280]">Account owner</p>
+                  <p className="text-sm text-muted-foreground">Account owner</p>
                 )}
               </div>
             </div>
@@ -174,14 +174,14 @@ export function TeamManager({ isOwner, members, invites }: TeamManagerProps) {
         <div className="hidden md:block">
           <Table>
             <TableHeader>
-              <TableRow className="border-b border-[#E5E7EB] bg-[#F8F9FC] hover:bg-[#F8F9FC]">
-                <TableHead className="h-auto px-5 py-3 text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280]">
+              <TableRow className="border-b border-border bg-muted hover:bg-muted">
+                <TableHead className="h-auto px-5 py-3 text-xs font-medium uppercase tracking-[0.05em] text-muted-foreground">
                   Member
                 </TableHead>
-                <TableHead className="h-auto px-5 py-3 text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280]">
+                <TableHead className="h-auto px-5 py-3 text-xs font-medium uppercase tracking-[0.05em] text-muted-foreground">
                   Role
                 </TableHead>
-                <TableHead className="h-auto px-5 py-3 text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280]">
+                <TableHead className="h-auto px-5 py-3 text-xs font-medium uppercase tracking-[0.05em] text-muted-foreground">
                   Joined
                 </TableHead>
                 <TableHead className="h-auto px-5 py-3" />
@@ -191,26 +191,26 @@ export function TeamManager({ isOwner, members, invites }: TeamManagerProps) {
               {members.map((member) => (
                 <TableRow
                   key={member.user_id}
-                  className="border-b border-[#E5E7EB] transition-colors hover:bg-[#F9FAFB]"
+                  className="border-b border-border transition-colors hover:bg-muted"
                 >
                   <TableCell className="px-5 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#EFF6FF] text-sm font-bold text-[#2563EB]">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent text-sm font-bold text-primary">
                         {getInitials(member.user_email ?? member.user_id)}
                       </div>
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold text-[#111827]">
+                        <p className="text-sm font-semibold text-foreground">
                           {member.user_email?.split("@")[0] ?? "Team member"}
                         </p>
                         {member.user_email ? (
                           <a
                             href={`mailto:${member.user_email}`}
-                            className="text-sm text-[#6B7280] transition-colors hover:text-[#2563EB] hover:underline"
+                            className="text-sm text-muted-foreground transition-colors hover:text-primary hover:underline"
                           >
                             {member.user_email}
                           </a>
                         ) : (
-                          <p className="text-sm text-[#6B7280]">{member.user_id}</p>
+                          <p className="text-sm text-muted-foreground">{member.user_id}</p>
                         )}
                       </div>
                     </div>
@@ -219,14 +219,14 @@ export function TeamManager({ isOwner, members, invites }: TeamManagerProps) {
                     <span
                       className={
                         member.role === "OWNER"
-                          ? "inline-flex rounded-full bg-[#EFF6FF] px-3 py-1 text-[12px] font-semibold text-[#2563EB]"
-                          : "inline-flex rounded-full bg-[#F0FDF4] px-3 py-1 text-[12px] font-semibold text-[#16A34A]"
+                          ? "inline-flex rounded-full bg-accent px-3 py-1 text-[12px] font-semibold text-primary"
+                          : "inline-flex rounded-full bg-green-50 dark:bg-green-950/30 px-3 py-1 text-[12px] font-semibold text-green-600 dark:text-green-400"
                       }
                     >
                       {formatRole(member.role)}
                     </span>
                   </TableCell>
-                  <TableCell className="px-5 py-4 text-sm text-[#6B7280]">
+                  <TableCell className="px-5 py-4 text-sm text-muted-foreground">
                     {new Date(member.created_at).toLocaleDateString()}
                   </TableCell>
                   <TableCell className="px-5 py-4 text-right">
@@ -234,7 +234,7 @@ export function TeamManager({ isOwner, members, invites }: TeamManagerProps) {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="border-2 border-[#2563EB] bg-transparent text-[#2563EB] hover:bg-[#EFF6FF]"
+                        className="border-2 border-primary bg-transparent text-primary hover:bg-accent"
                         onClick={() => remove(member.user_id)}
                       >
                         Remove
@@ -247,37 +247,37 @@ export function TeamManager({ isOwner, members, invites }: TeamManagerProps) {
           </Table>
         </div>
       </div>
-      <div className="rounded-[14px] border border-[#E5E7EB] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
-        <h2 className="mb-4 text-base font-semibold text-[#111827]">Pending Invites</h2>
+      <div className="rounded-[14px] border border-border bg-card p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
+        <h2 className="mb-4 text-base font-semibold text-foreground">Pending Invites</h2>
         {invites.length === 0 ? (
-          <p className="text-sm text-[#6B7280]">No pending invites.</p>
+          <p className="text-sm text-muted-foreground">No pending invites.</p>
         ) : (
           <ul className="space-y-3">
             {invites.map((inviteRow) => (
               <li
                 key={inviteRow.id}
-                className="flex flex-col gap-3 rounded-[12px] border border-[#E5E7EB] bg-[#F8F9FC] px-4 py-4 text-sm text-[#6B7280] sm:flex-row sm:items-center sm:justify-between"
+                className="flex flex-col gap-3 rounded-[12px] border border-border bg-muted px-4 py-4 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between"
               >
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#EFF6FF] text-sm font-bold text-[#2563EB]">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent text-sm font-bold text-primary">
                     {getInitials(inviteRow.email ?? "invite-link")}
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-[#111827]">
+                    <p className="text-sm font-medium text-foreground">
                       {inviteRow.email ?? "Invite link ready"}
                     </p>
-                    <p className="mt-1 text-sm text-[#6B7280]">
+                    <p className="mt-1 text-sm text-muted-foreground">
                       {new Date(inviteRow.created_at).toLocaleDateString()}
                     </p>
                     {inviteRow.expires_at ? (
-                      <p className="mt-1 text-sm text-[#6B7280]">
+                      <p className="mt-1 text-sm text-muted-foreground">
                         Expires {new Date(inviteRow.expires_at).toLocaleDateString()}
                       </p>
                     ) : null}
                   </div>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="inline-flex rounded-full bg-[#F0FDF4] px-3 py-1 text-[12px] font-semibold text-[#16A34A]">
+                  <span className="inline-flex rounded-full bg-green-50 dark:bg-green-950/30 px-3 py-1 text-[12px] font-semibold text-green-600 dark:text-green-400">
                     {formatRole(inviteRow.role)}
                   </span>
                   <span className="inline-flex rounded-full bg-[#FFF7ED] px-3 py-1 text-[12px] font-semibold text-[#EA580C]">

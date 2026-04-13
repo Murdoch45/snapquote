@@ -218,11 +218,11 @@ export function QuoteComposer({
             <p className="text-sm font-semibold text-blue-900">Estimate price range:</p>
             <p className="mt-1 text-3xl font-bold leading-none text-blue-600">{sendingRange}</p>
             {multiServiceBreakdown.length > 1 ? (
-              <div className="space-y-2 rounded-lg border border-blue-100 bg-white/60 p-3">
+              <div className="space-y-2 rounded-lg border border-blue-100 bg-card/60 p-3">
                 {multiServiceBreakdown.map((estimate) => (
                   <div
                     key={`${estimate.service}-${estimate.lowEstimate}-${estimate.highEstimate}`}
-                    className="flex items-center justify-between gap-4 text-sm text-gray-600"
+                    className="flex items-center justify-between gap-4 text-sm text-muted-foreground"
                   >
                     <span>{estimate.service as string}</span>
                     <span>
@@ -249,7 +249,7 @@ export function QuoteComposer({
             type="button"
             onClick={onGenerateMessage}
             disabled={!canSend}
-            className="h-11 w-full rounded-[10px] bg-[#2563EB] text-sm font-semibold text-white hover:bg-[#1D4ED8]"
+            className="h-11 w-full rounded-[10px] bg-primary text-sm font-semibold text-white hover:bg-primary/90"
           >
             {hasGeneratedBefore ? "Regenerate Estimate" : "Generate Estimate"}
           </Button>
@@ -269,8 +269,8 @@ export function QuoteComposer({
             </div>
 
             {/* Delivery checkboxes */}
-            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-              <p className="mb-3 text-sm font-medium text-gray-700">Delivery method</p>
+            <div className="rounded-lg border border-border bg-muted p-4">
+              <p className="mb-3 text-sm font-medium text-foreground/80">Delivery method</p>
               <div className="flex flex-wrap gap-6">
                 <label className="flex items-center gap-2 text-sm">
                   <Checkbox
@@ -297,7 +297,7 @@ export function QuoteComposer({
                 type="button"
                 onClick={() => void onSend()}
                 disabled={loading || !canSend || (!sendEmail && !sendText)}
-                className="bg-[#2563EB] text-white hover:bg-[#1D4ED8]"
+                className="bg-primary text-white hover:bg-primary/90"
               >
                 {loading ? "Sending..." : "Send Estimate"}
               </Button>
@@ -311,7 +311,7 @@ export function QuoteComposer({
               <Button
                 type="button"
                 variant="outline"
-                className="border-gray-300 bg-gray-100 text-gray-700 hover:bg-gray-200"
+                className="border-border bg-muted text-foreground/80 hover:bg-border"
                 onClick={onEditEstimate}
               >
                 Edit Estimate
@@ -330,7 +330,7 @@ export function QuoteComposer({
                 value={copiedMessage ?? message}
                 rows={7}
                 readOnly
-                className="pointer-events-none bg-gray-50"
+                className="pointer-events-none bg-muted"
               />
             </div>
             <p className="text-sm text-emerald-700">

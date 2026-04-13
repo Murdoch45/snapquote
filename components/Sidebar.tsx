@@ -70,8 +70,8 @@ function SidebarNav({
             className={cn(
               "flex min-h-[44px] items-center gap-3 rounded-[10px] border-l-[3px] px-4 py-3 text-sm font-medium transition-colors",
               active
-                ? "border-l-[#2563EB] bg-[#EFF6FF] font-semibold text-[#2563EB]"
-                : "border-l-transparent text-[#6B7280] hover:bg-[#F8F9FC] hover:text-[#111827]"
+                ? "border-l-primary bg-accent font-semibold text-primary"
+                : "border-l-transparent text-muted-foreground hover:bg-muted hover:text-foreground"
             )}
           >
             <Icon className="h-4 w-4 shrink-0" />
@@ -93,11 +93,11 @@ function SidebarFooter({
   return (
     <div className={cn("border-t border-border px-6 py-5", className)}>
       <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#EFF6FF] text-sm font-semibold text-[#2563EB]">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent text-sm font-semibold text-primary">
           {getInitials(businessName)}
         </div>
         <div className="min-w-0">
-          <p className="truncate text-sm font-medium text-[#111827]">
+          <p className="truncate text-sm font-medium text-foreground">
             {businessName ?? "SnapQuote"}
           </p>
         </div>
@@ -126,7 +126,7 @@ function MobileSidebar({
       <button
         type="button"
         className={cn(
-          "absolute inset-0 bg-[#111827]/40 transition-opacity duration-200",
+          "absolute inset-0 bg-foreground/40 transition-opacity duration-200",
           open ? "opacity-100" : "opacity-0"
         )}
         aria-label="Close navigation menu"

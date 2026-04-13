@@ -171,7 +171,7 @@ export function MyLinkPageClient({
     <div className="space-y-6">
       <Card className="shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
         <CardHeader className="pb-4">
-          <p className="text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280]">Share</p>
+          <p className="text-xs font-medium uppercase tracking-[0.05em] text-muted-foreground">Share</p>
           <CardDescription>Share your link with your caption via text or social</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -179,7 +179,7 @@ export function MyLinkPageClient({
             <Share2 className="mr-2 h-4 w-4" />
             Share Link
           </Button>
-          <div className="rounded-[8px] border border-[#FCD34D] bg-[#FFFBEB] px-4 py-3 text-sm text-[#92400E]">
+          <div className="rounded-[8px] border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/30 px-4 py-3 text-sm text-amber-800 dark:text-amber-200">
             Your link updates automatically if you change your Public URL in Settings.
           </div>
         </CardContent>
@@ -187,14 +187,14 @@ export function MyLinkPageClient({
 
       <Card className="shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
         <CardHeader className="pb-4">
-          <p className="text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280]">Your Link</p>
+          <p className="text-xs font-medium uppercase tracking-[0.05em] text-muted-foreground">Your Link</p>
           <CardDescription>Your public request page URL</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="relative rounded-[8px] border border-[#E5E7EB] bg-[#F8F9FC] px-4 py-3">
-            <Link2 className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6B7280]" />
+          <div className="relative rounded-[8px] border border-border bg-muted px-4 py-3">
+            <Link2 className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              className="h-auto border-0 bg-transparent px-0 pl-7 py-0 text-sm font-medium text-[#111827] shadow-none focus-visible:ring-0"
+              className="h-auto border-0 bg-transparent px-0 pl-7 py-0 text-sm font-medium text-foreground shadow-none focus-visible:ring-0"
               value={requestLink}
               readOnly
               aria-label="Public request page URL"
@@ -217,7 +217,7 @@ export function MyLinkPageClient({
 
       <Card className="shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
         <CardHeader className="pb-4">
-          <p className="text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280]">
+          <p className="text-xs font-medium uppercase tracking-[0.05em] text-muted-foreground">
             Social Caption
           </p>
           <CardDescription>Ready-to-post copy for social or text messages</CardDescription>
@@ -237,8 +237,8 @@ export function MyLinkPageClient({
               readOnly={!isEditingCaption}
               className={
                 isEditingCaption
-                ? "min-h-[100px] resize-none rounded-[8px] border-2 border-[#2563EB] bg-white px-[14px] py-3 text-sm text-[#111827] shadow-[0_0_0_3px_rgba(37,99,235,0.1)] focus-visible:ring-0"
-                : "min-h-[100px] resize-none rounded-[8px] border border-[#E5E7EB] bg-[#F8F9FC] px-[14px] py-3 text-sm text-[#111827] pointer-events-none focus-visible:ring-0"
+                ? "min-h-[100px] resize-none rounded-[8px] border-2 border-primary bg-card px-[14px] py-3 text-sm text-foreground shadow-[0_0_0_3px_rgba(37,99,235,0.1)] focus-visible:ring-0"
+                : "min-h-[100px] resize-none rounded-[8px] border border-border bg-muted px-[14px] py-3 text-sm text-foreground pointer-events-none focus-visible:ring-0"
               }
             />
           </div>
@@ -264,7 +264,7 @@ export function MyLinkPageClient({
                 <button
                   type="button"
                   onClick={onCancelEditingCaption}
-                  className="w-full text-sm font-medium text-[#6B7280] transition-colors hover:text-[#111827] sm:min-w-[160px] sm:w-auto"
+                  className="w-full text-sm font-medium text-muted-foreground transition-colors hover:text-foreground sm:min-w-[160px] sm:w-auto"
                 >
                   Cancel
                 </button>
@@ -273,7 +273,7 @@ export function MyLinkPageClient({
               <Button
                 type="button"
                 variant="outline"
-                className="w-full border-2 border-[#2563EB] bg-transparent text-[#2563EB] hover:bg-[#EFF6FF] sm:min-w-[160px] sm:w-auto"
+                className="w-full border-2 border-primary bg-transparent text-primary hover:bg-accent sm:min-w-[160px] sm:w-auto"
                 onClick={onStartEditingCaption}
               >
                 Edit Caption
@@ -285,12 +285,12 @@ export function MyLinkPageClient({
 
       <Card className="shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
         <CardHeader className="pb-4">
-          <p className="text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280]">QR Code</p>
+          <p className="text-xs font-medium uppercase tracking-[0.05em] text-muted-foreground">QR Code</p>
           <CardDescription>Download or share a scannable version of your public page</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex justify-center">
-            <div className="inline-flex rounded-[14px] border border-[#E5E7EB] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
+            <div className="inline-flex rounded-[14px] border border-border bg-card p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
               <QRCodeCanvas
                 ref={qrCodeRef}
                 value={requestLink}
@@ -306,7 +306,7 @@ export function MyLinkPageClient({
             <Download className="mr-2 h-4 w-4" />
             Download QR Code
           </Button>
-          <div className="rounded-[8px] border border-[#FCD34D] bg-[#FFFBEB] px-4 py-3 text-sm text-[#92400E]">
+          <div className="rounded-[8px] border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/30 px-4 py-3 text-sm text-amber-800 dark:text-amber-200">
             Your QR code updates automatically if you change your Public URL in Settings.
           </div>
         </CardContent>

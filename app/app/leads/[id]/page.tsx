@@ -133,8 +133,8 @@ export default async function LeadDetailPage({ params }: Props) {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold text-gray-900">{displayAddress}</h1>
-          <p className="text-sm text-gray-500">
+          <h1 className="text-xl font-semibold text-foreground">{displayAddress}</h1>
+          <p className="text-sm text-muted-foreground">
             Submitted {toRelativeMinutes(lead.submitted_at)} ({format(new Date(lead.submitted_at), "PPpp")})
           </p>
         </div>
@@ -151,7 +151,7 @@ export default async function LeadDetailPage({ params }: Props) {
           </CardHeader>
           <CardContent className="space-y-4">
             <section>
-              <h3 className="text-sm font-semibold text-gray-800">Services</h3>
+              <h3 className="text-sm font-semibold text-foreground">Services</h3>
               <div className="mt-1 flex flex-wrap gap-1">
                 {(lead.services as string[]).map((service) => (
                   <Badge key={service} className={getServiceBadgeClassName(service)}>{service}</Badge>
@@ -160,26 +160,26 @@ export default async function LeadDetailPage({ params }: Props) {
             </section>
 
             <section>
-              <h3 className="text-sm font-semibold text-gray-800">Customer Description</h3>
-              <p className="text-sm text-gray-700">{lead.description || "No description provided."}</p>
+              <h3 className="text-sm font-semibold text-foreground">Customer Description</h3>
+              <p className="text-sm text-foreground/80">{lead.description || "No description provided."}</p>
             </section>
 
             <section>
-              <h3 className="text-sm font-semibold text-gray-800">Customer Answers</h3>
+              <h3 className="text-sm font-semibold text-foreground">Customer Answers</h3>
               {customerAnswerGroups.length === 0 ? (
-                <p className="text-sm text-gray-500">No questionnaire answers available.</p>
+                <p className="text-sm text-muted-foreground">No questionnaire answers available.</p>
               ) : (
                 <div className="mt-2 space-y-3">
                   {customerAnswerGroups.map((group) => (
-                    <div key={group.service} className="rounded-lg border border-gray-200 bg-gray-50 p-3">
-                      <p className="text-sm font-medium text-gray-900">{group.service}</p>
+                    <div key={group.service} className="rounded-lg border border-border bg-muted p-3">
+                      <p className="text-sm font-medium text-foreground">{group.service}</p>
                       <dl className="mt-3 space-y-3">
                         {group.answers.map((answer) => (
                           <div key={answer.key}>
-                            <dt className="text-sm font-medium text-gray-600">
+                            <dt className="text-sm font-medium text-muted-foreground">
                               {answer.label}:
                             </dt>
-                            <dd className="mt-1 text-sm text-gray-700">{answer.value}</dd>
+                            <dd className="mt-1 text-sm text-foreground/80">{answer.value}</dd>
                           </div>
                         ))}
                       </dl>
@@ -190,23 +190,23 @@ export default async function LeadDetailPage({ params }: Props) {
             </section>
 
             <section>
-              <h3 className="text-sm font-semibold text-gray-800">Property</h3>
-              <p className="mt-2 text-sm text-gray-600">
+              <h3 className="text-sm font-semibold text-foreground">Property</h3>
+              <p className="mt-2 text-sm text-muted-foreground">
                 {lead.travel_distance_miles != null
                   ? `Approx. travel distance from business: ${Number(lead.travel_distance_miles).toFixed(1)} miles`
                   : "Travel distance not included for this lead."}
               </p>
               {isLocked ? (
-                <div className="mt-3 rounded-lg border border-dashed border-gray-200 bg-gray-50 p-6 text-center">
-                  <div className="rounded-lg bg-gray-200/80 px-4 py-10 text-sm text-gray-500 blur-sm select-none">
+                <div className="mt-3 rounded-lg border border-dashed border-border bg-muted p-6 text-center">
+                  <div className="rounded-lg bg-border/80 px-4 py-10 text-sm text-muted-foreground blur-sm select-none">
                     Property details hidden
                   </div>
-                  <p className="mt-4 text-sm text-gray-600">
+                  <p className="mt-4 text-sm text-muted-foreground">
                     Unlock this lead to reveal the full street address and property view.
                   </p>
                   <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
                     <LeadUnlockButton leadId={lead.id as string}>Unlock — 1 Credit</LeadUnlockButton>
-                    <span className="text-sm text-gray-500">{credits.total} credits remaining</span>
+                    <span className="text-sm text-muted-foreground">{credits.total} credits remaining</span>
                   </div>
                 </div>
               ) : (
@@ -221,9 +221,9 @@ export default async function LeadDetailPage({ params }: Props) {
             </section>
 
             <section>
-              <h3 className="text-sm font-semibold text-gray-800">Photos</h3>
+              <h3 className="text-sm font-semibold text-foreground">Photos</h3>
               {(photos ?? []).length === 0 ? (
-                <p className="text-sm text-gray-500">No photos uploaded.</p>
+                <p className="text-sm text-muted-foreground">No photos uploaded.</p>
               ) : (
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                   {(photos ?? []).map((photo) => (
@@ -248,8 +248,8 @@ export default async function LeadDetailPage({ params }: Props) {
             </CardHeader>
             <CardContent className="space-y-4">
               {isUnlocked ? (
-                <div className="space-y-2 text-sm text-gray-700">
-                  <p className="font-medium text-gray-900">
+                <div className="space-y-2 text-sm text-foreground/80">
+                  <p className="font-medium text-foreground">
                     {(lead.customer_name as string | null) ?? "No name provided"}
                   </p>
                   <p>{(lead.customer_phone as string | null) ?? "No phone provided"}</p>
@@ -258,24 +258,24 @@ export default async function LeadDetailPage({ params }: Props) {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                    <div className="mb-3 flex items-center gap-2 text-gray-500">
+                  <div className="rounded-lg border border-border bg-muted p-4">
+                    <div className="mb-3 flex items-center gap-2 text-muted-foreground">
                       <Lock className="h-4 w-4" />
                       <p className="text-sm font-medium">Contact info locked</p>
                     </div>
-                    <div className="select-none space-y-1 text-sm text-gray-500 blur-sm">
+                    <div className="select-none space-y-1 text-sm text-muted-foreground blur-sm">
                       <p>Customer name hidden</p>
                       <p>Phone hidden</p>
                       <p>Email hidden</p>
                       <p>Street address hidden</p>
                     </div>
-                    <p className="mt-3 text-sm text-gray-600">{addressParts.locality}</p>
+                    <p className="mt-3 text-sm text-muted-foreground">{addressParts.locality}</p>
                   </div>
                   <div className="flex flex-wrap items-center gap-3">
                     <LeadUnlockButton leadId={lead.id as string}>Unlock — 1 Credit</LeadUnlockButton>
-                    <span className="text-sm text-gray-500">{credits.total} credits remaining</span>
+                    <span className="text-sm text-muted-foreground">{credits.total} credits remaining</span>
                   </div>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-muted-foreground">
                     Unlock this lead to reveal full address and contact details.
                   </p>
                 </div>
@@ -290,14 +290,14 @@ export default async function LeadDetailPage({ params }: Props) {
               {lead.ai_status === "failed" ? (
                 <>
                   <p className="font-medium text-amber-700">AI estimate unavailable</p>
-                  <p className="text-gray-700">
+                  <p className="text-foreground/80">
                     We couldn&apos;t generate an AI estimate for this lead. You can still review the lead and send your own estimate manually.
                   </p>
                 </>
               ) : (
                 <>
-                  <p className="text-gray-700">Estimated price: {aiEstimateDisplay ?? "Pending estimate..."}</p>
-                  <p className="text-gray-700">{surfaceAreaSummary}</p>
+                  <p className="text-foreground/80">Estimated price: {aiEstimateDisplay ?? "Pending estimate..."}</p>
+                  <p className="text-foreground/80">{surfaceAreaSummary}</p>
                 </>
               )}
             </CardContent>
@@ -320,8 +320,8 @@ export default async function LeadDetailPage({ params }: Props) {
             <CardContent>
               {isSentQuote ? (
                 <div className="space-y-2 text-sm">
-                  <p className="text-gray-700">Estimate already sent for this lead.</p>
-                  <p className="text-gray-700">
+                  <p className="text-foreground/80">Estimate already sent for this lead.</p>
+                  <p className="text-foreground/80">
                     Price: {quoteEstimateDisplay ?? toCurrency(Number(existingQuote.price))} ({existingQuote.status})
                   </p>
                   <Link href={`/q/${existingQuote.public_id}`} target="_blank">
@@ -330,11 +330,11 @@ export default async function LeadDetailPage({ params }: Props) {
                 </div>
               ) : isLocked ? (
                 <div className="space-y-3 text-sm">
-                  <p className="text-gray-700">
+                  <p className="text-foreground/80">
                     Unlock this lead before sending an estimate to the customer.
                   </p>
                   <LeadUnlockButton leadId={lead.id as string}>Unlock — 1 Credit</LeadUnlockButton>
-                  <p className="text-gray-500">{credits.total} credits remaining</p>
+                  <p className="text-muted-foreground">{credits.total} credits remaining</p>
                 </div>
               ) : (
                 <QuoteComposer

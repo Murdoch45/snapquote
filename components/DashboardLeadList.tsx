@@ -21,11 +21,11 @@ export function DashboardLeadList({ cards, total }: Props) {
           <button
             type="button"
             onClick={() => setVisibleCount((prev) => Math.min(prev + 5, 20))}
-            className="text-[15px] font-semibold text-[#2563EB] hover:text-[#1D4ED8]"
+            className="text-[15px] font-semibold text-primary hover:text-primary/90"
           >
             Load more
           </button>
-          <p className="text-xs text-[#6B7280]">
+          <p className="text-xs text-muted-foreground">
             Showing {visible.length} of {capped}
           </p>
         </div>

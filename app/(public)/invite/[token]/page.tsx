@@ -25,7 +25,7 @@ export default async function InvitePage({ params }: InvitePageProps) {
         description="This team invite is no longer valid. Ask the account owner for a new link."
         footer={null}
       >
-        <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600">
+        <div className="rounded-xl border border-border bg-slate-50 px-4 py-4 text-sm text-muted-foreground">
           The invite may have already been used or revoked.
         </div>
       </AuthShell>
@@ -39,7 +39,7 @@ export default async function InvitePage({ params }: InvitePageProps) {
         description="This invite link has expired. Ask the account owner to generate a new one."
         footer={null}
       >
-        <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600">
+        <div className="rounded-xl border border-border bg-slate-50 px-4 py-4 text-sm text-muted-foreground">
           Team invite links stay active for 7 days.
         </div>
       </AuthShell>

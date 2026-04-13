@@ -34,12 +34,12 @@ export function PasswordField({
           onChange={(event) => onChange(event.target.value)}
           required
           minLength={8}
-          className="h-11 rounded-xl border-slate-300 pr-11 focus-visible:ring-primary/30"
+          className="h-11 rounded-xl border-border pr-11 focus-visible:ring-primary/30"
         />
         <button
           type="button"
           onClick={() => setVisible((current) => !current)}
-          className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-slate-400 transition-colors hover:text-slate-600 focus-visible:outline-none focus-visible:text-slate-700"
+          className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-muted-foreground/70 transition-colors hover:text-muted-foreground focus-visible:outline-none focus-visible:text-slate-700"
           aria-label={visible ? "Hide password" : "Show password"}
         >
           {visible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}

@@ -69,7 +69,7 @@ export function InviteSignupForm({ token }: { token: string }) {
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           required
-          className="h-11 rounded-xl border-slate-300 focus-visible:ring-primary/30"
+          className="h-11 rounded-xl border-border focus-visible:ring-primary/30"
         />
       </div>
 
@@ -89,9 +89,9 @@ export function InviteSignupForm({ token }: { token: string }) {
         {submitting ? "Joining team..." : "Create account and join team"}
       </Button>
 
-      <p className="text-center text-sm text-slate-500">
+      <p className="text-center text-sm text-muted-foreground">
         Already have an account?{" "}
-        <Link href="/login" className="text-slate-600 underline underline-offset-4 hover:text-slate-900">
+        <Link href="/login" className="text-muted-foreground underline underline-offset-4 hover:text-foreground">
           Log in
         </Link>
       </p>

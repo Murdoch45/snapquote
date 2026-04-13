@@ -393,3 +393,34 @@ export function buildEstimateExpiredEmail(input: { leadUrl: string }) {
     )
   };
 }
+
+export function buildAccountDeletedEmail() {
+  const title = "Your SnapQuote account has been deleted";
+
+  return {
+    subject: title,
+    text: `${title}
+
+Hey there, this is a confirmation that your SnapQuote account has been deleted. All associated data has been permanently removed from our systems.
+
+If you didn't request this or believe it was a mistake, please contact us at support@snapquote.us.
+
+— The SnapQuote Team`,
+    html: renderEmailShell(
+      title,
+      `
+        <p style="margin:0 0 16px;font-size:15px;line-height:1.7;color:#334155;">
+          Hey there, this is a confirmation that your SnapQuote account has been deleted.
+          All associated data has been permanently removed from our systems.
+        </p>
+        <p style="margin:0 0 16px;font-size:15px;line-height:1.7;color:#334155;">
+          If you didn't request this or believe it was a mistake, please contact us at
+          <a href="mailto:support@snapquote.us" style="color:#2563EB;text-decoration:underline;">support@snapquote.us</a>.
+        </p>
+        <p style="margin:24px 0 0;font-size:15px;line-height:1.7;color:#334155;">
+          — The SnapQuote Team
+        </p>
+      `
+    )
+  };
+}

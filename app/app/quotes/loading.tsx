@@ -1,5 +1,5 @@
 function Skeleton({ className }: { className?: string }) {
-  return <div className={`animate-pulse rounded-[8px] bg-[#E5E7EB] ${className ?? ""}`} />;
+  return <div className={`animate-pulse rounded-[8px] bg-border ${className ?? ""}`} />;
 }
 
 export default function QuotesLoading() {
@@ -12,7 +12,7 @@ export default function QuotesLoading() {
       {Array.from({ length: 8 }).map((_, i) => (
         <div
           key={i}
-          className="rounded-[14px] border border-[#E5E7EB] bg-white p-4"
+          className="rounded-[14px] border border-border bg-card p-4"
         >
           <div className="flex items-center justify-between gap-3">
             <div className="flex-1 space-y-2">

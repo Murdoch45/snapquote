@@ -56,13 +56,13 @@ export function LeadsPageClient({
     <div className="space-y-6">
       <LeadsRealtimeWatcher orgId={orgId} onRefresh={() => router.refresh()} />
       <div className="flex flex-wrap items-start justify-end gap-4">
-        <div className="rounded-[10px] border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-medium text-[#111827] shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+        <div className="rounded-[10px] border border-border bg-card px-4 py-2 text-sm font-medium text-foreground shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
           {creditsRemaining} credits remaining
         </div>
       </div>
       <LeadList leads={leads} onLeadUnlocked={onLeadUnlocked} />
       {totalLeads > 0 ? (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-[14px] border border-[#E5E7EB] bg-white px-4 py-3 text-sm text-[#6B7280] shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-[14px] border border-border bg-card px-4 py-3 text-sm text-muted-foreground shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
           <p>
             Page {currentPage} of {totalPages}
           </p>
@@ -70,24 +70,24 @@ export function LeadsPageClient({
             {currentPage > 1 ? (
               <Link
                 href={`/app/leads?page=${currentPage - 1}`}
-                className="rounded-[10px] border border-[#E5E7EB] px-4 py-2 font-medium text-[#111827] transition-colors hover:bg-[#F8F9FC]"
+                className="rounded-[10px] border border-border px-4 py-2 font-medium text-foreground transition-colors hover:bg-muted"
               >
                 Previous
               </Link>
             ) : (
-              <span className="rounded-[10px] border border-[#E5E7EB] px-4 py-2 font-medium text-[#9CA3AF]">
+              <span className="rounded-[10px] border border-border px-4 py-2 font-medium text-muted-foreground/70">
                 Previous
               </span>
             )}
             {currentPage < totalPages ? (
               <Link
                 href={`/app/leads?page=${currentPage + 1}`}
-                className="rounded-[10px] border border-[#2563EB] bg-[#2563EB] px-4 py-2 font-medium text-white transition-colors hover:bg-[#1D4ED8]"
+                className="rounded-[10px] border border-primary bg-primary px-4 py-2 font-medium text-white transition-colors hover:bg-primary/90"
               >
                 Next
               </Link>
             ) : (
-              <span className="rounded-[10px] border border-[#E5E7EB] px-4 py-2 font-medium text-[#9CA3AF]">
+              <span className="rounded-[10px] border border-border px-4 py-2 font-medium text-muted-foreground/70">
                 Next
               </span>
             )}

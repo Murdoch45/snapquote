@@ -14,13 +14,13 @@ export function ConfidenceMeter({ confidence }: Props) {
     confidence >= 0.78 ? "High confidence" : confidence >= 0.52 ? "Medium confidence" : "Low confidence";
 
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-[0_12px_30px_-18px_rgba(15,23,42,0.35)]">
+    <div className="rounded-2xl border border-border bg-card p-4 shadow-[0_12px_30px_-18px_rgba(15,23,42,0.35)]">
       <div className="mb-3 flex items-center justify-between gap-3">
         <div>
-          <p className="text-sm font-semibold text-gray-900">AI Confidence</p>
-          <p className="text-xs text-gray-500">{label}</p>
+          <p className="text-sm font-semibold text-foreground">AI Confidence</p>
+          <p className="text-xs text-muted-foreground">{label}</p>
         </div>
-        <p className="text-sm font-semibold text-gray-700">
+        <p className="text-sm font-semibold text-foreground/80">
           {Math.round(confidence * 100)}%
         </p>
       </div>
@@ -34,7 +34,7 @@ export function ConfidenceMeter({ confidence }: Props) {
           <div className="mx-auto h-3 w-0.5 rounded-full bg-slate-900" />
         </div>
       </div>
-      <div className="mt-3 flex items-center justify-between text-[11px] uppercase tracking-[0.16em] text-gray-400">
+      <div className="mt-3 flex items-center justify-between text-[11px] uppercase tracking-[0.16em] text-muted-foreground/70">
         <span>Low</span>
         <span>High</span>
       </div>

@@ -64,7 +64,7 @@ export function BrandLogo({
       {showWordmark ? (
         <span
           className={cn(
-            "font-extrabold tracking-tight text-[#1557B6]",
+            "font-extrabold tracking-tight text-primary",
             sizing.wordmark,
             wordmarkClassName
           )}

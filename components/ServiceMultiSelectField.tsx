@@ -18,8 +18,8 @@ export function ServiceMultiSelectField({
   return (
     <fieldset className="space-y-3">
       <div className="space-y-1">
-        <legend className="text-sm font-medium text-gray-900">{legend}</legend>
-        <p className="text-xs text-gray-500">{helperText}</p>
+        <legend className="text-sm font-medium text-foreground">{legend}</legend>
+        <p className="text-xs text-muted-foreground">{helperText}</p>
       </div>
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         {SERVICE_OPTIONS.map((service) => {
@@ -33,7 +33,7 @@ export function ServiceMultiSelectField({
               className={`rounded-xl border px-3 py-3 text-left text-sm transition-colors ${
                 selected
                   ? "border-blue-600 bg-blue-50 text-blue-900"
-                  : "border-gray-200 bg-white text-gray-700 hover:border-blue-300 hover:bg-blue-50"
+                  : "border-border bg-card text-foreground/80 hover:border-blue-300 hover:bg-blue-50"
               }`}
             >
               {service}

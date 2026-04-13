@@ -30,10 +30,10 @@ export function UpgradeBanner({
             className={`mt-0.5 h-5 w-5 ${canSend ? "text-amber-600" : "text-red-600"}`}
           />
           <div>
-            <p className="font-medium text-gray-900">
+            <p className="font-medium text-foreground">
               {canSend ? "You are nearing your monthly estimate limit." : "Estimate sending is paused."}
             </p>
-            <p className="text-sm text-gray-700">
+            <p className="text-sm text-foreground/80">
               {limit === null
                 ? "Business plan includes unlimited estimate sends."
                 : `Usage: ${quotesSentCount}/${limit} (hard stop at ${hardStopAt}).`}
@@ -41,7 +41,7 @@ export function UpgradeBanner({
           </div>
         </div>
         <Button asChild variant={canSend ? "secondary" : "default"}>
-          <Link href="/app/settings">Review plan</Link>
+          <Link href="/app/plan">Review plan</Link>
         </Button>
       </CardContent>
     </Card>

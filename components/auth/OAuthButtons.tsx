@@ -60,7 +60,7 @@ export function OAuthButtons({
     <div className="space-y-4">
       <div className="flex items-center gap-3">
         <div className="h-px flex-1 bg-slate-200" />
-        <span className="text-xs font-medium uppercase tracking-[0.24em] text-slate-400">or</span>
+        <span className="text-xs font-medium uppercase tracking-[0.24em] text-muted-foreground/70">or</span>
         <div className="h-px flex-1 bg-slate-200" />
       </div>
 
@@ -91,7 +91,7 @@ export function OAuthButtons({
           onClick={() => onProviderClick("google")}
           disabled={disabled}
           aria-label={googleLabel}
-          className="flex h-11 w-full items-center justify-center gap-3 rounded-xl border border-[#747775] bg-white px-4 font-medium text-[#1f1f1f] transition-colors hover:bg-[#f8f9fa] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1a73e8] disabled:cursor-not-allowed disabled:opacity-60"
+          className="flex h-11 w-full items-center justify-center gap-3 rounded-xl border border-[#747775] bg-card px-4 font-medium text-[#1f1f1f] transition-colors hover:bg-[#f8f9fa] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1a73e8] disabled:cursor-not-allowed disabled:opacity-60"
           style={{ fontFamily: '"Roboto","Helvetica Neue",Arial,sans-serif', fontSize: "14px", letterSpacing: "0.25px" }}
         >
           <GoogleLogo />

@@ -3,6 +3,12 @@ import { CustomersTable, type CustomerRow } from "@/components/CustomersTable";
 import { requireAuth } from "@/lib/auth/requireAuth";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
+const PAGE_SIZE = 25;
+
+type Props = {
+  searchParams: Promise<{ page?: string }>;
+};
+
 type UnlockedLeadRow = {
   id: string;
   customer_name: string | null;
@@ -22,9 +28,13 @@ function normalizeEmail(email: string | null): string | null {
   return email?.trim().toLowerCase() || null;
 }
 
-export default async function CustomersPage() {
+export default async function CustomersPage({ searchParams }: Props) {
+  const params = await searchParams;
   const auth = await requireAuth();
   const supabase = await createServerSupabaseClient();
+
+  const requestedPage = Number.parseInt(params.page ?? "1", 10);
+  const currentPage = Number.isFinite(requestedPage) && requestedPage > 0 ? requestedPage : 1;
 
   const { data: leads } = await supabase
     .from("leads")
@@ -83,18 +93,27 @@ export default async function CustomersPage() {
     }
   }
 
-  const customers = groups.sort(
+  const allCustomers = groups.sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   );
+
+  const totalCustomers = allCustomers.length;
+  const totalPages = Math.max(1, Math.ceil(totalCustomers / PAGE_SIZE));
+  const pageFrom = (currentPage - 1) * PAGE_SIZE;
+  const customers = allCustomers.slice(pageFrom, pageFrom + PAGE_SIZE);
 
   return (
     <div className="space-y-6">
       <Card className="shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
         <CardHeader>
-          <CardTitle className="text-lg font-semibold text-[#111827]">Customer contacts</CardTitle>
+          <CardTitle className="text-lg font-semibold text-foreground">Customer contacts</CardTitle>
         </CardHeader>
         <CardContent className="pt-0">
-          <CustomersTable customers={customers as CustomerRow[]} />
+          <CustomersTable
+            customers={customers as CustomerRow[]}
+            currentPage={currentPage}
+            totalPages={totalPages}
+          />
         </CardContent>
       </Card>
     </div>

@@ -240,8 +240,8 @@ export function PublicLeadForm({ contractorSlug }: Props) {
 
   if (submitted) {
     return (
-      <div className="rounded-[12px] border border-[#BBF7D0] bg-[#F0FDF4] p-6 text-center">
-        <p className="text-base font-semibold text-[#16A34A]">
+      <div className="rounded-[12px] border border-[#BBF7D0] bg-green-50 dark:bg-green-950/30 p-6 text-center">
+        <p className="text-base font-semibold text-green-600 dark:text-green-400">
           Request sent - you will receive your estimate shortly.
         </p>
       </div>
@@ -251,12 +251,12 @@ export function PublicLeadForm({ contractorSlug }: Props) {
   return (
     <>
       <form className="min-w-0 max-w-full space-y-5" noValidate onSubmit={onSubmit}>
-        <p className="text-xs text-[#6B7280]">* Required fields</p>
+        <p className="text-xs text-muted-foreground">* Required fields</p>
         <AddressAutocomplete
           variant="public"
           label={
             <span>
-              Address <span className="text-[#2563EB]">*</span>
+              Address <span className="text-primary">*</span>
             </span>
           }
           value={address}
@@ -286,7 +286,7 @@ export function PublicLeadForm({ contractorSlug }: Props) {
         <div className="space-y-2">
           <Label
             htmlFor="description"
-            className="mb-1.5 block text-[13px] font-semibold text-[#374151]"
+            className="mb-1.5 block text-[13px] font-semibold text-foreground"
           >
             Description
           </Label>
@@ -295,7 +295,7 @@ export function PublicLeadForm({ contractorSlug }: Props) {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Tell us what work you need done."
-            className="min-h-28 rounded-[8px] border-[#E5E7EB] bg-white px-[14px] py-3 text-sm text-[#111827] placeholder:text-[#6B7280] focus-visible:ring-[rgba(37,99,235,0.1)]"
+            className="min-h-28 rounded-[8px] border-border bg-card px-[14px] py-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-[rgba(37,99,235,0.1)]"
           />
         </div>
 
@@ -305,22 +305,22 @@ export function PublicLeadForm({ contractorSlug }: Props) {
           <div className="min-w-0 space-y-2">
             <Label
               htmlFor="customer-first-name"
-              className="mb-1.5 block text-[13px] font-semibold text-[#374151]"
+              className="mb-1.5 block text-[13px] font-semibold text-foreground"
             >
-              First name <span className="text-[#2563EB]">*</span>
+              First name <span className="text-primary">*</span>
             </Label>
             <Input
               id="customer-first-name"
               value={customerFirstName}
               onChange={(e) => setCustomerFirstName(e.target.value)}
               required
-              className="h-auto rounded-[8px] border-[#E5E7EB] bg-white px-[14px] py-3 text-sm text-[#111827] placeholder:text-[#6B7280] focus-visible:ring-[rgba(37,99,235,0.1)]"
+              className="h-auto rounded-[8px] border-border bg-card px-[14px] py-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-[rgba(37,99,235,0.1)]"
             />
           </div>
           <div className="min-w-0 space-y-2">
             <Label
               htmlFor="customer-last-name"
-              className="mb-1.5 block text-[13px] font-semibold text-[#374151]"
+              className="mb-1.5 block text-[13px] font-semibold text-foreground"
             >
               Last name
             </Label>
@@ -328,7 +328,7 @@ export function PublicLeadForm({ contractorSlug }: Props) {
               id="customer-last-name"
               value={customerLastName}
               onChange={(e) => setCustomerLastName(e.target.value)}
-              className="h-auto rounded-[8px] border-[#E5E7EB] bg-white px-[14px] py-3 text-sm text-[#111827] placeholder:text-[#6B7280] focus-visible:ring-[rgba(37,99,235,0.1)]"
+              className="h-auto rounded-[8px] border-border bg-card px-[14px] py-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-[rgba(37,99,235,0.1)]"
             />
           </div>
         </div>
@@ -337,7 +337,7 @@ export function PublicLeadForm({ contractorSlug }: Props) {
           <div className="min-w-0 space-y-2">
             <Label
               htmlFor="customer-phone"
-              className="mb-1.5 block text-[13px] font-semibold text-[#374151]"
+              className="mb-1.5 block text-[13px] font-semibold text-foreground"
             >
               Phone
             </Label>
@@ -345,16 +345,16 @@ export function PublicLeadForm({ contractorSlug }: Props) {
               id="customer-phone"
               value={customerPhone}
               onChange={(e) => setCustomerPhone(e.target.value)}
-              className="h-auto rounded-[8px] border-[#E5E7EB] bg-white px-[14px] py-3 text-sm text-[#111827] placeholder:text-[#6B7280] focus-visible:ring-[rgba(37,99,235,0.1)]"
+              className="h-auto rounded-[8px] border-border bg-card px-[14px] py-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-[rgba(37,99,235,0.1)]"
             />
           </div>
         </div>
         <div className="space-y-2">
           <Label
             htmlFor="customer-email"
-            className="mb-1.5 block text-[13px] font-semibold text-[#374151]"
+            className="mb-1.5 block text-[13px] font-semibold text-foreground"
           >
-            Email <span className="text-[#2563EB]">*</span>
+            Email <span className="text-primary">*</span>
           </Label>
           <Input
             id="customer-email"
@@ -362,7 +362,7 @@ export function PublicLeadForm({ contractorSlug }: Props) {
             value={customerEmail}
             onChange={(e) => setCustomerEmail(e.target.value)}
             required
-            className="h-auto rounded-[8px] border-[#E5E7EB] bg-white px-[14px] py-3 text-sm text-[#111827] placeholder:text-[#6B7280] focus-visible:ring-[rgba(37,99,235,0.1)]"
+            className="h-auto rounded-[8px] border-border bg-card px-[14px] py-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-[rgba(37,99,235,0.1)]"
           />
         </div>
 

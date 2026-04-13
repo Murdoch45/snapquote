@@ -92,8 +92,8 @@ function BillingToggle({
             onClick={() => onChange(option)}
             className={
               active
-                ? "rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-[#111827] shadow-[0_6px_18px_rgba(37,99,235,0.16)]"
-                : "rounded-full px-3 py-1.5 text-xs font-medium text-[#6B7280] transition-colors hover:text-[#111827]"
+                ? "rounded-full bg-card px-3 py-1.5 text-xs font-semibold text-foreground shadow-[0_6px_18px_rgba(37,99,235,0.16)]"
+                : "rounded-full px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
             }
           >
             {option === "monthly" ? "Monthly" : "Annual"}
@@ -208,8 +208,8 @@ export function PlanOptionsSection({ currentPlan, hasUsedTrial }: Props) {
               key={option.plan}
               className={
                 isCurrent
-                  ? "relative flex w-[75vw] shrink-0 snap-start flex-col overflow-hidden rounded-[14px] border border-[#BFDBFE] bg-[radial-gradient(circle_at_top_left,rgba(37,99,235,0.16),transparent_40%),linear-gradient(160deg,#ffffff_0%,#F5F9FF_100%)] shadow-[0_20px_40px_rgba(37,99,235,0.12),0_2px_8px_rgba(0,0,0,0.06)] xl:w-auto xl:min-w-0 xl:shrink xl:snap-align-none xl:row-span-4 xl:grid xl:grid-rows-subgrid"
-                  : "relative flex w-[75vw] shrink-0 snap-start flex-col overflow-hidden rounded-[14px] border border-[#E5E7EB] bg-[linear-gradient(180deg,#ffffff_0%,#F8F9FC_100%)] shadow-[0_16px_30px_rgba(15,23,42,0.06),0_2px_8px_rgba(0,0,0,0.04)] xl:w-auto xl:min-w-0 xl:shrink xl:snap-align-none xl:row-span-4 xl:grid xl:grid-rows-subgrid"
+                  ? "relative flex w-[75vw] shrink-0 snap-start flex-col overflow-hidden rounded-[14px] border border-primary/40 bg-card shadow-[0_20px_40px_rgba(37,99,235,0.12),0_2px_8px_rgba(0,0,0,0.06)] xl:w-auto xl:min-w-0 xl:shrink xl:snap-align-none xl:row-span-4 xl:grid xl:grid-rows-subgrid"
+                  : "relative flex w-[75vw] shrink-0 snap-start flex-col overflow-hidden rounded-[14px] border border-border bg-card shadow-[0_16px_30px_rgba(15,23,42,0.06),0_2px_8px_rgba(0,0,0,0.04)] xl:w-auto xl:min-w-0 xl:shrink xl:snap-align-none xl:row-span-4 xl:grid xl:grid-rows-subgrid"
               }
             >
               <div
@@ -224,21 +224,21 @@ export function PlanOptionsSection({ currentPlan, hasUsedTrial }: Props) {
                 <div className="flex min-h-[48px] items-start justify-between gap-2 xl:min-h-[56px] xl:gap-2.5">
                   <div className="space-y-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <CardTitle className="text-lg font-semibold text-[#111827]">
+                      <CardTitle className="text-lg font-semibold text-foreground">
                         {option.name}
                       </CardTitle>
                       {isCurrent ? (
-                        <Badge className="border-transparent bg-[#2563EB] px-3 py-1 text-[12px] font-semibold text-white">
+                        <Badge className="border-transparent bg-primary px-3 py-1 text-[12px] font-semibold text-white">
                           Current Plan
                         </Badge>
                       ) : null}
                       {showAnnualPricing ? (
-                        <Badge className="border-transparent bg-[#EFF6FF] px-3 py-1 text-[12px] font-semibold text-[#2563EB]">
+                        <Badge className="border-transparent bg-accent px-3 py-1 text-[12px] font-semibold text-primary">
                           Save 17%
                         </Badge>
                       ) : null}
                     </div>
-                    <p className="max-w-[26ch] text-xs leading-5 text-[#6B7280] xl:text-sm xl:leading-6">
+                    <p className="max-w-[26ch] text-xs leading-5 text-muted-foreground xl:text-sm xl:leading-6">
                       {option.description}
                     </p>
                   </div>
@@ -254,7 +254,7 @@ export function PlanOptionsSection({ currentPlan, hasUsedTrial }: Props) {
                       }
                     />
                   ) : (
-                    <div className="rounded-full border border-[#E5E7EB] bg-white px-2.5 py-1.5 text-xs font-semibold uppercase tracking-[0.05em] text-[#6B7280]">
+                    <div className="rounded-full border border-border bg-card px-2.5 py-1.5 text-xs font-semibold uppercase tracking-[0.05em] text-muted-foreground">
                       Free
                     </div>
                   )}
@@ -262,41 +262,41 @@ export function PlanOptionsSection({ currentPlan, hasUsedTrial }: Props) {
 
               </CardHeader>
 
-              <div className="mx-3 rounded-[14px] border border-[#E5E7EB] bg-white/80 px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)] backdrop-blur xl:mx-4 xl:px-4 xl:py-2.5">
+              <div className="mx-3 rounded-[14px] border border-border bg-card/80 px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)] backdrop-blur xl:mx-4 xl:px-4 xl:py-2.5">
                 <div className="flex items-end gap-2">
-                  <p className="text-3xl font-semibold tracking-[-0.04em] text-[#111827] xl:text-4xl">
+                  <p className="text-3xl font-semibold tracking-[-0.04em] text-foreground xl:text-4xl">
                     {displayPrice}
                   </p>
                 </div>
-                <p className="mt-1 min-h-[20px] text-sm text-[#6B7280]">
+                <p className="mt-1 min-h-[20px] text-sm text-muted-foreground">
                   {showAnnualPricing && option.annualBillingLine ? option.annualBillingLine : " "}
                 </p>
               </div>
 
               <div className="relative flex flex-1 flex-col px-3 xl:px-4">
                 <div className="mt-1.5 grid grid-cols-2 gap-1.5 xl:mt-2 xl:gap-2">
-                  <div className="rounded-[14px] border border-[#E5E7EB] bg-white px-2.5 py-2 xl:px-3 xl:py-3">
-                    <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#6B7280]">
+                  <div className="rounded-[14px] border border-border bg-card px-2.5 py-2 xl:px-3 xl:py-3">
+                    <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
                       Credits
                     </p>
-                    <p className="mt-1.5 text-lg font-semibold text-[#111827]">
+                    <p className="mt-1.5 text-lg font-semibold text-foreground">
                       {option.credits}
-                      <span className="ml-1 text-sm font-medium text-[#6B7280]">/ month</span>
+                      <span className="ml-1 text-sm font-medium text-muted-foreground">/ month</span>
                     </p>
                   </div>
-                  <div className="rounded-[14px] border border-[#E5E7EB] bg-white px-2.5 py-2 xl:px-3 xl:py-3">
-                    <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#6B7280]">
+                  <div className="rounded-[14px] border border-border bg-card px-2.5 py-2 xl:px-3 xl:py-3">
+                    <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
                       Users
                     </p>
-                    <p className="mt-1.5 text-lg font-semibold text-[#111827]">{option.seats}</p>
+                    <p className="mt-1.5 text-lg font-semibold text-foreground">{option.seats}</p>
                   </div>
                 </div>
 
-                <div className="mt-1.5 space-y-1.5 rounded-[14px] border border-[#E5E7EB] bg-white px-2.5 py-2 xl:mt-2 xl:space-y-2 xl:px-3 xl:py-3">
+                <div className="mt-1.5 space-y-1.5 rounded-[14px] border border-border bg-card px-2.5 py-2 xl:mt-2 xl:space-y-2 xl:px-3 xl:py-3">
                   {option.highlights.map((item) => (
-                    <div key={item} className="flex items-start gap-1.5 text-xs text-[#111827] xl:gap-2 xl:text-sm">
-                      <span className="mt-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full bg-[#EFF6FF] xl:h-5 xl:w-5">
-                        <Check className="h-3 w-3 text-[#2563EB] xl:h-3.5 xl:w-3.5" />
+                    <div key={item} className="flex items-start gap-1.5 text-xs text-foreground xl:gap-2 xl:text-sm">
+                      <span className="mt-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full bg-accent xl:h-5 xl:w-5">
+                        <Check className="h-3 w-3 text-primary xl:h-3.5 xl:w-3.5" />
                       </span>
                       <span>{item}</span>
                     </div>
@@ -309,7 +309,7 @@ export function PlanOptionsSection({ currentPlan, hasUsedTrial }: Props) {
                   <Button
                     type="button"
                     disabled
-                    className="h-11 w-full rounded-[10px] bg-[#111827] text-sm font-semibold text-white opacity-100 hover:bg-[#111827]"
+                    className="h-11 w-full rounded-[10px] bg-foreground text-sm font-semibold text-background opacity-100 hover:bg-foreground"
                   >
                     <Sparkles className="mr-2 h-4 w-4" />
                     Current Plan
@@ -317,7 +317,7 @@ export function PlanOptionsSection({ currentPlan, hasUsedTrial }: Props) {
                 ) : isUpgrade ? (
                   <Button
                     type="button"
-                    className="h-11 w-full rounded-[10px] bg-[#2563EB] text-sm font-semibold text-white shadow-[0_12px_24px_rgba(37,99,235,0.24)] hover:bg-[#1D4ED8]"
+                    className="h-11 w-full rounded-[10px] bg-primary text-sm font-semibold text-white shadow-[0_12px_24px_rgba(37,99,235,0.24)] hover:bg-primary/90"
                     disabled={loadingPlan === option.plan}
                     onClick={() => {
                       if (option.plan !== "SOLO") {
@@ -339,7 +339,7 @@ export function PlanOptionsSection({ currentPlan, hasUsedTrial }: Props) {
                   <Button
                     type="button"
                     variant="outline"
-                    className="h-11 w-full rounded-[10px] border border-[#BFDBFE] bg-white text-sm font-semibold text-[#2563EB] shadow-[0_8px_20px_rgba(37,99,235,0.08)] hover:bg-[#EFF6FF] hover:text-[#2563EB]"
+                    className="h-11 w-full rounded-[10px] border border-primary/40 bg-card text-sm font-semibold text-primary shadow-[0_8px_20px_rgba(37,99,235,0.08)] hover:bg-accent hover:text-primary"
                     disabled={loadingPortal}
                     onClick={() => setDowngradeTarget(option)}
                   >
@@ -354,10 +354,10 @@ export function PlanOptionsSection({ currentPlan, hasUsedTrial }: Props) {
 
       {downgradeTarget ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/45 px-4">
-          <div className="w-full max-w-md rounded-[14px] border border-[#E5E7EB] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
+          <div className="w-full max-w-md rounded-[14px] border border-border bg-card p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
             <div className="space-y-3">
-              <h3 className="text-lg font-semibold text-[#111827]">Confirm plan change</h3>
-              <p className="text-sm leading-6 text-[#6B7280]">
+              <h3 className="text-lg font-semibold text-foreground">Confirm plan change</h3>
+              <p className="text-sm leading-6 text-muted-foreground">
                 You&apos;ll keep your current plan until your billing cycle ends, then switch to{" "}
                 {downgradeTarget.name}. Your credits will adjust at that time. Continue?
               </p>
@@ -367,7 +367,7 @@ export function PlanOptionsSection({ currentPlan, hasUsedTrial }: Props) {
               <Button
                 type="button"
                 variant="outline"
-                className="border-2 border-[#E5E7EB] text-[#6B7280] hover:bg-[#F8F9FC] hover:text-[#111827]"
+                className="border-2 border-border text-muted-foreground hover:bg-muted hover:text-foreground"
                 onClick={() => setDowngradeTarget(null)}
                 disabled={loadingPortal}
               >

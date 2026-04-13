@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Turnstile } from "@marsidev/react-turnstile";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,8 @@ const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
 export function SignupForm() {
   const router = useRouter();
+  const urlParams = useSearchParams();
+  const workTypes = urlParams.get("workTypes");
   const supabase = createClient();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -97,7 +99,8 @@ export function SignupForm() {
     }
 
     window.sessionStorage.setItem(OAUTH_SIGNUP_TOAST_KEY, "1");
-    router.replace("/onboarding");
+    const onboardingUrl = workTypes ? `/onboarding?workTypes=${encodeURIComponent(workTypes)}` : "/onboarding";
+    router.replace(onboardingUrl);
   };
 
   const handleOAuth = async (provider: Provider) => {
@@ -142,7 +145,7 @@ export function SignupForm() {
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           required
-          className="h-11 rounded-xl border-slate-300 focus-visible:ring-primary/30"
+          className="h-11 rounded-xl border-border focus-visible:ring-primary/30"
         />
       </div>
 
@@ -172,13 +175,13 @@ export function SignupForm() {
         {submitting ? "Creating account..." : "Create Account"}
       </Button>
 
-      <p className="text-center text-sm text-slate-500">
+      <p className="text-center text-sm text-muted-foreground">
         By creating an account you agree to our{" "}
-        <Link href="/terms" className="text-slate-600 underline underline-offset-4 hover:text-slate-900">
+        <Link href="/terms" className="text-muted-foreground underline underline-offset-4 hover:text-foreground">
           Terms of Service
         </Link>{" "}
         and{" "}
-        <Link href="/privacy" className="text-slate-600 underline underline-offset-4 hover:text-slate-900">
+        <Link href="/privacy" className="text-muted-foreground underline underline-offset-4 hover:text-foreground">
           Privacy Policy
         </Link>
         .

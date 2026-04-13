@@ -38,11 +38,11 @@ export default async function TeamPage() {
     <div className="space-y-6">
       <Card className="shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
         <CardHeader className="pb-4">
-          <CardTitle className="text-base font-semibold text-[#111827]">Team</CardTitle>
+          <CardTitle className="text-base font-semibold text-foreground">Team</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-[#6B7280]">
-            Current plan: <span className="font-medium text-[#111827]">{org?.plan}</span>. Admins
+          <p className="text-sm text-muted-foreground">
+            Current plan: <span className="font-medium text-foreground">{org?.plan}</span>. Admins
             can invite or remove members.
           </p>
         </CardContent>

@@ -28,7 +28,7 @@ export function NotificationsFeed({
     <div className={className}>
       <p
         className={cn(
-          "mb-2 text-xs font-medium uppercase tracking-[0.05em] text-[#6B7280]",
+          "mb-2 text-xs font-medium uppercase tracking-[0.05em] text-muted-foreground",
           titleClassName
         )}
       >
@@ -36,7 +36,7 @@ export function NotificationsFeed({
       </p>
 
       {feed.length === 0 ? (
-        <p className={cn("text-sm text-[#6B7280]", emptyClassName)}>No notifications today</p>
+        <p className={cn("text-sm text-muted-foreground", emptyClassName)}>No notifications today</p>
       ) : (
         <ul className={cn("space-y-2", listClassName)}>
           {feed.map((item) => (
@@ -44,13 +44,13 @@ export function NotificationsFeed({
               <button
                 type="button"
                 className={cn(
-                  "min-h-[44px] w-full rounded-[10px] bg-[#F8F9FC] p-3 text-left text-sm text-[#111827] transition-colors hover:bg-[#EEF2FF]",
+                  "min-h-[44px] w-full rounded-[10px] bg-muted p-3 text-left text-sm text-foreground transition-colors hover:bg-accent",
                   itemClassName
                 )}
                 onClick={() => onDismiss(item.id)}
               >
                 <p>{item.text}</p>
-                <p className={cn("mt-1 text-xs text-[#6B7280]", timeClassName)}>
+                <p className={cn("mt-1 text-xs text-muted-foreground", timeClassName)}>
                   {formatNotificationTime(item.createdAt)}
                 </p>
               </button>

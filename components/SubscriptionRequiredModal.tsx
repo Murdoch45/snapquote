@@ -13,15 +13,15 @@ export function SubscriptionRequiredModal({ open, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 px-4">
-      <div className="w-full max-w-[calc(100vw-2rem)] rounded-2xl border border-slate-200 bg-white p-4 shadow-2xl sm:max-w-md sm:p-6">
+      <div className="w-full max-w-[calc(100vw-2rem)] rounded-2xl border border-border bg-card p-4 shadow-2xl sm:max-w-md sm:p-6">
         <div className="space-y-3">
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-cyan-700">
             Billing Required
           </p>
-          <h2 className="text-2xl font-semibold text-slate-950">
+          <h2 className="text-2xl font-semibold text-foreground">
             Your SnapQuote subscription is inactive.
           </h2>
-          <p className="text-sm leading-6 text-slate-600">
+          <p className="text-sm leading-6 text-muted-foreground">
             Update billing to continue generating estimates.
           </p>
         </div>

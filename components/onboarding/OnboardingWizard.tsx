@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { AddressAutocomplete } from "@/components/AddressAutocomplete";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { SERVICE_OPTIONS, type ServiceType } from "@/lib/services";
+import { SERVICE_OPTIONS, parseServiceTypesParam, type ServiceType } from "@/lib/services";
 import { cn } from "@/lib/utils";
 
 type ServiceOption = {
@@ -29,8 +29,11 @@ const OAUTH_SIGNUP_TOAST_KEY = "snapquote-oauth-signup-success";
 
 export function OnboardingWizard() {
   const router = useRouter();
+  const urlParams = useSearchParams();
   const [step, setStep] = useState(0);
-  const [services, setServices] = useState<ServiceType[]>([]);
+  const [services, setServices] = useState<ServiceType[]>(() =>
+    parseServiceTypesParam(urlParams.get("workTypes"))
+  );
   const [businessName, setBusinessName] = useState("");
   const [businessAddress, setBusinessAddress] = useState("");
   const [businessAddressPlaceId, setBusinessAddressPlaceId] = useState<string | null>(null);
@@ -136,16 +139,16 @@ export function OnboardingWizard() {
 
   return (
     <Card className="mx-auto w-full max-w-2xl">
-      <CardHeader className="space-y-4 border-b border-gray-200 pb-5">
+      <CardHeader className="space-y-4 border-b border-border pb-5">
         <div className="space-y-1">
-          <p className="text-sm font-medium text-gray-500">Step {step + 1} of 3</p>
+          <p className="text-sm font-medium text-muted-foreground">Step {step + 1} of 3</p>
           <div className="flex gap-2">
             {[0, 1, 2].map((index) => (
               <span
                 key={index}
                 className={cn(
                   "h-2 flex-1 rounded-full transition-colors",
-                  index <= step ? "bg-primary" : "bg-gray-200"
+                  index <= step ? "bg-primary" : "bg-border"
                 )}
               />
             ))}
@@ -157,16 +160,16 @@ export function OnboardingWizard() {
         {step === 0 ? (
           <div className="space-y-6">
             <div className="space-y-2">
-              <h1 className="text-xl font-semibold tracking-tight text-gray-900 sm:text-2xl">
+              <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
                 What type of services does your business offer?
               </h1>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 SnapQuote currently only supports outdoor property services.
               </p>
             </div>
 
             <div className="space-y-3">
-              <p className="text-sm font-medium text-gray-700">Select all that apply.</p>
+              <p className="text-sm font-medium text-foreground/80">Select all that apply.</p>
               <div className="grid gap-3 sm:grid-cols-2">
                 {serviceOptions.map((option) => {
                   const checked = services.includes(option.value);
@@ -178,7 +181,7 @@ export function OnboardingWizard() {
                         "flex items-start gap-3 rounded-lg border px-4 py-3 text-sm transition-colors",
                         checked
                           ? "border-blue-200 bg-blue-50"
-                          : "border-gray-200 bg-white hover:border-gray-300"
+                          : "border-border bg-card hover:border-border"
                       )}
                     >
                       <Checkbox
@@ -186,7 +189,7 @@ export function OnboardingWizard() {
                         onCheckedChange={(value) => toggleService(option.value, value === true)}
                         className="mt-0.5"
                       />
-                      <span className="font-medium text-gray-800">{option.label}</span>
+                      <span className="font-medium text-foreground">{option.label}</span>
                     </label>
                   );
                 })}
@@ -203,10 +206,10 @@ export function OnboardingWizard() {
         {step === 1 ? (
           <div className="space-y-6">
             <div className="space-y-2">
-              <h1 className="text-xl font-semibold tracking-tight text-gray-900 sm:text-2xl">
+              <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
                 What&apos;s your business&apos;s name?
               </h1>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 This is the name that will appear on customer request forms.
               </p>
             </div>
@@ -231,12 +234,12 @@ export function OnboardingWizard() {
         {step === 2 ? (
           <div className="space-y-6">
             <div className="space-y-2">
-              <h1 className="text-xl font-semibold tracking-tight text-gray-900 sm:text-2xl">
+              <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
                 Where is your business located?
               </h1>
             </div>
 
-            <div className="space-y-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
+            <div className="space-y-4 rounded-lg border border-border bg-muted p-4">
               <AddressAutocomplete
                 label="Business address"
                 inputId="business-address"
@@ -260,7 +263,7 @@ export function OnboardingWizard() {
                 }
               />
 
-              <label className="flex items-start gap-3 text-sm text-gray-700">
+              <label className="flex items-start gap-3 text-sm text-foreground/80">
                 <Checkbox
                   checked={mobileContractor}
                   onCheckedChange={(checked) => {
