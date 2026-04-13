@@ -44,6 +44,17 @@ export async function POST(_request: Request, { params }: Props) {
       body: "A customer is viewing your estimate.",
       data: { screen: "lead", id: quote.lead_id as string }
     });
+    void admin
+      .from("notifications")
+      .insert({
+        org_id: quote.org_id,
+        type: "ESTIMATE_VIEWED",
+        title: "Estimate Opened",
+        body: "A customer is viewing your estimate.",
+        screen: "quotes",
+        screen_params: { id: quote.id as string }
+      })
+      .then(null, (err: unknown) => console.warn("notification insert failed:", err));
   }
 
   return NextResponse.json({ viewed: true });

@@ -367,6 +367,17 @@ export async function POST(request: Request) {
         body: `You have a new lead in ${city}! Tap to unlock.`,
         data: { screen: "lead", id: leadId }
       });
+      void admin
+        .from("notifications")
+        .insert({
+          org_id: orgId,
+          type: "NEW_LEAD",
+          title: "New Lead",
+          body: `You have a new lead in ${city}! Tap to unlock.`,
+          screen: "lead",
+          screen_params: { id: leadId }
+        })
+        .then(null, (err: unknown) => console.warn("notification insert failed:", err));
     }
     const customerConfirmationEmail = buildCustomerConfirmationEmail({
       businessName: contractor.business_name as string,

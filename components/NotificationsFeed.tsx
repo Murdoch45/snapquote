@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 
 type NotificationsFeedProps = {
   feed: FeedItem[];
-  onDismiss: (id: string) => void;
+  onItemClick: (item: FeedItem) => void;
   className?: string;
   titleClassName?: string;
   emptyClassName?: string;
@@ -16,7 +16,7 @@ type NotificationsFeedProps = {
 
 export function NotificationsFeed({
   feed,
-  onDismiss,
+  onItemClick,
   className,
   titleClassName,
   emptyClassName,
@@ -36,18 +36,21 @@ export function NotificationsFeed({
       </p>
 
       {feed.length === 0 ? (
-        <p className={cn("text-sm text-muted-foreground", emptyClassName)}>No notifications today</p>
+        <p className={cn("text-sm text-muted-foreground", emptyClassName)}>No notifications</p>
       ) : (
-        <ul className={cn("space-y-2", listClassName)}>
+        <ul className={cn("max-h-[400px] space-y-2 overflow-y-auto", listClassName)}>
           {feed.map((item) => (
             <li key={item.id}>
               <button
                 type="button"
                 className={cn(
-                  "min-h-[44px] w-full rounded-[10px] bg-muted p-3 text-left text-sm text-foreground transition-colors hover:bg-accent",
+                  "min-h-[44px] w-full rounded-[10px] p-3 text-left text-sm transition-colors",
+                  item.read
+                    ? "bg-muted/50 text-muted-foreground hover:bg-muted"
+                    : "bg-muted text-foreground hover:bg-accent",
                   itemClassName
                 )}
-                onClick={() => onDismiss(item.id)}
+                onClick={() => onItemClick(item)}
               >
                 <p>{item.text}</p>
                 <p className={cn("mt-1 text-xs text-muted-foreground", timeClassName)}>

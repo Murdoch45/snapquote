@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { sendPushToOrg } from "@/lib/pushNotifications";
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
   createServerSupabaseClient,
@@ -83,6 +84,23 @@ export async function POST(request: Request) {
       .eq("id", invite.id);
 
     if (updateError) throw updateError;
+
+    void sendPushToOrg(invite.org_id as string, {
+      title: "Team Member Joined",
+      body: "A team member accepted your invite.",
+      data: { screen: "team" }
+    });
+    void admin
+      .from("notifications")
+      .insert({
+        org_id: invite.org_id,
+        type: "INVITE_ACCEPTED",
+        title: "Team Member Joined",
+        body: "A team member accepted your invite.",
+        screen: "team",
+        screen_params: {}
+      })
+      .then(null, (err: unknown) => console.warn("notification insert failed:", err));
 
     return NextResponse.json({ ok: true });
   } catch (error) {

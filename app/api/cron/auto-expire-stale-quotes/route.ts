@@ -78,6 +78,18 @@ export async function GET(request: Request) {
     });
 
     if (result.sent > 0) orgsNotified += 1;
+
+    void admin
+      .from("notifications")
+      .insert({
+        org_id: orgId,
+        type: "ESTIMATE_EXPIRED",
+        title: count === 1 ? "Estimate expired" : "Estimates expired",
+        body,
+        screen: "quotes",
+        screen_params: {}
+      })
+      .then(null, (err: unknown) => console.warn("notification insert failed:", err));
   }
 
   // Send an expiry email to each affected org's owner. Use the first expired

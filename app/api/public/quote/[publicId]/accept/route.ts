@@ -138,6 +138,17 @@ export async function POST(_request: Request, { params }: Props) {
     body: `${customerName} accepted your estimate${locationSuffix}.`,
     data: { screen: "lead", id: acceptedQuote.lead_id as string }
   });
+  void admin
+    .from("notifications")
+    .insert({
+      org_id: acceptedQuote.org_id,
+      type: "ESTIMATE_ACCEPTED",
+      title: "Estimate Accepted",
+      body: `${customerName} accepted your estimate${locationSuffix}.`,
+      screen: "quotes",
+      screen_params: { id: acceptedQuote.id as string }
+    })
+    .then(null, (err: unknown) => console.warn("notification insert failed:", err));
 
   if (profile?.notification_accept_email) {
     const ownerEmail = await getOwnerEmailForOrg(admin, acceptedQuote.org_id as string);

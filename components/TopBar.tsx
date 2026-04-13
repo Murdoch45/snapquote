@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Bell, CircleUser, LogOut, Menu } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { NotificationsFeed } from "@/components/NotificationsFeed";
 import { Button } from "@/components/ui/button";
-import { useNotifications } from "@/hooks/useNotifications";
+import { type FeedItem, useNotifications } from "@/hooks/useNotifications";
 import { createClient } from "@/lib/supabase/client";
 
 function getPageTitle(pathname: string): string {
@@ -41,8 +41,25 @@ export function TopBar({
   const [notificationVisible, setNotificationVisible] = useState(false);
   const [mobilePopoverOpen, setMobilePopoverOpen] = useState(false);
   const mobilePopoverRef = useRef<HTMLDivElement | null>(null);
-  const { feed, unreadCount, dismissNotification } = useNotifications(orgId);
+  const { feed, unreadCount, markAllRead } = useNotifications(orgId);
+  const router = useRouter();
   const pageTitle = getPageTitle(pathname);
+
+  const handleNotificationClick = useCallback(
+    (item: FeedItem) => {
+      setDesktopNotificationsOpen(false);
+      setMobilePopoverOpen(false);
+
+      if (item.screen === "lead" && item.screenParams?.id) {
+        router.push(`/app/leads/${item.screenParams.id}`);
+      } else if (item.screen === "quotes") {
+        router.push("/app/quotes");
+      } else if (item.screen === "team") {
+        router.push("/app/team");
+      }
+    },
+    [router]
+  );
 
   useEffect(() => {
     setDesktopNotificationsOpen(false);
@@ -141,7 +158,8 @@ export function TopBar({
         onClick={() => {
           setDesktopNotificationsOpen((value) => {
             if (!value) {
-              // Opening: cancel any in-flight fade
+              // Opening: mark as read and cancel any in-flight fade
+              void markAllRead();
               if (fadeTimeoutRef.current !== null) {
                 window.clearTimeout(fadeTimeoutRef.current);
                 fadeTimeoutRef.current = null;
@@ -178,7 +196,7 @@ export function TopBar({
           }}
           onMouseLeave={startNotificationTimer}
         >
-          <NotificationsFeed feed={feed} onDismiss={dismissNotification} />
+          <NotificationsFeed feed={feed} onItemClick={handleNotificationClick} />
         </div>
       ) : null}
     </div>
@@ -218,14 +236,19 @@ export function TopBar({
               className="text-muted-foreground p-1 transition-colors hover:text-foreground"
               aria-label="Open account menu"
               aria-expanded={mobilePopoverOpen}
-              onClick={() => setMobilePopoverOpen((value) => !value)}
+              onClick={() => {
+                setMobilePopoverOpen((value) => {
+                  if (!value) void markAllRead();
+                  return !value;
+                });
+              }}
             >
               <CircleUser className="h-5 w-5" />
             </button>
 
             {mobilePopoverOpen ? (
               <div className="absolute right-0 top-full z-30 mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-xl border border-border bg-card p-3 shadow-lg">
-                <NotificationsFeed feed={feed} onDismiss={dismissNotification} />
+                <NotificationsFeed feed={feed} onItemClick={handleNotificationClick} />
                 <div className="my-3 border-t border-border" />
                 <button
                   type="button"
