@@ -99,7 +99,6 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
     notificationAcceptEmail: initial.notification_accept_email
   });
   const [loading, setLoading] = useState(false);
-  const [deleting, setDeleting] = useState(false);
   const [savingTemplate, setSavingTemplate] = useState(false);
   const [slugStatus, setSlugStatus] = useState<SlugStatus>({ type: "idle", message: null });
   const [autoInsertCustomerName, setAutoInsertCustomerName] = useState(
@@ -602,47 +601,66 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
         {loading ? "Saving..." : "Save settings"}
       </Button>
 
-      <section className="rounded-[14px] border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
-        <h2 className="mb-2 text-base font-semibold text-red-600 dark:text-red-400">Danger Zone</h2>
-        <p className="mb-4 text-sm text-red-600/80 dark:text-red-400/80">
-          Permanently delete your account and all associated data. This action cannot be undone.
-        </p>
-        <Button
-          variant="destructive"
-          disabled={deleting}
-          onClick={async () => {
-            const confirmed = window.confirm(
-              "Are you sure you want to delete your account? This will permanently delete all your data, cancel any active subscriptions, and cannot be undone."
-            );
-            if (!confirmed) return;
-
-            setDeleting(true);
-            try {
-              const { data: { session } } = await supabase.auth.getSession();
-              const res = await fetch("/api/app/account/delete", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  ...(session?.access_token
-                    ? { Authorization: `Bearer ${session.access_token}` }
-                    : {}),
-                },
-              });
-              const json = await res.json();
-              if (!res.ok) throw new Error(json.error || "Failed to delete account.");
-
-              await supabase.auth.signOut();
-              router.push("/login");
-            } catch (error) {
-              toast.error(error instanceof Error ? error.message : "Failed to delete account.");
-              setDeleting(false);
-            }
-          }}
-        >
-          {deleting ? "Deleting..." : "Delete Account"}
-        </Button>
-      </section>
-
     </div>
+  );
+}
+
+export function DeleteAccountCard() {
+  const router = useRouter();
+  const supabase = createClient();
+  const [deleting, setDeleting] = useState(false);
+
+  return (
+    <section className="rounded-[14px] border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4">
+      <h2 className="mb-2 text-lg font-semibold text-red-600 dark:text-red-400">
+        Delete Account
+      </h2>
+      <p className="mb-4 text-sm leading-5 text-red-800 dark:text-red-400/80">
+        Permanently delete your account and all associated data. This action
+        cannot be undone.
+      </p>
+      <button
+        type="button"
+        disabled={deleting}
+        onClick={async () => {
+          const confirmed = window.confirm(
+            "Are you sure you want to delete your account? This will permanently delete all your data, cancel any active subscriptions, and cannot be undone."
+          );
+          if (!confirmed) return;
+
+          setDeleting(true);
+          try {
+            const {
+              data: { session }
+            } = await supabase.auth.getSession();
+            const res = await fetch("/api/app/account/delete", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                ...(session?.access_token
+                  ? { Authorization: `Bearer ${session.access_token}` }
+                  : {})
+              }
+            });
+            const json = await res.json();
+            if (!res.ok)
+              throw new Error(json.error || "Failed to delete account.");
+
+            await supabase.auth.signOut();
+            router.push("/login");
+          } catch (error) {
+            toast.error(
+              error instanceof Error
+                ? error.message
+                : "Failed to delete account."
+            );
+            setDeleting(false);
+          }
+        }}
+        className="inline-flex items-center justify-center rounded-[10px] bg-red-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-red-700 disabled:opacity-60"
+      >
+        {deleting ? "Deleting..." : "Delete Account"}
+      </button>
+    </section>
   );
 }

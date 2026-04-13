@@ -1,6 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import {
+  ClipboardList,
+  FileText,
+  Link as LinkIcon,
+  Settings,
+  type LucideIcon
+} from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
@@ -11,39 +18,43 @@ type OnboardingTourProps = {
 };
 
 type TourStep = {
-  targetId: string;
+  icon: LucideIcon;
   title: string;
   body: string;
+  previewType: "my-link" | "leads" | "estimates" | "settings";
 };
 
 const steps: TourStep[] = [
   {
-    targetId: "my-link",
+    icon: LinkIcon,
     title: "Share your link, get leads",
-    body: "Send this link directly to customers via text or email. You can also post it on your website or social media — every request comes straight to you with an AI estimate already built in."
+    body: "Send this link directly to customers via text or email. You can also post it on your website or social media — every request comes straight to you with an AI estimate already built in.",
+    previewType: "my-link"
   },
   {
-    targetId: "leads",
+    icon: FileText,
     title: "Leads come to you",
-    body: "When a customer submits a request through your link, it shows up here with an AI estimate already built in. Unlock the ones worth your time."
+    body: "When a customer submits a request through your link, it shows up here with an AI estimate already built in. Unlock the ones worth your time.",
+    previewType: "leads"
   },
   {
-    targetId: "estimates",
+    icon: ClipboardList,
     title: "Send your price in seconds",
-    body: "See all the estimates you've sent to customers right here — track which ones have been viewed, accepted, or are still waiting on a reply."
+    body: "See all the estimates you've sent to customers right here — track which ones have been viewed, accepted, or are still waiting on a reply.",
+    previewType: "estimates"
   },
   {
-    targetId: "settings",
+    icon: Settings,
     title: "Set up your profile",
-    body: "Add your business name, phone number, and address so customers know exactly who they're hearing from."
+    body: "Add your business name, phone number, and address so customers know exactly who they're hearing from.",
+    previewType: "settings"
   }
 ];
 
-const CARD_WIDTH = 480;
-const PREVIEW_SCALE = 0.61;
-const PREVIEW_CANVAS_WIDTH = 720;
-const PREVIEW_CANVAS_HEIGHT = 360;
 const ONBOARDING_TOUR_STORAGE_PREFIX = "snapquote:onboarding-tour-completed";
+const PREVIEW_CANVAS_WIDTH = 640;
+const PREVIEW_CANVAS_HEIGHT = 295;
+const PREVIEW_SCALE = 0.61;
 
 function MiniMyLinkPreview({ slug }: { slug?: string | null }) {
   return (
@@ -163,8 +174,8 @@ function MiniSettingsPreview() {
   );
 }
 
-function renderPreview(targetId: TourStep["targetId"], slug?: string | null) {
-  switch (targetId) {
+function renderPreview(previewType: string, slug?: string | null) {
+  switch (previewType) {
     case "my-link":
       return <MiniMyLinkPreview slug={slug} />;
     case "leads":
@@ -178,54 +189,19 @@ function renderPreview(targetId: TourStep["targetId"], slug?: string | null) {
   }
 }
 
-function restoreHighlight(element: HTMLElement | null) {
-  if (!element) return;
-  element.style.position = element.dataset.tourPrevPosition ?? "";
-  element.style.zIndex = element.dataset.tourPrevZIndex ?? "";
-  element.style.boxShadow = element.dataset.tourPrevBoxShadow ?? "";
-  element.style.background = element.dataset.tourPrevBackground ?? "";
-  element.style.borderRadius = element.dataset.tourPrevBorderRadius ?? "";
-  element.style.transition = element.dataset.tourPrevTransition ?? "";
-  delete element.dataset.tourPrevPosition;
-  delete element.dataset.tourPrevZIndex;
-  delete element.dataset.tourPrevBoxShadow;
-  delete element.dataset.tourPrevBackground;
-  delete element.dataset.tourPrevBorderRadius;
-  delete element.dataset.tourPrevTransition;
-}
-
-function highlightTarget(element: HTMLElement | null) {
-  if (!element) return;
-  element.dataset.tourPrevPosition = element.style.position;
-  element.dataset.tourPrevZIndex = element.style.zIndex;
-  element.dataset.tourPrevBoxShadow = element.style.boxShadow;
-  element.dataset.tourPrevBackground = element.style.background;
-  element.dataset.tourPrevBorderRadius = element.style.borderRadius;
-  element.dataset.tourPrevTransition = element.style.transition;
-  element.style.position = "relative";
-  element.style.zIndex = "61";
-  element.style.borderRadius = "12px";
-  element.style.transition = "box-shadow 220ms ease, background-color 220ms ease";
-  element.style.background = "rgba(239, 246, 255, 0.95)";
-  element.style.boxShadow =
-    "0 0 0 2px #3B82F6, 0 0 0 7px rgba(59,130,246,0.18), 0 14px 30px -18px rgba(37,99,235,0.65)";
-}
-
 export function OnboardingTour({ enabled, slug }: OnboardingTourProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const cardRef = useRef<HTMLDivElement | null>(null);
   const [stepIndex, setStepIndex] = useState(0);
   const [visible, setVisible] = useState(false);
   const [storageKey, setStorageKey] = useState<string | null>(null);
   const [hasResolvedVisibility, setHasResolvedVisibility] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isStepVisible, setIsStepVisible] = useState(true);
-  const [tooltipStyle, setTooltipStyle] = useState<React.CSSProperties>({});
-  const [tailOffset, setTailOffset] = useState<number | null>(null);
 
   const currentStep = steps[stepIndex];
   const isDashboard = pathname === "/app" || pathname === "/app/";
+  const isLast = stepIndex === steps.length - 1;
 
   useEffect(() => {
     let cancelled = false;
@@ -275,62 +251,6 @@ export function OnboardingTour({ enabled, slug }: OnboardingTourProps) {
     return () => window.clearTimeout(timeout);
   }, [stepIndex, visible]);
 
-  useEffect(() => {
-    if (!visible || !isDashboard) return;
-
-    const selector = `[data-tour-id="${currentStep.targetId}"]`;
-    const element = document.querySelector<HTMLElement>(selector);
-    if (!element) return;
-
-    const updateLayout = () => {
-      const rect = element.getBoundingClientRect();
-      const cardHeight = cardRef.current?.getBoundingClientRect().height ?? 520;
-      const prefersMobileLayout = window.innerWidth < 768;
-
-      if (prefersMobileLayout) {
-        const mobileTop = Math.min(rect.bottom + 20, window.innerHeight - cardHeight - 24);
-        setTooltipStyle({
-          left: 16,
-          top: Math.max(16, mobileTop),
-          right: 16,
-          maxWidth: CARD_WIDTH
-        });
-        setTailOffset(null);
-        return;
-      }
-
-      const tailWidth = 14;
-      const left = Math.min(rect.right + tailWidth + 14, window.innerWidth - CARD_WIDTH - 24);
-      const top = Math.min(
-        Math.max(rect.top + rect.height / 2 - cardHeight / 2, 24),
-        window.innerHeight - cardHeight - 24
-      );
-      const targetCenterY = rect.top + rect.height / 2;
-      const tailCenterY = Math.max(22, Math.min(cardHeight - 22, targetCenterY - top));
-
-      setTooltipStyle({
-        left,
-        top,
-        width: CARD_WIDTH
-      });
-      setTailOffset(tailCenterY);
-    };
-
-    element.scrollIntoView({ block: "nearest", inline: "nearest" });
-    highlightTarget(element);
-    const frame = window.requestAnimationFrame(updateLayout);
-
-    window.addEventListener("resize", updateLayout);
-    window.addEventListener("scroll", updateLayout, true);
-
-    return () => {
-      window.cancelAnimationFrame(frame);
-      restoreHighlight(element);
-      window.removeEventListener("resize", updateLayout);
-      window.removeEventListener("scroll", updateLayout, true);
-    };
-  }, [currentStep.targetId, isDashboard, visible]);
-
   const completeTour = async (showDoneToast = false) => {
     if (isSubmitting) return;
     setIsSubmitting(true);
@@ -364,71 +284,91 @@ export function OnboardingTour({ enabled, slug }: OnboardingTourProps) {
 
   if (!hasResolvedVisibility || !visible || !enabled || !isDashboard) return null;
 
+  const Icon = currentStep.icon;
+
   return (
-    <div className="pointer-events-none fixed inset-0 z-[70] overflow-hidden">
-      <div className="relative h-full w-full">
-        <div
-          ref={cardRef}
-          className={`pointer-events-auto fixed rounded-[14px] border border-slate-700/80 bg-[#1e293b] p-4 text-white shadow-[0_24px_60px_-30px_rgba(15,23,42,0.65)] transition-all duration-300 md:p-5 ${
-            isStepVisible ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"
-          }`}
-          style={tooltipStyle}
-        >
-          {tailOffset !== null ? (
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-900/60 p-5">
+      <div
+        className={`w-full max-w-[440px] rounded-[18px] bg-card p-5 shadow-[0_12px_48px_-12px_rgba(0,0,0,0.25)] transition-all duration-200 sm:p-6 ${
+          isStepVisible ? "scale-100 opacity-100" : "scale-[0.98] opacity-0"
+        }`}
+      >
+        {/* Step dots */}
+        <div className="mb-5 flex items-center justify-center gap-1.5">
+          {steps.map((_, i) => (
             <div
-              className="pointer-events-none absolute -left-[12px] h-0 w-0 border-y-[12px] border-y-transparent border-r-[12px] border-r-[#1e293b]"
-              style={{ top: tailOffset - 12 }}
+              key={i}
+              className={`h-1.5 rounded-full transition-all duration-200 ${
+                i === stepIndex
+                  ? "w-5 bg-primary"
+                  : "w-1.5 bg-gray-200 dark:bg-gray-700"
+              }`}
             />
-          ) : null}
-          <p className="text-xs font-medium uppercase tracking-[0.08em] text-slate-300">
-            {stepIndex + 1} of {steps.length}
-          </p>
+          ))}
+        </div>
 
-          <div className="relative mt-3 hidden h-[220px] overflow-hidden rounded-[12px] border border-slate-600 bg-muted md:block">
-            <div
-              style={{
-                position: "absolute",
-                width: PREVIEW_CANVAS_WIDTH,
-                height: PREVIEW_CANVAS_HEIGHT,
-                transform: `scale(${PREVIEW_SCALE})`,
-                transformOrigin: "top left",
-                fontFamily: 'var(--font-dm-sans), "DM Sans", sans-serif'
-              }}
-            >
-              {renderPreview(currentStep.targetId, slug)}
-            </div>
+        {/* Preview */}
+        <div
+          className="mb-5 overflow-hidden rounded-[14px] border border-border bg-muted"
+          style={{ height: Math.round(PREVIEW_CANVAS_HEIGHT * PREVIEW_SCALE) }}
+        >
+          <div
+            style={{
+              width: PREVIEW_CANVAS_WIDTH,
+              height: PREVIEW_CANVAS_HEIGHT,
+              transform: `scale(${PREVIEW_SCALE})`,
+              transformOrigin: "top left",
+              fontFamily: 'var(--font-dm-sans), "DM Sans", sans-serif'
+            }}
+          >
+            {renderPreview(currentStep.previewType, slug)}
           </div>
+        </div>
 
-          <h3 className="mt-3 text-[18px] font-semibold tracking-[-0.02em] text-white md:mt-5 md:text-[24px]">
+        {/* Icon + Title */}
+        <div className="mb-2.5 flex items-center gap-2.5">
+          <div className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full bg-blue-50 dark:bg-blue-950">
+            <Icon className="h-[18px] w-[18px] text-primary" />
+          </div>
+          <h3 className="text-lg font-bold text-foreground sm:text-xl">
             {currentStep.title}
           </h3>
-          <p className="mt-2 text-[13px] leading-5 text-slate-200 md:mt-3 md:text-[15px] md:leading-7">{currentStep.body}</p>
+        </div>
 
-          <div className="mt-4 flex items-center justify-between gap-3 md:mt-6">
-            <button
-              type="button"
-              onClick={() => void completeTour()}
-              disabled={isSubmitting}
-              className="rounded-[10px] px-2 py-2 text-sm font-medium text-slate-300 transition-colors hover:text-white disabled:opacity-60"
-            >
-              Skip
-            </button>
+        {/* Body */}
+        <p className="mb-3.5 text-sm leading-relaxed text-muted-foreground">
+          {currentStep.body}
+        </p>
 
-            <button
-              type="button"
-              onClick={() => {
-                if (stepIndex === steps.length - 1) {
-                  void completeTour(true);
-                  return;
-                }
-                setStepIndex((current) => Math.min(current + 1, steps.length - 1));
-              }}
-              disabled={isSubmitting}
-              className="rounded-[10px] bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary/90 disabled:opacity-60"
-            >
-              {stepIndex === steps.length - 1 ? "Done" : "Next"}
-            </button>
-          </div>
+        {/* Counter */}
+        <p className="mb-3.5 text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
+          {stepIndex + 1} of {steps.length}
+        </p>
+
+        {/* Actions */}
+        <div className="flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => void completeTour()}
+            disabled={isSubmitting}
+            className="px-1 py-2.5 text-sm text-muted-foreground transition-colors hover:text-foreground disabled:opacity-60"
+          >
+            Skip
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (isLast) {
+                void completeTour(true);
+                return;
+              }
+              setStepIndex((i) => Math.min(i + 1, steps.length - 1));
+            }}
+            disabled={isSubmitting}
+            className="rounded-[10px] bg-primary px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary/90 disabled:opacity-60"
+          >
+            {isLast ? "Done" : "Next"}
+          </button>
         </div>
       </div>
     </div>
