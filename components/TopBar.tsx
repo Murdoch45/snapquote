@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Bell, CircleUser, LogOut, Menu } from "lucide-react";
+import { Bell, CircleUser, Menu } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { NotificationsFeed } from "@/components/NotificationsFeed";
 import { Button } from "@/components/ui/button";
@@ -252,10 +252,9 @@ export function TopBar({
                 <div className="my-3 border-t border-border" />
                 <button
                   type="button"
-                  className="inline-flex min-h-[44px] w-full items-center gap-2 rounded-[10px] px-3 text-left text-sm font-medium text-red-500 transition-colors hover:bg-muted hover:text-red-600"
+                  className="inline-flex min-h-[44px] w-full items-center justify-center rounded-[10px] bg-red-600 px-3 text-sm font-semibold text-white transition-colors hover:bg-red-700"
                   onClick={() => void onLogout()}
                 >
-                  <LogOut className="h-4 w-4" />
                   Sign Out
                 </button>
               </div>
@@ -283,8 +282,7 @@ export function TopBar({
             <p className="truncate text-sm text-muted-foreground">{email ?? "Account"}</p>
           </div>
 
-          <Button variant="outline" className="h-10 px-4" onClick={onLogout}>
-            <LogOut className="mr-2 h-4 w-4" />
+          <Button variant="destructive" className="h-10 px-4" onClick={onLogout}>
             Sign out
           </Button>
         </div>

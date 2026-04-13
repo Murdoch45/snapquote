@@ -38,7 +38,7 @@ export function NotificationsFeed({
       {feed.length === 0 ? (
         <p className={cn("text-sm text-muted-foreground", emptyClassName)}>No notifications</p>
       ) : (
-        <ul className={cn("max-h-[400px] space-y-2 overflow-y-auto", listClassName)}>
+        <ul className={cn("max-h-[280px] space-y-2 overflow-y-auto", listClassName)}>
           {feed.map((item) => (
             <li key={item.id}>
               <button
