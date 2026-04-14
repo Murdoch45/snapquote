@@ -49,6 +49,7 @@ function getInitials(value: string): string {
 
 export function TeamManager({ isOwner, members, invites }: TeamManagerProps) {
   const [busy, setBusy] = useState(false);
+  const [sharing, setSharing] = useState(false);
 
   const invite = async () => {
     setBusy(true);
@@ -63,6 +64,40 @@ export function TeamManager({ isOwner, members, invites }: TeamManagerProps) {
       toast.error(error instanceof Error ? error.message : "Invite failed.");
     } finally {
       setBusy(false);
+    }
+  };
+
+  const share = async () => {
+    setSharing(true);
+    try {
+      const res = await fetch("/api/app/team/invite-link", { method: "POST" });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Invite failed.");
+
+      const shareText =
+        "Join my SnapQuote team so we can manage leads and estimates together.";
+      const shareUrl = json.inviteUrl as string;
+
+      if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+        try {
+          await navigator.share({
+            title: "Join my SnapQuote team",
+            text: shareText,
+            url: shareUrl
+          });
+          return;
+        } catch (err) {
+          // User cancelled or share failed — fall through to clipboard.
+          if ((err as Error)?.name === "AbortError") return;
+        }
+      }
+
+      await navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
+      toast.success("Invite message copied — paste it into text or email.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Share failed.");
+    } finally {
+      setSharing(false);
     }
   };
 
@@ -95,9 +130,14 @@ export function TeamManager({ isOwner, members, invites }: TeamManagerProps) {
               Generate a secure invite link that expires in 7 days.
             </p>
           </div>
-          <Button disabled={busy} onClick={invite}>
-            {busy ? "Copying..." : "Copy Invite Link"}
-          </Button>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Button disabled={sharing || busy} onClick={share} variant="secondary">
+              {sharing ? "Opening..." : "Share via text or email"}
+            </Button>
+            <Button disabled={busy || sharing} onClick={invite}>
+              {busy ? "Copying..." : "Copy Invite Link"}
+            </Button>
+          </div>
         </div>
       )}
       <div className="rounded-[14px] border border-border bg-card p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">

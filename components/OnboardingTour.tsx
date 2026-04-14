@@ -346,7 +346,7 @@ export function OnboardingTour({ enabled, slug }: OnboardingTourProps) {
         </p>
 
         {/* Actions */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3">
           <button
             type="button"
             onClick={() => void completeTour()}
@@ -355,20 +355,32 @@ export function OnboardingTour({ enabled, slug }: OnboardingTourProps) {
           >
             Skip
           </button>
-          <button
-            type="button"
-            onClick={() => {
-              if (isLast) {
-                void completeTour(true);
-                return;
-              }
-              setStepIndex((i) => Math.min(i + 1, steps.length - 1));
-            }}
-            disabled={isSubmitting}
-            className="rounded-[10px] bg-primary px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary/90 disabled:opacity-60"
-          >
-            {isLast ? "Done" : "Next"}
-          </button>
+          <div className="flex items-center gap-2">
+            {stepIndex > 0 ? (
+              <button
+                type="button"
+                onClick={() => setStepIndex((i) => Math.max(i - 1, 0))}
+                disabled={isSubmitting}
+                className="rounded-[10px] border border-border bg-card px-5 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-muted disabled:opacity-60"
+              >
+                Back
+              </button>
+            ) : null}
+            <button
+              type="button"
+              onClick={() => {
+                if (isLast) {
+                  void completeTour(true);
+                  return;
+                }
+                setStepIndex((i) => Math.min(i + 1, steps.length - 1));
+              }}
+              disabled={isSubmitting}
+              className="rounded-[10px] bg-primary px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary/90 disabled:opacity-60"
+            >
+              {isLast ? "Done" : "Next"}
+            </button>
+          </div>
         </div>
       </div>
     </div>
