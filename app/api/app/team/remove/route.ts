@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { recordAudit } from "@/lib/auditLog";
 import { requireOwnerForApi } from "@/lib/auth/requireRole";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { removeTeamSchema } from "@/lib/validations";
@@ -37,6 +38,15 @@ export async function POST(request: Request) {
       .eq("org_id", auth.orgId)
       .eq("user_id", body.memberUserId);
     if (error) throw error;
+
+    void recordAudit(admin, {
+      orgId: auth.orgId,
+      action: "team.member_removed",
+      actorUserId: auth.userId,
+      targetType: "user",
+      targetId: body.memberUserId,
+      metadata: { removed_role: member.role }
+    });
 
     return NextResponse.json({ ok: true });
   } catch (error) {

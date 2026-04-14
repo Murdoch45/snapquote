@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { buildTeamMemberJoinedEmail } from "@/lib/emailTemplates";
+import { sendEmail } from "@/lib/notify";
+import { getOwnerEmailForOrg } from "@/lib/organizationOwners";
 import { sendPushToOrg } from "@/lib/pushNotifications";
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
@@ -101,6 +104,25 @@ export async function POST(request: Request) {
         screen_params: {}
       })
       .then(null, (err: unknown) => console.warn("notification insert failed:", err));
+
+    // Email the org owner that a teammate joined (best-effort).
+    void (async () => {
+      try {
+        const ownerEmail = await getOwnerEmailForOrg(admin, invite.org_id as string);
+        if (!ownerEmail) return;
+        const inviteeEmail = user.email ?? "A new teammate";
+        const email = buildTeamMemberJoinedEmail({ inviteeEmail });
+        await sendEmail({
+          to: ownerEmail,
+          subject: email.subject,
+          text: email.text,
+          html: email.html,
+          sender: "noreply"
+        });
+      } catch (emailError) {
+        console.warn("invite/accept owner email failed:", emailError);
+      }
+    })();
 
     return NextResponse.json({ ok: true });
   } catch (error) {

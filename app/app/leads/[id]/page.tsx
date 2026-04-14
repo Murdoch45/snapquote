@@ -20,6 +20,7 @@ import {
 } from "@/lib/quote-template";
 import { getServiceBadgeClassName } from "@/lib/serviceColors";
 import { formatServiceQuestionAnswers, parseServiceQuestionBundles } from "@/lib/serviceQuestions";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { formatCurrencyRange, toCurrency, toRelativeMinutes } from "@/lib/utils";
 
@@ -68,6 +69,28 @@ export default async function LeadDetailPage({ params }: Props) {
   ]);
 
   if (!lead) notFound();
+
+  // Generate fresh signed URLs at render time (1-hour TTL) instead of
+  // relying on the long-lived URLs stored in the public_url column.
+  // This way a leaked URL only works for an hour, and revoking access
+  // (via storage RLS) takes effect immediately.
+  const photosWithFreshUrls = await (async () => {
+    if (!photos || photos.length === 0) return photos ?? [];
+    const admin = createAdminClient();
+    const ONE_HOUR = 60 * 60;
+    return Promise.all(
+      photos.map(async (photo) => {
+        const path = photo.storage_path as string | null;
+        if (!path) {
+          return { ...photo, signed_url: (photo.public_url as string | null) ?? null };
+        }
+        const { data: signed } = await admin.storage
+          .from("lead-photos")
+          .createSignedUrl(path, ONE_HOUR);
+        return { ...photo, signed_url: signed?.signedUrl ?? null };
+      })
+    );
+  })();
 
   const isUnlocked = Boolean(unlockRow?.id);
   const isLocked = !isUnlocked;
@@ -222,19 +245,26 @@ export default async function LeadDetailPage({ params }: Props) {
 
             <section>
               <h3 className="text-sm font-semibold text-foreground">Photos</h3>
-              {(photos ?? []).length === 0 ? (
+              {photosWithFreshUrls.length === 0 ? (
                 <p className="text-sm text-muted-foreground">No photos uploaded.</p>
               ) : (
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                  {(photos ?? []).map((photo) => (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      key={photo.id}
-                      src={(photo.public_url as string) || ""}
-                      alt="Lead"
-                      className="h-28 w-full rounded-md object-cover"
-                    />
-                  ))}
+                  {photosWithFreshUrls.map((photo) => {
+                    const url =
+                      ((photo as { signed_url?: string | null }).signed_url ??
+                        (photo.public_url as string | null)) ||
+                      "";
+                    if (!url) return null;
+                    return (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        key={photo.id}
+                        src={url}
+                        alt="Lead"
+                        className="h-28 w-full rounded-md object-cover"
+                      />
+                    );
+                  })}
                 </div>
               )}
             </section>

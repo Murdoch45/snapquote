@@ -47,6 +47,16 @@ export default async function AppLayout({
         orgId={auth.orgId}
         businessName={(profile?.business_name as string) ?? "SnapQuote"}
       >
+        {process.env.DEMO_ORG_ID && auth.orgId === process.env.DEMO_ORG_ID ? (
+          <div className="rounded-[14px] border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-200">
+            <strong className="font-semibold">Demo workspace:</strong> you&apos;re
+            viewing read-only sample data. Edits, deletions, and outgoing
+            messages are disabled.{" "}
+            <a href="/signup" className="font-semibold underline hover:no-underline">
+              Sign up for your own workspace.
+            </a>
+          </div>
+        ) : null}
         <UpgradeBanner {...usage} />
         {children}
       </AppShell>

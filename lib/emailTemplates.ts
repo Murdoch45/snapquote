@@ -424,3 +424,144 @@ If you didn't request this or believe it was a mistake, please contact us at sup
     )
   };
 }
+
+export function buildCreditPurchaseConfirmationEmail(input: {
+  creditAmount: number;
+  amountPaid: string | null;
+  newBalance: number | null;
+}) {
+  const title = `${input.creditAmount} bonus credits added to your account`;
+
+  return {
+    subject: title,
+    text: `${title}
+
+Thanks for the purchase! ${input.creditAmount} bonus credits have been added to your SnapQuote account.
+
+${input.newBalance != null ? `Your new bonus credit balance is ${input.newBalance}.` : ""}
+${input.amountPaid ? `Amount charged: ${input.amountPaid}` : ""}
+
+Bonus credits never expire and are used after your monthly credits run out.
+
+— The SnapQuote Team`,
+    html: renderEmailShell(
+      title,
+      `
+        <p style="margin:0 0 16px;font-size:15px;line-height:1.7;color:#334155;">
+          Thanks for the purchase! <strong>${input.creditAmount} bonus credits</strong> have been added to your SnapQuote account.
+        </p>
+        ${
+          input.newBalance != null
+            ? `<p style="margin:0 0 16px;font-size:15px;line-height:1.7;color:#334155;">Your new bonus credit balance is <strong>${input.newBalance}</strong>.</p>`
+            : ""
+        }
+        ${
+          input.amountPaid
+            ? `<p style="margin:0 0 16px;font-size:15px;line-height:1.7;color:#334155;">Amount charged: <strong>${esc(input.amountPaid)}</strong></p>`
+            : ""
+        }
+        <p style="margin:0 0 16px;font-size:15px;line-height:1.7;color:#334155;">
+          Bonus credits never expire and are used after your monthly credits run out.
+        </p>
+        <p style="margin:24px 0 0;font-size:15px;line-height:1.7;color:#334155;">
+          — The SnapQuote Team
+        </p>
+      `
+    )
+  };
+}
+
+export function buildTrialExpiredEmail() {
+  const title = "Your SnapQuote trial has ended";
+  const planUrl = "https://snapquote.us/app/plan";
+
+  return {
+    subject: title,
+    text: `${title}
+
+Hey there, your SnapQuote free trial has ended and your account has been moved to the Solo plan (5 credits per month).
+
+Want your full access back? You can upgrade any time:
+
+${planUrl}
+
+— The SnapQuote Team`,
+    html: renderEmailShell(
+      title,
+      `
+        <p style="margin:0 0 16px;font-size:15px;line-height:1.7;color:#334155;">
+          Hey there, your SnapQuote free trial has ended and your account has been
+          moved to the <strong>Solo plan</strong> (5 credits per month).
+        </p>
+        <p style="margin:0 0 16px;font-size:15px;line-height:1.7;color:#334155;">
+          Want your full access back? You can upgrade any time.
+        </p>
+        ${renderButton("Upgrade Plan", planUrl)}
+        <p style="margin:24px 0 0;font-size:15px;line-height:1.7;color:#334155;">
+          — The SnapQuote Team
+        </p>
+      `
+    )
+  };
+}
+
+export function buildTeamMemberJoinedEmail(input: { inviteeEmail: string }) {
+  const title = "A teammate just joined your SnapQuote workspace";
+  const teamUrl = "https://snapquote.us/app/team";
+
+  return {
+    subject: title,
+    text: `${title}
+
+${input.inviteeEmail} accepted your invite and is now part of your SnapQuote team.
+
+Manage your team: ${teamUrl}
+
+— The SnapQuote Team`,
+    html: renderEmailShell(
+      title,
+      `
+        <p style="margin:0 0 16px;font-size:15px;line-height:1.7;color:#334155;">
+          <strong>${esc(input.inviteeEmail)}</strong> accepted your invite and is now part of your SnapQuote team.
+        </p>
+        ${renderButton("Manage Team", teamUrl)}
+        <p style="margin:24px 0 0;font-size:15px;line-height:1.7;color:#334155;">
+          — The SnapQuote Team
+        </p>
+      `
+    )
+  };
+}
+
+export function buildEstimateNotViewedNudgeEmail(input: {
+  customerName: string;
+  daysSinceSent: number;
+  quoteUrl: string;
+}) {
+  const title = `${input.customerName} hasn't opened your estimate yet`;
+
+  return {
+    subject: title,
+    text: `${title}
+
+It's been ${input.daysSinceSent} days since you sent ${input.customerName} an estimate and they haven't opened it yet. A quick follow-up text or call usually does the trick.
+
+View estimate: ${input.quoteUrl}
+
+— The SnapQuote Team`,
+    html: renderEmailShell(
+      title,
+      `
+        <p style="margin:0 0 16px;font-size:15px;line-height:1.7;color:#334155;">
+          It's been <strong>${input.daysSinceSent} days</strong> since you sent
+          <strong>${esc(input.customerName)}</strong> an estimate and they haven't
+          opened it yet. A quick follow-up text or call usually does the trick.
+        </p>
+        ${renderButton("View Estimate", input.quoteUrl)}
+        <p style="margin:24px 0 0;font-size:15px;line-height:1.7;color:#334155;">
+          — The SnapQuote Team
+        </p>
+      `
+    )
+  };
+}

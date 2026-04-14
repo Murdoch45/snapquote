@@ -19,6 +19,14 @@
     {
       "path": "/api/cron/cleanup-notifications",
       "schedule": "0 4 * * *"
+    },
+    {
+      "path": "/api/cron/trial-expired",
+      "schedule": "0 16 * * *"
+    },
+    {
+      "path": "/api/cron/estimate-nudge-unviewed",
+      "schedule": "0 17 * * *"
     }
   ]
 }

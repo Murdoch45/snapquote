@@ -31,7 +31,24 @@ export function ManageBillingButton({
 
       window.location.href = json.url;
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Unable to open billing portal.");
+      // Provide a recovery path: if the portal call fails (Stripe outage,
+      // misconfigured customer, etc.) point the user at support so they
+      // aren't dead-ended on a toast they can't act on.
+      toast.error(
+        error instanceof Error ? error.message : "Unable to open billing portal.",
+        {
+          description:
+            "If this keeps happening, email support@snapquote.us and we'll sort out your billing manually.",
+          action: {
+            label: "Email support",
+            onClick: () => {
+              window.location.href =
+                "mailto:support@snapquote.us?subject=Billing%20portal%20issue";
+            }
+          },
+          duration: 10000
+        }
+      );
     } finally {
       setLoadingPortal(false);
     }

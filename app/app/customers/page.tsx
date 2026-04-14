@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { UserPlus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CustomersTable, type CustomerRow } from "@/components/CustomersTable";
 import { requireAuth } from "@/lib/auth/requireAuth";
@@ -101,6 +103,33 @@ export default async function CustomersPage({ searchParams }: Props) {
   const totalPages = Math.max(1, Math.ceil(totalCustomers / PAGE_SIZE));
   const pageFrom = (currentPage - 1) * PAGE_SIZE;
   const customers = allCustomers.slice(pageFrom, pageFrom + PAGE_SIZE);
+
+  if (totalCustomers === 0) {
+    return (
+      <div className="space-y-6">
+        <Card className="shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
+          <CardContent className="flex flex-col items-center justify-center gap-4 py-16 text-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-accent">
+              <UserPlus className="h-6 w-6 text-primary" />
+            </div>
+            <div className="space-y-1">
+              <h2 className="text-lg font-semibold text-foreground">No customers yet</h2>
+              <p className="max-w-md text-sm text-muted-foreground">
+                Customers show up here once you unlock a lead. Share your link
+                to start receiving requests.
+              </p>
+            </div>
+            <Link
+              href="/dashboard/my-link"
+              className="inline-flex h-10 items-center justify-center rounded-[10px] bg-primary px-5 text-sm font-semibold text-white transition-colors hover:bg-primary/90"
+            >
+              Share your link
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

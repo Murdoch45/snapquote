@@ -25,7 +25,12 @@ export async function POST(request: Request) {
         email: email.trim().toLowerCase()
       });
 
-      if (!error && data?.properties?.hashed_token) {
+      if (error) {
+        console.warn("[forgot-password] generateLink failed:", {
+          email: normalizedEmail,
+          error: error.message
+        });
+      } else if (data?.properties?.hashed_token) {
         const tokenHash = data.properties.hashed_token;
         const resetUrl = `${appUrl}/auth/confirm?token_hash=${encodeURIComponent(tokenHash)}&type=recovery&next=/reset-password`;
 
@@ -44,17 +49,29 @@ export async function POST(request: Request) {
 
         const text = `Reset your SnapQuote password\n\nWe received a request to reset your password. Visit the link below to choose a new one:\n\n${resetUrl}\n\nIf you didn't request this, you can safely ignore this email.`;
 
-        await sendEmail({
-          to: email.trim().toLowerCase(),
+        // sendEmail() already retries 3x internally with backoff. Capture and
+        // log the result so silent send failures show up in our logs instead
+        // of leaving the user wondering why they never got the email.
+        const sent = await sendEmail({
+          to: normalizedEmail,
           subject: "Reset your SnapQuote password",
           text,
           html,
           sender: "noreply"
         });
+
+        if (!sent) {
+          console.error(
+            "[forgot-password] All retries exhausted, email NOT sent for",
+            normalizedEmail
+          );
+        }
       }
     }
-  } catch {
+  } catch (err) {
     // Swallow all errors to avoid leaking info about whether the email exists.
+    // Log internally so we can spot configuration issues.
+    console.warn("[forgot-password] threw an error:", err);
   }
 
   // Always return 200 to prevent email enumeration.

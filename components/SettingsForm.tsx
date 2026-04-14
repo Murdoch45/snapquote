@@ -520,6 +520,45 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
         </div>
       </section>
 
+      <section className="rounded-[14px] border border-border bg-card p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
+        <h2 className="mb-1 text-base font-semibold text-foreground">Email Notifications</h2>
+        <p className="mb-4 text-sm text-muted-foreground">
+          Choose which email alerts SnapQuote sends you.
+        </p>
+        <div className="space-y-3 rounded-[8px] border border-border bg-muted p-4">
+          <label className="flex items-start gap-3 text-sm text-foreground">
+            <Checkbox
+              className="mt-0.5 data-[state=checked]:border-primary data-[state=checked]:bg-primary"
+              checked={form.notificationLeadEmail}
+              onCheckedChange={(checked) =>
+                setForm((prev) => ({
+                  ...prev,
+                  notificationLeadEmail: checked === true
+                }))
+              }
+            />
+            <span className="leading-snug">
+              Email me when a new lead comes in
+            </span>
+          </label>
+          <label className="flex items-start gap-3 text-sm text-foreground">
+            <Checkbox
+              className="mt-0.5 data-[state=checked]:border-primary data-[state=checked]:bg-primary"
+              checked={form.notificationAcceptEmail}
+              onCheckedChange={(checked) =>
+                setForm((prev) => ({
+                  ...prev,
+                  notificationAcceptEmail: checked === true
+                }))
+              }
+            />
+            <span className="leading-snug">
+              Email me when a customer accepts an estimate
+            </span>
+          </label>
+        </div>
+      </section>
+
       {isEmailUser ? (
         <section className="rounded-[14px] border border-border bg-card p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
           <h2 className="mb-4 text-base font-semibold text-foreground">Change Password</h2>
@@ -602,6 +641,47 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
       </Button>
 
     </div>
+  );
+}
+
+export function ReplayTourCard() {
+  const router = useRouter();
+  const [resetting, setResetting] = useState(false);
+
+  return (
+    <section className="rounded-[14px] border border-border bg-card p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
+      <h2 className="text-base font-semibold text-foreground">Product tour</h2>
+      <p className="mt-2 text-sm text-muted-foreground">
+        Want a refresher on how SnapQuote works? Replay the guided tour you
+        saw when you first signed up.
+      </p>
+      <Button
+        type="button"
+        variant="outline"
+        className="mt-4"
+        disabled={resetting}
+        onClick={async () => {
+          setResetting(true);
+          try {
+            const res = await fetch("/api/onboarding/reset", { method: "POST" });
+            const json = await res.json().catch(() => ({}));
+            if (!res.ok) {
+              toast.error(json.error || "Couldn't reset the tour.");
+              return;
+            }
+            toast.success("Tour reset — heading back to the dashboard.");
+            router.push("/app");
+            router.refresh();
+          } catch {
+            toast.error("Couldn't reset the tour.");
+          } finally {
+            setResetting(false);
+          }
+        }}
+      >
+        {resetting ? "Resetting..." : "Replay product tour"}
+      </Button>
+    </section>
   );
 }
 

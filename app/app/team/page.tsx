@@ -34,6 +34,9 @@ export default async function TeamPage() {
     })
   );
 
+  const isSoloWorkspace =
+    membersWithEmail.length <= 1 && (invites ?? []).length === 0;
+
   return (
     <div className="space-y-6">
       <Card className="shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
@@ -47,6 +50,19 @@ export default async function TeamPage() {
           </p>
         </CardContent>
       </Card>
+      {isSoloWorkspace && auth.role === "OWNER" ? (
+        <Card className="border-dashed shadow-none">
+          <CardContent className="flex flex-col items-start gap-2 py-6">
+            <h3 className="text-base font-semibold text-foreground">
+              You&apos;re flying solo
+            </h3>
+            <p className="max-w-md text-sm text-muted-foreground">
+              Invite a teammate below to share leads, send estimates together,
+              and keep everyone in sync. Team plan includes up to 3 seats.
+            </p>
+          </CardContent>
+        </Card>
+      ) : null}
       <TeamManager
         isOwner={auth.role === "OWNER"}
         members={membersWithEmail as any}

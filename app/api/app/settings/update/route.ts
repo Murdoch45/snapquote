@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { recordAudit } from "@/lib/auditLog";
 import { requireOwnerForApi } from "@/lib/auth/requireRole";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { updateSettingsSchema } from "@/lib/validations";
@@ -57,6 +58,16 @@ export async function POST(request: Request) {
     if (error) throw error;
 
     await admin.from("organizations").update({ name: body.businessName }).eq("id", auth.orgId);
+
+    void recordAudit(admin, {
+      orgId: auth.orgId,
+      action: "settings.updated",
+      actorUserId: auth.userId,
+      metadata: {
+        slug_changed: existing.public_slug !== body.publicSlug,
+        business_name: body.businessName
+      }
+    });
 
     return NextResponse.json({ ok: true });
   } catch (error) {

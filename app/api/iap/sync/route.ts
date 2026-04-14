@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireOwnerForApi } from "@/lib/auth/requireRole";
+import { buildCreditPurchaseConfirmationEmail } from "@/lib/emailTemplates";
+import { sendEmail } from "@/lib/notify";
+import { getOwnerEmailForOrg } from "@/lib/organizationOwners";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getPlanMonthlyCredits } from "@/lib/plans";
 import type { OrgPlan } from "@/lib/types";
@@ -78,10 +81,47 @@ export async function POST(request: Request) {
 
     if (error) throw error;
 
-    return NextResponse.json({
-      ok: true,
-      status: data === "already_processed" ? "already_processed" : "added"
-    });
+    const status = data === "already_processed" ? "already_processed" : "added";
+
+    // Only email on first-time recording — re-syncs of the same transaction
+    // (e.g. retry from the queue) shouldn't re-send the confirmation.
+    if (status === "added") {
+      void (async () => {
+        try {
+          const ownerEmail = await getOwnerEmailForOrg(admin, auth.orgId);
+          if (!ownerEmail) return;
+
+          const { data: orgRow } = await admin
+            .from("organizations")
+            .select("bonus_credits")
+            .eq("id", auth.orgId)
+            .maybeSingle();
+
+          const newBalance =
+            orgRow && typeof orgRow.bonus_credits === "number"
+              ? (orgRow.bonus_credits as number)
+              : null;
+
+          const email = buildCreditPurchaseConfirmationEmail({
+            creditAmount: body.creditAmount,
+            amountPaid: null,
+            newBalance
+          });
+
+          await sendEmail({
+            to: ownerEmail,
+            subject: email.subject,
+            text: email.text,
+            html: email.html,
+            sender: "noreply"
+          });
+        } catch (emailError) {
+          console.warn("iap/sync credit purchase email failed:", emailError);
+        }
+      })();
+    }
+
+    return NextResponse.json({ ok: true, status });
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Unable to sync purchase." },

@@ -102,12 +102,17 @@ export async function POST(request: Request) {
       .eq("public_slug", payload.contractorSlug)
       .single();
 
-    if (contractorError) {
+    if (contractorError && contractorError.code !== "PGRST116") {
       throw contractorError;
     }
 
     if (!contractor) {
-      return NextResponse.json({ error: "Contractor slug not found." }, { status: 404 });
+      // Generic 400 instead of 404 to avoid distinguishing "slug exists" from
+      // "slug doesn't exist" via status codes when the slug is malformed.
+      return NextResponse.json(
+        { error: "We couldn't find that contractor. Please check the link and try again." },
+        { status: 400 }
+      );
     }
 
     const orgId = contractor.org_id as string;
@@ -262,10 +267,14 @@ export async function POST(request: Request) {
           upsert: false
         });
       if (uploadError) continue;
+      // We DON'T persist a long-lived signed URL anymore. The path is stored
+      // permanently and fresh signed URLs are generated on demand at render
+      // time (1-hour TTL). public_url is kept for AI ingest which needs a
+      // URL right away — give it a 24-hour token, plenty for processing.
       // eslint-disable-next-line no-await-in-loop
       const { data: signed } = await admin.storage
         .from("lead-photos")
-        .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+        .createSignedUrl(path, 60 * 60 * 24);
       uploadedPaths.push({ path, url: signed?.signedUrl ?? "" });
     }
 

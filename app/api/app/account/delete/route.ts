@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { recordAudit } from "@/lib/auditLog";
 import { requireOwnerForApi } from "@/lib/auth/requireRole";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe";
@@ -38,6 +39,21 @@ export async function POST(request: Request) {
 
     // 3. Delete push tokens for the org
     await admin.from("push_tokens").delete().eq("org_id", auth.orgId);
+
+    // Audit log BEFORE the org cascade-delete (after which audit_log rows
+    // for that org would also be cascade-deleted). We log to a separate
+    // record-keeping note in metadata; the org row itself is gone after
+    // step 4 so the FK cascade will clean up the audit row too — but the
+    // log line in our server logs survives forever.
+    await recordAudit(admin, {
+      orgId: auth.orgId,
+      action: "account.deleted",
+      actorUserId: auth.userId,
+      actorEmail: userEmail ?? null,
+      metadata: {
+        had_active_subscription: Boolean(subscription?.stripe_subscription_id)
+      }
+    });
 
     // 4. Delete the organization (cascades all org data via FK)
     const { error: orgDeleteError } = await admin

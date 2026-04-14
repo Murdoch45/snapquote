@@ -61,14 +61,36 @@ export async function GET(request: Request) {
     try {
       const count = quotes.length;
 
+      const title =
+        count === 1 ? "Estimate expiring soon" : "Estimates expiring soon";
+      const body =
+        count === 1
+          ? "An estimate expires in 24 hours. Follow up before it's too late."
+          : `${count} estimates expire in 24 hours. Follow up before it's too late.`;
+
       // Push notification
       void sendPushToOrg(orgId, {
-        title: count === 1 ? "Estimate expiring soon" : "Estimates expiring soon",
-        body: count === 1
-          ? "An estimate expires in 24 hours. Follow up before it's too late."
-          : `${count} estimates expire in 24 hours. Follow up before it's too late.`,
+        title,
+        body,
         data: { screen: "quotes" }
       });
+
+      // In-app notification feed entry (parity with auto-expire and the
+      // other notification flows). Best-effort — failing to record this
+      // shouldn't block the email/push from going out.
+      void admin
+        .from("notifications")
+        .insert({
+          org_id: orgId,
+          type: "ESTIMATE_EXPIRING_SOON",
+          title,
+          body,
+          screen: "quotes",
+          screen_params: {}
+        })
+        .then(null, (err: unknown) =>
+          console.warn("notification insert failed:", err)
+        );
 
       // Email to org owner
       const ownerEmail = await getOwnerEmailForOrg(admin, orgId);

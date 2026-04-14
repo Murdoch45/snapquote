@@ -27,3 +27,11 @@
 metabase.jar
 metabase.db.mv.db
 metabase.db.trace.db
+
+# build artifacts
+tsconfig.tsbuildinfo
+*.tsbuildinfo
+
+# supabase CLI cache
+supabase/.temp/
+supabase/.branches/

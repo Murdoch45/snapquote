@@ -1,7 +1,10 @@
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
-import { buildPaymentFailedEmail } from "@/lib/emailTemplates";
+import {
+  buildCreditPurchaseConfirmationEmail,
+  buildPaymentFailedEmail
+} from "@/lib/emailTemplates";
 import { sendEmail } from "@/lib/notify";
 import { getOwnerEmailForOrg } from "@/lib/organizationOwners";
 import { getPlanMonthlyCredits } from "@/lib/usage";
@@ -173,6 +176,49 @@ async function handleCreditPackCheckoutCompleted(session: Stripe.Checkout.Sessio
 
   if (data === "already_processed") {
     return;
+  }
+
+  // Send credit purchase confirmation email (best-effort).
+  try {
+    const ownerEmail = await getOwnerEmailForOrg(admin, orgId);
+    if (!ownerEmail) return;
+
+    const { data: orgRow } = await admin
+      .from("organizations")
+      .select("bonus_credits")
+      .eq("id", orgId)
+      .maybeSingle();
+
+    const newBalance =
+      orgRow && typeof orgRow.bonus_credits === "number"
+        ? (orgRow.bonus_credits as number)
+        : null;
+
+    const amountTotal = session.amount_total;
+    const currency = (session.currency ?? "usd").toUpperCase();
+    const amountPaid =
+      typeof amountTotal === "number"
+        ? new Intl.NumberFormat("en-US", {
+            style: "currency",
+            currency
+          }).format(amountTotal / 100)
+        : null;
+
+    const email = buildCreditPurchaseConfirmationEmail({
+      creditAmount,
+      amountPaid,
+      newBalance
+    });
+
+    await sendEmail({
+      to: ownerEmail,
+      subject: email.subject,
+      text: email.text,
+      html: email.html,
+      sender: "noreply"
+    });
+  } catch (emailError) {
+    console.warn("stripe webhook: credit purchase email failed:", emailError);
   }
 }
 
