@@ -9,6 +9,8 @@ const ACTIVE_SUBSCRIPTION_STATUSES = ["active", "trialing"] as const;
 
 type ActiveSubscriptionStatus = (typeof ACTIVE_SUBSCRIPTION_STATUSES)[number];
 
+export type BillingSource = "stripe" | "iap" | null;
+
 export type OrganizationSubscriptionStatus = {
   status: string | null;
   plan: OrgPlan | null;
@@ -16,6 +18,7 @@ export type OrganizationSubscriptionStatus = {
   stripeSubscriptionId: string | null;
   trialEndDate: string | null;
   billingInterval: string | null;
+  billingSource: BillingSource;
 };
 
 export class SubscriptionRequiredError extends Error {
@@ -53,13 +56,15 @@ export async function getOrganizationSubscriptionStatus(
     .filter((value): value is string => Boolean(value));
 
   if (userIds.length === 0) {
+    const billingSource = await resolveBillingSource(admin, orgId, 0);
     return {
       status: null,
       plan: null,
       active: false,
       stripeSubscriptionId: null,
       trialEndDate: null,
-      billingInterval: null
+      billingInterval: null,
+      billingSource
     };
   }
 
@@ -78,6 +83,8 @@ export async function getOrganizationSubscriptionStatus(
   const current =
     rows.find((row) => isActiveStatus(row.status as string | null | undefined)) ?? rows[0] ?? null;
 
+  const billingSource = await resolveBillingSource(admin, orgId, rows.length);
+
   if (!current) {
     return {
       status: null,
@@ -85,7 +92,8 @@ export async function getOrganizationSubscriptionStatus(
       active: false,
       stripeSubscriptionId: null,
       trialEndDate: null,
-      billingInterval: null
+      billingInterval: null,
+      billingSource
     };
   }
 
@@ -112,8 +120,29 @@ export async function getOrganizationSubscriptionStatus(
     active: isActiveStatus(status),
     stripeSubscriptionId,
     trialEndDate,
-    billingInterval: (current.billing_interval as string | null | undefined) ?? null
+    billingInterval: (current.billing_interval as string | null | undefined) ?? null,
+    billingSource
   };
+}
+
+async function resolveBillingSource(
+  admin: ReturnType<typeof createAdminClient>,
+  orgId: string,
+  stripeRowCount: number
+): Promise<BillingSource> {
+  if (stripeRowCount > 0) return "stripe";
+
+  const { count: iapCount, error: iapError } = await admin
+    .from("iap_subscription_events")
+    .select("id", { count: "exact", head: true })
+    .eq("org_id", orgId);
+
+  if (iapError) {
+    console.warn("Unable to resolve IAP billing source:", iapError);
+    return null;
+  }
+
+  return (iapCount ?? 0) > 0 ? "iap" : null;
 }
 
 export async function requireActiveSubscription(

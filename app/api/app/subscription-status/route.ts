@@ -22,7 +22,8 @@ export async function GET(request: Request) {
       active: status.active,
       plan: status.plan,
       status: status.status,
-      trialEndDate: status.trialEndDate
+      trialEndDate: status.trialEndDate,
+      billingSource: status.billingSource
     });
   } catch (error) {
     return NextResponse.json(
