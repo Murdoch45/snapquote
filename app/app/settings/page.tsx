@@ -24,9 +24,11 @@ export default async function SettingsPage() {
     return <p className="text-sm text-red-600">Contractor profile not found.</p>;
   }
 
+  const isOwner = auth.role === "OWNER";
+
   return (
     <div className="space-y-6">
-      <SettingsForm initial={profile as any} />
+      <SettingsForm initial={profile as any} role={auth.role} />
       <section className="rounded-[14px] border border-border bg-card p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
         <h2 className="text-base font-semibold text-foreground">Need help?</h2>
         <p className="mt-2 text-sm text-muted-foreground">
@@ -39,9 +41,9 @@ export default async function SettingsPage() {
           support@snapquote.us
         </a>
       </section>
-      <ReplayTourCard />
+      {isOwner ? <ReplayTourCard /> : null}
       <SignOutCard />
-      <DeleteAccountCard />
+      <DeleteAccountCard role={auth.role} />
     </div>
   );
 }

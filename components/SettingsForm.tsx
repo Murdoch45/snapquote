@@ -71,10 +71,18 @@ function ensureCustomerNameToken(template: string): string {
   return `${template}${template.length > 0 ? " " : ""}${CUSTOMER_NAME_TOKEN}`;
 }
 
-export function SettingsForm({ initial }: { initial: SettingsData }) {
+export function SettingsForm({
+  initial,
+  role
+}: {
+  initial: SettingsData;
+  role: "OWNER" | "MEMBER";
+}) {
   const router = useRouter();
   const supabase = createClient();
   const { theme, setTheme } = useTheme();
+  const isOwner = role === "OWNER";
+  const [savingPassword, setSavingPassword] = useState(false);
   const initialTemplate = initial.quote_sms_template ?? DEFAULT_ESTIMATE_SMS_TEMPLATE;
   const [savedTemplate, setSavedTemplate] = useState(initialTemplate);
   const [mounted, setMounted] = useState(false);
@@ -299,6 +307,39 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
     await saveSettings();
   };
 
+  // Members have no settings to persist — they only change their password.
+  // This flow calls supabase.auth.updateUser directly, bypassing the
+  // owner-gated /api/app/settings/update endpoint.
+  const submitPasswordOnly = async () => {
+    setPasswordError(null);
+    if (newPassword.length < 8) {
+      setPasswordError("Password must be at least 8 characters.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError("Passwords do not match.");
+      return;
+    }
+    setSavingPassword(true);
+    try {
+      const { error: pwError } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+      if (pwError) {
+        setPasswordError(pwError.message);
+        toast.error("Password update failed.");
+        return;
+      }
+      setNewPassword("");
+      setConfirmPassword("");
+      setShowNew(false);
+      setShowConfirm(false);
+      toast.success("Password updated.");
+    } finally {
+      setSavingPassword(false);
+    }
+  };
+
   const saveTemplate = async () => {
     try {
       await saveSettings({ templateOnly: true });
@@ -314,6 +355,7 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
 
   return (
     <div className="space-y-6">
+      {isOwner ? (
       <section className="rounded-[14px] border border-border bg-card p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
         <h2 className="mb-4 text-base font-semibold text-foreground">Business Details</h2>
         <div className="grid gap-4 md:grid-cols-2">
@@ -398,7 +440,9 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
         </div>
       </div>
       </section>
+      ) : null}
 
+      {isOwner ? (
       <section className="rounded-[14px] border border-border bg-card p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
         <h2 className="mb-4 text-base font-semibold text-foreground">Business Address</h2>
         <div className="space-y-3 rounded-[8px] border border-border bg-muted p-4">
@@ -448,6 +492,7 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
         </label>
         </div>
       </section>
+      ) : null}
 
       <section className="rounded-[14px] border border-border bg-card p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
         <h2 className="mb-4 text-base font-semibold text-foreground">Appearance</h2>
@@ -478,6 +523,7 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
       </section>
 
 
+      {isOwner ? (
       <section className="rounded-[14px] border border-border bg-card p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
         <h2 className="mb-4 text-base font-semibold text-foreground">Estimate Message Template</h2>
         <div className="space-y-2">
@@ -519,7 +565,9 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
         />
         </div>
       </section>
+      ) : null}
 
+      {isOwner ? (
       <section className="rounded-[14px] border border-border bg-card p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
         <h2 className="mb-1 text-base font-semibold text-foreground">Email Notifications</h2>
         <p className="mb-4 text-sm text-muted-foreground">
@@ -558,8 +606,9 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
           </label>
         </div>
       </section>
+      ) : null}
 
-      {isEmailUser ? (
+      {isEmailUser && isOwner ? (
         <section className="rounded-[14px] border border-border bg-card p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
           <h2 className="mb-4 text-base font-semibold text-foreground">Change Password</h2>
           <div className="grid gap-4 md:grid-cols-2">
@@ -628,17 +677,95 @@ export function SettingsForm({ initial }: { initial: SettingsData }) {
         </section>
       ) : null}
 
-      <Button
-        onClick={submit}
-        disabled={
-          loading ||
-          slugStatus.type === "invalid" ||
-          slugStatus.type === "taken" ||
-          slugStatus.type === "checking"
-        }
-      >
-        {loading ? "Saving..." : "Save settings"}
-      </Button>
+      {isEmailUser && !isOwner ? (
+        <section className="rounded-[14px] border border-border bg-card p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
+          <h2 className="mb-4 text-base font-semibold text-foreground">Change Password</h2>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label
+                htmlFor="memberNewPassword"
+                className="mb-1.5 block text-xs font-medium uppercase tracking-[0.05em] text-muted-foreground"
+              >
+                New password
+              </Label>
+              <div className="relative">
+                <Input
+                  id="memberNewPassword"
+                  type={showNew ? "text" : "password"}
+                  autoComplete="new-password"
+                  value={newPassword}
+                  onChange={(e) => { setNewPassword(e.target.value); setPasswordError(null); }}
+                  minLength={8}
+                  placeholder="New password"
+                  className="h-11 rounded-[8px] border-border bg-card pr-11 px-[14px] text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-ring"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNew((v) => !v)}
+                  className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-muted-foreground/70 transition-colors hover:text-muted-foreground"
+                  aria-label={showNew ? "Hide password" : "Show password"}
+                >
+                  {showNew ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label
+                htmlFor="memberConfirmPassword"
+                className="mb-1.5 block text-xs font-medium uppercase tracking-[0.05em] text-muted-foreground"
+              >
+                Confirm password
+              </Label>
+              <div className="relative">
+                <Input
+                  id="memberConfirmPassword"
+                  type={showConfirm ? "text" : "password"}
+                  autoComplete="new-password"
+                  value={confirmPassword}
+                  onChange={(e) => { setConfirmPassword(e.target.value); setPasswordError(null); }}
+                  minLength={8}
+                  placeholder="Confirm new password"
+                  className="h-11 rounded-[8px] border-border bg-card pr-11 px-[14px] text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-ring"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm((v) => !v)}
+                  className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-muted-foreground/70 transition-colors hover:text-muted-foreground"
+                  aria-label={showConfirm ? "Hide password" : "Show password"}
+                >
+                  {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+          </div>
+          {passwordError ? (
+            <p className="mt-4 rounded-[8px] border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 px-4 py-3 text-sm text-red-600 dark:text-red-400">
+              {passwordError}
+            </p>
+          ) : null}
+          <Button
+            className="mt-4"
+            onClick={() => void submitPasswordOnly()}
+            disabled={savingPassword || newPassword.length === 0}
+          >
+            {savingPassword ? "Saving..." : "Update password"}
+          </Button>
+        </section>
+      ) : null}
+
+      {isOwner ? (
+        <Button
+          onClick={submit}
+          disabled={
+            loading ||
+            slugStatus.type === "invalid" ||
+            slugStatus.type === "taken" ||
+            slugStatus.type === "checking"
+          }
+        >
+          {loading ? "Saving..." : "Save settings"}
+        </Button>
+      ) : null}
 
     </div>
   );
@@ -705,10 +832,22 @@ export function SignOutCard() {
   );
 }
 
-export function DeleteAccountCard() {
+export function DeleteAccountCard({
+  role = "OWNER"
+}: {
+  role?: "OWNER" | "MEMBER";
+}) {
   const router = useRouter();
   const supabase = createClient();
   const [deleting, setDeleting] = useState(false);
+  const isOwner = role === "OWNER";
+
+  const bodyCopy = isOwner
+    ? "Permanently delete your account and all associated data. This action cannot be undone."
+    : "Leave this workspace and delete your account. The workspace and your teammates won't be affected.";
+  const confirmCopy = isOwner
+    ? "Are you sure you want to delete your account? This will permanently delete all your data, cancel any active subscriptions, and cannot be undone."
+    : "Are you sure you want to leave this workspace and delete your account? This cannot be undone.";
 
   return (
     <section className="rounded-[14px] border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-4">
@@ -716,16 +855,13 @@ export function DeleteAccountCard() {
         Delete Account
       </h2>
       <p className="mb-4 text-sm leading-5 text-red-800 dark:text-red-400/80">
-        Permanently delete your account and all associated data. This action
-        cannot be undone.
+        {bodyCopy}
       </p>
       <button
         type="button"
         disabled={deleting}
         onClick={async () => {
-          const confirmed = window.confirm(
-            "Are you sure you want to delete your account? This will permanently delete all your data, cancel any active subscriptions, and cannot be undone."
-          );
+          const confirmed = window.confirm(confirmCopy);
           if (!confirmed) return;
 
           setDeleting(true);

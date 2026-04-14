@@ -10,6 +10,7 @@ export type AuditAction =
   | "team.member_removed"
   | "team.invite_sent"
   | "team.invite_accepted"
+  | "member.self_removed"
   | "settings.updated"
   | "settings.password_changed"
   | "credits.purchased";
