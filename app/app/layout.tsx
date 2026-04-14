@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { AppShell } from "@/components/AppShell";
 import { OnboardingTour } from "@/components/OnboardingTour";
 import { UpgradeBanner } from "@/components/UpgradeBanner";
@@ -52,9 +53,9 @@ export default async function AppLayout({
             <strong className="font-semibold">Demo workspace:</strong> you&apos;re
             viewing read-only sample data. Edits, deletions, and outgoing
             messages are disabled.{" "}
-            <a href="/signup" className="font-semibold underline hover:no-underline">
+            <Link href="/signup" className="font-semibold underline hover:no-underline">
               Sign up for your own workspace.
-            </a>
+            </Link>
           </div>
         ) : null}
         <UpgradeBanner {...usage} />

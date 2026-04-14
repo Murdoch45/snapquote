@@ -123,7 +123,7 @@ export default function PricingPage() {
               Built for contractors.
             </h1>
             <p className="mt-6 text-lg leading-8 text-[#c3c6d7]">
-              Start free. Upgrade when you're ready to take on more jobs.
+              Start free. Upgrade when you&apos;re ready to take on more jobs.
             </p>
           </div>
         </section>
