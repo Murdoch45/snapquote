@@ -61,15 +61,40 @@ export default async function LeadsPage({ searchParams }: Props) {
     acc[row.lead_id as string] = (acc[row.lead_id as string] ?? 0) + 1;
     return acc;
   }, {});
-  const previewPhotosByLead = relevantPhotos.reduce<Record<string, string[]>>((acc, row) => {
+
+  // Pick up to 2 photos per lead for preview, then mint fresh 1-hour signed
+  // URLs from storage_path. The public_url column holds a 24-hour signed URL
+  // from upload time and expires, so relying on it makes previews disappear
+  // for anyone viewing older leads. Generating signed URLs at render time
+  // matches how the lead detail page serves photos.
+  const previewCandidates = relevantPhotos.reduce<Record<string, typeof relevantPhotos>>((acc, row) => {
     const leadId = row.lead_id as string;
-    const publicUrl = row.public_url as string | null;
-    if (!publicUrl || publicUrl.trim() === "") {
-      return acc;
-    }
-    acc[leadId] = [...(acc[leadId] ?? []), publicUrl].slice(0, 2);
+    const existing = acc[leadId] ?? [];
+    if (existing.length >= 2) return acc;
+    acc[leadId] = [...existing, row];
     return acc;
   }, {});
+  const ONE_HOUR = 60 * 60;
+  const previewPhotosByLead: Record<string, string[]> = {};
+  await Promise.all(
+    Object.entries(previewCandidates).map(async ([leadId, rows]) => {
+      const urls = await Promise.all(
+        rows.map(async (row) => {
+          const storagePath = row.storage_path as string | null;
+          if (storagePath) {
+            const { data: signed } = await adminClient.storage
+              .from("lead-photos")
+              .createSignedUrl(storagePath, ONE_HOUR);
+            if (signed?.signedUrl) return signed.signedUrl;
+          }
+          const fallback = row.public_url as string | null;
+          return fallback && fallback.trim() ? fallback : null;
+        })
+      );
+      const filtered = urls.filter((url): url is string => Boolean(url));
+      if (filtered.length > 0) previewPhotosByLead[leadId] = filtered;
+    })
+  );
   const unlockedLeadIds = new Set((unlockedRows ?? []).map((row) => row.lead_id as string));
   const totalLeads = count ?? 0;
   const totalPages = Math.max(1, Math.ceil(totalLeads / LEADS_PER_PAGE));
