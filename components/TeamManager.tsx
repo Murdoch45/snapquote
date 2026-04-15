@@ -12,22 +12,12 @@ type Member = {
   user_email?: string | null;
 };
 
-type Invite = {
-  id: string;
-  email: string | null;
-  role: "MEMBER";
-  status: "PENDING" | "ACCEPTED" | "REVOKED";
-  created_at: string;
-  expires_at?: string | null;
-};
-
 type TeamManagerProps = {
   isOwner: boolean;
   members: Member[];
-  invites: Invite[];
 };
 
-function formatRole(role: Member["role"] | Invite["role"]): string {
+function formatRole(role: Member["role"]): string {
   return role === "OWNER" ? "Admin" : "User";
 }
 
@@ -46,7 +36,7 @@ function getInitials(value: string): string {
     .join("");
 }
 
-export function TeamManager({ isOwner, members, invites }: TeamManagerProps) {
+export function TeamManager({ isOwner, members }: TeamManagerProps) {
   const [busy, setBusy] = useState(false);
   const [sharing, setSharing] = useState(false);
 
@@ -76,13 +66,13 @@ export function TeamManager({ isOwner, members, invites }: TeamManagerProps) {
       const shareText =
         "Join my SnapQuote team so we can manage leads and estimates together.";
       const shareUrl = json.inviteUrl as string;
+      const shareMessage = `${shareText} ${shareUrl}`;
 
       if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
         try {
           await navigator.share({
             title: "Join my SnapQuote team",
-            text: shareText,
-            url: shareUrl
+            text: shareMessage
           });
           return;
         } catch (err) {
@@ -91,7 +81,7 @@ export function TeamManager({ isOwner, members, invites }: TeamManagerProps) {
         }
       }
 
-      await navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
+      await navigator.clipboard.writeText(shareMessage);
       toast.success("Invite message copied — paste it into text or email.");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Share failed.");
@@ -287,48 +277,6 @@ export function TeamManager({ isOwner, members, invites }: TeamManagerProps) {
             </TableBody>
           </Table>
         </div>
-      </div>
-      <div className="rounded-[14px] border border-border bg-card p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
-        <h2 className="mb-4 text-base font-semibold text-foreground">Pending Invites</h2>
-        {invites.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No pending invites.</p>
-        ) : (
-          <ul className="space-y-3">
-            {invites.map((inviteRow) => (
-              <li
-                key={inviteRow.id}
-                className="flex flex-col gap-3 rounded-[12px] border border-border bg-muted px-4 py-4 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent text-sm font-bold text-primary">
-                    {getInitials(inviteRow.email ?? "invite-link")}
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-foreground">
-                      {inviteRow.email ?? "Invite link ready"}
-                    </p>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {new Date(inviteRow.created_at).toLocaleDateString()}
-                    </p>
-                    {inviteRow.expires_at ? (
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        Expires {new Date(inviteRow.expires_at).toLocaleDateString()}
-                      </p>
-                    ) : null}
-                  </div>
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="inline-flex rounded-full bg-green-50 dark:bg-green-950/30 px-3 py-1 text-[12px] font-semibold text-green-600 dark:text-green-400">
-                    {formatRole(inviteRow.role)}
-                  </span>
-                  <span className="inline-flex rounded-full bg-[#FFF7ED] px-3 py-1 text-[12px] font-semibold text-[#EA580C]">
-                    Pending
-                  </span>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
       </div>
     </div>
   );

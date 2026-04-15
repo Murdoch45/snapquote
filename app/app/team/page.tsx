@@ -4,21 +4,17 @@ import { requireAuth } from "@/lib/auth/requireAuth";
 import { getPlanSeatLimit } from "@/lib/plans";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { getActivePendingInvites } from "@/lib/teamInvites";
 
 export default async function TeamPage() {
   const auth = await requireAuth();
   const supabase = await createServerSupabaseClient();
   const admin = createAdminClient();
 
-  const [{ data: members }, invites] = await Promise.all([
-    supabase
-      .from("organization_members")
-      .select("user_id, role, created_at")
-      .eq("org_id", auth.orgId)
-      .order("created_at", { ascending: true }),
-    getActivePendingInvites(admin, auth.orgId)
-  ]);
+  const { data: members } = await supabase
+    .from("organization_members")
+    .select("user_id, role, created_at")
+    .eq("org_id", auth.orgId)
+    .order("created_at", { ascending: true });
 
   const membersWithEmail = await Promise.all(
     (members ?? []).map(async (member) => {
@@ -30,8 +26,7 @@ export default async function TeamPage() {
     })
   );
 
-  const isSoloWorkspace =
-    membersWithEmail.length <= 1 && (invites ?? []).length === 0;
+  const isSoloWorkspace = membersWithEmail.length <= 1;
 
   return (
     <div className="space-y-6">
@@ -51,7 +46,6 @@ export default async function TeamPage() {
       <TeamManager
         isOwner={auth.role === "OWNER"}
         members={membersWithEmail as any}
-        invites={invites as any}
       />
     </div>
   );
