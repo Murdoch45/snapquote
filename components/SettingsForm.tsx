@@ -773,6 +773,7 @@ export function SettingsForm({
 
 export function ReplayTourLink() {
   const router = useRouter();
+  const supabase = createClient();
   const [resetting, setResetting] = useState(false);
 
   const handleReplay = async () => {
@@ -784,6 +785,14 @@ export function ReplayTourLink() {
       if (!res.ok) {
         toast.error(json.error || "Couldn't reset the tour.");
         return;
+      }
+      const {
+        data: { user }
+      } = await supabase.auth.getUser();
+      if (user?.id) {
+        window.localStorage.removeItem(
+          `snapquote:onboarding-tour-completed:${user.id}`
+        );
       }
       router.push("/app");
       router.refresh();
