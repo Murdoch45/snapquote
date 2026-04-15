@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireOwnerForApi } from "@/lib/auth/requireRole";
-import { getPlanSeatLimit } from "@/lib/plans";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { deleteExpiredPendingInvites } from "@/lib/teamInvites";
 import { getAppUrl } from "@/lib/utils";
 import { inviteTeamSchema } from "@/lib/validations";
 
@@ -11,28 +11,7 @@ export async function POST(request: Request) {
   try {
     const body = inviteTeamSchema.parse(await request.json());
     const admin = createAdminClient();
-
-    const [{ data: org }, { count: memberCount }, { count: pendingCount }] = await Promise.all([
-      admin.from("organizations").select("plan").eq("id", auth.orgId).single(),
-      admin
-        .from("organization_members")
-        .select("*", { count: "exact", head: true })
-        .eq("org_id", auth.orgId),
-      admin
-        .from("pending_invites")
-        .select("*", { count: "exact", head: true })
-        .eq("org_id", auth.orgId)
-        .eq("status", "PENDING")
-    ]);
-
-    const maxMembers = getPlanSeatLimit((org?.plan as "SOLO" | "TEAM" | "BUSINESS" | null) ?? "SOLO");
-    const occupied = (memberCount ?? 0) + (pendingCount ?? 0);
-    if (occupied >= maxMembers) {
-      return NextResponse.json(
-        { error: `Plan limit reached (${maxMembers} users). Upgrade to invite more members.` },
-        { status: 400 }
-      );
-    }
+    await deleteExpiredPendingInvites(admin, auth.orgId);
 
     const { data: existingInvite } = await admin
       .from("pending_invites")

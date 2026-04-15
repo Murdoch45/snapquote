@@ -1,26 +1,23 @@
 import { TeamManager } from "@/components/TeamManager";
 import { Card, CardContent } from "@/components/ui/card";
 import { requireAuth } from "@/lib/auth/requireAuth";
+import { getPlanSeatLimit } from "@/lib/plans";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { getActivePendingInvites } from "@/lib/teamInvites";
 
 export default async function TeamPage() {
   const auth = await requireAuth();
   const supabase = await createServerSupabaseClient();
   const admin = createAdminClient();
 
-  const [{ data: members }, { data: invites }] = await Promise.all([
+  const [{ data: members }, invites] = await Promise.all([
     supabase
       .from("organization_members")
       .select("user_id, role, created_at")
       .eq("org_id", auth.orgId)
       .order("created_at", { ascending: true }),
-    admin
-      .from("pending_invites")
-      .select("id, email, role, status, created_at, expires_at")
-      .eq("org_id", auth.orgId)
-      .eq("status", "PENDING")
-      .order("created_at", { ascending: false })
+    getActivePendingInvites(admin, auth.orgId)
   ]);
 
   const membersWithEmail = await Promise.all(
@@ -46,7 +43,7 @@ export default async function TeamPage() {
             </h3>
             <p className="max-w-md text-sm text-muted-foreground">
               Invite a teammate below to share leads, send estimates together,
-              and keep everyone in sync. Team plan includes up to 3 seats.
+              and keep everyone in sync. Team plan includes up to {getPlanSeatLimit("TEAM")} seats.
             </p>
           </CardContent>
         </Card>
@@ -54,7 +51,7 @@ export default async function TeamPage() {
       <TeamManager
         isOwner={auth.role === "OWNER"}
         members={membersWithEmail as any}
-        invites={(invites ?? []) as any}
+        invites={invites as any}
       />
     </div>
   );

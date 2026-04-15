@@ -55,8 +55,9 @@ export async function POST(request: Request) {
       const status =
         message === "This invite link is no longer valid." ||
         message === "This invite link has expired." ||
-        message === "This account is already connected to a SnapQuote workspace." ||
-        message.includes("team member limit")
+        message ===
+          "This email already has a SnapQuote account. Use a different email address to join this organization." ||
+        message.includes("already full")
           ? 400
           : 500;
 

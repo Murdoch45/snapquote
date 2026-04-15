@@ -63,8 +63,8 @@ const PLAN_OPTIONS: PlanOption[] = [
     annualMonthlyPrice: "$33.99/mo",
     annualBillingLine: "billed $383.99/yr",
     credits: 100,
-    seats: 5,
-    highlights: ["100 monthly credits", "5 team members", "Best for repeat lead volume"]
+    seats: 4,
+    highlights: ["100 monthly credits", "4 team members", "Best for repeat lead volume"]
   }
 ];
 

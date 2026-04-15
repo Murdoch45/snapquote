@@ -30,6 +30,11 @@ export function InviteSignupForm({ token }: { token: string }) {
       });
 
       if (signupError) {
+        if (signupError.message.toLowerCase().includes("already registered")) {
+          throw new Error(
+            "This email already has a SnapQuote account. Use a different email address to join this organization."
+          );
+        }
         throw signupError;
       }
 
