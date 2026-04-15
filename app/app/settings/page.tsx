@@ -1,7 +1,6 @@
 import {
   DeleteAccountCard,
   ReplayTourLink,
-  SignOutCard,
   SettingsForm
 } from "@/components/SettingsForm";
 import { requireAuth } from "@/lib/auth/requireAuth";
@@ -42,7 +41,6 @@ export default async function SettingsPage() {
         </a>
         {isOwner ? <ReplayTourLink /> : null}
       </section>
-      <SignOutCard />
       <DeleteAccountCard role={auth.role} />
     </div>
   );
