@@ -2,18 +2,39 @@ import Link from "next/link";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { LoginForm } from "@/components/auth/LoginForm";
 
-export default function LoginPage() {
+type LoginPageProps = {
+  searchParams: Promise<{
+    invite_token?: string;
+    email?: string;
+  }>;
+};
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
+  const { invite_token: inviteToken, email } = await searchParams;
+  const hasInviteToken = Boolean(inviteToken?.trim());
+
   return (
     <AuthShell
       title="Log in to SnapQuote"
-      description="Access your SnapQuote workspace."
+      description={
+        hasInviteToken
+          ? "Log in to accept your team invite."
+          : "Access your SnapQuote workspace."
+      }
       footer={
-        <>
-          Don&apos;t have an account? <Link href="/signup">Sign up</Link>
-        </>
+        hasInviteToken ? (
+          <>
+            Need a new account instead?{" "}
+            <Link href={`/invite/${encodeURIComponent(inviteToken!.trim())}`}>Back to your invite</Link>
+          </>
+        ) : (
+          <>
+            Don&apos;t have an account? <Link href="/signup">Sign up</Link>
+          </>
+        )
       }
     >
-      <LoginForm />
+      <LoginForm inviteToken={inviteToken} initialEmail={email} />
     </AuthShell>
   );
 }

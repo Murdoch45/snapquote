@@ -55,7 +55,7 @@ export default async function InvitePage({ params }: InvitePageProps) {
   return (
     <AuthShell
       title={`Join ${organization?.name ?? "your team"} on SnapQuote`}
-      description="Create your account to access the shared workspace."
+      description="Create your account or log in to access the shared workspace."
       footer={null}
     >
       <InviteSignupForm token={token} />

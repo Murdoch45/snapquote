@@ -10,10 +10,24 @@ function safeNextPath(value: string | null): string {
   return value;
 }
 
+function extractInviteTokenFromNext(value: string | null): string | null {
+  const next = safeNextPath(value);
+  const [pathname, query = ""] = next.split("?");
+
+  if (pathname !== "/invite/accept") {
+    return null;
+  }
+
+  const token = new URLSearchParams(query).get("token")?.trim();
+  return token || null;
+}
+
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
-  const next = safeNextPath(url.searchParams.get("next"));
+  const rawNext = url.searchParams.get("next");
+  const next = safeNextPath(rawNext);
+  const inviteToken = extractInviteTokenFromNext(rawNext);
   const errorParam = url.searchParams.get("error");
   const errorDescription = url.searchParams.get("error_description");
 
@@ -22,12 +36,18 @@ export async function GET(request: NextRequest) {
   if (errorParam) {
     const loginUrl = new URL("/login", url.origin);
     loginUrl.searchParams.set("oauth_error", errorDescription ?? errorParam);
+    if (inviteToken) {
+      loginUrl.searchParams.set("invite_token", inviteToken);
+    }
     return NextResponse.redirect(loginUrl);
   }
 
   if (!code) {
     const loginUrl = new URL("/login", url.origin);
     loginUrl.searchParams.set("oauth_error", "missing_code");
+    if (inviteToken) {
+      loginUrl.searchParams.set("invite_token", inviteToken);
+    }
     return NextResponse.redirect(loginUrl);
   }
 
@@ -37,6 +57,9 @@ export async function GET(request: NextRequest) {
   if (error) {
     const loginUrl = new URL("/login", url.origin);
     loginUrl.searchParams.set("oauth_error", error.message);
+    if (inviteToken) {
+      loginUrl.searchParams.set("invite_token", inviteToken);
+    }
     return NextResponse.redirect(loginUrl);
   }
 

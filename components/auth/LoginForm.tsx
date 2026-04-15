@@ -14,13 +14,22 @@ import { useOAuthLoadingReset } from "@/components/auth/useOAuthLoadingReset";
 
 type Provider = "google" | "apple";
 
-export function LoginForm() {
+type LoginFormProps = {
+  inviteToken?: string | null;
+  initialEmail?: string | null;
+};
+
+export function LoginForm({ inviteToken: inviteTokenProp, initialEmail }: LoginFormProps) {
   const router = useRouter();
   const supabase = createClient();
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(initialEmail?.trim() || "");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [loadingProvider, setLoadingProvider] = useState<Provider | null>(null);
+  const inviteToken = inviteTokenProp?.trim() || "";
+  const inviteAcceptPath = inviteToken
+    ? `/invite/accept?token=${encodeURIComponent(inviteToken)}`
+    : null;
 
   // Per-click reset timer. Every OAuth click installs a fresh 5s timeout that
   // wipes the loading state if the user is still on this page when it fires.
@@ -67,7 +76,7 @@ export function LoginForm() {
     }
 
     toast.success("Welcome back!");
-    router.replace("/dashboard");
+    router.replace(inviteAcceptPath ?? "/dashboard");
   };
 
   const handleOAuth = async (provider: Provider) => {
@@ -86,7 +95,9 @@ export function LoginForm() {
         // Point at the PKCE callback route, which exchanges ?code=... for a
         // session before forwarding to /app. Without this hop the user lands
         // on /app with no session and gets bounced to /login.
-        redirectTo: `${window.location.origin}/auth/callback?next=/app`
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(
+          inviteAcceptPath ?? "/app"
+        )}`
       }
     });
 

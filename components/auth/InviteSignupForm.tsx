@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
@@ -17,6 +17,15 @@ export function InviteSignupForm({ token }: { token: string }) {
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const loginHref = useMemo(() => {
+    const params = new URLSearchParams({ invite_token: token });
+    const nextEmail = email.trim();
+    if (nextEmail) {
+      params.set("email", nextEmail);
+    }
+
+    return `/login?${params.toString()}`;
+  }, [email, token]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -31,9 +40,9 @@ export function InviteSignupForm({ token }: { token: string }) {
 
       if (signupError) {
         if (signupError.message.toLowerCase().includes("already registered")) {
-          throw new Error(
-            "This email already has a SnapQuote account. Use a different email address to join this organization."
-          );
+          toast.warning("This email already has a SnapQuote account. Log in to accept this invite.");
+          router.replace(loginHref);
+          return;
         }
         throw signupError;
       }
@@ -96,8 +105,11 @@ export function InviteSignupForm({ token }: { token: string }) {
 
       <p className="text-center text-sm text-muted-foreground">
         Already have an account?{" "}
-        <Link href="/login" className="text-muted-foreground underline underline-offset-4 hover:text-foreground">
-          Log in
+        <Link
+          href={loginHref}
+          className="text-muted-foreground underline underline-offset-4 hover:text-foreground"
+        >
+          Log in to join this team
         </Link>
       </p>
 
