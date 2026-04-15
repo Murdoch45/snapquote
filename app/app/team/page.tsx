@@ -7,6 +7,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 export default async function TeamPage() {
   const auth = await requireAuth();
   const supabase = await createServerSupabaseClient();
+  const admin = createAdminClient();
 
   const [{ data: members }, { data: invites }] = await Promise.all([
     supabase
@@ -14,15 +15,14 @@ export default async function TeamPage() {
       .select("user_id, role, created_at")
       .eq("org_id", auth.orgId)
       .order("created_at", { ascending: true }),
-    supabase
+    admin
       .from("pending_invites")
-      .select("id, email, role, status, created_at, expires_at, token")
+      .select("id, email, role, status, created_at, expires_at")
       .eq("org_id", auth.orgId)
       .eq("status", "PENDING")
       .order("created_at", { ascending: false })
   ]);
 
-  const admin = createAdminClient();
   const membersWithEmail = await Promise.all(
     (members ?? []).map(async (member) => {
       const userResult = await admin.auth.admin.getUserById(member.user_id as string);

@@ -41,52 +41,33 @@ export async function POST(request: Request) {
     const body = acceptInviteSchema.parse(await request.json());
     const admin = createAdminClient();
 
-    const { data: invite } = await admin
-      .from("pending_invites")
-      .select("id,org_id,role,status,expires_at,used_at")
-      .eq("token", body.token)
-      .maybeSingle();
+    const { data: acceptedInvite, error: acceptError } = await admin.rpc(
+      "accept_invite_token",
+      {
+        p_token: body.token,
+        p_user_id: user.id,
+        p_user_email: user.email ?? null
+      }
+    );
 
-    if (!invite || invite.status !== "PENDING" || invite.used_at) {
-      return NextResponse.json({ error: "This invite link is no longer valid." }, { status: 400 });
+    if (acceptError) {
+      const message = acceptError.message || "Failed to accept invite.";
+      const status =
+        message === "This invite link is no longer valid." ||
+        message === "This invite link has expired." ||
+        message === "This account is already connected to a SnapQuote workspace." ||
+        message.includes("team member limit")
+          ? 400
+          : 500;
+
+      return NextResponse.json({ error: message }, { status });
     }
 
-    if (invite.expires_at && new Date(invite.expires_at as string) <= new Date()) {
-      return NextResponse.json({ error: "This invite link has expired." }, { status: 400 });
+    const invite = Array.isArray(acceptedInvite) ? acceptedInvite[0] : acceptedInvite;
+
+    if (!invite?.org_id) {
+      return NextResponse.json({ error: "Failed to accept invite." }, { status: 500 });
     }
-
-    const { data: existingMembership } = await admin
-      .from("organization_members")
-      .select("id")
-      .eq("user_id", user.id)
-      .limit(1)
-      .maybeSingle();
-
-    if (existingMembership) {
-      return NextResponse.json(
-        { error: "This account is already connected to a SnapQuote workspace." },
-        { status: 400 }
-      );
-    }
-
-    const { error: membershipError } = await admin.from("organization_members").insert({
-      org_id: invite.org_id,
-      user_id: user.id,
-      role: invite.role
-    });
-
-    if (membershipError) throw membershipError;
-
-    const { error: updateError } = await admin
-      .from("pending_invites")
-      .update({
-        email: user.email?.toLowerCase() ?? null,
-        status: "ACCEPTED",
-        used_at: new Date().toISOString()
-      })
-      .eq("id", invite.id);
-
-    if (updateError) throw updateError;
 
     void sendPushToOrg(invite.org_id as string, {
       title: "Team Member Joined",

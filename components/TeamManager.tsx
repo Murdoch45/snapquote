@@ -19,7 +19,6 @@ type Invite = {
   status: "PENDING" | "ACCEPTED" | "REVOKED";
   created_at: string;
   expires_at?: string | null;
-  token?: string | null;
 };
 
 type TeamManagerProps = {
