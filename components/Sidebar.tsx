@@ -204,7 +204,7 @@ function AccountSheet({
           type="button"
           onClick={handleSignOut}
           disabled={signingOut}
-          className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-[12px] border border-red-300 dark:border-red-700 bg-card px-5 py-3 text-sm font-semibold text-red-600 dark:text-red-400 transition-colors hover:bg-red-50 dark:hover:bg-red-950/30 disabled:opacity-60"
+          className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-[12px] bg-red-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-red-700 disabled:opacity-60"
         >
           <LogOut className="h-4 w-4" />
           {signingOut ? "Signing out..." : "Sign Out"}
