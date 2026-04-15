@@ -202,8 +202,10 @@ export function TeamManager({ isOwner, members, invites }: TeamManagerProps) {
                   >
                     Remove
                   </Button>
-                ) : (
+                ) : member.role === "OWNER" ? (
                   <p className="text-sm text-muted-foreground">Account owner</p>
+                ) : (
+                  <p className="text-sm text-muted-foreground">Team member</p>
                 )}
               </div>
             </div>
