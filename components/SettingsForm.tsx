@@ -771,44 +771,41 @@ export function SettingsForm({
   );
 }
 
-export function ReplayTourCard() {
+export function ReplayTourLink() {
   const router = useRouter();
   const [resetting, setResetting] = useState(false);
 
+  const handleReplay = async () => {
+    if (resetting) return;
+    setResetting(true);
+    try {
+      const res = await fetch("/api/onboarding/reset", { method: "POST" });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        toast.error(json.error || "Couldn't reset the tour.");
+        return;
+      }
+      router.push("/app");
+      router.refresh();
+    } catch {
+      toast.error("Couldn't reset the tour.");
+    } finally {
+      setResetting(false);
+    }
+  };
+
   return (
-    <section className="rounded-[14px] border border-border bg-card p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
-      <h2 className="text-base font-semibold text-foreground">Product tour</h2>
-      <p className="mt-2 text-sm text-muted-foreground">
-        Want a refresher on how SnapQuote works? Replay the guided tour you
-        saw when you first signed up.
-      </p>
-      <Button
+    <p className="mt-4 text-sm text-muted-foreground">
+      Need to see the tutorial again?{" "}
+      <button
         type="button"
-        variant="outline"
-        className="mt-4"
+        onClick={handleReplay}
         disabled={resetting}
-        onClick={async () => {
-          setResetting(true);
-          try {
-            const res = await fetch("/api/onboarding/reset", { method: "POST" });
-            const json = await res.json().catch(() => ({}));
-            if (!res.ok) {
-              toast.error(json.error || "Couldn't reset the tour.");
-              return;
-            }
-            toast.success("Tour reset — heading back to the dashboard.");
-            router.push("/app");
-            router.refresh();
-          } catch {
-            toast.error("Couldn't reset the tour.");
-          } finally {
-            setResetting(false);
-          }
-        }}
+        className="font-medium text-primary transition-colors hover:text-primary/90 disabled:opacity-60"
       >
-        {resetting ? "Resetting..." : "Replay product tour"}
-      </Button>
-    </section>
+        {resetting ? "Resetting..." : "Replay here"}
+      </button>
+    </p>
   );
 }
 

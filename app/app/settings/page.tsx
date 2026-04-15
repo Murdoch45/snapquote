@@ -1,6 +1,6 @@
 import {
   DeleteAccountCard,
-  ReplayTourCard,
+  ReplayTourLink,
   SignOutCard,
   SettingsForm
 } from "@/components/SettingsForm";
@@ -40,8 +40,8 @@ export default async function SettingsPage() {
         >
           support@snapquote.us
         </a>
+        {isOwner ? <ReplayTourLink /> : null}
       </section>
-      {isOwner ? <ReplayTourCard /> : null}
       <SignOutCard />
       <DeleteAccountCard role={auth.role} />
     </div>

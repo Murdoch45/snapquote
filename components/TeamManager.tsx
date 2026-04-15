@@ -131,10 +131,10 @@ export function TeamManager({ isOwner, members, invites }: TeamManagerProps) {
             </p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row">
-            <Button disabled={sharing || busy} onClick={share} variant="secondary">
+            <Button disabled={sharing || busy} onClick={share}>
               {sharing ? "Opening..." : "Share via text or email"}
             </Button>
-            <Button disabled={busy || sharing} onClick={invite}>
+            <Button disabled={busy || sharing} onClick={invite} variant="outline">
               {busy ? "Copying..." : "Copy Invite Link"}
             </Button>
           </div>
