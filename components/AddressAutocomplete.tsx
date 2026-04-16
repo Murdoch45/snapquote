@@ -102,6 +102,8 @@ export function AddressAutocomplete({
         ref={inputRef}
         value={value}
         required={required}
+        aria-required={required || undefined}
+        aria-describedby={`${inputId}-helper`}
         disabled={disabled}
         autoComplete="street-address"
         onChange={(e) => {
@@ -121,6 +123,9 @@ export function AddressAutocomplete({
         }
       />
       <p
+        id={`${inputId}-helper`}
+        role={invalid || loadError ? "alert" : undefined}
+        aria-live={invalid || loadError ? "polite" : undefined}
         className={
           variant === "public"
             ? `max-w-full break-words text-xs ${invalid || loadError ? "text-red-600 dark:text-red-400" : "text-muted-foreground"}`

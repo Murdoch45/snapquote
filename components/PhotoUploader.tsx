@@ -144,14 +144,16 @@ export function PhotoUploader({
           onChange={(e) => void onAddFiles(e.target.files)}
           className="hidden"
           id="photo-upload-input"
+          aria-label="Upload photos"
         />
         <Button
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={files.length >= maxFiles || compressing}
+          aria-disabled={files.length >= maxFiles || compressing}
           className="max-w-full"
         >
-          <UploadCloud className="mr-2 h-4 w-4" />
+          <UploadCloud aria-hidden="true" className="mr-2 h-4 w-4" />
           {compressing ? "Compressing..." : "Upload photos"}
         </Button>
       </div>
@@ -163,20 +165,25 @@ export function PhotoUploader({
               className="group relative min-w-0 max-w-full overflow-hidden rounded-[12px] border border-border bg-card"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={url} alt={file.name} className="h-24 w-full max-w-full object-cover" />
+              <img
+                src={url}
+                alt={`Uploaded photo ${index + 1}`}
+                className="h-24 w-full max-w-full object-cover"
+              />
               <button
                 type="button"
+                aria-label={`Remove uploaded photo ${index + 1}`}
                 className="absolute right-1 top-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-black/65 text-white opacity-0 transition group-hover:opacity-100"
                 onClick={() => setFiles(files.filter((_, i) => i !== index))}
               >
-                <X className="h-4 w-4" />
+                <X aria-hidden="true" className="h-4 w-4" />
               </button>
             </div>
           ))}
         </div>
       )}
       {required && files.length === 0 ? (
-        <p className="text-xs text-red-600 dark:text-red-400">At least one photo is required before submission.</p>
+        <p role="alert" aria-live="polite" className="text-xs text-red-600 dark:text-red-400">At least one photo is required before submission.</p>
       ) : null}
     </div>
   );

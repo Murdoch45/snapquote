@@ -34,6 +34,8 @@ export function ServiceQuestion({
   const selectedValues = parseQuestionAnswer(value);
   const isOtherSelected = selectedValues.includes("Other");
   const exclusiveOptions = new Set(question.exclusiveOptions ?? []);
+  const labelId = `${idPrefix}-${question.key}-label`;
+  const selectId = `${idPrefix}-${question.key}`;
 
   const updateCheckboxValue = (option: string, checked: boolean) => {
     if (disabled) return;
@@ -57,16 +59,31 @@ export function ServiceQuestion({
 
   return (
     <div
+      role={
+        question.inputType === "select"
+          ? undefined
+          : question.inputType === "checkbox"
+            ? "group"
+            : "radiogroup"
+      }
+      aria-labelledby={question.inputType === "select" ? undefined : labelId}
+      aria-required={question.inputType === "select" ? undefined : true}
       className={`min-w-0 max-w-full space-y-3 rounded-[12px] border border-border bg-card p-4 ${
         disabled ? "opacity-60" : ""
       }`}
     >
-      <Label className="text-[13px] font-semibold text-foreground">
+      <Label
+        id={labelId}
+        htmlFor={question.inputType === "select" ? selectId : undefined}
+        className="text-[13px] font-semibold text-foreground"
+      >
         {question.question} <span className="text-primary">*</span>
       </Label>
 
       {question.inputType === "select" ? (
         <select
+          id={selectId}
+          aria-required="true"
           disabled={disabled}
           value={typeof value === "string" ? value : ""}
           onChange={(event) => {
@@ -169,7 +186,11 @@ export function ServiceQuestion({
       ) : null}
 
       {helperText ? (
-        <p className={helperTone === "error" ? "text-xs text-red-600 dark:text-red-400" : "text-xs text-muted-foreground"}>
+        <p
+          role={helperTone === "error" ? "alert" : undefined}
+          aria-live={helperTone === "error" ? "polite" : undefined}
+          className={helperTone === "error" ? "text-xs text-red-600 dark:text-red-400" : "text-xs text-muted-foreground"}
+        >
           {helperText}
         </p>
       ) : null}

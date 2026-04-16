@@ -240,7 +240,11 @@ export function PublicLeadForm({ contractorSlug }: Props) {
 
   if (submitted) {
     return (
-      <div className="rounded-[12px] border border-[#BBF7D0] bg-green-50 dark:bg-green-950/30 p-6 text-center">
+      <div
+        role="status"
+        aria-live="polite"
+        className="rounded-[12px] border border-[#BBF7D0] bg-green-50 dark:bg-green-950/30 p-6 text-center"
+      >
         <p className="text-base font-semibold text-green-600 dark:text-green-400">
           Request sent - you will receive your estimate shortly.
         </p>
@@ -250,7 +254,12 @@ export function PublicLeadForm({ contractorSlug }: Props) {
 
   return (
     <>
-      <form className="min-w-0 max-w-full space-y-5" noValidate onSubmit={onSubmit}>
+      <form
+        aria-labelledby="lead-form-heading"
+        className="min-w-0 max-w-full space-y-5"
+        noValidate
+        onSubmit={onSubmit}
+      >
         <p className="text-xs text-muted-foreground">* Required fields</p>
         <AddressAutocomplete
           variant="public"
@@ -314,6 +323,7 @@ export function PublicLeadForm({ contractorSlug }: Props) {
               value={customerFirstName}
               onChange={(e) => setCustomerFirstName(e.target.value)}
               required
+              aria-required="true"
               className="h-auto rounded-[8px] border-border bg-card px-[14px] py-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-[rgba(37,99,235,0.1)]"
             />
           </div>
@@ -343,6 +353,7 @@ export function PublicLeadForm({ contractorSlug }: Props) {
             </Label>
             <Input
               id="customer-phone"
+              type="tel"
               value={customerPhone}
               onChange={(e) => setCustomerPhone(e.target.value)}
               className="h-auto rounded-[8px] border-border bg-card px-[14px] py-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-[rgba(37,99,235,0.1)]"
@@ -358,16 +369,17 @@ export function PublicLeadForm({ contractorSlug }: Props) {
           </Label>
           <Input
             id="customer-email"
-            type="text"
+            type="email"
             value={customerEmail}
             onChange={(e) => setCustomerEmail(e.target.value)}
             required
+            aria-required="true"
             className="h-auto rounded-[8px] border-border bg-card px-[14px] py-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-[rgba(37,99,235,0.1)]"
           />
         </div>
 
         {turnstileSiteKey ? (
-          <div className="pt-2">
+          <div aria-label="Bot verification challenge" className="pt-2">
             <Turnstile
               siteKey={turnstileSiteKey}
               onSuccess={(token) => setTurnstileToken(token)}
@@ -380,6 +392,8 @@ export function PublicLeadForm({ contractorSlug }: Props) {
         <Button
           className="mt-6 w-full rounded-[10px] py-3 text-base font-bold"
           disabled={!canSubmit || !turnstileToken || loading}
+          aria-disabled={!canSubmit || !turnstileToken || loading}
+          aria-live="polite"
         >
           {loading ? "Sending..." : "Get My Estimate"}
         </Button>

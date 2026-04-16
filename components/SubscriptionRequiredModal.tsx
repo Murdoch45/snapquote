@@ -19,13 +19,18 @@ export function SubscriptionRequiredModal({ open, onClose, variant = "contractor
   const isCustomer = variant === "customer";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 px-4">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="subscription-required-title"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 px-4"
+    >
       <div className="w-full max-w-[calc(100vw-2rem)] rounded-2xl border border-border bg-card p-4 shadow-2xl sm:max-w-md sm:p-6">
         <div className="space-y-3">
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-cyan-700">
             {isCustomer ? "Not Accepting Requests" : "Billing Required"}
           </p>
-          <h2 className="text-2xl font-semibold text-foreground">
+          <h2 id="subscription-required-title" className="text-2xl font-semibold text-foreground">
             {isCustomer
               ? "This contractor isn't accepting new requests right now."
               : "Your SnapQuote subscription is inactive."}

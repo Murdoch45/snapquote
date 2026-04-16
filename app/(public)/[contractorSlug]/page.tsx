@@ -26,7 +26,7 @@ export default async function ContractorPublicPage({ params }: Props) {
           <div className="mb-6">
             <BrandLogo size="sm" />
           </div>
-          <h1 className="mt-6 text-2xl font-bold text-foreground">
+          <h1 id="lead-form-heading" className="mt-6 text-2xl font-bold text-foreground">
             Request an Estimate from {profile.business_name}
           </h1>
           <p className="mb-6 mt-2 text-sm text-muted-foreground">

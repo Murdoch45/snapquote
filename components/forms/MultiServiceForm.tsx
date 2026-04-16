@@ -54,10 +54,18 @@ export function MultiServiceForm({
 
             {serviceEntry.service ? (
               <div className="min-w-0 max-w-full space-y-3 rounded-[12px] border border-border bg-card p-4">
-                <Label className="text-[13px] font-semibold text-foreground">
+                <Label
+                  id={`${idPrefix}-add-another-label`}
+                  className="text-[13px] font-semibold text-foreground"
+                >
                   Do you need help with another service? <span className="text-primary">*</span>
                 </Label>
-                <div className="space-y-2">
+                <div
+                  role="radiogroup"
+                  aria-labelledby={`${idPrefix}-add-another-label`}
+                  aria-required="true"
+                  className="space-y-2"
+                >
                   {[
                     { value: "no" as const, label: "No, continue" },
                     { value: "yes" as const, label: "Yes, add another service" }
