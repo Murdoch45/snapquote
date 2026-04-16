@@ -14,14 +14,49 @@ const syncSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("subscription"),
     plan: z.enum(["TEAM", "BUSINESS"]),
-    transactionId: z.string().min(1)
+    transactionId: z.string().min(1),
+    productId: z.string().min(1).optional()
   }),
   z.object({
     type: z.literal("credits"),
     creditAmount: z.number().int().positive(),
-    transactionId: z.string().min(1)
+    transactionId: z.string().min(1),
+    productId: z.string().min(1).optional()
   })
 ]);
+
+type SyncBody = z.infer<typeof syncSchema>;
+
+/**
+ * Mirror webhook-driven purchases into iap_subscription_events so mobile-
+ * initiated syncs leave the same audit trail. Event id is prefixed to avoid
+ * collisions with RevenueCat's own event ids; the RC webhook will still land
+ * its own row when it arrives, which is fine — both are legitimate records
+ * of the same transaction.
+ */
+async function logMobileSyncEvent(
+  admin: ReturnType<typeof createAdminClient>,
+  orgId: string,
+  body: SyncBody
+) {
+  const { error } = await admin.from("iap_subscription_events").insert({
+    org_id: orgId,
+    event_id: `mobile_sync_${body.transactionId}`,
+    event_type:
+      body.type === "subscription" ? "MOBILE_IAP_SYNC_SUBSCRIPTION" : "MOBILE_IAP_SYNC_CREDITS",
+    plan: body.type === "subscription" ? body.plan : null,
+    product_id: body.productId ?? null,
+    store: "app_store",
+    is_trial_period: null,
+    store_transaction_id: body.transactionId,
+    app_user_id: orgId,
+    raw_event: body
+  });
+
+  if (error) {
+    console.warn("iap/sync audit log insert failed:", error);
+  }
+}
 
 function addOneMonth(from = new Date()): Date {
   const next = new Date(from);
@@ -69,6 +104,8 @@ export async function POST(request: Request) {
 
       if (creditError) throw creditError;
 
+      await logMobileSyncEvent(admin, auth.orgId, body);
+
       return NextResponse.json({ ok: true, plan });
     }
 
@@ -82,6 +119,10 @@ export async function POST(request: Request) {
     if (error) throw error;
 
     const status = data === "already_processed" ? "already_processed" : "added";
+
+    if (status === "added") {
+      await logMobileSyncEvent(admin, auth.orgId, body);
+    }
 
     // Only email on first-time recording — re-syncs of the same transaction
     // (e.g. retry from the queue) shouldn't re-send the confirmation.

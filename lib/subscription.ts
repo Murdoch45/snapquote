@@ -19,6 +19,7 @@ export type OrganizationSubscriptionStatus = {
   trialEndDate: string | null;
   billingInterval: string | null;
   billingSource: BillingSource;
+  iapCancellationScheduledAt: string | null;
 };
 
 export class SubscriptionRequiredError extends Error {
@@ -55,6 +56,8 @@ export async function getOrganizationSubscriptionStatus(
     .map((member) => member.user_id as string | null)
     .filter((value): value is string => Boolean(value));
 
+  const iapCancellationScheduledAt = await getIapCancellationScheduledAt(admin, orgId);
+
   if (userIds.length === 0) {
     const billingSource = await resolveBillingSource(admin, orgId, 0);
     return {
@@ -64,7 +67,8 @@ export async function getOrganizationSubscriptionStatus(
       stripeSubscriptionId: null,
       trialEndDate: null,
       billingInterval: null,
-      billingSource
+      billingSource,
+      iapCancellationScheduledAt
     };
   }
 
@@ -93,7 +97,8 @@ export async function getOrganizationSubscriptionStatus(
       stripeSubscriptionId: null,
       trialEndDate: null,
       billingInterval: null,
-      billingSource
+      billingSource,
+      iapCancellationScheduledAt
     };
   }
 
@@ -121,8 +126,27 @@ export async function getOrganizationSubscriptionStatus(
     stripeSubscriptionId,
     trialEndDate,
     billingInterval: (current.billing_interval as string | null | undefined) ?? null,
-    billingSource
+    billingSource,
+    iapCancellationScheduledAt
   };
+}
+
+async function getIapCancellationScheduledAt(
+  admin: ReturnType<typeof createAdminClient>,
+  orgId: string
+): Promise<string | null> {
+  const { data, error } = await admin
+    .from("organizations")
+    .select("iap_cancellation_scheduled_at")
+    .eq("id", orgId)
+    .maybeSingle();
+
+  if (error) {
+    console.warn("Unable to read iap_cancellation_scheduled_at:", error);
+    return null;
+  }
+
+  return (data?.iap_cancellation_scheduled_at as string | null | undefined) ?? null;
 }
 
 async function resolveBillingSource(

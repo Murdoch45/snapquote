@@ -2,6 +2,9 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { timingSafeEqual } from "crypto";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { buildPaymentFailedEmail } from "@/lib/emailTemplates";
+import { sendEmail } from "@/lib/notify";
+import { getOwnerEmailForOrg } from "@/lib/organizationOwners";
 import { getPlanMonthlyCredits } from "@/lib/plans";
 import { sendPlanEndedEmail, sendPlanUpgradedEmail } from "@/lib/planChangeEmails";
 import { claimWebhookEvent, releaseWebhookEvent } from "@/lib/webhookEvents";
@@ -147,11 +150,17 @@ async function recordCreditPackPurchase(
   if (error) throw error;
 }
 
+type LogIapEventOptions = {
+  needsReview?: boolean;
+  reviewReason?: string;
+};
+
 async function logIapEvent(
   orgId: string | null,
   event: RevenueCatEvent,
   plan: OrgPlan | null,
-  raw: unknown
+  raw: unknown,
+  options: LogIapEventOptions = {}
 ) {
   const admin = createAdminClient();
   const { error } = await admin.from("iap_subscription_events").insert({
@@ -164,10 +173,42 @@ async function logIapEvent(
     is_trial_period: event.is_trial_period ?? null,
     store_transaction_id: event.transaction_id ?? event.original_transaction_id ?? null,
     app_user_id: event.app_user_id ?? null,
-    raw_event: raw
+    raw_event: raw,
+    needs_review: options.needsReview ?? false,
+    review_reason: options.reviewReason ?? null
   });
   if (error) {
     console.error("Failed to write iap_subscription_events row.", error);
+  }
+}
+
+async function setIapCancellationScheduled(orgId: string, scheduledAt: Date | null) {
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from("organizations")
+    .update({ iap_cancellation_scheduled_at: scheduledAt ? scheduledAt.toISOString() : null })
+    .eq("id", orgId);
+  if (error) {
+    console.warn("Failed to update iap_cancellation_scheduled_at:", error);
+  }
+}
+
+async function sendBillingIssueEmail(orgId: string) {
+  try {
+    const admin = createAdminClient();
+    const ownerEmail = await getOwnerEmailForOrg(admin, orgId);
+    if (!ownerEmail) return;
+
+    const email = buildPaymentFailedEmail();
+    await sendEmail({
+      to: ownerEmail,
+      subject: email.subject,
+      text: email.text,
+      html: email.html,
+      sender: "noreply"
+    });
+  } catch (error) {
+    console.warn("RC BILLING_ISSUE email send failed:", error);
   }
 }
 
@@ -209,15 +250,32 @@ export async function POST(request: Request) {
   try {
     const orgId = resolveOrgId(event);
     const planForLog = resolvePlanFromEvent(event);
-    await logIapEvent(orgId, event, planForLog, payload);
 
     if (!orgId) {
-      console.warn("RevenueCat event skipped: app_user_id is not a valid org UUID.", {
-        type: event.type,
-        appUserId: event.app_user_id
+      // Flag for manual review rather than silently dropping. Without this
+      // any purchase whose app_user_id isn't a valid org UUID (e.g. a race
+      // where the purchase happens before configureRevenueCat keyed the
+      // user to their org) would be permanently lost with no retry path.
+      await logIapEvent(null, event, planForLog, payload, {
+        needsReview: true,
+        reviewReason: "app_user_id_not_uuid"
       });
-      return NextResponse.json({ received: true, skipped: "no_org" });
+      console.warn("RevenueCat event flagged for review: app_user_id is not a valid org UUID.", {
+        type: event.type,
+        appUserId: event.app_user_id,
+        eventId: event.id
+      });
+      return NextResponse.json({ received: true, needs_review: true, reason: "no_org" });
     }
+
+    // Some event types are worth flagging for review even when the org
+    // resolves cleanly (BILLING_ISSUE needs operator awareness if Apple's
+    // retry attempts eventually exhaust without recovery).
+    const logOptions: LogIapEventOptions =
+      event.type === "BILLING_ISSUE"
+        ? { needsReview: true, reviewReason: "billing_issue" }
+        : {};
+    await logIapEvent(orgId, event, planForLog, payload, logOptions);
 
     switch (event.type) {
       case "INITIAL_PURCHASE": {
@@ -252,7 +310,35 @@ export async function POST(request: Request) {
         }
         await setOrganizationPlan(orgId, plan);
         await resetOrganizationCredits(orgId, plan);
+        // Successful renewal clears any prior cancellation-scheduled state.
+        await setIapCancellationScheduled(orgId, null);
         void sendPlanUpgradedEmail(orgId, plan);
+        break;
+      }
+
+      case "CANCELLATION": {
+        // User has cancelled but the subscription remains active until
+        // expiration_at_ms. Record the scheduled-cancellation timestamp so
+        // the UI can render a banner; do NOT change the plan yet.
+        const scheduledAt = event.expiration_at_ms
+          ? new Date(event.expiration_at_ms)
+          : new Date();
+        await setIapCancellationScheduled(orgId, scheduledAt);
+        break;
+      }
+
+      case "UNCANCELLATION": {
+        // User reactivated before period end — clear the scheduled flag.
+        await setIapCancellationScheduled(orgId, null);
+        break;
+      }
+
+      case "BILLING_ISSUE": {
+        // RevenueCat's equivalent of Stripe past_due: the renewal charge
+        // failed but Apple will keep retrying. Notify the owner but leave
+        // the plan in place so we don't kick them off for a transient card
+        // issue. Audit row is already flagged needs_review above.
+        void sendBillingIssueEmail(orgId);
         break;
       }
 
@@ -285,6 +371,7 @@ export async function POST(request: Request) {
         const previousPlan = await getCurrentOrgPlan(orgId);
         await setOrganizationPlan(orgId, "SOLO");
         await resetOrganizationCredits(orgId, "SOLO");
+        await setIapCancellationScheduled(orgId, null);
         if (previousPlan && previousPlan !== "SOLO") {
           void sendPlanEndedEmail(orgId, previousPlan);
         }

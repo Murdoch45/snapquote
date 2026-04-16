@@ -23,7 +23,8 @@ export async function GET(request: Request) {
       plan: status.plan,
       status: status.status,
       trialEndDate: status.trialEndDate,
-      billingSource: status.billingSource
+      billingSource: status.billingSource,
+      iapCancellationScheduledAt: status.iapCancellationScheduledAt
     });
   } catch (error) {
     return NextResponse.json(
