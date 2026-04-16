@@ -1,6 +1,7 @@
 import "server-only";
-import { startOfDay, subDays } from "date-fns";
+import { subDays } from "date-fns";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import type { AnalyticsResponse } from "@/lib/analyticsTypes";
 
 export type OrgContext = {
   userId: string;
@@ -29,114 +30,49 @@ export async function getOrgContext(): Promise<OrgContext | null> {
   };
 }
 
-function makeDateMap(days = 30): Record<string, number> {
-  const map: Record<string, number> = {};
-  for (let i = days - 1; i >= 0; i -= 1) {
-    const date = startOfDay(subDays(new Date(), i)).toISOString().slice(0, 10);
-    map[date] = 0;
-  }
-  return map;
-}
+// Fixed 30-day window on web to preserve the existing UI contract. The
+// mobile client passes its own range; if web ever grows a range picker it
+// can swap these two dates for user-supplied values.
+const WEB_ANALYTICS_WINDOW_DAYS = 30;
 
-export async function getAnalytics(orgId: string) {
-  const supabase = await createServerSupabaseClient();
-  const since = subDays(new Date(), 30).toISOString();
-
-  const [{ data: leads }, { data: quotes }] = await Promise.all([
-    supabase
-      .from("leads")
-      .select("id,submitted_at,services,status")
-      .eq("org_id", orgId)
-      .eq("ai_status", "ready")
-      .gte("submitted_at", since),
-    supabase
-      .from("quotes")
-      .select("id,price,sent_at,accepted_at,lead_id,status")
-      .eq("org_id", orgId)
-      .gte("sent_at", since)
-  ]);
-
-  const leadRows = leads ?? [];
-  const quoteRows = quotes ?? [];
-  const acceptedRows = quoteRows.filter((q) => q.status === "ACCEPTED");
-  const quotesSent = quoteRows.length;
-  const avgQuoteValue =
-    quoteRows.length === 0
-      ? 0
-      : quoteRows.reduce((acc, row) => acc + Number(row.price || 0), 0) / quoteRows.length;
-  const acceptanceRate = quotesSent === 0 ? 0 : acceptedRows.length / quotesSent;
-
-  const leadByDay = makeDateMap(30);
-  leadRows.forEach((row) => {
-    const day = new Date(row.submitted_at).toISOString().slice(0, 10);
-    if (leadByDay[day] !== undefined) leadByDay[day] += 1;
-  });
-
-  const quoteByDay = makeDateMap(30);
-  quoteRows.forEach((row) => {
-    const day = new Date(row.sent_at).toISOString().slice(0, 10);
-    if (quoteByDay[day] !== undefined) quoteByDay[day] += 1;
-  });
-
-  const acceptByDay = makeDateMap(30);
-  acceptedRows.forEach((row) => {
-    if (!row.accepted_at) return;
-    const day = new Date(row.accepted_at).toISOString().slice(0, 10);
-    if (acceptByDay[day] !== undefined) acceptByDay[day] += 1;
-  });
-
-  const acceptanceSeries = Object.keys(quoteByDay).map((day) => {
-    const sent = quoteByDay[day];
-    const accepted = acceptByDay[day];
-    return {
-      date: day,
-      rate: sent === 0 ? 0 : Number(((accepted / sent) * 100).toFixed(1))
-    };
-  });
-
-  const servicesCount: Record<string, number> = {};
-  leadRows.forEach((row) => {
-    (row.services as string[]).forEach((service) => {
-      servicesCount[service] = (servicesCount[service] ?? 0) + 1;
-    });
-  });
-
-  const avgResponseMinutes = await getAverageResponseMinutes(orgId);
-
-  return {
-    totals: {
-      totalLeads: leadRows.length,
-      quotesSent,
-      quotesAccepted: acceptedRows.length,
-      acceptanceRate: Number((acceptanceRate * 100).toFixed(1)),
-      avgQuoteValue: Number(avgQuoteValue.toFixed(2)),
-      avgResponseMinutes
-    },
-    leadsOverTime: Object.entries(leadByDay).map(([date, count]) => ({ date, count })),
-    quotesOverTime: Object.entries(quoteByDay).map(([date, count]) => ({ date, count })),
-    acceptanceRateOverTime: acceptanceSeries,
-    servicesBreakdown: Object.entries(servicesCount).map(([name, value]) => ({ name, value }))
+/**
+ * Pull the analytics snapshot for an org. All aggregation happens inside
+ * the get_org_analytics Postgres RPC (see migration 0052) so the web and
+ * mobile clients agree on the numbers. This helper is a thin wrapper that
+ * supplies the web's fixed 30-day window and 'UTC' bucketing.
+ */
+type WebAnalytics = Omit<AnalyticsResponse, "totals"> & {
+  totals: Omit<AnalyticsResponse["totals"], "avgResponseMinutes"> & {
+    // The RPC returns null when there are no qualifying responses in the
+    // window. The web UI (app/app/page.tsx formatResponseTime) was written
+    // before nullability — it treats 0 as "no data". Coerce at the data
+    // layer to preserve the existing UI contract without a UI change.
+    avgResponseMinutes: number;
   };
-}
+};
 
-export async function getAverageResponseMinutes(orgId: string): Promise<number> {
+export async function getAnalytics(orgId: string): Promise<WebAnalytics> {
   const supabase = await createServerSupabaseClient();
-  const { data } = await supabase
-    .from("quotes")
-    .select("sent_at,lead:leads(submitted_at)")
-    .eq("org_id", orgId);
+  const end = new Date();
+  const start = subDays(end, WEB_ANALYTICS_WINDOW_DAYS);
 
-  if (!data || data.length === 0) return 0;
+  const { data, error } = await supabase.rpc("get_org_analytics", {
+    p_org_id: orgId,
+    p_start_date: start.toISOString(),
+    p_end_date: end.toISOString(),
+    p_timezone: "UTC"
+  });
 
-  const diffs = data
-    .map((row) => {
-      const submitted = (Array.isArray(row.lead) ? row.lead[0] : row.lead)?.submitted_at;
-      if (!submitted) return null;
-      const ms = new Date(row.sent_at).getTime() - new Date(submitted).getTime();
-      return ms > 0 ? ms / 60000 : null;
-    })
-    .filter((value): value is number => value !== null);
+  if (error) {
+    throw new Error(`Analytics query failed: ${error.message}`);
+  }
 
-  if (diffs.length === 0) return 0;
-  return Number((diffs.reduce((a, b) => a + b, 0) / diffs.length).toFixed(1));
+  const raw = data as AnalyticsResponse;
+  return {
+    ...raw,
+    totals: {
+      ...raw.totals,
+      avgResponseMinutes: raw.totals.avgResponseMinutes ?? 0
+    }
+  };
 }
