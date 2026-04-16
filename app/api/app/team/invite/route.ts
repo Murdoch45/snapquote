@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { requireOwnerForApi } from "@/lib/auth/requireRole";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { deleteExpiredPendingInvites } from "@/lib/teamInvites";
+import {
+  SeatLimitReachedError,
+  assertSeatAvailable,
+  deleteExpiredPendingInvites
+} from "@/lib/teamInvites";
 import { getAppUrl } from "@/lib/utils";
 import { inviteTeamSchema } from "@/lib/validations";
 
@@ -22,6 +26,10 @@ export async function POST(request: Request) {
       .maybeSingle();
 
     if (!existingInvite) {
+      // Preventive seat check — skipped when re-sending an existing invite,
+      // since that doesn't add a new seat claim.
+      await assertSeatAvailable(admin, auth.orgId);
+
       const { error: inviteError } = await admin.from("pending_invites").insert({
         org_id: auth.orgId,
         email: body.email.toLowerCase(),
@@ -38,6 +46,12 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ ok: true });
   } catch (error) {
+    if (error instanceof SeatLimitReachedError) {
+      return NextResponse.json(
+        { error: error.message, code: error.code },
+        { status: error.statusCode }
+      );
+    }
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Failed to invite member." },
       { status: 400 }

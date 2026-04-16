@@ -112,9 +112,35 @@ export default async function PlanPage({ searchParams }: Props) {
     { label: subscription.active ? "Billing is active" : subscriptionStatusLabel, positive: subscription.active }
   ];
 
+  const isOverSeatLimit = usersUsed > usersLimit;
+
   return (
     <div className="mx-auto max-w-5xl space-y-6">
       <CreditsAddedToast enabled={params.credits === "added"} />
+
+      {isOverSeatLimit ? (
+        <Card className="border-destructive/40 bg-destructive/5 shadow-none">
+          <CardContent className="flex items-start gap-3 py-5">
+            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
+            <div className="space-y-1 text-sm">
+              <p className="font-semibold text-foreground">
+                Over seat limit ({usersUsed}/{usersLimit})
+              </p>
+              <p className="text-muted-foreground">
+                Your organization has more members than the {formatPlanName(plan)} plan allows.
+                All members keep access for now, but you can&apos;t invite anyone new until you
+                remove {usersUsed - usersLimit}{" "}
+                {usersUsed - usersLimit === 1 ? "member" : "members"} or upgrade.
+              </p>
+              <div className="pt-1">
+                <Link href="/app/team" className="font-medium text-primary hover:text-primary/90">
+                  Manage team →
+                </Link>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
 
       <Card className="shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
         <CardHeader className="pb-4">

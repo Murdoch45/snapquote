@@ -2,7 +2,11 @@ import { randomBytes } from "crypto";
 import { NextResponse } from "next/server";
 import { requireOwnerForApi } from "@/lib/auth/requireRole";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { deleteExpiredPendingInvites } from "@/lib/teamInvites";
+import {
+  SeatLimitReachedError,
+  assertSeatAvailable,
+  deleteExpiredPendingInvites
+} from "@/lib/teamInvites";
 import { getAppUrl } from "@/lib/utils";
 
 function makeInviteToken() {
@@ -16,6 +20,7 @@ export async function POST(request: Request) {
   try {
     const admin = createAdminClient();
     await deleteExpiredPendingInvites(admin, auth.orgId);
+    await assertSeatAvailable(admin, auth.orgId);
 
     const token = makeInviteToken();
     const expiresAt = new Date();
@@ -38,6 +43,12 @@ export async function POST(request: Request) {
       inviteUrl: `${getAppUrl()}/invite/${token}`
     });
   } catch (error) {
+    if (error instanceof SeatLimitReachedError) {
+      return NextResponse.json(
+        { error: error.message, code: error.code },
+        { status: error.statusCode }
+      );
+    }
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Failed to create invite link." },
       { status: 400 }
