@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ActivityTracker } from "@/components/ActivityTracker";
 import { AppShell } from "@/components/AppShell";
 import { OnboardingTour } from "@/components/OnboardingTour";
 import { UpgradeBanner } from "@/components/UpgradeBanner";
@@ -39,6 +40,7 @@ export default async function AppLayout({
 
   return (
     <>
+      <ActivityTracker />
       <OnboardingTour
         enabled={!Boolean(organization?.onboarding_completed)}
         slug={profile?.public_slug as string | null | undefined}

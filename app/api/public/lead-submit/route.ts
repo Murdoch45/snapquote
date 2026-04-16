@@ -37,6 +37,7 @@ function parseJsonField<T>(input: FormDataEntryValue | null, fallback: T): T {
 }
 
 const ONE_HOUR = 60 * 60 * 1000;
+const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
 export async function POST(request: Request) {
   try {
@@ -116,6 +117,35 @@ export async function POST(request: Request) {
     }
 
     const orgId = contractor.org_id as string;
+
+    // 30-day inactivity gate for Solo plans. Paid plans (TEAM/BUSINESS) are
+    // always accepted; cancelled/expired subscriptions get downgraded to SOLO
+    // by the subscription lifecycle, so no separate "expired" branch is
+    // needed — they fall through this same check.
+    const { data: gateOrg, error: gateOrgError } = await admin
+      .from("organizations")
+      .select("plan,last_active_at")
+      .eq("id", orgId)
+      .single();
+
+    if (gateOrgError || !gateOrg) {
+      throw gateOrgError ?? new Error("Organization not found.");
+    }
+
+    if ((gateOrg.plan as string) === "SOLO") {
+      const lastActiveIso = gateOrg.last_active_at as string | null;
+      const lastActiveMs = lastActiveIso ? new Date(lastActiveIso).getTime() : 0;
+      if (!lastActiveMs || Date.now() - lastActiveMs > THIRTY_DAYS_MS) {
+        return NextResponse.json(
+          {
+            error:
+              "This contractor isn't accepting new requests right now. Please reach out to them directly.",
+            code: "SUBSCRIPTION_INACTIVE"
+          },
+          { status: 402 }
+        );
+      }
+    }
 
     const travelDistanceMiles =
       !contractor.travel_pricing_disabled &&

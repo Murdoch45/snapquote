@@ -1,3 +1,4 @@
+import { ActivityTracker } from "@/components/ActivityTracker";
 import { AppShell } from "@/components/AppShell";
 import { MyLinkPageClient } from "@/components/MyLinkPageClient";
 import { UpgradeBanner } from "@/components/UpgradeBanner";
@@ -32,6 +33,7 @@ export default async function MyLinkPage() {
         orgId={auth.orgId}
         businessName={(profile?.business_name as string) ?? "SnapQuote"}
       >
+        <ActivityTracker />
         <UpgradeBanner {...usage} />
         <p className="text-sm text-red-600">Contractor profile not found.</p>
       </AppShell>
@@ -46,6 +48,7 @@ export default async function MyLinkPage() {
 
   return (
     <AppShell email={user?.email} orgId={auth.orgId} businessName={businessName}>
+      <ActivityTracker />
       <UpgradeBanner {...usage} />
       <MyLinkPageClient
         businessName={businessName}

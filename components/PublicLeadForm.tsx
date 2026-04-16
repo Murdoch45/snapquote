@@ -387,6 +387,7 @@ export function PublicLeadForm({ contractorSlug }: Props) {
       <SubscriptionRequiredModal
         open={showSubscriptionModal}
         onClose={() => setShowSubscriptionModal(false)}
+        variant="customer"
       />
     </>
   );
