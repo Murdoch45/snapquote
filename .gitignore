@@ -35,3 +35,6 @@ tsconfig.tsbuildinfo
 # supabase CLI cache
 supabase/.temp/
 supabase/.branches/
+
+# claude code workspace config
+.claude/
