@@ -28,8 +28,7 @@ const patchSettingsSchema = z
     notification_lead_email: z.boolean().optional(),
     notification_lead_sms: z.boolean().optional(),
     notification_accept_email: z.boolean().optional(),
-    notification_accept_sms: z.boolean().optional(),
-    social_caption: optionalNullableString(5000)
+    notification_accept_sms: z.boolean().optional()
   })
   .refine((value) => Object.keys(value).length > 0, {
     message: "No settings changes were provided."
@@ -109,9 +108,6 @@ export async function PATCH(request: Request) {
     }
     if ("notification_accept_sms" in body) {
       updatePayload.notification_accept_sms = body.notification_accept_sms;
-    }
-    if ("social_caption" in body) {
-      updatePayload.social_caption = body.social_caption?.trim() || null;
     }
 
     const { data: updated, error } = await admin

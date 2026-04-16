@@ -8,12 +8,44 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { SOCIAL_CAPTION_MAX_LENGTH } from "@/lib/socialCaption";
 
 type Props = {
   businessName: string;
   requestLink: string;
   initialSocialCaption: string;
+  canEditCaption: boolean;
 };
+
+type SaveError = {
+  kind: "permission" | "validation" | "server" | "network";
+  message: string;
+};
+
+function classifyFetchError(status: number, serverMessage?: string): SaveError {
+  if (status === 401 || status === 403) {
+    return {
+      kind: "permission",
+      message: "You don't have permission to edit this caption."
+    };
+  }
+  if (status === 400) {
+    return {
+      kind: "validation",
+      message: serverMessage || "We couldn't save that caption. Check the content and try again."
+    };
+  }
+  if (status >= 500) {
+    return {
+      kind: "server",
+      message: "Something went wrong on our end. Try again in a moment."
+    };
+  }
+  return {
+    kind: "server",
+    message: serverMessage || "We couldn't save your caption. Try again."
+  };
+}
 
 function fallbackCopy(text: string): boolean {
   const textarea = document.createElement("textarea");
@@ -47,7 +79,8 @@ async function copyText(text: string) {
 export function MyLinkPageClient({
   businessName,
   requestLink,
-  initialSocialCaption
+  initialSocialCaption,
+  canEditCaption
 }: Props) {
   const qrCodeRef = useRef<HTMLCanvasElement | null>(null);
   const captionTextareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -55,6 +88,7 @@ export function MyLinkPageClient({
   const [draftCaption, setDraftCaption] = useState(initialSocialCaption);
   const [savingCaption, setSavingCaption] = useState(false);
   const [isEditingCaption, setIsEditingCaption] = useState(false);
+  const [saveError, setSaveError] = useState<SaveError | null>(null);
 
   useEffect(() => {
     setSocialCaption(initialSocialCaption);
@@ -117,6 +151,7 @@ export function MyLinkPageClient({
 
   const onSaveCaption = async () => {
     setSavingCaption(true);
+    setSaveError(null);
 
     try {
       const response = await fetch("/api/app/my-link/caption", {
@@ -126,17 +161,23 @@ export function MyLinkPageClient({
         },
         body: JSON.stringify({ socialCaption: draftCaption })
       });
-      const json = (await response.json()) as { error?: string };
+      const json = (await response
+        .json()
+        .catch(() => ({}))) as { error?: string };
 
       if (!response.ok) {
-        throw new Error(json.error || "Could not save caption.");
+        setSaveError(classifyFetchError(response.status, json.error));
+        return;
       }
 
       setSocialCaption(draftCaption);
       setIsEditingCaption(false);
       toast.success("Caption saved.");
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not save caption.");
+    } catch {
+      setSaveError({
+        kind: "network",
+        message: "We couldn't reach the server. Check your connection and try again."
+      });
     } finally {
       setSavingCaption(false);
     }
@@ -145,11 +186,13 @@ export function MyLinkPageClient({
   const onStartEditingCaption = () => {
     setDraftCaption(socialCaption);
     setIsEditingCaption(true);
+    setSaveError(null);
   };
 
   const onCancelEditingCaption = () => {
     setDraftCaption(socialCaption);
     setIsEditingCaption(false);
+    setSaveError(null);
   };
 
   const onDownloadQrCode = () => {
@@ -217,9 +260,12 @@ export function MyLinkPageClient({
 
       <Card className="shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
         <CardHeader className="pb-4">
-          <p className="text-xs font-medium uppercase tracking-[0.05em] text-muted-foreground">
+          <label
+            htmlFor="social-caption"
+            className="text-xs font-medium uppercase tracking-[0.05em] text-muted-foreground"
+          >
             Social Caption
-          </p>
+          </label>
           <CardDescription>Ready-to-post copy for social or text messages</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -231,10 +277,14 @@ export function MyLinkPageClient({
             }
           >
             <Textarea
+              id="social-caption"
               ref={captionTextareaRef}
               value={isEditingCaption ? draftCaption : socialCaption}
               onChange={(event) => setDraftCaption(event.target.value)}
               readOnly={!isEditingCaption}
+              maxLength={SOCIAL_CAPTION_MAX_LENGTH}
+              aria-describedby="social-caption-counter"
+              aria-invalid={saveError ? true : undefined}
               className={
                 isEditingCaption
                 ? "min-h-[100px] resize-none rounded-[8px] border-2 border-primary bg-card px-[14px] py-3 text-sm text-foreground shadow-[0_0_0_3px_rgba(37,99,235,0.1)] focus-visible:ring-0"
@@ -242,6 +292,23 @@ export function MyLinkPageClient({
               }
             />
           </div>
+          <div className="flex items-center justify-end">
+            <span
+              id="social-caption-counter"
+              className="text-xs tabular-nums text-muted-foreground"
+              aria-live="polite"
+            >
+              {(isEditingCaption ? draftCaption : socialCaption).length} / {SOCIAL_CAPTION_MAX_LENGTH}
+            </span>
+          </div>
+          {saveError ? (
+            <div
+              role="alert"
+              className="rounded-[8px] border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-300"
+            >
+              {saveError.message}
+            </div>
+          ) : null}
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
             <Button
               type="button"
@@ -251,34 +318,36 @@ export function MyLinkPageClient({
               <Copy className="mr-2 h-4 w-4" />
               Copy Caption
             </Button>
-            {isEditingCaption ? (
-              <>
+            {canEditCaption ? (
+              isEditingCaption ? (
+                <>
+                  <Button
+                    type="button"
+                    className="w-full sm:min-w-[160px] sm:w-auto"
+                    onClick={onSaveCaption}
+                    disabled={savingCaption}
+                  >
+                    {savingCaption ? "Saving..." : "Save Caption"}
+                  </Button>
+                  <button
+                    type="button"
+                    onClick={onCancelEditingCaption}
+                    className="w-full text-sm font-medium text-muted-foreground transition-colors hover:text-foreground sm:min-w-[160px] sm:w-auto"
+                  >
+                    Cancel
+                  </button>
+                </>
+              ) : (
                 <Button
                   type="button"
-                  className="w-full sm:min-w-[160px] sm:w-auto"
-                  onClick={onSaveCaption}
-                  disabled={savingCaption}
+                  variant="outline"
+                  className="w-full border-2 border-primary bg-transparent text-primary hover:bg-accent sm:min-w-[160px] sm:w-auto"
+                  onClick={onStartEditingCaption}
                 >
-                  {savingCaption ? "Saving..." : "Save Caption"}
+                  Edit Caption
                 </Button>
-                <button
-                  type="button"
-                  onClick={onCancelEditingCaption}
-                  className="w-full text-sm font-medium text-muted-foreground transition-colors hover:text-foreground sm:min-w-[160px] sm:w-auto"
-                >
-                  Cancel
-                </button>
-              </>
-            ) : (
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full border-2 border-primary bg-transparent text-primary hover:bg-accent sm:min-w-[160px] sm:w-auto"
-                onClick={onStartEditingCaption}
-              >
-                Edit Caption
-              </Button>
-            )}
+              )
+            ) : null}
           </div>
         </CardContent>
       </Card>
