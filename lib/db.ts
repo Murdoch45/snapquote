@@ -1,5 +1,6 @@
 import "server-only";
-import { subDays } from "date-fns";
+import { unstable_cache } from "next/cache";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { AnalyticsResponse } from "@/lib/analyticsTypes";
 
@@ -30,17 +31,29 @@ export async function getOrgContext(): Promise<OrgContext | null> {
   };
 }
 
-// Fixed 30-day window on web to preserve the existing UI contract. The
-// mobile client passes its own range; if web ever grows a range picker it
-// can swap these two dates for user-supplied values.
-const WEB_ANALYTICS_WINDOW_DAYS = 30;
+export type AnalyticsRange = "30d" | "90d" | "ytd" | "all";
 
-/**
- * Pull the analytics snapshot for an org. All aggregation happens inside
- * the get_org_analytics Postgres RPC (see migration 0052) so the web and
- * mobile clients agree on the numbers. This helper is a thin wrapper that
- * supplies the web's fixed 30-day window and 'UTC' bucketing.
- */
+export const ANALYTICS_RANGES: AnalyticsRange[] = ["30d", "90d", "ytd", "all"];
+
+export function isAnalyticsRange(value: string | undefined): value is AnalyticsRange {
+  return value === "30d" || value === "90d" || value === "ytd" || value === "all";
+}
+
+function getStartDate(range: AnalyticsRange, now: Date): Date | null {
+  switch (range) {
+    case "30d":
+      return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    case "90d":
+      return new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+    case "ytd":
+      // Jan 1 UTC. The RPC rebuckets against the tz we pass ('UTC' on
+      // web) so day labels line up with the UTC calendar.
+      return new Date(Date.UTC(now.getUTCFullYear(), 0, 1));
+    case "all":
+      return null;
+  }
+}
+
 type WebAnalytics = Omit<AnalyticsResponse, "totals"> & {
   totals: Omit<AnalyticsResponse["totals"], "avgResponseMinutes"> & {
     // The RPC returns null when there are no qualifying responses in the
@@ -51,15 +64,25 @@ type WebAnalytics = Omit<AnalyticsResponse, "totals"> & {
   };
 };
 
-export async function getAnalytics(orgId: string): Promise<WebAnalytics> {
-  const supabase = await createServerSupabaseClient();
-  const end = new Date();
-  const start = subDays(end, WEB_ANALYTICS_WINDOW_DAYS);
+const ANALYTICS_CACHE_TTL_SECONDS = 300;
 
-  const { data, error } = await supabase.rpc("get_org_analytics", {
+async function fetchAnalyticsFromRpc(
+  orgId: string,
+  range: AnalyticsRange
+): Promise<WebAnalytics> {
+  // Uses the service-role admin client because unstable_cache closures
+  // can't read cookies/headers. Safe here because every caller below has
+  // already run requireAuth() to confirm the user is a member of orgId.
+  // Migration 0053 lets the RPC skip its is_org_member gate when
+  // auth.uid() IS NULL (service role) — see comment on that migration.
+  const admin = createAdminClient();
+  const now = new Date();
+  const start = getStartDate(range, now);
+
+  const { data, error } = await admin.rpc("get_org_analytics", {
     p_org_id: orgId,
-    p_start_date: start.toISOString(),
-    p_end_date: end.toISOString(),
+    p_start_date: start ? start.toISOString() : null,
+    p_end_date: now.toISOString(),
     p_timezone: "UTC"
   });
 
@@ -75,4 +98,28 @@ export async function getAnalytics(orgId: string): Promise<WebAnalytics> {
       avgResponseMinutes: raw.totals.avgResponseMinutes ?? 0
     }
   };
+}
+
+/**
+ * Pull the analytics snapshot for an org. Aggregation happens inside the
+ * get_org_analytics Postgres RPC (migration 0052); responses are cached
+ * with a 5-minute TTL keyed on orgId + range so repeated views of the
+ * page within that window don't re-run the aggregation.
+ *
+ * The cache TTL is short enough that contractors see fresh-ish data on
+ * browser refresh and long enough to meaningfully reduce DB load.
+ */
+export async function getAnalytics(
+  orgId: string,
+  range: AnalyticsRange = "30d"
+): Promise<WebAnalytics> {
+  const cached = unstable_cache(
+    () => fetchAnalyticsFromRpc(orgId, range),
+    ["analytics-rpc", orgId, range],
+    {
+      revalidate: ANALYTICS_CACHE_TTL_SECONDS,
+      tags: [`analytics:${orgId}`]
+    }
+  );
+  return cached();
 }

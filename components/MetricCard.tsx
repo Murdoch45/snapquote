@@ -16,8 +16,10 @@ export function MetricCard({
           {title}
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <p className="text-4xl font-bold leading-none text-foreground">{value}</p>
+      <CardContent className="min-w-0">
+        <p className="truncate text-2xl font-bold leading-none tabular-nums text-foreground sm:text-3xl md:text-4xl">
+          {value}
+        </p>
         {subtext ? <p className="mt-3 text-sm text-muted-foreground">{subtext}</p> : null}
       </CardContent>
     </Card>

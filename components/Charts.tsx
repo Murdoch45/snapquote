@@ -18,6 +18,7 @@ import {
   YAxis
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { AnalyticsRange } from "@/lib/db";
 import { getServiceChartColor } from "@/lib/serviceColors";
 
 type Props = {
@@ -25,6 +26,45 @@ type Props = {
   quotesOverTime: { date: string; count: number }[];
   acceptanceRateOverTime: { date: string; rate: number }[];
   servicesBreakdown: { name: string; value: number }[];
+  range: AnalyticsRange;
+};
+
+// Chart labels only — the underlying data stays daily in every range.
+// We let Recharts' minTickGap auto-thin ticks to whatever fits horizontally,
+// and we swap to "MMM yyyy" formatting when the range is long enough that
+// month-year labels are more useful than a month-day tick.
+function getTickFormatter(range: AnalyticsRange) {
+  const useMonthYear = range === "ytd" || range === "all";
+  return (value: string) => {
+    const parsed = new Date(`${value}T00:00:00Z`);
+    if (Number.isNaN(parsed.getTime())) return value;
+    return new Intl.DateTimeFormat("en-US", {
+      timeZone: "UTC",
+      ...(useMonthYear
+        ? { month: "short", year: "2-digit" }
+        : { month: "short", day: "numeric" })
+    }).format(parsed);
+  };
+}
+
+function getTooltipLabelFormatter() {
+  return (value: string) => {
+    const parsed = new Date(`${value}T00:00:00Z`);
+    if (Number.isNaN(parsed.getTime())) return value;
+    return new Intl.DateTimeFormat("en-US", {
+      timeZone: "UTC",
+      month: "short",
+      day: "numeric",
+      year: "numeric"
+    }).format(parsed);
+  };
+}
+
+const CHART_TITLE_BY_RANGE: Record<AnalyticsRange, string> = {
+  "30d": "30 days",
+  "90d": "90 days",
+  ytd: "Year to date",
+  all: "All time"
 };
 
 function useChartColors() {
@@ -56,7 +96,8 @@ export function Charts({
   leadsOverTime,
   quotesOverTime,
   acceptanceRateOverTime,
-  servicesBreakdown
+  servicesBreakdown,
+  range
 }: Props) {
   const colors = useChartColors();
   const leadsVsQuotesData = leadsOverTime.map((item, index) => ({
@@ -66,6 +107,10 @@ export function Charts({
   const hasLeadsVsQuotesData = leadsVsQuotesData.length > 0;
   const hasAcceptanceRateData = acceptanceRateOverTime.length > 0;
   const hasServicesData = servicesBreakdown.length > 0;
+
+  const tickFormatter = getTickFormatter(range);
+  const tooltipLabelFormatter = getTooltipLabelFormatter();
+  const rangeLabel = CHART_TITLE_BY_RANGE[range];
 
   const tooltipStyle = {
     backgroundColor: colors.tooltipBg,
@@ -78,17 +123,25 @@ export function Charts({
       <Card className="min-w-0 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
         <CardHeader className="pb-4">
           <CardTitle className="text-base font-semibold text-foreground">
-            Leads vs Estimates (30 days)
+            Leads vs Estimates ({rangeLabel})
           </CardTitle>
         </CardHeader>
-        <CardContent className="min-w-0 overflow-hidden h-48 sm:h-64 md:h-72">
+        <CardContent className="min-w-0 overflow-hidden h-56 sm:h-72 md:h-80">
           {hasLeadsVsQuotesData ? (
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={leadsVsQuotesData}>
+              <LineChart data={leadsVsQuotesData} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>
                 <CartesianGrid stroke={colors.grid} strokeDasharray="3 3" />
-                <XAxis dataKey="date" hide />
-                <YAxis allowDecimals={false} stroke={colors.axis} />
-                <Tooltip contentStyle={tooltipStyle} />
+                <XAxis
+                  dataKey="date"
+                  stroke={colors.axis}
+                  tick={{ fontSize: 11 }}
+                  tickMargin={8}
+                  tickFormatter={tickFormatter}
+                  minTickGap={32}
+                  interval="preserveStartEnd"
+                />
+                <YAxis allowDecimals={false} stroke={colors.axis} tick={{ fontSize: 11 }} />
+                <Tooltip contentStyle={tooltipStyle} labelFormatter={tooltipLabelFormatter} />
                 <Legend />
                 <Line type="monotone" dataKey="count" name="Leads" stroke={colors.primary} strokeWidth={2} />
                 <Line type="monotone" dataKey="quotes" name="Estimates" stroke={colors.success} strokeWidth={2} />
@@ -106,14 +159,31 @@ export function Charts({
             Acceptance Rate (%)
           </CardTitle>
         </CardHeader>
-        <CardContent className="min-w-0 overflow-hidden h-48 sm:h-64 md:h-72">
+        <CardContent className="min-w-0 overflow-hidden h-56 sm:h-72 md:h-80">
           {hasAcceptanceRateData ? (
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={acceptanceRateOverTime}>
+              <BarChart data={acceptanceRateOverTime} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>
                 <CartesianGrid stroke={colors.grid} strokeDasharray="3 3" />
-                <XAxis dataKey="date" hide />
-                <YAxis domain={[0, 100]} stroke={colors.axis} />
-                <Tooltip contentStyle={tooltipStyle} />
+                <XAxis
+                  dataKey="date"
+                  stroke={colors.axis}
+                  tick={{ fontSize: 11 }}
+                  tickMargin={8}
+                  tickFormatter={tickFormatter}
+                  minTickGap={32}
+                  interval="preserveStartEnd"
+                />
+                <YAxis
+                  domain={[0, 100]}
+                  stroke={colors.axis}
+                  tick={{ fontSize: 11 }}
+                  tickFormatter={(v) => `${v}%`}
+                />
+                <Tooltip
+                  contentStyle={tooltipStyle}
+                  labelFormatter={tooltipLabelFormatter}
+                  formatter={(v: number) => [`${v}%`, "Acceptance"]}
+                />
                 <Bar dataKey="rate" fill={colors.primary} radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>

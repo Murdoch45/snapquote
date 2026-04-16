@@ -394,6 +394,7 @@ function AnalyticsView({ data }: { data: DemoApiResponse<"analytics"> }) {
         quotesOverTime={data.payload.quotesOverTime}
         acceptanceRateOverTime={data.payload.acceptanceRateOverTime}
         servicesBreakdown={data.payload.servicesBreakdown}
+        range="30d"
       />
     </div>
   );
