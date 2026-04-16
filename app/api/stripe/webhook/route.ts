@@ -22,7 +22,11 @@ function normalizePlan(value: string | null | undefined): OrgPlan | null {
 }
 
 function shouldDowngradeToSolo(status: string): boolean {
-  return status === "canceled" || status === "unpaid" || status === "past_due";
+  // Only downgrade on outright cancellation. past_due / unpaid are transient
+  // dunning states — Stripe retries the payment automatically, and downgrading
+  // mid-retry kicks users off their plan for what's often a temporary card
+  // issue. customer.subscription.deleted handles the terminal case separately.
+  return status === "canceled";
 }
 
 function addOneMonth(from = new Date()): Date {
