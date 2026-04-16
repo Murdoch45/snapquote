@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -n \"enable row level security\\\\|create policy.*organizations\" /c/Users/murdo/SnapQuote/supabase/migrations/*.sql)"
+    ]
+  }
+}
