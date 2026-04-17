@@ -38,8 +38,8 @@ describe("deterministic confidence scoring", () => {
     });
 
     expect(result.serviceBaseline).toBe(80);
-    expect(result.rawScore).toBe(85);
-    expect(result.finalScore).toBe(85);
+    expect(result.rawScore).toBe(89);
+    expect(result.finalScore).toBe(89);
   });
 
   it("subtracts 10 per vague selection and adds 1 per non-vague selection", () => {
@@ -53,8 +53,8 @@ describe("deterministic confidence scoring", () => {
     expect(result.serviceBaseline).toBe(70);
     expect(result.vaguePenalty).toBe(-10);
     expect(result.nonVagueBonus).toBe(4);
-    expect(result.photoAdjustment).toBe(-5);
-    expect(result.finalScore).toBe(59);
+    expect(result.photoAdjustment).toBe(2);
+    expect(result.finalScore).toBe(66);
   });
 
   it("caps Other services at 70", () => {
@@ -77,7 +77,7 @@ describe("deterministic confidence scoring", () => {
       nonVagueSelections: 0
     });
 
-    expect(result.rawScore).toBe(15);
+    expect(result.rawScore).toBe(22);
     expect(result.finalScore).toBe(37);
   });
 

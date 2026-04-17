@@ -583,8 +583,8 @@ export function smoothDisplayConfidence(
 }
 
 export function confidenceLabel(score: number): LeadConfidence {
-  if (score >= 0.78) return "high";
-  if (score >= 0.6) return "medium";
+  if (score >= 0.7) return "high";
+  if (score >= 0.4) return "medium";
   return "low";
 }
 
@@ -839,10 +839,8 @@ export function getDeterministicConfidenceServiceConfig(service: CanonicalServic
 }
 
 export function deterministicPhotoConfidenceAdjustment(photoCount: number): number {
-  if (photoCount === 1) return -5;
-  if (photoCount === 2) return 0;
-  if (photoCount >= 3) return Math.min(photoCount - 2, MAX_PHOTO_CONFIDENCE_BONUS);
-  return 0;
+  if (photoCount <= 0) return 0;
+  return Math.min(photoCount * 2, MAX_PHOTO_CONFIDENCE_BONUS);
 }
 
 function allowedBaseTiersForService(service: CanonicalService): readonly number[] {

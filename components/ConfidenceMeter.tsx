@@ -11,7 +11,7 @@ export function clampDisplayConfidence(confidence: number): number {
 export function ConfidenceMeter({ confidence }: Props) {
   const displayConfidence = clampDisplayConfidence(confidence);
   const label =
-    confidence >= 0.78 ? "High confidence" : confidence >= 0.52 ? "Medium confidence" : "Low confidence";
+    confidence >= 0.7 ? "High confidence" : confidence >= 0.4 ? "Medium confidence" : "Low confidence";
 
   return (
     <div className="rounded-2xl border border-border bg-card p-4 shadow-[0_12px_30px_-18px_rgba(15,23,42,0.35)]">
