@@ -23,23 +23,31 @@ function firstDayOfMonth(date = new Date()): string {
 export { getPlanMonthlyCredits } from "@/lib/plans";
 
 export function getPlanUsageLimit(plan: OrgPlan): PlanUsageLimit {
+  // No plan currently runs with a grace tier — a plan's monthly credits
+  // are also its hard-stop point. Keeping both fields populated (rather
+  // than leaving hardStopAt null) lets UpgradeBanner render the "hard
+  // stop at N" copy without a null-in-string. If a grace tier is ever
+  // reintroduced, split the two values here.
   const monthlyCredits = getPlanMonthlyCredits(plan);
-  return { limit: monthlyCredits, grace: 0, hardStopAt: null };
+  return { limit: monthlyCredits, grace: 0, hardStopAt: monthlyCredits };
 }
 
-function getWarningAt90(limit: number | null, count: number): boolean {
+export function getWarningAt90(limit: number | null, count: number): boolean {
   if (limit === null) return false;
   return count >= Math.ceil(limit * 0.9);
 }
 
 function buildUsageState(plan: OrgPlan, month: string, count: number): UsageState {
   const { limit, grace, hardStopAt } = getPlanUsageLimit(plan);
+  // Hard stop is currently always equal to limit. The null fallback is
+  // defensive for a future unlimited plan tier.
+  const effectiveStop = hardStopAt ?? limit;
   return {
     plan,
     month,
     quotesSentCount: count,
-    warningAt90: false,
-    canSend: true,
+    warningAt90: getWarningAt90(limit, count),
+    canSend: effectiveStop === null ? true : count < effectiveStop,
     limit,
     grace,
     hardStopAt

@@ -14,7 +14,12 @@ export function OutOfCreditsModal({ open, onClose }: OutOfCreditsModalProps) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[80]">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="out-of-credits-title"
+      className="fixed inset-0 z-[80]"
+    >
       <button
         type="button"
         aria-label="Close out of credits modal"
@@ -37,7 +42,10 @@ export function OutOfCreditsModal({ open, onClose }: OutOfCreditsModalProps) {
             <CreditCard className="h-6 w-6" />
           </div>
 
-          <h2 className="mt-5 text-2xl font-semibold tracking-[-0.02em] text-foreground">
+          <h2
+            id="out-of-credits-title"
+            className="mt-5 text-2xl font-semibold tracking-[-0.02em] text-foreground"
+          >
             You&apos;re out of credits
           </h2>
           <p className="mt-3 text-sm leading-6 text-muted-foreground">

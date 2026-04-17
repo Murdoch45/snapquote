@@ -287,7 +287,12 @@ export function OnboardingTour({ enabled, slug }: OnboardingTourProps) {
   const Icon = currentStep.icon;
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-900/60 p-5">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="onboarding-tour-title"
+      className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-900/60 p-5"
+    >
       <div
         className={`w-full max-w-[440px] rounded-[18px] bg-card p-5 shadow-[0_12px_48px_-12px_rgba(0,0,0,0.25)] transition-all duration-200 sm:p-6 ${
           isStepVisible ? "scale-100 opacity-100" : "scale-[0.98] opacity-0"
@@ -330,7 +335,7 @@ export function OnboardingTour({ enabled, slug }: OnboardingTourProps) {
           <div className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full bg-blue-50 dark:bg-blue-950">
             <Icon className="h-[18px] w-[18px] text-primary" />
           </div>
-          <h3 className="text-lg font-bold text-foreground sm:text-xl">
+          <h3 id="onboarding-tour-title" className="text-lg font-bold text-foreground sm:text-xl">
             {currentStep.title}
           </h3>
         </div>

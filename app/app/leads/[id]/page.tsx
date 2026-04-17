@@ -22,6 +22,7 @@ import { getServiceBadgeClassName } from "@/lib/serviceColors";
 import { formatServiceQuestionAnswers, parseServiceQuestionBundles } from "@/lib/serviceQuestions";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { getMonthlyUsage } from "@/lib/usage";
 import { formatCurrencyRange, toCurrency, toRelativeMinutes } from "@/lib/utils";
 
 type Props = {
@@ -67,7 +68,8 @@ export default async function LeadDetailPage({ params }: Props) {
     { data: existingQuote },
     { data: profile },
     { data: unlockRow },
-    credits
+    credits,
+    usage
   ] = await Promise.all([
     supabase.auth.getUser(),
     supabase
@@ -88,7 +90,8 @@ export default async function LeadDetailPage({ params }: Props) {
       .eq("org_id", auth.orgId)
       .single(),
     supabase.from("lead_unlocks").select("id").eq("org_id", auth.orgId).eq("lead_id", id).maybeSingle(),
-    getOrgCredits(auth.orgId)
+    getOrgCredits(auth.orgId),
+    getMonthlyUsage(auth.orgId)
   ]);
 
   if (!lead) notFound();
@@ -432,7 +435,7 @@ export default async function LeadDetailPage({ params }: Props) {
                     customerName={(lead.customer_name as string | null) ?? null}
                     customerPhone={(lead.customer_phone as string | null) ?? null}
                     customerEmail={(lead.customer_email as string | null) ?? null}
-                    canSend
+                    canSend={usage.canSend}
                     isResend={isExpiredQuote}
                   />
                 </div>
