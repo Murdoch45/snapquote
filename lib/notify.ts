@@ -19,10 +19,23 @@ type SendEmailInput = {
    * routes back to the contractor's own inbox instead of estimates@.
    */
   replyTo?: string | null;
+  /**
+   * Optional idempotency key forwarded to Resend. When set, Resend
+   * deduplicates identical send calls so a double-clicked contractor
+   * Send button doesn't result in the customer receiving the same
+   * estimate email twice. The send route derives this key from the
+   * quote id.
+   */
+  idempotencyKey?: string;
 };
 
 const TELNYX_API_URL = "https://api.telnyx.com/v2/messages";
 const TELNYX_FROM_NUMBER = "+17169938159";
+
+// Match the retry policy used by Resend below so SMS and email behave
+// consistently under transient provider failure.
+const SMS_MAX_ATTEMPTS = 3;
+const SMS_RETRY_BASE_DELAY_MS = 500;
 
 const telnyxConfigured = Boolean(process.env.TELNYX_API_KEY);
 const resendConfigured = Boolean(process.env.RESEND_API_KEY);
@@ -34,44 +47,62 @@ function getResendClient(): Resend {
   return resendClient;
 }
 
+function isRetryableSmsStatus(status: number): boolean {
+  if (status === 429) return true;
+  return status >= 500 && status <= 599;
+}
+
 export async function sendSms(to: string, body: string): Promise<boolean> {
   if (!telnyxConfigured) {
     console.warn("Telnyx sendSms skipped: TELNYX_API_KEY missing.");
     return false;
   }
-  try {
-    const response = await fetch(TELNYX_API_URL, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.TELNYX_API_KEY as string}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        from: TELNYX_FROM_NUMBER,
-        to,
-        text: body
-      })
-    });
 
-    if (!response.ok) {
-      let detail = "";
-      try {
-        const errBody = await response.json();
-        detail = JSON.stringify(errBody);
-      } catch {
-        detail = await response.text().catch(() => "");
+  for (let attempt = 1; attempt <= SMS_MAX_ATTEMPTS; attempt++) {
+    let response: Response;
+    try {
+      response = await fetch(TELNYX_API_URL, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.TELNYX_API_KEY as string}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          from: TELNYX_FROM_NUMBER,
+          to,
+          text: body
+        })
+      });
+    } catch (error) {
+      console.error(`Telnyx sendSms network error (attempt ${attempt}/${SMS_MAX_ATTEMPTS}):`, error);
+      if (attempt < SMS_MAX_ATTEMPTS) {
+        await new Promise((resolve) => setTimeout(resolve, SMS_RETRY_BASE_DELAY_MS * attempt));
+        continue;
       }
-      console.error(
-        `Telnyx sendSms failed (${response.status} ${response.statusText}): ${detail}`
-      );
       return false;
     }
 
-    return true;
-  } catch (error) {
-    console.error("Telnyx sendSms error:", error);
-    return false;
+    if (response.ok) return true;
+
+    let detail = "";
+    try {
+      const errBody = await response.json();
+      detail = JSON.stringify(errBody);
+    } catch {
+      detail = await response.text().catch(() => "");
+    }
+    console.error(
+      `Telnyx sendSms failed (attempt ${attempt}/${SMS_MAX_ATTEMPTS}, ${response.status} ${response.statusText}): ${detail}`
+    );
+
+    if (!isRetryableSmsStatus(response.status) || attempt === SMS_MAX_ATTEMPTS) {
+      return false;
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, SMS_RETRY_BASE_DELAY_MS * attempt));
   }
+
+  return false;
 }
 
 function resolveFromAddress(sender: SenderKey): string {
@@ -97,14 +128,17 @@ export async function sendEmail(input: SendEmailInput): Promise<boolean> {
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
-      const result = await getResendClient().emails.send({
-        from: fromEmail,
-        to: input.to,
-        subject: input.subject,
-        text: input.text,
-        html: input.html,
-        ...(input.replyTo ? { replyTo: input.replyTo } : {})
-      });
+      const result = await getResendClient().emails.send(
+        {
+          from: fromEmail,
+          to: input.to,
+          subject: input.subject,
+          text: input.text,
+          html: input.html,
+          ...(input.replyTo ? { replyTo: input.replyTo } : {})
+        },
+        input.idempotencyKey ? { idempotencyKey: input.idempotencyKey } : undefined
+      );
       if (result.error) {
         console.error(`Resend sendEmail API error (attempt ${attempt}/${maxAttempts}):`, result.error);
         if (attempt < maxAttempts) {

@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { toast } from "sonner";
 import { BrandLogo } from "@/components/BrandLogo";
 import { Button } from "@/components/ui/button";
+import type { QuoteStatus } from "@/lib/quoteStatus";
 import { formatCurrencyRange, toCurrency } from "@/lib/utils";
 
 type QuoteData = {
@@ -19,7 +20,9 @@ type QuoteData = {
   estimatedPriceLow: number | string | null;
   estimatedPriceHigh: number | string | null;
   message: string;
-  status: "DRAFT" | "SENT" | "VIEWED" | "ACCEPTED" | "EXPIRED";
+  // Already coerced by the server — SENT/VIEWED past the 7-day boundary
+  // arrives as EXPIRED. This component does not need to compute expiry.
+  status: QuoteStatus;
   sentAt: string;
   expiresAt: string;
 };
@@ -41,7 +44,11 @@ export function PublicQuoteCard({ quote }: { quote: QuoteData }) {
     fetch(`/api/public/quote/${quote.publicId}/viewed`, { method: "POST" }).catch(() => undefined);
   }, [quote.publicId, isDraft]);
 
-  const isExpired = useMemo(() => new Date() > new Date(quote.expiresAt), [quote.expiresAt]);
+  // Trust the server-computed status. The old useMemo expiry check used to
+  // run once at mount and would let the accept button stay clickable past
+  // the 7-day boundary until the user refreshed — the server now returns
+  // EXPIRED directly, so a single check is enough.
+  const isExpired = status === "EXPIRED";
 
   const onAccept = async () => {
     setLoading(true);

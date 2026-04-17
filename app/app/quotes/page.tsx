@@ -12,9 +12,11 @@ import {
   TableRow
 } from "@/components/ui/table";
 import { requireAuth } from "@/lib/auth/requireAuth";
+import { computeEffectiveQuoteStatus } from "@/lib/quoteExpiry";
+import type { QuoteStatus } from "@/lib/quoteStatus";
 import { getServiceBadgeClassName } from "@/lib/serviceColors";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { formatCurrencyRange, publicQuoteExpiry } from "@/lib/utils";
+import { formatCurrencyRange } from "@/lib/utils";
 
 // Force dynamic rendering so freshly sent estimates appear immediately.
 export const dynamic = "force-dynamic";
@@ -83,15 +85,14 @@ export default async function QuotesPage({ searchParams }: Props) {
       formatCurrencyRange(null, null, quote.price as number | string | null | undefined) ??
       "-";
 
-    // Inline expiry detection — if the cron hasn't run yet but 7 days have
-    // passed since sent_at, show EXPIRED status in the UI.
-    const rawStatus = quote.status as string | null | undefined;
+    // Coerce expiry via the shared helper so this list view, the public
+    // GET endpoint, the mobile list, and the cron all agree on "effective"
+    // status even when the cron hasn't run yet.
+    const rawStatus = quote.status as QuoteStatus | null | undefined;
     const sentAt = quote.sent_at as string | null;
-    const isExpired =
-      sentAt &&
-      (rawStatus === "SENT" || rawStatus === "VIEWED") &&
-      new Date() > publicQuoteExpiry(sentAt);
-    const effectiveStatus = isExpired ? "EXPIRED" : rawStatus;
+    const effectiveStatus = rawStatus
+      ? computeEffectiveQuoteStatus(rawStatus, sentAt)
+      : rawStatus;
 
     return {
       id: quote.id as string,

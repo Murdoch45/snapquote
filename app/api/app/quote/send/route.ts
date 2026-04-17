@@ -4,12 +4,12 @@ import { buildEstimateSentEmail } from "@/lib/emailTemplates";
 import { requireMemberForApi } from "@/lib/auth/requireRole";
 import { sendEmail } from "@/lib/notify";
 import { buildEstimateLink, renderEstimateTemplate } from "@/lib/quote-template";
+import { sendQuoteSchema } from "@/lib/quoteSendSchema";
 import { SubscriptionRequiredError, requireActiveSubscription } from "@/lib/subscription";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { sendQuoteSms } from "@/lib/telnyx";
 import { incrementUsageOnQuoteSend } from "@/lib/usage";
-import { sendQuoteSchema } from "@/lib/validations";
 
 export const runtime = "nodejs";
 
@@ -21,6 +21,19 @@ function makePublicId(): string {
 
 function roundToNearestFive(value: number): number {
   return Math.round(value / 5) * 5;
+}
+
+// Derive idempotency keys for the downstream providers. Keyed on quote id
+// so every retry for the same quote — whether a double-clicked Send button,
+// a network-interrupted retry from the client, or the server's own CAS
+// losing a race — presents the same key to Resend/Telnyx. Both providers
+// reject the duplicate at their end so the customer only ever receives
+// one email and one text per quote.
+function resendIdempotencyKey(quoteId: string): string {
+  return `quote-send-${quoteId}-email`;
+}
+function telnyxIdempotencyKey(quoteId: string): string {
+  return `quote-send-${quoteId}-sms`;
 }
 
 export async function POST(request: Request) {
@@ -76,11 +89,14 @@ export async function POST(request: Request) {
     // backward compatibility with pre-existing unlocked leads.
     const { data: existingQuote } = await admin
       .from("quotes")
-      .select("id,public_id,status")
+      .select("id,public_id,status,estimated_price_low,estimated_price_high,message,sent_via")
       .eq("lead_id", body.leadId)
       .eq("org_id", auth.orgId)
       .maybeSingle();
 
+    // Defense-in-depth pre-check. A concurrent request may race past this
+    // and still win the DRAFT→SENT CAS below; the idempotency handling
+    // there returns the first winner's result to the late caller.
     if (existingQuote && existingQuote.status !== "DRAFT") {
       return NextResponse.json({ error: "Estimate already sent for this lead." }, { status: 400 });
     }
@@ -88,12 +104,16 @@ export async function POST(request: Request) {
     let confirmedPublicId: string;
 
     if (existingQuote) {
-      // DRAFT exists — update it to SENT
+      // DRAFT exists — update it to SENT via compare-and-swap. The
+      // `.eq("status","DRAFT")` guarantees only one concurrent request
+      // wins even if they both passed the pre-check above. The .select()
+      // returns the row count so we can detect a loss without a follow-up
+      // query on the happy path.
       wasDraft = true;
       quoteId = existingQuote.id as string;
       confirmedPublicId = existingQuote.public_id as string;
 
-      const { error: updateError } = await admin
+      const { data: updatedRows, error: updateError } = await admin
         .from("quotes")
         .update({
           price: roundToNearestFive((body.estimatedPriceLow + body.estimatedPriceHigh) / 2),
@@ -104,9 +124,45 @@ export async function POST(request: Request) {
           sent_at: new Date().toISOString()
         })
         .eq("id", quoteId)
-        .eq("org_id", auth.orgId);
+        .eq("org_id", auth.orgId)
+        .eq("status", "DRAFT")
+        .select("id");
 
       if (updateError) throw updateError;
+
+      if (!updatedRows || updatedRows.length === 0) {
+        // Another concurrent request beat us to the DRAFT→SENT transition.
+        // Fetch the canonical row and return an idempotent success so the
+        // late caller (usually a double-click) doesn't see a spurious
+        // error. We intentionally do NOT re-send email/SMS — the winner
+        // already did.
+        const { data: winner } = await admin
+          .from("quotes")
+          .select("id,public_id,status,message,sent_via")
+          .eq("id", quoteId)
+          .eq("org_id", auth.orgId)
+          .maybeSingle();
+
+        if (winner && winner.status && winner.status !== "DRAFT") {
+          // Don't trigger the outer catch's rollback — nothing we did
+          // needs reverting; clear the markers so the `catch` block
+          // treats this as a clean exit.
+          quoteId = null;
+          wasDraft = false;
+          return NextResponse.json({
+            ok: true,
+            quoteId: winner.id,
+            publicId: winner.public_id,
+            publicUrl: buildEstimateLink(winner.public_id as string),
+            resolvedMessage: winner.message,
+            usage: null,
+            sentChannels: (winner.sent_via as ("email" | "text")[] | null) ?? [],
+            warning: null,
+            idempotent: true
+          });
+        }
+        throw new Error("Estimate send failed: concurrent update lost.");
+      }
     } else {
       // No draft — fall back to INSERT (backward compat for pre-existing unlocked leads)
       const requestedPublicId = body.publicId ?? makePublicId();
@@ -156,7 +212,8 @@ export async function POST(request: Request) {
       try {
         await sendQuoteSms({
           to: lead.customer_phone as string,
-          body: resolvedMessage
+          body: resolvedMessage,
+          idempotencyKey: telnyxIdempotencyKey(quoteId)
         });
         sentChannels.push("text");
       } catch (error) {
@@ -183,7 +240,8 @@ export async function POST(request: Request) {
         text: customerEmail.text,
         html: customerEmail.html,
         // Replies go straight to the contractor, not to estimates@.
-        replyTo: contractorReplyEmail
+        replyTo: contractorReplyEmail,
+        idempotencyKey: resendIdempotencyKey(quoteId)
       });
       if (!emailSent) {
         deliveryErrors.push("Failed to send estimate by email.");

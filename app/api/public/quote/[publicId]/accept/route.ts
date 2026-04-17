@@ -4,8 +4,9 @@ import { notifyContractor } from "@/lib/notify";
 import { sendEmail } from "@/lib/notify";
 import { getOwnerEmailForOrg } from "@/lib/organizationOwners";
 import { sendPushToOrg } from "@/lib/pushNotifications";
+import { computeEffectiveQuoteStatus } from "@/lib/quoteExpiry";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getAppUrl, publicQuoteExpiry } from "@/lib/utils";
+import { getAppUrl } from "@/lib/utils";
 
 type Props = {
   params: Promise<{ publicId: string }>;
@@ -39,8 +40,12 @@ export async function POST(_request: Request, { params }: Props) {
   if (!quote.sent_at) {
     return NextResponse.json({ error: "Estimate has not been sent yet." }, { status: 400 });
   }
-  const expiresAt = publicQuoteExpiry(quote.sent_at as string);
-  if (new Date() > expiresAt) {
+  // Re-check effective status with the shared helper so a stale SENT/VIEWED
+  // row that crossed the 7-day boundary since the initial fetch still gets
+  // correctly rejected (and lazily flipped in the DB).
+  if (
+    computeEffectiveQuoteStatus(quote.status, quote.sent_at as string) === "EXPIRED"
+  ) {
     await admin.from("quotes").update({ status: "EXPIRED" }).eq("id", quote.id);
     return NextResponse.json({ error: "Estimate has expired." }, { status: 400 });
   }

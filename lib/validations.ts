@@ -5,12 +5,18 @@ import {
   type ServiceQuestionAnswers
 } from "@/lib/serviceQuestions";
 import { SERVICE_OPTIONS } from "@/lib/services";
+import { QUOTE_STATUSES } from "@/lib/quoteStatus";
 import {
   LEAD_STATUS,
   MEMBER_ROLES,
-  ORG_PLANS,
-  QUOTE_STATUS
+  ORG_PLANS
 } from "@/lib/types";
+
+// Re-export the shared quote-send schema so existing callers
+// (`@/lib/validations`) keep working. The authoritative definition lives
+// in the cross-repo-shared lib/quoteSendSchema.ts.
+export { sendQuoteSchema } from "@/lib/quoteSendSchema";
+export type { SendQuoteInput } from "@/lib/quoteSendSchema";
 
 const phoneSchema = z
   .string()
@@ -81,32 +87,6 @@ export function parseLeadSubmitQuestionAnswers(value: unknown) {
   return parseServiceQuestionBundles(value);
 }
 
-export const sendQuoteSchema = z.object({
-  leadId: z.string().uuid(),
-  publicId: z.string().min(6).max(24).optional(),
-  estimatedPriceLow: z.number().positive(),
-  estimatedPriceHigh: z.number().positive(),
-  message: z.string().min(12).max(4000),
-  sendEmail: z.boolean(),
-  sendText: z.boolean()
-}).superRefine((val, ctx) => {
-  if (!val.sendEmail && !val.sendText) {
-    ctx.addIssue({
-      path: ["sendEmail"],
-      code: z.ZodIssueCode.custom,
-      message: "Select email, text, or both before sending the estimate."
-    });
-  }
-
-  if (val.estimatedPriceLow > val.estimatedPriceHigh) {
-    ctx.addIssue({
-      path: ["estimatedPriceLow"],
-      code: z.ZodIssueCode.custom,
-      message: "Low price cannot exceed high price."
-    });
-  }
-});
-
 export const updateSettingsSchema = z.object({
   businessName: z.string().min(2).max(120),
   publicSlug: z.string().min(3).max(80).regex(/^[a-z0-9-]+$/),
@@ -164,5 +144,5 @@ export const enumSchemas = {
   orgPlan: z.enum(ORG_PLANS),
   memberRole: z.enum(MEMBER_ROLES),
   leadStatus: z.enum(LEAD_STATUS),
-  quoteStatus: z.enum(QUOTE_STATUS)
+  quoteStatus: z.enum(QUOTE_STATUSES)
 };

@@ -72,9 +72,6 @@ export function toRelativeMinutes(dateInput: string | Date): string {
   return formatDistanceToNowStrict(date, { addSuffix: true });
 }
 
-export function publicQuoteExpiry(sentAt: string | Date): Date {
-  const sent = sentAt instanceof Date ? sentAt : new Date(sentAt);
-  const expires = new Date(sent);
-  expires.setDate(expires.getDate() + 7);
-  return expires;
-}
+// Canonical 7-day expiry + effective-status rules live in the cross-repo-shared
+// lib/quoteExpiry.ts. Re-export here for existing call sites.
+export { publicQuoteExpiry, computeEffectiveQuoteStatus } from "@/lib/quoteExpiry";

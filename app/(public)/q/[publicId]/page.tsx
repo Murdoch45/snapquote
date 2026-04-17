@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { PublicQuoteCard } from "@/components/PublicQuoteCard";
-import { publicQuoteExpiry } from "@/lib/utils";
+import { computeEffectiveQuoteStatus, publicQuoteExpiry } from "@/lib/quoteExpiry";
+import type { QuoteStatus } from "@/lib/quoteStatus";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 type Props = {
@@ -74,7 +75,8 @@ export default async function PublicQuotePage({ params }: Props) {
   }
 
   const lead = Array.isArray(quote.lead) ? quote.lead[0] : quote.lead;
-  const isDraft = quote.status === "DRAFT";
+  const rawStatus = (quote.status as QuoteStatus | null) ?? "DRAFT";
+  const isDraft = rawStatus === "DRAFT";
   const businessName = (profile?.business_name as string | null) ?? "SnapQuote";
 
   // For DRAFT quotes sent_at is null — use a far-future expiry so the page
@@ -82,6 +84,11 @@ export default async function PublicQuotePage({ params }: Props) {
   const expiresAt = quote.sent_at
     ? publicQuoteExpiry(quote.sent_at).toISOString()
     : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
+
+  // Authoritative status — SENT/VIEWED past the 7-day boundary comes back
+  // as EXPIRED even if the cron hasn't flipped the row yet. The client
+  // component can trust this verbatim.
+  const effectiveStatus = computeEffectiveQuoteStatus(rawStatus, quote.sent_at);
 
   return (
     <main className="min-h-screen bg-muted px-4 py-8 sm:py-12">
@@ -100,7 +107,7 @@ export default async function PublicQuotePage({ params }: Props) {
           message: isDraft
             ? `Your estimate is being prepared by ${businessName}.`
             : ((quote.message as string | null) ?? ""),
-          status: isDraft ? "DRAFT" : (quote.status as "SENT" | "VIEWED" | "ACCEPTED" | "EXPIRED"),
+          status: effectiveStatus,
           sentAt: quote.sent_at ?? new Date().toISOString(),
           expiresAt
         }}

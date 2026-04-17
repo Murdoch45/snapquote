@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
+import { computeEffectiveQuoteStatus } from "@/lib/quoteExpiry";
+import type { QuoteStatus } from "@/lib/quoteStatus";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { publicQuoteExpiry } from "@/lib/utils";
+import { publicQuoteExpiry } from "@/lib/quoteExpiry";
 
 type Props = {
   params: Promise<{ publicId: string }>;
@@ -35,10 +37,21 @@ export async function GET(_request: Request, { params }: Props) {
   }
 
   const lead = Array.isArray(quote.lead) ? quote.lead[0] : quote.lead;
-  const expiresAt = publicQuoteExpiry(quote.sent_at as string);
-  const isExpired = quote.status !== "ACCEPTED" && new Date() > expiresAt;
+  const rawStatus = quote.status as QuoteStatus;
+  const sentAt = quote.sent_at as string | null;
 
-  if (isExpired && quote.status !== "EXPIRED") {
+  // DRAFT quotes have sent_at=null — fall back to a far-future date so the
+  // card doesn't render "expired" while the contractor is still finalising.
+  const expiresAt = sentAt
+    ? publicQuoteExpiry(sentAt)
+    : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+
+  const effectiveStatus = computeEffectiveQuoteStatus(rawStatus, sentAt);
+
+  // Catch the DB up lazily. The daily cron runs this sweep globally; this
+  // per-read UPDATE keeps status honest for customers who open the page
+  // between sweeps.
+  if (effectiveStatus === "EXPIRED" && rawStatus !== "EXPIRED") {
     await admin.from("quotes").update({ status: "EXPIRED" }).eq("id", quote.id);
   }
 
@@ -52,8 +65,8 @@ export async function GET(_request: Request, { params }: Props) {
     estimatedPriceLow: quote.estimated_price_low,
     estimatedPriceHigh: quote.estimated_price_high,
     message: quote.message,
-    status: isExpired ? "EXPIRED" : quote.status,
-    sentAt: quote.sent_at,
+    status: effectiveStatus,
+    sentAt,
     expiresAt: expiresAt.toISOString()
   });
 }
