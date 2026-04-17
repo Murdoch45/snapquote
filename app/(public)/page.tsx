@@ -113,7 +113,7 @@ export default function HomePage() {
                 </div>
                 <h3 className="mb-4 text-xl font-bold text-foreground">Precision Measurements</h3>
                 <p className="leading-relaxed text-muted-foreground">
-                  Stop guessing roof pitches or lawn square footage. Our AI uses high-res satellite data for exact quotes.
+                  Stop guessing roof pitches or lawn square footage. Our AI uses high-res satellite data for exact estimates.
                 </p>
               </div>
 

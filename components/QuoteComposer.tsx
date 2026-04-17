@@ -55,9 +55,17 @@ export function QuoteComposer({
   canSend,
   isResend = false
 }: Props) {
-  const [priceRange, setPriceRange] = useState(() => ({
+  // Original AI estimate captured once at mount. The "Reset to AI estimate"
+  // button below uses these to revert any manual slider/input adjustments.
+  // If the lead has no AI range at all we fall back to the snapQuote
+  // single-value estimate for both sides.
+  const originalRange = {
     low: estimateLow ?? snapQuote,
     high: estimateHigh ?? snapQuote
+  };
+  const [priceRange, setPriceRange] = useState(() => ({
+    low: originalRange.low,
+    high: originalRange.high
   }));
   const [message, setMessage] = useState(initialMessage);
   // Skip phase 1 on resend — the contractor already has a message to edit
@@ -337,12 +345,33 @@ export function QuoteComposer({
               </div>
             ) : null}
             {!messageGenerated ? (
-              <PriceSlider
-                snapQuote={snapQuote}
-                low={priceRange.low}
-                high={priceRange.high}
-                onChange={setPriceRange}
-              />
+              <>
+                <PriceSlider
+                  snapQuote={snapQuote}
+                  low={priceRange.low}
+                  high={priceRange.high}
+                  onChange={setPriceRange}
+                />
+                {/* Reset-to-AI-estimate action — only surfaces when the
+                    current range has drifted from what the AI produced,
+                    so it doesn't clutter the slider when nothing's been
+                    adjusted yet. Matches the muted-link pattern used
+                    elsewhere on the lead detail page. */}
+                {priceRange.low !== originalRange.low ||
+                priceRange.high !== originalRange.high ? (
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setPriceRange({ low: originalRange.low, high: originalRange.high })
+                      }
+                      className="text-xs font-medium text-primary underline-offset-4 hover:underline"
+                    >
+                      Reset to AI estimate
+                    </button>
+                  </div>
+                ) : null}
+              </>
             ) : null}
           </div>
         ) : null}
