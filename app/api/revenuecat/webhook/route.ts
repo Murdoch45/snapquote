@@ -385,28 +385,25 @@ export async function POST(request: Request) {
 
         if (creditAmount) {
           // Credit pack refund — deduct the bonus credits, leave plan untouched.
+          // Uses the refund_bonus_credits RPC (migration 0055) which locks
+          // the org row with FOR UPDATE so concurrent refunds serialize
+          // instead of both reading the same pre-deduct value and double-
+          // deducting by half.
           const admin = createAdminClient();
-          const { data: org } = await admin
-            .from("organizations")
-            .select("bonus_credits")
-            .eq("id", orgId)
-            .single();
-
-          const currentBonus = Number(
-            (org as { bonus_credits?: number } | null)?.bonus_credits ?? 0
+          const { data: newBonusRaw, error: deductError } = await admin.rpc(
+            "refund_bonus_credits",
+            {
+              p_org_id: orgId,
+              p_amount: creditAmount
+            }
           );
-          const newBonus = Math.max(0, currentBonus - creditAmount);
-
-          const { error: deductError } = await admin
-            .from("organizations")
-            .update({ bonus_credits: newBonus })
-            .eq("id", orgId);
 
           if (deductError) {
             console.error("RC credit pack refund deduction failed:", deductError);
           } else {
+            const newBonus = typeof newBonusRaw === "number" ? newBonusRaw : "unknown";
             console.log(
-              `RC credit pack refund: org ${orgId} bonus_credits ${currentBonus} → ${newBonus} (deducted ${creditAmount})`
+              `RC credit pack refund: org ${orgId} bonus_credits → ${newBonus} (deducted ${creditAmount})`
             );
           }
         } else {

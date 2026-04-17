@@ -94,7 +94,10 @@ export async function GET(request: Request) {
 
   // Send an expiry email to each affected org's owner. Use the first expired
   // quote's lead_id as the CTA link — multiple expirations still get one email.
+  // Idempotency key scoped to org + UTC day so a Vercel retry within the
+  // same run produces the same key and Resend dedupes.
   const appUrl = getAppUrl();
+  const runDay = new Date().toISOString().slice(0, 10);
   for (const [orgId] of orgCounts.entries()) {
     try {
       const ownerEmail = await getOwnerEmailForOrg(admin, orgId);
@@ -111,7 +114,8 @@ export async function GET(request: Request) {
         subject: email.subject,
         text: email.text,
         html: email.html,
-        sender: "noreply"
+        sender: "noreply",
+        idempotencyKey: `cron-expire-${orgId}-${runDay}`
       });
     } catch (emailError) {
       console.warn("auto-expire email failed for org", orgId, emailError);

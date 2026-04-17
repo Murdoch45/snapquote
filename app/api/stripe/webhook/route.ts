@@ -509,26 +509,20 @@ async function handleChargeRefunded(charge: Stripe.Charge) {
 
     // Deduct the credits, flooring at zero. We deduct the full credit amount
     // even on partial monetary refunds because credit packs are all-or-nothing
-    // units — you can't partially use half a 50-credit pack.
-    const { data: org } = await admin
-      .from("organizations")
-      .select("bonus_credits")
-      .eq("id", orgId)
-      .single();
-
-    const currentBonus = Number((org as { bonus_credits?: number } | null)?.bonus_credits ?? 0);
-    const newBonus = Math.max(0, currentBonus - creditAmount);
-
-    const { error: deductError } = await admin
-      .from("organizations")
-      .update({ bonus_credits: newBonus })
-      .eq("id", orgId);
+    // units — you can't partially use half a 50-credit pack. The RPC locks
+    // the org row with FOR UPDATE so concurrent refunds on the same org
+    // serialize instead of both reading the same pre-deduct value.
+    const { data: newBonusRaw, error: deductError } = await admin.rpc("refund_bonus_credits", {
+      p_org_id: orgId,
+      p_amount: creditAmount
+    });
 
     if (deductError) {
       console.error("Credit refund deduction failed:", deductError);
     } else {
+      const newBonus = typeof newBonusRaw === "number" ? newBonusRaw : "unknown";
       console.log(
-        `Credit refund: org ${orgId} bonus_credits ${currentBonus} → ${newBonus} (deducted ${creditAmount})`
+        `Credit refund: org ${orgId} bonus_credits → ${newBonus} (deducted ${creditAmount})`
       );
     }
   } catch (error) {

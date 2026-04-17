@@ -49,12 +49,17 @@ export async function GET(request: Request) {
       }
 
       const email = buildTrialEndingSoonEmail();
+      // Idempotency key scoped per org — trial_ending_notified_at is the
+      // app-side dedupe; this adds Resend-side dedupe for the window
+      // between the email send and the marker update (if the marker
+      // update fails or the cron retries before it commits).
       const ok = await sendEmail({
         to: ownerEmail,
         subject: email.subject,
         text: email.text,
         html: email.html,
-        sender: "noreply"
+        sender: "noreply",
+        idempotencyKey: `cron-trial-ending-${orgId}`
       });
 
       if (!ok) {

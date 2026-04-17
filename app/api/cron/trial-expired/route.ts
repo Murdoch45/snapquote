@@ -57,12 +57,18 @@ export async function GET(request: Request) {
       }
 
       const email = buildTrialExpiredEmail();
+      // Idempotency key scoped to org + UTC day. The cron has no app-
+      // side "already notified" marker, so a Vercel retry within the
+      // same 24h window would otherwise re-send. Resend-side dedupe
+      // catches this.
+      const runDay = new Date().toISOString().slice(0, 10);
       const ok = await sendEmail({
         to: ownerEmail,
         subject: email.subject,
         text: email.text,
         html: email.html,
-        sender: "noreply"
+        sender: "noreply",
+        idempotencyKey: `cron-trial-expired-${orgId}-${runDay}`
       });
 
       if (!ok) {

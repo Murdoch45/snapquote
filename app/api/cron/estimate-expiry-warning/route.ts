@@ -56,6 +56,10 @@ export async function GET(request: Request) {
     orgQuotes.set(orgId, existing);
   }
 
+  // Idempotency key scoped to org + UTC day so a Vercel retry within the
+  // same cron run dedupes at Resend and doesn't spam the contractor.
+  const runDay = new Date().toISOString().slice(0, 10);
+
   let warned = 0;
   for (const [orgId, quotes] of orgQuotes.entries()) {
     try {
@@ -103,7 +107,8 @@ export async function GET(request: Request) {
         subject: email.subject,
         text: email.text,
         html: email.html,
-        sender: "noreply"
+        sender: "noreply",
+        idempotencyKey: `cron-expiry-warning-${orgId}-${runDay}`
       });
 
       if (sent) warned += 1;

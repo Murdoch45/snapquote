@@ -90,7 +90,10 @@ export async function GET(request: Request) {
           console.warn("notification insert failed:", err)
         );
 
-      // Email (best-effort).
+      // Email (best-effort). Idempotency key scoped to the quote id —
+      // the cron's 2-3 day window means each quote only matches the
+      // query once, so a quote-scoped key is enough to dedupe any
+      // Vercel retry of the same run.
       const ownerEmail = await getOwnerEmailForOrg(admin, orgId);
       if (ownerEmail) {
         const email = buildEstimateNotViewedNudgeEmail({
@@ -103,7 +106,8 @@ export async function GET(request: Request) {
           subject: email.subject,
           text: email.text,
           html: email.html,
-          sender: "noreply"
+          sender: "noreply",
+          idempotencyKey: `cron-nudge-${quoteId}`
         });
       }
 
