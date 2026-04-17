@@ -44,11 +44,43 @@ export function PublicQuoteCard({ quote }: { quote: QuoteData }) {
     fetch(`/api/public/quote/${quote.publicId}/viewed`, { method: "POST" }).catch(() => undefined);
   }, [quote.publicId, isDraft]);
 
-  // Trust the server-computed status. The old useMemo expiry check used to
-  // run once at mount and would let the accept button stay clickable past
-  // the 7-day boundary until the user refreshed — the server now returns
-  // EXPIRED directly, so a single check is enough.
-  const isExpired = status === "EXPIRED";
+  // Seed the client clock from the server status. The server already coerces
+  // SENT/VIEWED past the 7-day boundary to EXPIRED at render time via
+  // computeEffectiveQuoteStatus, so this starts accurate.
+  const [clientNow, setClientNow] = useState(() => Date.now());
+
+  // Keep the client clock refreshed so a customer who leaves the tab open
+  // across the 7-day boundary sees the accept button disable without having
+  // to refresh the page. Server enforcement still wins — /accept re-checks
+  // expiry on every submission — this is UI-sync only.
+  //
+  // We only arm the interval when the quote could plausibly expire on
+  // screen: terminal statuses (ACCEPTED, EXPIRED) and DRAFT never change.
+  useEffect(() => {
+    if (status === "ACCEPTED" || status === "EXPIRED" || isDraft) return;
+
+    const tick = () => setClientNow(Date.now());
+    const onFocus = () => tick();
+    const onVisibility = () => {
+      if (typeof document !== "undefined" && !document.hidden) tick();
+    };
+
+    // 60s keeps the button accurate within a minute of actual expiry
+    // without burning CPU while idle. Focus/visibility handlers cover the
+    // common "left tab open for hours, came back" case instantly.
+    const interval = window.setInterval(tick, 60_000);
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisibility);
+
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [status, isDraft]);
+
+  const expiresAtMs = new Date(quote.expiresAt).getTime();
+  const isExpired = status === "EXPIRED" || (!isDraft && clientNow > expiresAtMs);
 
   const onAccept = async () => {
     setLoading(true);

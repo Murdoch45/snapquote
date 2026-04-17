@@ -3,6 +3,7 @@ import { ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { QuotesFilterBar } from "@/components/QuotesFilterBar";
 import {
   Table,
   TableBody,
@@ -14,6 +15,7 @@ import {
 import { requireAuth } from "@/lib/auth/requireAuth";
 import { computeEffectiveQuoteStatus } from "@/lib/quoteExpiry";
 import type { QuoteStatus } from "@/lib/quoteStatus";
+import { QUOTE_STATUSES } from "@/lib/quoteStatus";
 import { getServiceBadgeClassName } from "@/lib/serviceColors";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { formatCurrencyRange } from "@/lib/utils";
@@ -21,10 +23,14 @@ import { formatCurrencyRange } from "@/lib/utils";
 // Force dynamic rendering so freshly sent estimates appear immediately.
 export const dynamic = "force-dynamic";
 
+// Keep the 25-per-page contract the contractors already know, but the
+// page is now cursor-paginated on sent_at so the query cost stays flat
+// even for orgs with thousands of estimates. DRAFT rows are still
+// excluded at the query level (they're infrastructure, never surfaced).
 const PAGE_SIZE = 25;
 
 type Props = {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ q?: string; status?: string; cursor?: string }>;
 };
 
 function getStatusBadgeClass(status: string | null | undefined): string {
@@ -42,32 +48,93 @@ function getStatusBadgeClass(status: string | null | undefined): string {
   }
 }
 
+// Labels the channel strings recorded by /api/app/quote/send in the
+// quotes.sent_via array. The send route writes "email" and "text"; the
+// UI renders them as "Email" and "SMS" for readability.
+function formatSentVia(channels: readonly string[] | null | undefined): string {
+  if (!channels || channels.length === 0) return "—";
+  const seen = new Set<string>();
+  const labels = channels
+    .map((channel) => {
+      const normalized = channel.trim().toLowerCase();
+      if (normalized === "email") return "Email";
+      if (normalized === "text" || normalized === "sms") return "SMS";
+      return channel;
+    })
+    .filter((label) => {
+      if (seen.has(label)) return false;
+      seen.add(label);
+      return true;
+    });
+  if (labels.length === 0) return "—";
+  if (labels.length === 1) return labels[0];
+  return labels.join(" + ");
+}
+
+// Pick the starting status for the composer-side filter. Rejects garbage
+// values silently so a hand-edited URL can't poison the query with an
+// enum value Postgres will 22P02 on.
+function parseStatusFilter(value: string | undefined): QuoteStatus | null {
+  if (!value) return null;
+  const allowed = QUOTE_STATUSES.filter((status) => status !== "DRAFT");
+  return (allowed as readonly string[]).includes(value) ? (value as QuoteStatus) : null;
+}
+
 export default async function QuotesPage({ searchParams }: Props) {
   const params = await searchParams;
   const auth = await requireAuth();
   const supabase = await createServerSupabaseClient();
 
-  const requestedPage = Number.parseInt(params.page ?? "1", 10);
-  const currentPage = Number.isFinite(requestedPage) && requestedPage > 0 ? requestedPage : 1;
-  const rangeFrom = (currentPage - 1) * PAGE_SIZE;
-  const rangeTo = rangeFrom + PAGE_SIZE - 1;
+  const searchTerm = (params.q ?? "").trim();
+  const statusFilter = parseStatusFilter(params.status);
+  const cursor = (params.cursor ?? "").trim() || null;
 
-  // Only show sent estimates — DRAFT quotes are internal and should not appear.
-  const { data: quotes, count } = await supabase
+  // PostgREST embedded-filter syntax: the `!inner` join on leads + the
+  // `.or(..., { foreignTable: "leads" })` filter restricts both the
+  // returned quote rows and their embedded lead to matching names/emails/
+  // phones. Without `!inner` we'd still see all quotes and only the
+  // nested lead would filter — we want the quote list to shrink too.
+  //
+  // Note: leaving DRAFT exclusion on the quotes table, not on leads.
+  let dataQuery = supabase
     .from("quotes")
     .select(
-      "id,public_id,price,estimated_price_low,estimated_price_high,status,sent_at,accepted_at,lead:leads(address_full,services,customer_name)",
-      { count: "exact" }
+      "id,public_id,price,estimated_price_low,estimated_price_high,status,sent_at,accepted_at,sent_via,lead:leads!inner(address_full,services,customer_name,customer_email,customer_phone)"
     )
     .eq("org_id", auth.orgId)
     .neq("status", "DRAFT")
     .order("sent_at", { ascending: false })
-    .range(rangeFrom, rangeTo);
+    // Fetch one extra row to determine whether a next page exists without
+    // a second count query.
+    .limit(PAGE_SIZE + 1);
 
-  const totalQuotes = count ?? 0;
-  const totalPages = Math.max(1, Math.ceil(totalQuotes / PAGE_SIZE));
+  if (statusFilter) {
+    dataQuery = dataQuery.eq("status", statusFilter);
+  }
 
-  const quoteRows = (quotes ?? []).map((quote) => {
+  if (cursor) {
+    // sent_at has millisecond precision and only one send per lead is
+    // allowed, so collisions are effectively impossible. A strict-less-
+    // than on the last row's sent_at gives clean cursor pagination.
+    dataQuery = dataQuery.lt("sent_at", cursor);
+  }
+
+  if (searchTerm) {
+    const escaped = searchTerm.replace(/[%_\\]/g, "\\$&");
+    dataQuery = dataQuery.or(
+      `customer_name.ilike.%${escaped}%,customer_email.ilike.%${escaped}%,customer_phone.ilike.%${escaped}%`,
+      { foreignTable: "leads" }
+    );
+  }
+
+  const { data: quotesFull } = await dataQuery;
+
+  const rowsFull = quotesFull ?? [];
+  const hasNext = rowsFull.length > PAGE_SIZE;
+  const pageRows = hasNext ? rowsFull.slice(0, PAGE_SIZE) : rowsFull;
+  const nextCursor = hasNext ? (pageRows[pageRows.length - 1]?.sent_at as string | null) : null;
+
+  const quoteRows = pageRows.map((quote) => {
     const lead = Array.isArray(quote.lead) ? quote.lead[0] : quote.lead;
     const services = (((lead?.services as string[] | null) ?? []).length > 0
       ? ((lead?.services as string[] | null) ?? [])
@@ -94,6 +161,8 @@ export default async function QuotesPage({ searchParams }: Props) {
       ? computeEffectiveQuoteStatus(rawStatus, sentAt)
       : rawStatus;
 
+    const sentViaLabel = formatSentVia(quote.sent_via as string[] | null | undefined);
+
     return {
       id: quote.id as string,
       publicId: quote.public_id as string,
@@ -103,12 +172,35 @@ export default async function QuotesPage({ searchParams }: Props) {
       services,
       address,
       mapsUrl,
-      displayPrice
+      displayPrice,
+      sentViaLabel
     };
   });
 
+  // Build a next-page URL that preserves search/status filters.
+  const nextUrlParams = new URLSearchParams();
+  if (searchTerm) nextUrlParams.set("q", searchTerm);
+  if (statusFilter) nextUrlParams.set("status", statusFilter);
+  if (nextCursor) nextUrlParams.set("cursor", nextCursor);
+  const nextHref = `/app/quotes?${nextUrlParams.toString()}`;
+
+  const firstPageParams = new URLSearchParams();
+  if (searchTerm) firstPageParams.set("q", searchTerm);
+  if (statusFilter) firstPageParams.set("status", statusFilter);
+  const firstPageHref = firstPageParams.toString()
+    ? `/app/quotes?${firstPageParams.toString()}`
+    : "/app/quotes";
+
+  const onLaterPage = Boolean(cursor);
+  const hasActiveFilters = Boolean(searchTerm) || Boolean(statusFilter);
+  const emptyCopy = hasActiveFilters
+    ? "No estimates match these filters."
+    : "No estimates sent yet.";
+
   return (
     <div className="space-y-6">
+      <QuotesFilterBar />
+
       <Card className="shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
         <CardHeader>
           <CardTitle className="text-lg font-semibold text-foreground">Sent estimates</CardTitle>
@@ -161,6 +253,13 @@ export default async function QuotesPage({ searchParams }: Props) {
 
                     <div className="mt-4">
                       <p className="text-[11px] font-medium uppercase tracking-[0.05em] text-muted-foreground">
+                        Sent via
+                      </p>
+                      <p className="mt-1 text-sm text-foreground/80">{quote.sentViaLabel}</p>
+                    </div>
+
+                    <div className="mt-4">
+                      <p className="text-[11px] font-medium uppercase tracking-[0.05em] text-muted-foreground">
                         Address
                       </p>
                       {quote.address && quote.mapsUrl ? (
@@ -203,6 +302,9 @@ export default async function QuotesPage({ searchParams }: Props) {
                           Price
                         </TableHead>
                         <TableHead className="h-auto px-5 py-3 text-xs font-medium uppercase tracking-[0.05em] text-muted-foreground">
+                          Sent via
+                        </TableHead>
+                        <TableHead className="h-auto px-5 py-3 text-xs font-medium uppercase tracking-[0.05em] text-muted-foreground">
                           Address
                         </TableHead>
                         <TableHead className="h-auto px-5 py-3 text-xs font-medium uppercase tracking-[0.05em] text-muted-foreground">
@@ -236,6 +338,9 @@ export default async function QuotesPage({ searchParams }: Props) {
                           </TableCell>
                           <TableCell className="px-5 py-4 text-2xl font-bold text-foreground">
                             {quote.displayPrice}
+                          </TableCell>
+                          <TableCell className="px-5 py-4 text-sm text-foreground/80">
+                            {quote.sentViaLabel}
                           </TableCell>
                           <TableCell className="px-5 py-4">
                             {quote.address && quote.mapsUrl ? (
@@ -282,31 +387,36 @@ export default async function QuotesPage({ searchParams }: Props) {
               </div>
             </>
           ) : (
-            <p className="text-sm text-muted-foreground">No estimates sent yet.</p>
+            <p className="text-sm text-muted-foreground">{emptyCopy}</p>
           )}
         </CardContent>
       </Card>
-      {totalQuotes > 0 ? (
+
+      {/* Cursor-style pagination. "Newest" resets cursor but keeps filters,
+          so search + status survive the nav. "Next" forwards on sent_at.
+          Intentionally no arbitrary page number: cursor pagination doesn't
+          give us one without a second, potentially expensive count query. */}
+      {quoteRows.length > 0 || onLaterPage ? (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-[14px] border border-border bg-card px-4 py-3 text-sm text-muted-foreground shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
           <p>
-            Page {currentPage} of {totalPages}
+            Showing {quoteRows.length} {quoteRows.length === 1 ? "estimate" : "estimates"}
           </p>
           <div className="flex items-center gap-2">
-            {currentPage > 1 ? (
+            {onLaterPage ? (
               <Link
-                href={`/app/quotes?page=${currentPage - 1}`}
+                href={firstPageHref}
                 className="rounded-[10px] border border-border px-4 py-2 font-medium text-foreground transition-colors hover:bg-muted"
               >
-                Previous
+                Newest
               </Link>
             ) : (
               <span className="rounded-[10px] border border-border px-4 py-2 font-medium text-muted-foreground/70">
-                Previous
+                Newest
               </span>
             )}
-            {currentPage < totalPages ? (
+            {hasNext ? (
               <Link
-                href={`/app/quotes?page=${currentPage + 1}`}
+                href={nextHref}
                 className="rounded-[10px] border border-primary bg-primary px-4 py-2 font-medium text-white transition-colors hover:bg-primary/90"
               >
                 Next

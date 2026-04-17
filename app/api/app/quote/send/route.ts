@@ -42,7 +42,13 @@ export async function POST(request: Request) {
 
   let quoteId: string | null = null;
   let bodyLeadId: string | null = null;
+  // The send path accepts either a DRAFT (first send) or EXPIRED (resend
+  // after 7-day window) as the starting status. On rollback we need to
+  // know which of the two to revert to so the permanent public_id row
+  // stays recoverable — "wasDraft" is the more descriptive name retained
+  // from the prior revision; originalStatus holds the exact revert target.
   let wasDraft = false;
+  let originalStatus: "DRAFT" | "EXPIRED" | null = null;
 
   try {
     const body = sendQuoteSchema.parse(await request.json());
@@ -95,21 +101,27 @@ export async function POST(request: Request) {
       .maybeSingle();
 
     // Defense-in-depth pre-check. A concurrent request may race past this
-    // and still win the DRAFT→SENT CAS below; the idempotency handling
-    // there returns the first winner's result to the late caller.
-    if (existingQuote && existingQuote.status !== "DRAFT") {
+    // and still win the CAS below; the idempotency handling there returns
+    // the first winner's result to the late caller. EXPIRED is allowed as
+    // a "resend" entry point — the contractor has elected to re-send an
+    // estimate that timed out without a customer response.
+    const startingStatus = (existingQuote?.status as "DRAFT" | "EXPIRED" | null) ?? null;
+    const canTransitionFromExisting =
+      startingStatus === "DRAFT" || startingStatus === "EXPIRED";
+    if (existingQuote && !canTransitionFromExisting) {
       return NextResponse.json({ error: "Estimate already sent for this lead." }, { status: 400 });
     }
 
     let confirmedPublicId: string;
 
-    if (existingQuote) {
-      // DRAFT exists — update it to SENT via compare-and-swap. The
-      // `.eq("status","DRAFT")` guarantees only one concurrent request
-      // wins even if they both passed the pre-check above. The .select()
-      // returns the row count so we can detect a loss without a follow-up
-      // query on the happy path.
+    if (existingQuote && startingStatus) {
+      // DRAFT or EXPIRED exists — update it to SENT via compare-and-swap.
+      // The `.in("status", [startingStatus])` clause keeps the CAS narrow
+      // to the exact status we observed so we only transition in a single
+      // direction and a concurrent request can't win by flipping in a
+      // different direction first.
       wasDraft = true;
+      originalStatus = startingStatus;
       quoteId = existingQuote.id as string;
       confirmedPublicId = existingQuote.public_id as string;
 
@@ -121,17 +133,26 @@ export async function POST(request: Request) {
           estimated_price_high: body.estimatedPriceHigh,
           message: body.message,
           status: "SENT",
-          sent_at: new Date().toISOString()
+          sent_at: new Date().toISOString(),
+          // Clear sent_via — on an EXPIRED → SENT resend the prior
+          // channel list from the first send doesn't apply to this one.
+          sent_via: [],
+          // Clear viewed_at / accepted_at so the resend starts a clean
+          // lifecycle. ACCEPTED can't reach this branch (blocked above)
+          // but zeroing these prevents any stale timestamps from polluting
+          // the new window.
+          viewed_at: null,
+          accepted_at: null
         })
         .eq("id", quoteId)
         .eq("org_id", auth.orgId)
-        .eq("status", "DRAFT")
+        .eq("status", startingStatus)
         .select("id");
 
       if (updateError) throw updateError;
 
       if (!updatedRows || updatedRows.length === 0) {
-        // Another concurrent request beat us to the DRAFT→SENT transition.
+        // Another concurrent request beat us to the CAS transition.
         // Fetch the canonical row and return an idempotent success so the
         // late caller (usually a double-click) doesn't see a spurious
         // error. We intentionally do NOT re-send email/SMS — the winner
@@ -143,12 +164,13 @@ export async function POST(request: Request) {
           .eq("org_id", auth.orgId)
           .maybeSingle();
 
-        if (winner && winner.status && winner.status !== "DRAFT") {
+        if (winner && winner.status && winner.status !== "DRAFT" && winner.status !== "EXPIRED") {
           // Don't trigger the outer catch's rollback — nothing we did
           // needs reverting; clear the markers so the `catch` block
           // treats this as a clean exit.
           quoteId = null;
           wasDraft = false;
+          originalStatus = null;
           return NextResponse.json({
             ok: true,
             quoteId: winner.id,
@@ -297,10 +319,23 @@ export async function POST(request: Request) {
       const admin = createAdminClient();
 
       if (wasDraft) {
-        // Revert back to DRAFT — do NOT delete, or the permanent URL breaks
+        // Revert back to the exact status we transitioned from — DRAFT for
+        // a first send, EXPIRED for a resend. Never delete, or the
+        // permanent public_id (and any customer link already shared) dies
+        // with the row. sent_via clears either way; sent_at only resets
+        // for a DRAFT (EXPIRED rows' sent_at is still meaningful as the
+        // original delivery timestamp for audit purposes).
+        const revertStatus = originalStatus ?? "DRAFT";
+        const revertPatch: Record<string, unknown> = {
+          status: revertStatus,
+          sent_via: []
+        };
+        if (revertStatus === "DRAFT") {
+          revertPatch.sent_at = null;
+        }
         await admin
           .from("quotes")
-          .update({ status: "DRAFT", sent_at: null, sent_via: [] })
+          .update(revertPatch)
           .eq("id", quoteId)
           .eq("org_id", auth.orgId);
       } else {

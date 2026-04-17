@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Loader2, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import { SubscriptionRequiredModal } from "@/components/SubscriptionRequiredModal";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -27,7 +29,17 @@ type Props = {
   customerPhone: string | null;
   customerEmail: string | null;
   canSend: boolean;
+  // When true the composer opens in phase 2 with the existing estimate
+  // pre-filled — used for "Edit & Resend" on expired quotes. The send
+  // endpoint also accepts EXPIRED as a valid starting status for the CAS.
+  isResend?: boolean;
 };
+
+// Simple regex validators mirroring the leadSubmitSchema's phone/email
+// rules. Kept here so the inline contact-edit UX can give immediate
+// feedback without a round-trip to the API for format checks.
+const PHONE_REGEX = /^[+\d().\-\s]{7,20}$/;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function QuoteComposer({
   leadId,
@@ -40,15 +52,18 @@ export function QuoteComposer({
   customerName,
   customerPhone,
   customerEmail,
-  canSend
+  canSend,
+  isResend = false
 }: Props) {
   const [priceRange, setPriceRange] = useState(() => ({
     low: estimateLow ?? snapQuote,
     high: estimateHigh ?? snapQuote
   }));
   const [message, setMessage] = useState(initialMessage);
-  const [messageGenerated, setMessageGenerated] = useState(false);
-  const [hasGeneratedBefore, setHasGeneratedBefore] = useState(false);
+  // Skip phase 1 on resend — the contractor already has a message to edit
+  // and doesn't need to click "Generate" to surface it.
+  const [messageGenerated, setMessageGenerated] = useState<boolean>(isResend);
+  const [hasGeneratedBefore, setHasGeneratedBefore] = useState<boolean>(isResend);
   const [loading, setLoading] = useState(false);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [quoteLink, setQuoteLink] = useState<string | null>(null);
@@ -59,6 +74,17 @@ export function QuoteComposer({
   const [sendEmail, setSendEmail] = useState(true);
   const [sendText, setSendText] = useState(false);
   const [prefsLoaded, setPrefsLoaded] = useState(false);
+
+  // Customer contact (email + phone) — editable via a small inline form so
+  // a typo captured on the public lead submit can be corrected without the
+  // contractor having to bail out and edit the lead row by hand. Saved
+  // changes hit the leads table via PATCH /api/app/leads/[id]/contact.
+  const [contactEmail, setContactEmail] = useState<string | null>(customerEmail);
+  const [contactPhone, setContactPhone] = useState<string | null>(customerPhone);
+  const [isEditingContact, setIsEditingContact] = useState(false);
+  const [contactDraftEmail, setContactDraftEmail] = useState(customerEmail ?? "");
+  const [contactDraftPhone, setContactDraftPhone] = useState(customerPhone ?? "");
+  const [isSavingContact, setIsSavingContact] = useState(false);
 
   const sendingRange =
     formatCurrencyRange(priceRange.low, priceRange.high) ??
@@ -105,23 +131,34 @@ export function QuoteComposer({
     return () => { cancelled = true; };
   }, []);
 
-  // Save delivery preferences when they change
+  // Save delivery preferences when they change. Toast on failure so the
+  // contractor knows the pref didn't actually persist — previously the
+  // catch block swallowed the error, which meant a PostgREST permission
+  // failure or missing column silently reverted the saved value on next
+  // load. Success stays silent; these toggles flip a lot and don't need
+  // their own confirmation.
   useEffect(() => {
     if (!prefsLoaded) return;
 
     const save = async () => {
       try {
         const supabase = createClient();
-        // Best-effort save — don't block the UI if the columns don't exist yet
-        await supabase
+        const { error } = await supabase
           .from("contractor_profile")
           .update({
             estimate_send_email: sendEmail,
             estimate_send_text: sendText
           })
           .limit(1);
-      } catch {
-        // Non-critical — preference will still work locally for this session
+        if (error) {
+          throw error;
+        }
+      } catch (error) {
+        toast.error(
+          error instanceof Error
+            ? `Couldn't save delivery preference: ${error.message}`
+            : "Couldn't save delivery preference."
+        );
       }
     };
 
@@ -157,16 +194,71 @@ export function QuoteComposer({
     setMessageGenerated(false);
   };
 
+  const onStartEditContact = () => {
+    setContactDraftEmail(contactEmail ?? "");
+    setContactDraftPhone(contactPhone ?? "");
+    setIsEditingContact(true);
+  };
+
+  const onCancelEditContact = () => {
+    setIsEditingContact(false);
+  };
+
+  const onSaveContact = async () => {
+    const trimmedEmail = contactDraftEmail.trim();
+    const trimmedPhone = contactDraftPhone.trim();
+
+    // Light client-side validation — matches the server's zod rules so the
+    // user gets immediate feedback instead of a 400 round-trip.
+    if (trimmedEmail && !EMAIL_REGEX.test(trimmedEmail)) {
+      toast.error("Enter a valid customer email, or clear the field.");
+      return;
+    }
+    if (trimmedPhone && !PHONE_REGEX.test(trimmedPhone)) {
+      toast.error("Enter a valid customer phone number, or clear the field.");
+      return;
+    }
+
+    setIsSavingContact(true);
+    try {
+      const res = await fetch(`/api/app/leads/${leadId}/contact`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customerEmail: trimmedEmail || null,
+          customerPhone: trimmedPhone || null
+        })
+      });
+      const json = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        error?: string;
+        customerEmail?: string | null;
+        customerPhone?: string | null;
+      };
+      if (!res.ok || json.ok !== true) {
+        throw new Error(json.error || "Couldn't save contact details.");
+      }
+      setContactEmail(json.customerEmail ?? null);
+      setContactPhone(json.customerPhone ?? null);
+      setIsEditingContact(false);
+      toast.success("Customer contact updated.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Couldn't save contact details.");
+    } finally {
+      setIsSavingContact(false);
+    }
+  };
+
   const onSend = async () => {
     if (!sendEmail && !sendText) {
       toast.error("Select email, text, or both before sending.");
       return;
     }
-    if (sendEmail && !customerEmail) {
+    if (sendEmail && !contactEmail) {
       toast.error("No customer email available.");
       return;
     }
-    if (sendText && !customerPhone) {
+    if (sendText && !contactPhone) {
       toast.error("No customer phone number available.");
       return;
     }
@@ -193,7 +285,15 @@ export function QuoteComposer({
       }
       if (!res.ok) throw new Error(json.error || "Failed to send estimate.");
       setQuoteLink(json.publicUrl ?? null);
-      setCopiedMessage(json.resolvedMessage ?? message);
+      // Prefer the server-resolved message (tokens replaced with real
+      // values) for the post-send preview. The fallback to the raw
+      // template is a last-resort belt-and-braces — if it ever shows a
+      // "{{customer_name}}" token on screen something is off upstream.
+      const resolved =
+        typeof json.resolvedMessage === "string" && json.resolvedMessage.trim().length > 0
+          ? json.resolvedMessage
+          : message;
+      setCopiedMessage(resolved);
       setSent(true);
       const channels = (json.sentChannels ?? []) as string[];
       const channelLabel = channels.join(" and ") || "successfully";
@@ -208,6 +308,10 @@ export function QuoteComposer({
       setLoading(false);
     }
   };
+
+  const primarySendLabel = isResend ? "Resend Estimate" : "Send Estimate";
+  const primarySendingLabel = isResend ? "Resending..." : "Sending...";
+  const postSendHeading = isResend ? "Resent." : "Estimate sent.";
 
   return (
     <>
@@ -268,6 +372,92 @@ export function QuoteComposer({
               />
             </div>
 
+            {/* Customer contact — editable inline so typos captured on the
+                lead form can be fixed before send. Save writes through to
+                the leads table via PATCH /api/app/leads/[id]/contact. */}
+            <div className="space-y-2 rounded-lg border border-border bg-muted p-4">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-sm font-medium text-foreground/80">Customer contact</p>
+                {!isEditingContact ? (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={onStartEditContact}
+                    className="h-auto px-2 py-1 text-xs text-primary hover:bg-accent"
+                  >
+                    <Pencil className="mr-1 h-3 w-3" />
+                    Edit
+                  </Button>
+                ) : null}
+              </div>
+              {!isEditingContact ? (
+                <div className="space-y-1 text-sm text-foreground/80">
+                  <p>
+                    Email: {contactEmail ? contactEmail : <span className="text-muted-foreground">—</span>}
+                  </p>
+                  <p>
+                    Phone: {contactPhone ? contactPhone : <span className="text-muted-foreground">—</span>}
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <div className="space-y-1">
+                    <Label htmlFor="contact-email" className="text-xs text-muted-foreground">
+                      Customer email
+                    </Label>
+                    <Input
+                      id="contact-email"
+                      type="email"
+                      value={contactDraftEmail}
+                      onChange={(e) => setContactDraftEmail(e.target.value)}
+                      placeholder="customer@example.com"
+                      disabled={isSavingContact}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="contact-phone" className="text-xs text-muted-foreground">
+                      Customer phone
+                    </Label>
+                    <Input
+                      id="contact-phone"
+                      type="tel"
+                      value={contactDraftPhone}
+                      onChange={(e) => setContactDraftPhone(e.target.value)}
+                      placeholder="+1 555 123 4567"
+                      disabled={isSavingContact}
+                    />
+                  </div>
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => void onSaveContact()}
+                      disabled={isSavingContact}
+                    >
+                      {isSavingContact ? (
+                        <>
+                          <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                          Saving...
+                        </>
+                      ) : (
+                        "Save"
+                      )}
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={onCancelEditContact}
+                      disabled={isSavingContact}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Delivery checkboxes */}
             <div className="rounded-lg border border-border bg-muted p-4">
               <p className="mb-3 text-sm font-medium text-foreground/80">Delivery method</p>
@@ -275,18 +465,18 @@ export function QuoteComposer({
                 <label className="flex items-center gap-2 text-sm">
                   <Checkbox
                     checked={sendEmail}
-                    disabled={!customerEmail}
+                    disabled={!contactEmail}
                     onCheckedChange={(checked) => toggleEmail(checked === true)}
                   />
-                  <span>Email{!customerEmail ? " (no customer email)" : ""}</span>
+                  <span>Email{!contactEmail ? " (no customer email)" : ""}</span>
                 </label>
                 <label className="flex items-center gap-2 text-sm">
                   <Checkbox
                     checked={sendText}
-                    disabled={!customerPhone}
+                    disabled={!contactPhone}
                     onCheckedChange={(checked) => toggleText(checked === true)}
                   />
-                  <span>Text{!customerPhone ? " (no customer phone)" : ""}</span>
+                  <span>Text{!contactPhone ? " (no customer phone)" : ""}</span>
                 </label>
               </div>
             </div>
@@ -299,7 +489,7 @@ export function QuoteComposer({
                 disabled={loading || !canSend || (!sendEmail && !sendText)}
                 className="bg-primary text-white hover:bg-primary/90"
               >
-                {loading ? "Sending..." : "Send Estimate"}
+                {loading ? primarySendingLabel : primarySendLabel}
               </Button>
               <Button
                 type="button"
@@ -334,7 +524,7 @@ export function QuoteComposer({
               />
             </div>
             <p className="text-sm text-emerald-700">
-              Estimate sent. You can copy the link or message below.
+              {postSendHeading} You can copy the link or message below.
             </p>
             <div className="flex flex-wrap gap-3">
               <Button

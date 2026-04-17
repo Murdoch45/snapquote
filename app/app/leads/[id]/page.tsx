@@ -30,6 +30,29 @@ type Props = {
 
 export const dynamic = "force-dynamic";
 
+// Matches the channel labels recorded by /api/app/quote/send — "email" and
+// "text". We display them in the contractor-facing "Sent via" line as
+// "Email" and "SMS" so it reads naturally; unknown values pass through
+// unchanged.
+function formatSentVia(channels: string[]): string {
+  const seen = new Set<string>();
+  const labels = channels
+    .map((channel) => {
+      const normalized = channel.trim().toLowerCase();
+      if (normalized === "email") return "Email";
+      if (normalized === "text" || normalized === "sms") return "SMS";
+      return channel;
+    })
+    .filter((label) => {
+      if (seen.has(label)) return false;
+      seen.add(label);
+      return true;
+    });
+  if (labels.length === 0) return "—";
+  if (labels.length === 1) return labels[0];
+  return `${labels.slice(0, -1).join(", ")} and ${labels[labels.length - 1]}`;
+}
+
 export default async function LeadDetailPage({ params }: Props) {
   const { id } = await params;
   const auth = await requireAuth();
@@ -125,7 +148,13 @@ export default async function LeadDetailPage({ params }: Props) {
   const draftPublicId = (existingQuote?.public_id as string | null) ?? null;
   const existingQuoteStatus = (existingQuote?.status as string | null) ?? null;
   const isDraftQuote = existingQuoteStatus === "DRAFT";
-  const isSentQuote = existingQuote && !isDraftQuote;
+  // EXPIRED is a "resendable" starting point — the 7-day window elapsed,
+  // the contractor can edit the message and send again via DRAFT-or-EXPIRED
+  // CAS in /api/app/quote/send. The composer opens in phase 2 with the
+  // existing estimate pre-filled instead of the generate-then-send flow.
+  const isExpiredQuote = existingQuoteStatus === "EXPIRED";
+  const canComposeQuote = !existingQuote || isDraftQuote || isExpiredQuote;
+  const isSentQuote = existingQuote && !isDraftQuote && !isExpiredQuote;
   const companyName = (profile?.business_name as string | null)?.trim() || "SnapQuote";
   const contractorPhone = (profile?.phone as string | null)?.trim() || "Not provided";
   const contractorEmail =
@@ -354,6 +383,11 @@ export default async function LeadDetailPage({ params }: Props) {
                   <p className="text-foreground/80">
                     Price: {quoteEstimateDisplay ?? toCurrency(Number(existingQuote.price))} ({existingQuote.status})
                   </p>
+                  {Array.isArray(existingQuote.sent_via) && (existingQuote.sent_via as string[]).length > 0 ? (
+                    <p className="text-muted-foreground">
+                      Sent via {formatSentVia(existingQuote.sent_via as string[])}.
+                    </p>
+                  ) : null}
                   <Link href={`/q/${existingQuote.public_id}`} target="_blank">
                     Preview customer estimate page
                   </Link>
@@ -366,21 +400,43 @@ export default async function LeadDetailPage({ params }: Props) {
                   <LeadUnlockButton leadId={lead.id as string}>Unlock — 1 Credit</LeadUnlockButton>
                   <p className="text-muted-foreground">{credits.total} credits remaining</p>
                 </div>
-              ) : (
-                <QuoteComposer
-                  leadId={lead.id as string}
-                  publicId={activePublicId}
-                  snapQuote={Number(lead.ai_suggested_price ?? 900)}
-                  estimateLow={isDraftQuote ? Number(existingQuote.estimated_price_low ?? lead.ai_estimate_low ?? null) : ((lead.ai_estimate_low as number | null) ?? null)}
-                  estimateHigh={isDraftQuote ? Number(existingQuote.estimated_price_high ?? lead.ai_estimate_high ?? null) : ((lead.ai_estimate_high as number | null) ?? null)}
-                  serviceEstimates={aiServiceEstimates}
-                  initialMessage={previewMessage}
-                  customerName={(lead.customer_name as string | null) ?? null}
-                  customerPhone={(lead.customer_phone as string | null) ?? null}
-                  customerEmail={(lead.customer_email as string | null) ?? null}
-                  canSend
-                />
-              )}
+              ) : canComposeQuote ? (
+                <div className="space-y-3">
+                  {isExpiredQuote ? (
+                    <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+                      This estimate expired. Edit the details below and hit
+                      <span className="whitespace-nowrap"> “Resend Estimate”</span> to send it again —
+                      the customer&apos;s existing link will reflect the new estimate and reset the 7-day window.
+                    </div>
+                  ) : null}
+                  <QuoteComposer
+                    leadId={lead.id as string}
+                    publicId={activePublicId}
+                    snapQuote={Number(lead.ai_suggested_price ?? 900)}
+                    estimateLow={
+                      isDraftQuote || isExpiredQuote
+                        ? Number(existingQuote.estimated_price_low ?? lead.ai_estimate_low ?? null)
+                        : ((lead.ai_estimate_low as number | null) ?? null)
+                    }
+                    estimateHigh={
+                      isDraftQuote || isExpiredQuote
+                        ? Number(existingQuote.estimated_price_high ?? lead.ai_estimate_high ?? null)
+                        : ((lead.ai_estimate_high as number | null) ?? null)
+                    }
+                    serviceEstimates={aiServiceEstimates}
+                    initialMessage={
+                      isExpiredQuote
+                        ? ((existingQuote.message as string | null) ?? previewMessage)
+                        : previewMessage
+                    }
+                    customerName={(lead.customer_name as string | null) ?? null}
+                    customerPhone={(lead.customer_phone as string | null) ?? null}
+                    customerEmail={(lead.customer_email as string | null) ?? null}
+                    canSend
+                    isResend={isExpiredQuote}
+                  />
+                </div>
+              ) : null}
             </CardContent>
           </Card>
         </div>
