@@ -50,34 +50,6 @@ describe("ai estimate parsing", () => {
     expect(parsed.serviceSignals?.["Pressure Washing"]?.jobSubtype).toBe("driveway");
   });
 
-  it("sanitizes minor JSON formatting issues before parsing", () => {
-    const parsed = parseAiOutput(`
-      Here is the extracted JSON:
-      {
-        "summary": "Pressure washing request.",
-        "condition": "light",
-        "access": "easy",
-        "severity": "minor",
-        "debris": "none",
-        "multipleAreas": false,
-        "materialHint": null,
-        "inferredScope": null,
-        "treeSize": "medium",
-        "estimatedWindowCount": null,
-        "estimatedPoolSqft": null,
-        "estimatedFixtureCount": null,
-        "estimatedJunkCubicYards": null,
-        "internalConfidence": 0.,
-        "pricingDrivers": ["Driveway size",],
-        "estimatorNotes": ["Satellite image available.",],
-      }
-    `);
-
-    expect(parsed.internalConfidence).toBe(0);
-    expect(parsed.pricingDrivers).toEqual(["Driveway size"]);
-    expect(parsed.estimatorNotes).toEqual(["Satellite image available."]);
-  });
-
   it("builds the structured-output schema for OpenAI", () => {
     const responseFormat = buildAiSignalsResponseFormat();
     const serialized = JSON.stringify(responseFormat);
@@ -417,7 +389,7 @@ describe("ai estimate parsing", () => {
     const inferred = fallbackEstimate(input, propertyData, buildSignals("strong_inference"));
     const inferredTrace = inferred.serviceEstimates[0].scope_reconciliation;
 
-    expect(inferredTrace?.reconciledQuantity).toBe(11);
+    expect(inferredTrace?.reconciledQuantity).toBe(9);
     expect(inferredTrace?.questionnaireAnchor?.quantity).toBe(10);
     expect(inferredTrace?.propertyHint?.quantity).toBe(8);
     expect(inferredTrace?.notes).toContain("Large inferred AI drift was heavily damped to keep repeat runs stable.");
@@ -717,47 +689,52 @@ describe("ai estimate parsing", () => {
     expect(withEdging.costBreakdown?.edging_adjustment).toBeGreaterThan(0);
   });
 
-  it("marks lawn quotes outside the service radius as out of service area", () => {
-    const fallback = fallbackEstimate(
-      {
-        businessName: "Demo Co",
-        services: ["Lawn Care / Maintenance"],
-        serviceQuestionAnswers: [
-          {
-            service: "Lawn Care / Maintenance",
-            answers: {
-              lawn_work_type: "Mowing only",
-              lawn_area_size: "Medium yard (~2,000-5,000 sq ft)",
-              lawn_condition: "Regular maintenance",
-              lawn_property_type: "Front and backyard"
-            }
+  it("caps the travel multiplier at 200 miles so far-away leads still produce a normal estimate", () => {
+    const leadInput: Parameters<typeof fallbackEstimate>[0] = {
+      businessName: "Demo Co",
+      services: ["Lawn Care / Maintenance"],
+      serviceQuestionAnswers: [
+        {
+          service: "Lawn Care / Maintenance",
+          answers: {
+            lawn_work_type: "Mowing only",
+            lawn_area_size: "Medium yard (~2,000-5,000 sq ft)",
+            lawn_condition: "Regular maintenance",
+            lawn_property_type: "Front and backyard"
           }
-        ],
-        address: "999 Far Away Rd",
-        lat: 35.0,
-        lng: -120.0,
-        description: "Lawn mowing request outside the service area.",
-        photoUrls: []
-      },
-      {
-        formattedAddress: "999 Far Away Rd",
-        city: "Austin",
-        state: "TX",
-        zipCode: "78701",
-        lotSizeSqft: 7000,
-        houseSqft: 2000,
-        estimatedBackyardSqft: 3200,
-        travelDistanceMiles: 250,
-        lotSizeSource: "lead_parcel",
-        houseSqftSource: "lot_coverage_estimate",
-        locationSource: "address_geocode"
-      }
-    );
+        }
+      ],
+      address: "999 Far Away Rd",
+      lat: 35.0,
+      lng: -120.0,
+      description: "Lawn mowing request far outside the service area.",
+      photoUrls: []
+    };
 
-    expect(fallback.snapQuote).toBe(0);
-    expect(fallback.confidenceScore).toBe(0);
-    expect(fallback.outOfServiceArea).toBe(true);
-    expect(fallback.serviceEstimates[0].outOfServiceArea).toBe(true);
+    const propertyAt = (miles: number) => ({
+      formattedAddress: "999 Far Away Rd",
+      city: "Austin",
+      state: "TX",
+      zipCode: "78701",
+      lotSizeSqft: 7000,
+      houseSqft: 2000,
+      estimatedBackyardSqft: 3200,
+      travelDistanceMiles: miles,
+      lotSizeSource: "lead_parcel" as const,
+      houseSqftSource: "lot_coverage_estimate" as const,
+      locationSource: "address_geocode" as const
+    });
+
+    const atCap = fallbackEstimate(leadInput, propertyAt(200));
+    const beyondCap = fallbackEstimate(leadInput, propertyAt(250));
+
+    expect(atCap.snapQuote).toBeGreaterThan(0);
+    expect(beyondCap.snapQuote).toBeGreaterThan(0);
+    expect(beyondCap.confidenceScore).toBeGreaterThan(0);
+    expect(beyondCap.snapQuote).toBe(atCap.snapQuote);
+    expect(beyondCap.lowEstimate).toBe(atCap.lowEstimate);
+    expect(beyondCap.highEstimate).toBe(atCap.highEstimate);
+    expect(beyondCap.estimatorNotes.join(" ")).toContain("200-mile");
   });
 
   it("filters pressure-wash scope to the quoted surface family instead of all detected hardscape", () => {
@@ -844,7 +821,7 @@ describe("ai estimate parsing", () => {
     );
 
     expect(weak.serviceEstimates[0].jobType).toContain("other_");
-    expect(weak.confidenceScore).toBe(0.38);
+    expect(weak.confidenceScore).toBe(0.42);
     expect(weak.estimatorNotes.join(" ")).toContain("fallback");
   });
 

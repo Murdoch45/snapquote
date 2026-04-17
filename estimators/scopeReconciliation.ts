@@ -1110,7 +1110,7 @@ function withReconciledSignal(input: ReconcileScopeInput, signal: NormalizedServ
     const driftFromStableAnchor = differencePct(stableAnchor, aiProposal.quantity);
     const damping = inferredAiDamping(strength, driftFromStableAnchor);
 
-    if (driftFromStableAnchor <= 0.12) {
+    if (driftFromStableAnchor <= 0.15) {
       candidate = stableAnchor;
       notes.push("Indirect AI quantity stayed inside the stable anchor band, so the stable center was used.");
     } else {

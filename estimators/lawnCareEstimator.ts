@@ -15,8 +15,7 @@ import {
   normalizeBucket,
   resolveServiceSignalContext
 } from "@/estimators/serviceEstimatorSupport";
-
-const MAX_SERVICE_RADIUS_MILES = 200;
+import { TRAVEL_DISTANCE_CAP_MILES } from "@/lib/ai/cost-models";
 
 function applyEdgingAdjustment(estimate: ServiceEstimate): ServiceEstimate {
   const snapQuote = roundToNearestTwentyFive(estimate.snapQuote + 25);
@@ -116,9 +115,9 @@ export function estimateLawnCare(context: EstimatorContext) {
     ],
       estimatorNotes: [
         ...context.signals.estimatorNotes,
-        ...(travelDistanceMiles != null && travelDistanceMiles > MAX_SERVICE_RADIUS_MILES
+        ...(travelDistanceMiles != null && travelDistanceMiles > TRAVEL_DISTANCE_CAP_MILES
           ? [
-              `Travel distance ${travelDistanceMiles} miles exceeds the ${MAX_SERVICE_RADIUS_MILES}-mile lawn-service radius; pricing kept for estimator validation.`
+              `Travel distance ${travelDistanceMiles} miles exceeds the ${TRAVEL_DISTANCE_CAP_MILES}-mile cap; travel multiplier held at the ${TRAVEL_DISTANCE_CAP_MILES}-mile rate.`
             ]
           : []),
         ...(isPremiumProperty(context) ? ["Large-lot or estate-scale lawn complexity applied."] : [])

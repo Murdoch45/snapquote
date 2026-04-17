@@ -419,7 +419,6 @@ export type EstimateInput = {
 };
 
 export type GeneratedLeadEstimate = EngineEstimate & {
-  message: string;
   summary: string;
   costBreakdown: Record<string, number>;
   aiExtractionTrace?: AiExtractionTrace | null;
@@ -1232,43 +1231,6 @@ function inferSignalsFallback(input: EstimateInput, propertyData: PropertyData):
   };
 }
 
-function sanitizeAiJsonPayload(raw: string): string {
-  const firstBrace = raw.indexOf("{");
-  const lastBrace = raw.lastIndexOf("}");
-  let jsonPayload =
-    firstBrace >= 0 && lastBrace >= firstBrace ? raw.slice(firstBrace, lastBrace + 1) : raw;
-
-  jsonPayload = jsonPayload.trim();
-  jsonPayload = jsonPayload.replace(/```json|```/gi, "");
-  jsonPayload = jsonPayload.replace(/[“”]/g, "\"");
-  jsonPayload = jsonPayload.replace(/[‘’]/g, "'");
-  jsonPayload = jsonPayload.replace(/\s+/g, " ").trim();
-  jsonPayload = jsonPayload.replace(/,\s*([}\]])/g, "$1");
-  jsonPayload = jsonPayload.replace(/(:\s*)(-?\d+)\.(?=\s*[,}\]])/g, "$1$2.0");
-  jsonPayload = jsonPayload.replace(/(:\s*)\.(\d+)(?=\s*[,}\]])/g, "$10.$2");
-
-  return jsonPayload;
-}
-
-function repairAiJsonPayload(jsonPayload: string): string {
-  let repairedPayload = jsonPayload;
-
-  repairedPayload = repairedPayload.replace(/([{,]\s*)([A-Za-z_][A-Za-z0-9_]*)(\s*:)/g, "$1\"$2\"$3");
-  repairedPayload = repairedPayload.replace(/'([^'\\]*(?:\\.[^'\\]*)*)'/g, (_, value: string) => {
-    const normalizedValue = value.replace(/"/g, "\\\"");
-    return `"${normalizedValue}"`;
-  });
-  repairedPayload = repairedPayload.replace(/(")\s+(")/g, "$1,$2");
-  repairedPayload = repairedPayload.replace(/(\d)\s+(")/g, "$1,$2");
-  repairedPayload = repairedPayload.replace(/(")\s+(\{|\[|-?\d|true|false|null)/g, "$1,$2");
-  repairedPayload = repairedPayload.replace(/(\}|\]|true|false|null|-?\d+(?:\.\d+)?)\s+("|\{|\[|-?\d)/g, "$1,$2");
-  repairedPayload = repairedPayload.replace(/,\s*([}\]])/g, "$1");
-  repairedPayload = repairedPayload.replace(/(:\s*)(-?\d+)\.(?=\s*[,}\]])/g, "$1$2.0");
-  repairedPayload = repairedPayload.replace(/(:\s*)\.(\d+)(?=\s*[,}\]])/g, "$10.$2");
-
-  return repairedPayload;
-}
-
 function normalizeNullableSurfaceMap(
   surfaceMap: AiSignalsResponse["detectedSurfaces"]
 ): HardSurfaceMap | undefined {
@@ -1797,23 +1759,8 @@ function computeStructuredAiRetryDelayMs(attempt: number): number {
 }
 
 function parseAiOutput(raw: string): AiEstimatorSignals {
-  const sanitizedPayload = sanitizeAiJsonPayload(raw);
-
-  try {
-    const parsedJson = JSON.parse(sanitizedPayload);
-    return normalizeLooseAiSignals(aiSignalsSchema.parse(parsedJson));
-  } catch {
-    const repairedPayload = repairAiJsonPayload(sanitizedPayload);
-
-    try {
-      const repairedJson = JSON.parse(repairedPayload);
-      return normalizeLooseAiSignals(aiSignalsSchema.parse(repairedJson));
-    } catch (error) {
-      console.error("parseAiOutput failed after sanitizing payload:", sanitizedPayload);
-      console.error("parseAiOutput failed after repair pass:", repairedPayload);
-      throw error;
-    }
-  }
+  const parsedJson = JSON.parse(raw);
+  return normalizeLooseAiSignals(aiSignalsSchema.parse(parsedJson));
 }
 
 async function fetchImageAsDataUrl(url: string): Promise<string | null> {
@@ -3388,10 +3335,7 @@ function buildSignalPrompt(
   return [
     "You are SnapQuote's estimator signal extraction assistant.",
     "Analyze the services, questionnaire answers, any other-text answer fields, customer description, uploaded photos, property data, and satellite image.",
-    "Return ONLY valid JSON.",
-    "Return a single JSON object and nothing else.",
-    "Do not include explanations, markdown, code fences, or text before or after the JSON.",
-    "All numbers must use valid JSON decimals. Use 0.8 or 0.0 when needed.",
+    "Return a single valid JSON object and nothing else — no explanations, markdown, code fences, or text before or after. All numbers must use valid JSON decimals (use 0.8 or 0.0, not 0.).",
     "AI interprets. Logic prices. Do not estimate or suggest any dollar amount.",
     "Questionnaire answers are the primary structured evidence. Use description, other-text answers, photos, satellite, and property context to refine and confirm, not to override recklessly.",
     "Prefer stable categorical outputs over creative wording. Use the canonical enums and stable subtype labels whenever possible.",
@@ -3808,8 +3752,7 @@ async function callOpenAI(prompt: string, input: EstimateInput): Promise<Structu
                 content: [
                   {
                     type: "input_text",
-                    text:
-                      "Return ONLY valid JSON. Do not include markdown, explanations, or any text outside the JSON object. All numeric values must be valid JSON numbers."
+                    text: "You are SnapQuote's estimator signal extractor. Follow the user prompt exactly."
                   }
                 ]
               },
@@ -3901,12 +3844,10 @@ function buildGeneratedEstimate(
   signals: AiEstimatorSignalsWithTrace,
   estimatorAudit?: EstimatorPipelineAudit | null
 ): GeneratedLeadEstimate {
-  const message = `SnapQuote estimate: ${engineEstimate.service}. Estimated range ${engineEstimate.lowEstimate.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 })} to ${engineEstimate.highEstimate.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 })}.`;
   const region = engineEstimate.region ?? signals.region ?? "default";
 
   return {
     ...engineEstimate,
-    message,
     summary: signals.summary ?? engineEstimate.scopeSummary,
     costBreakdown: engineEstimate.lineItems,
     propertyData,
@@ -4354,23 +4295,18 @@ export async function generateEstimateAsync(leadId: string) {
         terrain_classification: estimate.terrain ?? null,
         access_difficulty: estimate.access ?? null,
         material_tier: estimate.material ?? null,
-        fence_linear_ft: null,
         ai_confidence: confidenceLabel(estimate.confidenceScore),
         ai_confidence_score: estimate.confidenceScore,
         ai_cost_breakdown: estimate.costBreakdown,
         ai_service_estimates: estimate.serviceEstimates,
         ai_pricing_drivers: estimate.pricingDrivers,
         ai_estimator_notes: estimate.estimatorNotes,
-        yard_layout: null,
-        demo_items: null,
         ai_job_summary: estimate.summary,
         ai_estimate_low: estimate.lowEstimate,
         ai_estimate_high: estimate.highEstimate,
         ai_suggested_price: estimate.snapQuote,
-        ai_draft_message: estimate.message,
         ai_status: "ready",
-        ai_generated_at: new Date().toISOString()
-        ,
+        ai_generated_at: new Date().toISOString(),
         travel_distance_miles: travelDistanceMiles
       })
       .eq("id", leadId)

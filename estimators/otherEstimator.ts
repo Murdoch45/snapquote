@@ -76,7 +76,7 @@ export function estimateOther(context: EstimatorContext) {
     knownPath: false,
     usedFallbackFamily: true,
     customJob: true,
-    needsManualReview: needsManualReview || true
+    needsManualReview
   });
 
   return finalizeEstimate({

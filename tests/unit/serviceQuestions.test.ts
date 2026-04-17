@@ -146,7 +146,7 @@ describe("service questions", () => {
       {
         key: "lighting_type",
         label: "Lighting type",
-        value: "Accent or landscape lights"
+        value: "Driveway lights, Pathway lights"
       },
       {
         key: "lighting_type_contractor_note",

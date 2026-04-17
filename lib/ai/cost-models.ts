@@ -290,10 +290,13 @@ export function resolveRegionalCostModel(region: RegionLookup): RegionalCostMode
   return NATIONAL_DEFAULT;
 }
 
+export const TRAVEL_DISTANCE_CAP_MILES = 200;
+
 export function getTravelAdjustmentPct(distanceMiles: number | null | undefined): number {
   if (distanceMiles == null || distanceMiles <= 10) return 0;
-  if (distanceMiles <= 25) return 0.05;
-  if (distanceMiles <= 50) return 0.1;
+  const capped = Math.min(distanceMiles, TRAVEL_DISTANCE_CAP_MILES);
+  if (capped <= 25) return 0.05;
+  if (capped <= 50) return 0.1;
   return 0.15;
 }
 
