@@ -1,5 +1,6 @@
 import { randomBytes } from "crypto";
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
+import { recordAudit } from "@/lib/auditLog";
 import { buildEstimateSentEmail } from "@/lib/emailTemplates";
 import { requireMemberForApi } from "@/lib/auth/requireRole";
 import { sendEmail } from "@/lib/notify";
@@ -301,6 +302,45 @@ export async function POST(request: Request) {
     } catch (usageError) {
       console.error("quote send usage increment failed:", usageError);
     }
+
+    // Best-effort audit — runs after the response is sent so the user
+    // never waits on the log write. recordAudit swallows internal errors
+    // so an audit blip never surfaces as a failed send. We intentionally
+    // skip the idempotent-concurrent-winner path above: that request
+    // didn't actually send anything, and the original winner's audit
+    // row already represents what happened.
+    const ipAddress =
+      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
+    const auditOrgId = auth.orgId;
+    const auditUserId = auth.userId;
+    const auditUserEmail = auth.userEmail;
+    const auditQuoteId = quoteId;
+    const auditLeadId = body.leadId;
+    const auditSentChannels = [...sentChannels];
+    const auditDeliveryWarning = deliveryErrors.length > 0 ? deliveryErrors.join(" ") : null;
+    const auditEstimateLow = body.estimatedPriceLow;
+    const auditEstimateHigh = body.estimatedPriceHigh;
+    const auditWasResend = wasDraft && originalStatus === "EXPIRED";
+    after(async () => {
+      const admin = createAdminClient();
+      await recordAudit(admin, {
+        orgId: auditOrgId,
+        action: "quote.sent",
+        actorUserId: auditUserId,
+        actorEmail: auditUserEmail,
+        targetType: "quote",
+        targetId: auditQuoteId,
+        metadata: {
+          lead_id: auditLeadId,
+          sent_via: auditSentChannels,
+          estimated_price_low: auditEstimateLow,
+          estimated_price_high: auditEstimateHigh,
+          was_resend: auditWasResend,
+          partial_delivery_warning: auditDeliveryWarning
+        },
+        ipAddress
+      });
+    });
 
     return NextResponse.json({
       ok: true,

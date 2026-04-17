@@ -13,12 +13,18 @@ type ApiAuthFailure = {
 type OwnerApiAuthSuccess = {
   ok: true;
   userId: string;
+  // Email from the auth session. Exposed so audit-log writers can record
+  // actor_email without a second auth.getUser() round-trip. May be null
+  // if the auth user row has no email on file (e.g., OAuth-only accounts
+  // before email sync completes).
+  userEmail: string | null;
   orgId: string;
 };
 
 type MemberApiAuthSuccess = {
   ok: true;
   userId: string;
+  userEmail: string | null;
   orgId: string;
   role: "OWNER" | "MEMBER";
 };
@@ -97,6 +103,7 @@ export async function requireOwnerForApi(
   return {
     ok: true as const,
     userId: user.id,
+    userEmail: user.email ?? null,
     orgId: membership.org_id as string
   };
 }
@@ -136,6 +143,7 @@ export async function requireMemberForApi(
   return {
     ok: true as const,
     userId: user.id,
+    userEmail: user.email ?? null,
     orgId: membership.org_id as string,
     role: membership.role as "OWNER" | "MEMBER"
   };

@@ -1,6 +1,7 @@
 import { randomBytes } from "crypto";
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { z } from "zod";
+import { recordAudit } from "@/lib/auditLog";
 import { requireMemberForApi } from "@/lib/auth/requireRole";
 import { unlockLead } from "@/lib/credits";
 import { DEFAULT_ESTIMATE_SMS_TEMPLATE } from "@/lib/quote-template";
@@ -88,6 +89,36 @@ export async function POST(request: Request) {
         // Non-critical — continue without publicId
       }
     }
+
+    // Best-effort audit. Runs after the response is sent so the user
+    // never waits on the log write; recordAudit swallows internal errors
+    // so an audit blip never surfaces as a failed unlock. We log both
+    // the fresh-unlock and already-unlocked paths — an already-unlocked
+    // request still represents a contractor (or team member) acting on
+    // this lead and is worth the trail.
+    const ipAddress =
+      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
+    const orgId = auth.orgId;
+    const userId = auth.userId;
+    const actorEmail = auth.userEmail;
+    const leadIdForAudit = body.leadId;
+    const { alreadyUnlocked, remainingCredits } = result;
+    after(async () => {
+      const admin = createAdminClient();
+      await recordAudit(admin, {
+        orgId,
+        action: "lead.unlocked",
+        actorUserId: userId,
+        actorEmail,
+        targetType: "lead",
+        targetId: leadIdForAudit,
+        metadata: {
+          already_unlocked: alreadyUnlocked,
+          remaining_credits: remainingCredits
+        },
+        ipAddress
+      });
+    });
 
     return NextResponse.json({
       ok: true,

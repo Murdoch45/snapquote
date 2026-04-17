@@ -13,7 +13,14 @@ export type AuditAction =
   | "member.self_removed"
   | "settings.updated"
   | "settings.password_changed"
-  | "credits.purchased";
+  | "credits.purchased"
+  // High-value lead/estimate transactions worth a paper trail. Unlocks
+  // charge a credit and reveal customer PII; sends dispatch email/SMS
+  // through Resend + Telnyx with real per-message cost. Both are the
+  // kinds of actions a contractor might later dispute or need to audit
+  // team activity against.
+  | "lead.unlocked"
+  | "quote.sent";
 
 type RecordAuditInput = {
   orgId: string;
