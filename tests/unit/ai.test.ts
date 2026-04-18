@@ -3,6 +3,7 @@ import { clampDisplayConfidence } from "../../components/ConfidenceMeter";
 import {
   buildAiExtractionNotes,
   buildAiSignalsResponseFormat,
+  buildDeterministicJobSummary,
   classifyStructuredAiFailure,
   fallbackEstimate,
   parseAiOutput,
@@ -828,5 +829,60 @@ describe("ai estimate parsing", () => {
   it("clamps displayed confidence out of the deepest red zone", () => {
     expect(clampDisplayConfidence(0.05)).toBe(0.25);
     expect(clampDisplayConfidence(0.72)).toBe(0.72);
+  });
+
+  it("builds a deterministic job summary from questionnaire answers for the declared service", () => {
+    const summary = buildDeterministicJobSummary({
+      businessName: "Demo Co",
+      services: ["Concrete"],
+      address: "123 Example St",
+      photoUrls: [],
+      serviceQuestionAnswers: [
+        {
+          service: "Concrete",
+          answers: {
+            concrete_work_type: "New pour",
+            concrete_size: "Medium (~500 sq ft)",
+            concrete_access: "Easy"
+          }
+        }
+      ]
+    });
+
+    expect(summary.toLowerCase()).toContain("concrete");
+    const sentences = summary.split(/\.\s+/).filter(Boolean);
+    expect(sentences.length).toBeGreaterThanOrEqual(1);
+    expect(sentences.length).toBeLessThanOrEqual(3);
+  });
+
+  it("ignores questionnaire bundles whose service isn't declared", () => {
+    // Guardrail: a Concrete lead must never get a summary describing a fence,
+    // even if a stray fence answer bundle sneaks in.
+    const summary = buildDeterministicJobSummary({
+      businessName: "Demo Co",
+      services: ["Concrete"],
+      address: "123 Example St",
+      photoUrls: [],
+      serviceQuestionAnswers: [
+        {
+          service: "Fence Installation / Repair",
+          answers: {
+            fence_work_type: "New installation",
+            fence_material: "Wood"
+          }
+        },
+        {
+          service: "Concrete",
+          answers: {
+            concrete_work_type: "New pour",
+            concrete_size: "Medium (~500 sq ft)"
+          }
+        }
+      ]
+    });
+
+    expect(summary.toLowerCase()).not.toContain("fence");
+    expect(summary.toLowerCase()).not.toContain("wood");
+    expect(summary.toLowerCase()).toContain("concrete");
   });
 });

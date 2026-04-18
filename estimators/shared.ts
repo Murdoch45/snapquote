@@ -266,7 +266,10 @@ export type NormalizedServiceSignal = {
 };
 
 export type AiEstimatorSignals = {
-  summary: string;
+  // Top-level summary is produced deterministically after the engine runs
+  // (see buildDeterministicJobSummary) and is no longer part of the AI
+  // signal extraction. Kept optional so legacy cached replays still parse.
+  summary?: string;
   condition: "light" | "moderate" | "heavy";
   access: "easy" | "moderate" | "difficult";
   severity: "minor" | "moderate" | "major";
