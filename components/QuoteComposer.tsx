@@ -82,6 +82,7 @@ export function QuoteComposer({
   const [sendEmail, setSendEmail] = useState(true);
   const [sendText, setSendText] = useState(false);
   const [prefsLoaded, setPrefsLoaded] = useState(false);
+  const [prefsOrgId, setPrefsOrgId] = useState<string | null>(null);
 
   // Customer contact (email + phone) — editable via a small inline form so
   // a typo captured on the public lead submit can be corrected without the
@@ -113,13 +114,14 @@ export function QuoteComposer({
         const supabase = createClient();
         const { data } = await supabase
           .from("contractor_profile")
-          .select("estimate_send_email,estimate_send_text")
+          .select("org_id,estimate_send_email,estimate_send_text")
           .limit(1)
           .maybeSingle();
 
         if (cancelled) return;
 
         if (data) {
+          setPrefsOrgId((data.org_id as string | null) ?? null);
           const prefEmail = data.estimate_send_email;
           const prefText = data.estimate_send_text;
           // Only apply if at least one is true
@@ -146,7 +148,7 @@ export function QuoteComposer({
   // load. Success stays silent; these toggles flip a lot and don't need
   // their own confirmation.
   useEffect(() => {
-    if (!prefsLoaded) return;
+    if (!prefsLoaded || !prefsOrgId) return;
 
     const save = async () => {
       try {
@@ -157,7 +159,7 @@ export function QuoteComposer({
             estimate_send_email: sendEmail,
             estimate_send_text: sendText
           })
-          .limit(1);
+          .eq("org_id", prefsOrgId);
         if (error) {
           throw error;
         }
@@ -171,7 +173,7 @@ export function QuoteComposer({
     };
 
     void save();
-  }, [sendEmail, sendText, prefsLoaded]);
+  }, [sendEmail, sendText, prefsLoaded, prefsOrgId]);
 
   const toggleEmail = (checked: boolean) => {
     // Prevent unchecking both
