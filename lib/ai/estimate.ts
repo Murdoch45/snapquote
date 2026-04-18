@@ -238,7 +238,7 @@ const aiServiceSignalResponseSchema = z.object({
   aiConfidenceReasons: z.array(z.string()),
   consistencyScore: z.number().min(-1).max(100),
   notes: z.array(z.string()),
-  summary: z.string(),
+  summary: z.string().max(600),
   quotedSurfaces: buildHardSurfaceMapResponseSchema(),
   surfaceDetections: z.array(
     z.object({
@@ -250,7 +250,7 @@ const aiServiceSignalResponseSchema = z.object({
 });
 
 const aiSignalsSchema = z.object({
-  summary: z.string(),
+  summary: z.string().max(600),
   condition: z.enum(["light", "moderate", "heavy"]),
   access: z.enum(["easy", "moderate", "difficult"]),
   severity: z.enum(["minor", "moderate", "major"]),
@@ -3372,7 +3372,7 @@ function buildSignalPrompt(
     "The pricingRegion is already determined by the backend from the address. Treat it as fixed context and do not infer or return region.",
     "Detect washable hard surfaces from satellite imagery and photos, then separately infer which of those surfaces are actually in customer scope for relevant services.",
     "Surface types are driveway, motor_court, parking_pad, walkway, and patio.",
-    "summary must be plain English sentences describing what the customer wants done, the condition or difficulty of the job, and any notable details. Write it like a contractor briefing a colleague. No technical labels, no colons, no data formats. Scale the summary length based on service count. For 1 service: write 3 detailed sentences covering scope, condition, size, and access. For 2-3 services: write 2 sentences covering all services briefly. For 4 or more services: write 1-2 concise sentences naming all services and the overall scope only. Never exceed 3 sentences regardless of service count. If multiple services are requested, summarize ALL of them. Do not focus on just one service. Cover the full scope of work across all requested services. Also include a rough size estimate using words like 'around' or 'about' — never an exact number. Base the size on satellite imagery, customer photos, and property data combined with questionnaire answers.",
+    "summary must be exactly 2 plain English sentences describing what the customer wants done. Sentence 1: state the service type, scope, and size using words like 'around' or 'about' for size — base size on satellite imagery and property data. Sentence 2: describe the condition, difficulty, access, or any notable details. Write it like a contractor briefing a colleague. No technical labels, no colons, no data formats. The questionnaire answers are the ONLY source of truth for what service is being requested and what the scope is. Photos, satellite imagery, and property data may only be used to estimate SIZE — they must never change the service type, job type, material, or scope described in the questionnaire answers. Never describe a service that was not requested.",
     JSON.stringify(
       {
         businessName: input.businessName,
@@ -4358,5 +4358,4 @@ export async function generateEstimateAsync(leadId: string) {
 
 export { parseAiOutput };
 export { buildAiSignalsResponseFormat };
-
 
