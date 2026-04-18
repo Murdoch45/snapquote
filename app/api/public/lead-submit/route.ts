@@ -12,7 +12,6 @@ import { rateLimit } from "@/lib/rateLimit";
 import { normalizeServiceTypes } from "@/lib/services";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAppUrl } from "@/lib/utils";
-import { sendPushToOrg } from "@/lib/pushNotifications";
 import { leadSubmitSchema, parseLeadSubmitQuestionAnswers } from "@/lib/validations";
 
 export const runtime = "nodejs";
@@ -399,25 +398,6 @@ export async function POST(request: Request) {
       emailBody: `New estimate request: ${serviceText} at ${payload.addressFull}. Open: ${leadLink}`
     });
 
-    {
-      const city = payload.addressFull.split(",")[1]?.trim() || "your area";
-      void sendPushToOrg(contractor.org_id as string, {
-        title: "New Lead",
-        body: `You have a new lead in ${city}! Tap to unlock.`,
-        data: { screen: "lead", id: leadId }
-      });
-      void admin
-        .from("notifications")
-        .insert({
-          org_id: orgId,
-          type: "NEW_LEAD",
-          title: "New Lead",
-          body: `You have a new lead in ${city}! Tap to unlock.`,
-          screen: "lead",
-          screen_params: { id: leadId }
-        })
-        .then(null, (err: unknown) => console.warn("notification insert failed:", err));
-    }
     const customerConfirmationEmail = buildCustomerConfirmationEmail({
       businessName: contractor.business_name as string,
       businessPhone: (contractor.phone as string | null) ?? null,

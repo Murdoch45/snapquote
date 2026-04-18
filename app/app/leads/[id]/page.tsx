@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Lock } from "lucide-react";
 import { format } from "date-fns";
 import { LeadPropertyPreview } from "@/components/LeadPropertyPreview";
+import { LeadPhotoGallery } from "@/components/LeadPhotoGallery";
 import { ConfidenceMeter } from "@/components/ConfidenceMeter";
 import { LeadUnlockButton } from "@/components/LeadUnlockButton";
 import { QuoteComposer } from "@/components/QuoteComposer";
@@ -277,28 +278,18 @@ export default async function LeadDetailPage({ params }: Props) {
 
             <section>
               <h3 className="text-sm font-semibold text-foreground">Photos</h3>
-              {photosWithFreshUrls.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No photos uploaded.</p>
-              ) : (
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                  {photosWithFreshUrls.map((photo) => {
-                    const url =
-                      ((photo as { signed_url?: string | null }).signed_url ??
-                        (photo.public_url as string | null)) ||
-                      "";
-                    if (!url) return null;
-                    return (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        key={photo.id}
-                        src={url}
-                        alt="Lead"
-                        className="h-28 w-full rounded-md object-cover"
-                      />
-                    );
-                  })}
-                </div>
-              )}
+              <div className="mt-2">
+                <LeadPhotoGallery
+                  photos={photosWithFreshUrls
+                    .map(
+                      (photo) =>
+                        ((photo as { signed_url?: string | null }).signed_url ??
+                          (photo.public_url as string | null)) ||
+                        ""
+                    )
+                    .filter((url): url is string => url.length > 0)}
+                />
+              </div>
             </section>
           </CardContent>
         </Card>

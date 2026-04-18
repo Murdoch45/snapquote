@@ -43,6 +43,7 @@ import {
 import { resolveRegionalCostModel } from "@/lib/ai/cost-models";
 import { getGoogleMapsApiKey, buildSatelliteStaticMapUrl, haversineMiles } from "@/lib/maps";
 import { getPropertyData, type PropertyData } from "@/lib/property-data";
+import { sendPushToOrg } from "@/lib/pushNotifications";
 import {
   OTHER_OUTDOOR_UNSUPPORTED_MESSAGE,
   isOtherServiceOutdoorBlocked,
@@ -4158,6 +4159,40 @@ function getUnsupportedEstimatorRequest(
   return otherBundle ? { service: "Other", message: OTHER_OUTDOOR_UNSUPPORTED_MESSAGE } : null;
 }
 
+async function sendNewLeadNotifications(
+  admin: ReturnType<typeof createAdminClient>,
+  params: { leadId: string; orgId: string; addressFull: string | null }
+): Promise<void> {
+  const city = (params.addressFull ?? "").split(",")[1]?.trim() || "your area";
+  const body = `You have a new lead in ${city}! Tap to unlock.`;
+
+  try {
+    await sendPushToOrg(params.orgId, {
+      title: "New Lead",
+      body,
+      data: { screen: "lead", id: params.leadId }
+    });
+  } catch (error) {
+    console.warn("new lead push notification failed:", error);
+  }
+
+  try {
+    const { error: insertError } = await admin.from("notifications").insert({
+      org_id: params.orgId,
+      type: "NEW_LEAD",
+      title: "New Lead",
+      body,
+      screen: "lead",
+      screen_params: { id: params.leadId }
+    });
+    if (insertError) {
+      console.warn("new lead notification insert failed:", insertError);
+    }
+  } catch (error) {
+    console.warn("new lead notification insert failed:", error);
+  }
+}
+
 export async function generateEstimateAsync(leadId: string) {
   const admin = createAdminClient();
 
@@ -4230,6 +4265,11 @@ export async function generateEstimateAsync(leadId: string) {
       }
 
       console.warn("Estimator request blocked as unsupported.");
+      await sendNewLeadNotifications(admin, {
+        leadId,
+        orgId: lead.org_id as string,
+        addressFull: (lead.address_full as string | null) ?? null
+      });
       return;
     }
 
@@ -4320,6 +4360,12 @@ export async function generateEstimateAsync(leadId: string) {
     if (updateError) {
       throw updateError;
     }
+
+    await sendNewLeadNotifications(admin, {
+      leadId,
+      orgId: lead.org_id as string,
+      addressFull: (lead.address_full as string | null) ?? null
+    });
   } catch (error) {
     const failureMessage = error instanceof Error ? error.message : "Unknown estimator failure.";
     console.error("AI estimate failed:", error);
@@ -4352,6 +4398,20 @@ export async function generateEstimateAsync(leadId: string) {
 
     if (failureUpdateError) {
       console.error("Failed to persist estimator failure state:", failureUpdateError);
+    }
+
+    const { data: failureLead } = await admin
+      .from("leads")
+      .select("org_id,address_full")
+      .eq("id", leadId)
+      .single();
+
+    if (failureLead?.org_id) {
+      await sendNewLeadNotifications(admin, {
+        leadId,
+        orgId: failureLead.org_id as string,
+        addressFull: (failureLead.address_full as string | null) ?? null
+      });
     }
   }
 }
