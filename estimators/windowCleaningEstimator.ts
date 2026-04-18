@@ -85,7 +85,7 @@ export function estimateWindowCleaning(context: EstimatorContext) {
     accessMultiplier:
       storyHeightMultiplier(stories) *
       (accessLabel === "difficult" ? 1.12 : accessLabel === "moderate" ? 1.06 : 1),
-      regionalMultiplier: context.signals.regionMultiplier ?? regionalMultiplier(context.regionalModel),
+      regionalMultiplier: regionalMultiplier(context.regionalModel),
       minimumJobPrice: /commercial/i.test(propertyType) ? 200 : 125,
       internalConfidence: confidenceTrace.finalScore,
     pricingDrivers: [

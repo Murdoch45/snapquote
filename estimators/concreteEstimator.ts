@@ -194,7 +194,7 @@ export function estimateConcrete(context: EstimatorContext) {
     conditionMultiplier: /repair|resurfac/i.test(workType) ? 0.86 : 1,
     terrainMultiplier: context.signals.terrainMultiplier ?? terrainMultiplier(context.signals.terrainType),
     accessMultiplier,
-    regionalMultiplier: context.signals.regionMultiplier ?? regionalMultiplier(context.regionalModel),
+    regionalMultiplier: regionalMultiplier(context.regionalModel),
     minimumJobPrice: rateProfile.minimum,
     internalConfidence,
     pricingDrivers: [

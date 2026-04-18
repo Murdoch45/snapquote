@@ -40,8 +40,7 @@ import {
   type SurfaceMaterialType,
   type TerrainType
 } from "@/estimators/shared";
-import { resolveRegion } from "@/lib/location/resolveRegion";
-import { getTravelAdjustmentPct } from "@/lib/ai/cost-models";
+import { resolveRegionalCostModel } from "@/lib/ai/cost-models";
 import { getGoogleMapsApiKey, buildSatelliteStaticMapUrl, haversineMiles } from "@/lib/maps";
 import { getPropertyData, type PropertyData } from "@/lib/property-data";
 import {
@@ -289,7 +288,6 @@ const aiSignalsSchema = z.object({
   terrainMultiplier: z.number().min(1).max(2).optional(),
   accessTypeMultiplier: z.number().min(1).max(2).optional(),
   materialMultiplier: z.number().min(1).max(2).optional(),
-  regionMultiplier: z.number().min(0.8).max(2).optional(),
   luxuryMultiplier: z.number().min(1).max(2).optional(),
   estateScore: z.number().min(0).optional(),
   premiumPropertySignal: z.boolean().optional(),
@@ -336,7 +334,6 @@ const aiSignalsResponseSchema = z.object({
   terrainMultiplier: z.number().min(-1).max(2),
   accessTypeMultiplier: z.number().min(-1).max(2),
   materialMultiplier: z.number().min(-1).max(2),
-  regionMultiplier: z.number().min(-1).max(2),
   luxuryMultiplier: z.number().min(-1).max(2),
   estateScore: z.number().min(-1),
   premiumPropertySignal: z.boolean(),
@@ -617,18 +614,27 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
 }
 
-function resolveSystemRegionMultiplier(systemRegion: PricingRegionKey): number | undefined {
-  return systemRegion === "default" ? undefined : REGION_MULTIPLIERS[systemRegion];
-}
+// Cost-model keys used by terrain and luxury heuristics that treat certain high-cost
+// metros as having extra slope / luxury-property likelihood.
+const LOS_ANGELES_KEY = "los-angeles-ca";
+const BAY_AREA_KEYS = new Set([
+  "san-francisco-ca",
+  "oakland-ca",
+  "berkeley-ca",
+  "san-jose-ca",
+  "palo-alto-ca",
+  "mountain-view-ca",
+  "sunnyvale-ca",
+  "santa-clara-ca"
+]);
 
-const REGION_MULTIPLIERS: Record<PricingRegionKey, number> = {
-  los_angeles: 1.2,
-  san_francisco: 1.25,
-  new_york: 1.3,
-  miami: 1.15,
-  chicago: 1.15,
-  default: 1
-};
+function resolveSystemRegion(propertyData: PropertyData): PricingRegionKey {
+  return resolveRegionalCostModel({
+    city: propertyData.city,
+    state: propertyData.state,
+    zipCode: propertyData.zipCode
+  }).key;
+}
 
 const TERRAIN_MULTIPLIERS: Record<TerrainType, number> = {
   flat: 1,
@@ -814,12 +820,15 @@ function inferTerrain(
 
   if (
     /steep|hillside|canyon|ridge|incline/.test(text) ||
-    (region === "los_angeles" && /bel air|hollywood hills|beverly hills/.test(text))
+    (region === LOS_ANGELES_KEY && /bel air|hollywood hills|beverly hills/.test(text))
   ) {
     return { terrainType: "steep_hillside", confidence: 84 };
   }
 
-  if (/slope|sloped|grade|elevated|terraced/.test(text) || (region === "san_francisco" && (propertyData.lotSizeSqft ?? 0) > 4500)) {
+  if (
+    /slope|sloped|grade|elevated|terraced/.test(text) ||
+    (BAY_AREA_KEYS.has(region) && (propertyData.lotSizeSqft ?? 0) > 4500)
+  ) {
     return { terrainType: "moderate_slope", confidence: 70 };
   }
 
@@ -869,7 +878,7 @@ function inferLuxuryMultiplier(
   const lotSize = propertyData.lotSizeSqft ?? 0;
   const estateScore = lotSize + drivewayArea;
   const confidenceBase = lotSize > 0 ? 72 : 48;
-  const regionalBoost = region === "los_angeles" || region === "san_francisco" ? 8 : 0;
+  const regionalBoost = region === LOS_ANGELES_KEY || BAY_AREA_KEYS.has(region) ? 8 : 0;
   const confidence = clamp(confidenceBase + regionalBoost + (drivewayArea > 1800 ? 8 : 0), 0, 92);
 
   if (confidence < 60 || estateScore < 14000) {
@@ -984,7 +993,6 @@ function normalizeSignals(
       baseSignals.materialMultiplier ??
       MATERIAL_MULTIPLIERS[baseSignals.materialType ?? materialInference.materialType],
     region: systemRegion,
-    regionMultiplier: baseSignals.regionMultiplier ?? resolveSystemRegionMultiplier(systemRegion),
     luxuryMultiplier: baseSignals.luxuryMultiplier ?? luxuryMultiplier,
     estateScore: baseSignals.estateScore ?? estateScore,
     premiumPropertySignal: preliminaryPremiumPropertySignal,
@@ -1400,7 +1408,6 @@ function normalizeAiSignalsResponse(parsed: AiSignalsResponse): AiEstimatorSigna
     terrainMultiplier: maybeNumber(parsed.terrainMultiplier),
     accessTypeMultiplier: maybeNumber(parsed.accessTypeMultiplier),
     materialMultiplier: maybeNumber(parsed.materialMultiplier),
-    regionMultiplier: maybeNumber(parsed.regionMultiplier),
     luxuryMultiplier: maybeNumber(parsed.luxuryMultiplier),
     estateScore: maybeNumber(parsed.estateScore),
     serviceSignals: Object.fromEntries(
@@ -3496,7 +3503,6 @@ function buildSignalPrompt(
         terrainMultiplier: 1,
         accessTypeMultiplier: 1,
         materialMultiplier: 1,
-        regionMultiplier: 1.2,
         luxuryMultiplier: 1.05,
         estateScore: 14300,
         premiumPropertySignal: false,
@@ -3873,13 +3879,15 @@ function buildMultiplierVisibilityNote(
   propertyData: PropertyData
 ): string {
   const travelDistanceMiles = propertyData.travelDistanceMiles ?? null;
-  const travelMultiplier = 1 + getTravelAdjustmentPct(travelDistanceMiles);
+  const travelCost = estimate.multiplierSummary?.travelCost ?? 0;
+  const travelMultiplier = estimate.multiplierSummary?.travelMultiplier ?? 1;
   const summary = {
     pricingRegionModelKey: estimate.multiplierSummary?.pricingRegionModelKey ?? estimate.pricingRegion,
     resolvedRegion: estimate.multiplierSummary?.resolvedRegion ?? estimate.region ?? estimate.pricingRegion,
     regionalMultiplier: estimate.multiplierSummary?.regionalMultiplier ?? 1,
     travelDistanceMiles,
     travelMultiplier,
+    travelCost,
     luxuryMultiplier: estimate.multiplierSummary?.luxuryMultiplier ?? estimate.luxury_multiplier ?? 1,
     serviceMultipliers: estimate.multiplierSummary?.serviceMultipliers ?? []
   };
@@ -3891,7 +3899,7 @@ export function fallbackEstimate(
   propertyData: PropertyData,
   signals?: AiEstimatorSignalsWithTrace
 ): GeneratedLeadEstimate {
-  const systemRegion = resolveRegion(propertyData);
+  const systemRegion = resolveSystemRegion(propertyData);
   const rawSignals: AiEstimatorSignalsWithTrace = signals ?? inferSignalsFallback(input, propertyData);
   const auditEnabled = isEstimatorAuditEnabled();
   const normalizeAudit: NormalizeSignalsAudit | undefined = auditEnabled ? { serviceStages: {} } : undefined;
@@ -3972,7 +3980,7 @@ export async function generateEstimate(input: EstimateInput): Promise<GeneratedL
     parcelLotSizeSqft: input.parcelLotSizeSqft,
     travelDistanceMiles: input.travelDistanceMiles
   });
-  const systemRegion = resolveRegion(propertyData);
+  const systemRegion = resolveSystemRegion(propertyData);
   const aiMode = getEstimatorAiMode();
 
   const prompt = buildSignalPrompt(input, propertyData, systemRegion);
@@ -3996,7 +4004,6 @@ export async function generateEstimate(input: EstimateInput): Promise<GeneratedL
     return fallbackEstimate(input, propertyData, {
       ...attachAiExtractionTrace(aiResult.signals, aiResult.trace, aiMode),
       region: systemRegion,
-      regionMultiplier: resolveSystemRegionMultiplier(systemRegion)
     });
   }
 
@@ -4032,7 +4039,7 @@ export async function debugEstimateTrace(input: EstimateInput) {
     parcelLotSizeSqft: input.parcelLotSizeSqft,
     travelDistanceMiles: input.travelDistanceMiles
   });
-  const systemRegion = resolveRegion(propertyData);
+  const systemRegion = resolveSystemRegion(propertyData);
   const aiMode = getEstimatorAiMode();
   const prompt = buildSignalPrompt(input, propertyData, systemRegion);
 
@@ -4077,7 +4084,6 @@ export async function debugEstimateTrace(input: EstimateInput) {
     const normalizedSignals = normalizeSignals(input, propertyData, systemRegion, {
       ...tracedAiSignals,
       region: systemRegion,
-      regionMultiplier: resolveSystemRegionMultiplier(systemRegion)
     });
     const finalSignals = anchorFinalPressureEstimatorSignals(input, propertyData, systemRegion, normalizedSignals);
     const engineEstimate = estimateEngine({
@@ -4101,7 +4107,6 @@ export async function debugEstimateTrace(input: EstimateInput) {
       generatedEstimate: fallbackEstimate(input, propertyData, {
         ...tracedAiSignals,
         region: systemRegion,
-        regionMultiplier: resolveSystemRegionMultiplier(systemRegion)
       })
     };
   }

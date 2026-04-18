@@ -82,7 +82,7 @@ export function estimateFence(context: EstimatorContext) {
     ],
     materialMultiplier: materialMultiplier * terrainMultiplier * removalMultiplier * gateMultiplier,
     conditionMultiplier: repairMultiplier,
-    regionalMultiplier: context.signals.regionMultiplier ?? regionalMultiplier(context.regionalModel),
+    regionalMultiplier: regionalMultiplier(context.regionalModel),
     minimumJobPrice: resolvedSubtype === "gate_work" ? 450 : 350,
     internalConfidence: confidenceTrace.finalScore,
     pricingDrivers: [

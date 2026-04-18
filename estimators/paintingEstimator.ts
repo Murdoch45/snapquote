@@ -84,7 +84,7 @@ export function estimatePainting(context: EstimatorContext) {
       (surfaceMultiplierMap[surfaceType.toLowerCase()] ?? 1.05) * trimHeavyMultiplier * detachedMultiplier,
     conditionMultiplier: prepMultiplier,
     accessMultiplier,
-    regionalMultiplier: context.signals.regionMultiplier ?? regionalMultiplier(context.regionalModel),
+    regionalMultiplier: regionalMultiplier(context.regionalModel),
     minimumJobPrice: resolvedSubtype === "trim_doors_garage" ? 450 : 850,
     internalConfidence: confidenceTrace.finalScore,
       pricingDrivers: [

@@ -87,7 +87,7 @@ export function estimatePoolService(context: EstimatorContext) {
     tieredRates: tiers,
     conditionMultiplier: sizeFactor * spaAddOn * conditionFactor * (commercialSignal ? 1.2 : 1),
     accessMultiplier: accessFactor,
-    regionalMultiplier: context.signals.regionMultiplier ?? regionalMultiplier(context.regionalModel),
+    regionalMultiplier: regionalMultiplier(context.regionalModel),
     minimumJobPrice,
     internalConfidence: confidenceTrace.finalScore,
     pricingDrivers: [

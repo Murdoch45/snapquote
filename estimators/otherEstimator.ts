@@ -87,7 +87,7 @@ export function estimateOther(context: EstimatorContext) {
     unitLabel: "fallback project units",
     tieredRates: fallbackRateMap[normalizedWorkType],
     conditionMultiplier: propertyMultiplier * accessMultiplier,
-    regionalMultiplier: context.signals.regionMultiplier ?? regionalMultiplier(context.regionalModel),
+    regionalMultiplier: regionalMultiplier(context.regionalModel),
     minimumJobPrice: 220,
     internalConfidence: confidenceTrace.finalScore,
     pricingDrivers: [

@@ -83,7 +83,7 @@ export function estimateGutterCleaning(context: EstimatorContext) {
     ],
     conditionMultiplier: debrisMultiplier * addOnMultiplier,
     accessMultiplier: heightMultiplier * accessMultiplier,
-      regionalMultiplier: context.signals.regionMultiplier ?? regionalMultiplier(context.regionalModel),
+      regionalMultiplier: regionalMultiplier(context.regionalModel),
       minimumJobPrice,
       internalConfidence: confidenceTrace.finalScore,
     pricingDrivers: [

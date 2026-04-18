@@ -172,7 +172,7 @@ export function estimatePressureWashing(context: EstimatorContext) {
     terrainMultiplier: context.signals.terrainMultiplier ?? terrainMultiplier(context.signals.terrainType),
     accessMultiplier,
     materialMultiplier,
-      regionalMultiplier: context.signals.regionMultiplier ?? regionalMultiplier(context.regionalModel),
+      regionalMultiplier: regionalMultiplier(context.regionalModel),
       minimumJobPrice: pricingProfile.minimum,
     internalConfidence,
     pricingDrivers: [

@@ -108,7 +108,7 @@ export function estimateLandscaping(context: EstimatorContext) {
       blendedWorkMultiplier *
       blendedMaterialMultiplier,
     accessMultiplier,
-    regionalMultiplier: context.signals.regionMultiplier ?? regionalMultiplier(context.regionalModel),
+    regionalMultiplier: regionalMultiplier(context.regionalModel),
     minimumJobPrice: resolvedSubtype === "major_redesign" ? 1200 : 350,
     internalConfidence,
     pricingDrivers: [

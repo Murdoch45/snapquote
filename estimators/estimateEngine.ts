@@ -109,7 +109,7 @@ export function estimateEngine(input: EstimateEngineInput): EngineEstimate {
     }
   });
 
-  return aggregateEngineEstimate(serviceEstimates, input.propertyData, regionalModel.key, input.signals, {
+  return aggregateEngineEstimate(serviceEstimates, input.propertyData, regionalModel, input.signals, {
     services: input.services,
     description: input.description,
     photoCount: input.photoCount

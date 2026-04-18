@@ -91,7 +91,7 @@ export function estimateDeck(context: EstimatorContext) {
     materialMultiplier:
       (materialMultiplierMap[material.toLowerCase()] ?? 1.1) * structureMultiplier * removalMultiplier * stairsMultiplier,
     conditionMultiplier,
-    regionalMultiplier: context.signals.regionMultiplier ?? regionalMultiplier(context.regionalModel),
+    regionalMultiplier: regionalMultiplier(context.regionalModel),
     minimumJobPrice: resolvedSubtype === "stairs_railing_work" ? 650 : 900,
     internalConfidence: confidenceTrace.finalScore,
       pricingDrivers: [

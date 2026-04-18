@@ -1,4 +1,4 @@
-import { getTravelAdjustmentPct, type RegionalCostModel } from "@/lib/ai/cost-models";
+import { computeTravelCost, type RegionalCostModel } from "@/lib/ai/cost-models";
 import type { PropertyData } from "@/lib/property-data";
 import {
   parseQuestionAnswer,
@@ -57,13 +57,10 @@ export type HardSurfaceMap = Partial<Record<HardSurfaceType, number>>;
 export type TerrainType = "flat" | "moderate_slope" | "steep_hillside";
 export type AccessType = "easy_access" | "tight_access" | "gated_estate";
 export type SurfaceMaterialType = "concrete" | "asphalt" | "pavers" | "brick" | "stone";
-export type PricingRegionKey =
-  | "los_angeles"
-  | "san_francisco"
-  | "new_york"
-  | "miami"
-  | "chicago"
-  | "default";
+// Pricing region label — a stable string derived from the resolved cost model's `key`
+// (e.g., "los-angeles-ca", "ny-state", "national-default"). Kept as a type alias so
+// the many places that already reference it don't need wholesale refactors.
+export type PricingRegionKey = string;
 export type QuantityUnit = (typeof QUANTITY_UNITS)[number];
 export type QuantityEvidence = "direct" | "strong_inference" | "weak_inference" | "fallback";
 export type SizeBucket = "small" | "medium" | "large" | "very_large" | "unknown";
@@ -305,7 +302,6 @@ export type AiEstimatorSignals = {
   materialType?: SurfaceMaterialType;
   materialMultiplier?: number;
   region?: PricingRegionKey;
-  regionMultiplier?: number;
   luxuryScore?: number;
   luxuryMultiplier?: number;
   estateScore?: number;
@@ -418,6 +414,7 @@ export type EngineEstimate = {
     regionalMultiplier: number;
     travelDistanceMiles: number | null;
     travelMultiplier: number;
+    travelCost: number;
     luxuryMultiplier: number;
     serviceMultipliers: Array<{
       service: CanonicalService;
@@ -600,7 +597,7 @@ export function accessMultiplier(access: AiEstimatorSignals["access"]): number {
 }
 
 export function regionalMultiplier(model: RegionalCostModel): number {
-  return clamp(model.regionalMultiplier, 0.85, 1.3);
+  return clamp(model.regionalMultiplier, 1.0, 1.45);
 }
 
 export function terrainMultiplier(terrain: TerrainType | null | undefined): number {
@@ -1263,30 +1260,35 @@ export function finalizeEstimate(input: FinalizeEstimateInput): ServiceEstimate 
 export function aggregateEngineEstimate(
   serviceEstimates: ServiceEstimate[],
   propertyData: PropertyData,
-  pricingRegion: string,
+  regionalModel: RegionalCostModel,
   signals: AiEstimatorSignals,
   confidenceInput?: Omit<ConfidenceScoreInput, "propertyData" | "signals">
 ): EngineEstimate {
+  const pricingRegion = regionalModel.key;
+  const resolvedRegionalMultiplier = regionalMultiplier(regionalModel);
   const luxuryProfile = computeLuxuryProfile(propertyData, signals);
   const luxuryAdjustedServiceEstimates = serviceEstimates.map((estimate) =>
     applyLuxuryToServiceEstimate(estimate, luxuryProfile)
   );
   const travelDistanceMiles = propertyData.travelDistanceMiles ?? null;
-  const travelMultiplier = 1 + getTravelAdjustmentPct(travelDistanceMiles);
+  const rawTravelCost = computeTravelCost(travelDistanceMiles, resolvedRegionalMultiplier);
+  const travelCost = roundCurrency(rawTravelCost);
   const lowEstimateBeforeTravel = roundToNearestTwentyFive(
     luxuryAdjustedServiceEstimates.reduce((total, estimate) => total + estimate.lowEstimate, 0)
   );
   const highEstimateBeforeTravel = roundToNearestTwentyFive(
     luxuryAdjustedServiceEstimates.reduce((total, estimate) => total + estimate.highEstimate, 0)
   );
-  const lowEstimate = roundToNearestTwentyFive(lowEstimateBeforeTravel * travelMultiplier);
-  const highEstimate = roundToNearestTwentyFive(highEstimateBeforeTravel * travelMultiplier);
+  const lowEstimate = roundToNearestTwentyFive(lowEstimateBeforeTravel + travelCost);
+  const highEstimate = roundToNearestTwentyFive(highEstimateBeforeTravel + travelCost);
   const snapQuote = midpoint(lowEstimate, highEstimate);
   const snapQuoteBeforeTravel = midpoint(lowEstimateBeforeTravel, highEstimateBeforeTravel);
+  const travelBaseMidpoint = Math.max(snapQuoteBeforeTravel, 1);
+  const travelMultiplier = travelCost > 0 ? 1 + travelCost / travelBaseMidpoint : 1;
   const pricingDrivers = Array.from(
     new Set(luxuryAdjustedServiceEstimates.flatMap((estimate) => estimate.pricingDrivers))
   )
-    .concat(travelMultiplier > 1 ? ["Travel distance adjustment"] : [])
+    .concat(travelCost > 0 ? ["Travel distance adjustment"] : [])
     .slice(0, 8);
   const estimatorNotes = Array.from(
     new Set(luxuryAdjustedServiceEstimates.flatMap((estimate) => estimate.estimatorNotes))
@@ -1298,7 +1300,7 @@ export function aggregateEngineEstimate(
     result[estimate.service] = (result[estimate.service] ?? 0) + estimate.snapQuote;
     return result;
   }, {});
-  lineItems.travel_adjustment = roundCurrency(Math.max(0, snapQuote - snapQuoteBeforeTravel));
+  lineItems.travel_adjustment = travelCost;
   const detectedSurfaces = mergeSurfaceMaps(luxuryAdjustedServiceEstimates, "detected_surfaces");
   const quotedSurfaces = mergeSurfaceMaps(luxuryAdjustedServiceEstimates, "quoted_surfaces");
   const washSurfaceSqft = luxuryAdjustedServiceEstimates.some((estimate) => estimate.wash_surface_sqft != null)
@@ -1307,9 +1309,9 @@ export function aggregateEngineEstimate(
       )
     : null;
   const firstRichSignal = luxuryAdjustedServiceEstimates.find(
-    (estimate) => estimate.terrain || estimate.access || estimate.material || estimate.region
+    (estimate) => estimate.terrain || estimate.access || estimate.material
   );
-  const resolvedRegion = firstRichSignal?.region ?? signals.region ?? "default";
+  const resolvedRegion: PricingRegionKey = regionalModel.key;
   const serviceMultipliers = luxuryAdjustedServiceEstimates.map((estimate) => {
     const finalization = estimate.estimatorAudit?.finalization;
     return {
@@ -1387,9 +1389,10 @@ export function aggregateEngineEstimate(
     multiplierSummary: {
       pricingRegionModelKey: pricingRegion,
       resolvedRegion,
-      regionalMultiplier: serviceMultipliers[0]?.regionalMultiplier ?? 1,
+      regionalMultiplier: resolvedRegionalMultiplier,
       travelDistanceMiles,
       travelMultiplier,
+      travelCost,
       luxuryMultiplier: luxuryProfile.luxuryMultiplier,
       serviceMultipliers
     }

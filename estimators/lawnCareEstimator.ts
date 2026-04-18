@@ -104,7 +104,7 @@ export function estimateLawnCare(context: EstimatorContext) {
       { upto: Number.POSITIVE_INFINITY, rate: 0.05 }
     ],
     conditionMultiplier: conditionMultiplier * serviceMultiplier * estateMultiplier,
-    regionalMultiplier: context.signals.regionMultiplier ?? regionalMultiplier(context.regionalModel),
+    regionalMultiplier: regionalMultiplier(context.regionalModel),
     minimumJobPrice: resolvedSubtype === "overgrown_cleanup" ? 95 : 60,
     internalConfidence: confidenceTrace.finalScore,
     pricingDrivers: [

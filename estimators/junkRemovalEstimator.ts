@@ -71,7 +71,7 @@ export function estimateJunkRemoval(context: EstimatorContext) {
       { upto: Number.POSITIVE_INFINITY, rate: 190 }
     ],
     conditionMultiplier: heavyMultiplier * densityMultiplier * extractionMultiplier * curbsideDiscount,
-    regionalMultiplier: context.signals.regionMultiplier ?? regionalMultiplier(context.regionalModel),
+    regionalMultiplier: regionalMultiplier(context.regionalModel),
     minimumJobPrice: 160,
     internalConfidence: confidenceTrace.finalScore,
       pricingDrivers: [

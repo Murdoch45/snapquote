@@ -84,7 +84,7 @@ export function estimateRoofing(context: EstimatorContext) {
     materialMultiplier: (roofMaterialMultiplierMap[roofType.toLowerCase()] ?? 1.08) * emergencyMultiplier,
     conditionMultiplier: severityMultiplier,
     accessMultiplier,
-      regionalMultiplier: context.signals.regionMultiplier ?? regionalMultiplier(context.regionalModel),
+      regionalMultiplier: regionalMultiplier(context.regionalModel),
       minimumJobPrice:
         resolvedSubtype === "minor_repair"
         ? 425

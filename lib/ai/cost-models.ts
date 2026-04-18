@@ -34,10 +34,12 @@ export type RegionalCostModel = {
 export type RegionLookup = {
   city?: string | null;
   state?: string | null;
+  // Deprecated — kept on the shape so existing callers can still pass it without a TS error.
+  // The new resolver ignores ZIP code entirely.
   zipCode?: string | null;
 };
 
-const NATIONAL_DEFAULT: RegionalCostModel = {
+export const NATIONAL_DEFAULT: RegionalCostModel = {
   key: "national-default",
   label: "National Default",
   costTier: "NATIONAL_DEFAULT",
@@ -58,198 +60,135 @@ const NATIONAL_DEFAULT: RegionalCostModel = {
   outdoorLivingAllowance: { low: 6000, high: 20000, target: 11000 }
 };
 
-const CALIFORNIA: RegionalCostModel = {
-  ...NATIONAL_DEFAULT,
-  key: "ca-state",
-  label: "California",
-  costTier: "MEDIUM_COST",
-  regionalMultiplier: 1.22,
-  typicalLotSqft: 6500,
-  retainingWallPerLinearFoot: { low: 180, high: 420, target: 290 },
-  paverWalkwayPerSqft: { low: 24, high: 48, target: 35 },
-  patioPerSqft: { low: 30, high: 58, target: 44 },
-  gradingPerSqft: { low: 6, high: 14, target: 10 },
-  landscapingAllowance: { low: 2200, high: 6500, target: 3800 },
-  irrigationAllowance: { low: 1800, high: 5200, target: 3100 },
-  firePitAllowance: { low: 2200, high: 5200, target: 3400 },
-  fencePerLinearFoot: { low: 36, high: 95, target: 58 },
-  deckPerSqft: { low: 45, high: 120, target: 78 },
-  cleaningPerSqft: { low: 0.18, high: 0.4, target: 0.28 },
-  demolitionAllowance: { low: 700, high: 5200, target: 2200 },
-  outdoorLivingAllowance: { low: 8000, high: 28000, target: 15500 }
-};
+function stateModel(key: string, label: string, regionalMultiplier: number): RegionalCostModel {
+  const costTier: RegionalCostModel["costTier"] =
+    regionalMultiplier >= 1.2 ? "HIGH_COST" : regionalMultiplier >= 1.1 ? "MEDIUM_COST" : "NATIONAL_DEFAULT";
+  return { ...NATIONAL_DEFAULT, key, label, costTier, regionalMultiplier };
+}
 
-const TEXAS: RegionalCostModel = {
-  ...NATIONAL_DEFAULT,
-  key: "tx-state",
-  label: "Texas",
-  costTier: "NATIONAL_DEFAULT",
-  regionalMultiplier: 1.08,
-  typicalLotSqft: 8200,
-  retainingWallPerLinearFoot: { low: 140, high: 320, target: 220 },
-  paverWalkwayPerSqft: { low: 18, high: 34, target: 27 },
-  patioPerSqft: { low: 22, high: 44, target: 33 },
-  gradingPerSqft: { low: 4, high: 11, target: 7 },
-  landscapingAllowance: { low: 1400, high: 4600, target: 2500 },
-  irrigationAllowance: { low: 1000, high: 3200, target: 1800 },
-  firePitAllowance: { low: 1400, high: 3600, target: 2300 },
-  fencePerLinearFoot: { low: 24, high: 64, target: 40 },
-  deckPerSqft: { low: 32, high: 78, target: 52 },
-  cleaningPerSqft: { low: 0.14, high: 0.3, target: 0.21 },
-  demolitionAllowance: { low: 450, high: 3200, target: 1300 },
-  outdoorLivingAllowance: { low: 5000, high: 18000, target: 9500 }
-};
+function cityModel(key: string, label: string, regionalMultiplier: number): RegionalCostModel {
+  const costTier: RegionalCostModel["costTier"] =
+    regionalMultiplier >= 1.2 ? "HIGH_COST" : regionalMultiplier >= 1.1 ? "MEDIUM_COST" : "NATIONAL_DEFAULT";
+  return { ...NATIONAL_DEFAULT, key, label, costTier, regionalMultiplier };
+}
 
-const FLORIDA: RegionalCostModel = {
-  ...NATIONAL_DEFAULT,
-  key: "fl-state",
-  label: "Florida",
-  costTier: "NATIONAL_DEFAULT",
-  regionalMultiplier: 1.12,
-  typicalLotSqft: 7800,
-  retainingWallPerLinearFoot: { low: 150, high: 330, target: 235 },
-  paverWalkwayPerSqft: { low: 20, high: 38, target: 29 },
-  patioPerSqft: { low: 24, high: 46, target: 35 },
-  gradingPerSqft: { low: 5, high: 11, target: 7.5 },
-  landscapingAllowance: { low: 1600, high: 5200, target: 2850 },
-  irrigationAllowance: { low: 1300, high: 3600, target: 2100 },
-  firePitAllowance: { low: 1500, high: 3800, target: 2450 },
-  fencePerLinearFoot: { low: 26, high: 68, target: 43 },
-  deckPerSqft: { low: 34, high: 86, target: 56 },
-  cleaningPerSqft: { low: 0.16, high: 0.34, target: 0.24 },
-  demolitionAllowance: { low: 500, high: 3600, target: 1450 },
-  outdoorLivingAllowance: { low: 5800, high: 19000, target: 10500 }
-};
-
-const MASSACHUSETTS: RegionalCostModel = {
-  ...NATIONAL_DEFAULT,
-  key: "ma-state",
-  label: "Massachusetts",
-  costTier: "MEDIUM_COST",
-  regionalMultiplier: 1.17,
-  typicalLotSqft: 6800,
-  retainingWallPerLinearFoot: { low: 170, high: 390, target: 270 },
-  paverWalkwayPerSqft: { low: 22, high: 44, target: 33 },
-  patioPerSqft: { low: 28, high: 54, target: 41 },
-  gradingPerSqft: { low: 5, high: 13, target: 9 },
-  landscapingAllowance: { low: 2000, high: 6200, target: 3550 },
-  irrigationAllowance: { low: 1500, high: 4300, target: 2550 },
-  firePitAllowance: { low: 1900, high: 4600, target: 3000 },
-  fencePerLinearFoot: { low: 32, high: 82, target: 52 },
-  deckPerSqft: { low: 42, high: 108, target: 70 },
-  cleaningPerSqft: { low: 0.17, high: 0.37, target: 0.26 },
-  demolitionAllowance: { low: 650, high: 4500, target: 1900 },
-  outdoorLivingAllowance: { low: 7000, high: 24000, target: 13200 }
-};
-
-const LOS_ANGELES: RegionalCostModel = {
-  ...CALIFORNIA,
-  key: "los-angeles-ca",
-  label: "Los Angeles, CA",
-  costTier: "HIGH_COST",
-  regionalMultiplier: 1.4,
-  typicalLotSqft: 5800,
-  minimumJobPrice: 350,
-  retainingWallPerLinearFoot: { low: 220, high: 480, target: 330 },
-  paverWalkwayPerSqft: { low: 28, high: 54, target: 39 },
-  patioPerSqft: { low: 34, high: 64, target: 48 },
-  gradingPerSqft: { low: 7, high: 16, target: 11 },
-  landscapingAllowance: { low: 2600, high: 7200, target: 4300 },
-  irrigationAllowance: { low: 2200, high: 5800, target: 3600 },
-  firePitAllowance: { low: 2600, high: 6000, target: 3900 },
-  fencePerLinearFoot: { low: 40, high: 105, target: 64 },
-  deckPerSqft: { low: 52, high: 130, target: 84 },
-  cleaningPerSqft: { low: 0.2, high: 0.42, target: 0.3 },
-  demolitionAllowance: { low: 900, high: 5800, target: 2500 },
-  outdoorLivingAllowance: { low: 9000, high: 32000, target: 18000 }
-};
-
-const SAN_FRANCISCO: RegionalCostModel = {
-  ...CALIFORNIA,
-  key: "san-francisco-ca",
-  label: "San Francisco, CA",
-  costTier: "HIGH_COST",
-  regionalMultiplier: 1.42,
-  typicalLotSqft: 4200
-};
-
-const SEATTLE: RegionalCostModel = {
-  ...NATIONAL_DEFAULT,
-  key: "seattle-wa",
-  label: "Seattle, WA",
-  costTier: "HIGH_COST",
-  regionalMultiplier: 1.36,
-  typicalLotSqft: 5000
-};
-
-const AUSTIN: RegionalCostModel = {
-  ...TEXAS,
-  key: "austin-tx",
-  label: "Austin, TX",
-  costTier: "MEDIUM_COST",
-  regionalMultiplier: 1.2,
-  typicalLotSqft: 7600
-};
-
-const DENVER: RegionalCostModel = {
-  ...NATIONAL_DEFAULT,
-  key: "denver-co",
-  label: "Denver, CO",
-  costTier: "MEDIUM_COST",
-  regionalMultiplier: 1.18,
-  typicalLotSqft: 7000
-};
-
-const PHOENIX: RegionalCostModel = {
-  ...NATIONAL_DEFAULT,
-  key: "phoenix-az",
-  label: "Phoenix, AZ",
-  costTier: "MEDIUM_COST",
-  regionalMultiplier: 1.17,
-  typicalLotSqft: 7900
-};
-
-const ATLANTA: RegionalCostModel = {
-  ...NATIONAL_DEFAULT,
-  key: "atlanta-ga",
-  label: "Atlanta, GA",
-  costTier: "MEDIUM_COST",
-  regionalMultiplier: 1.16,
-  typicalLotSqft: 8400
+const STATE_MODELS: Record<string, RegionalCostModel> = {
+  AK: stateModel("ak-state", "Alaska", 1.25),
+  CA: stateModel("ca-state", "California", 1.15),
+  CT: stateModel("ct-state", "Connecticut", 1.18),
+  DE: stateModel("de-state", "Delaware", 1.05),
+  DC: stateModel("dc-state", "District of Columbia", 1.02),
+  HI: stateModel("hi-state", "Hawaii", 1.2),
+  IL: stateModel("il-state", "Illinois", 1.1),
+  MA: stateModel("ma-state", "Massachusetts", 1.18),
+  MI: stateModel("mi-state", "Michigan", 1.03),
+  MN: stateModel("mn-state", "Minnesota", 1.06),
+  NJ: stateModel("nj-state", "New Jersey", 1.11),
+  NY: stateModel("ny-state", "New York", 1.18),
+  OR: stateModel("or-state", "Oregon", 1.08),
+  PA: stateModel("pa-state", "Pennsylvania", 1.0),
+  RI: stateModel("ri-state", "Rhode Island", 1.07),
+  WA: stateModel("wa-state", "Washington", 1.05)
 };
 
 const CITY_MODELS: Record<string, RegionalCostModel> = {
-  "los angeles,ca": LOS_ANGELES,
-  "manhattan beach,ca": LOS_ANGELES,
-  "santa monica,ca": LOS_ANGELES,
-  "san francisco,ca": SAN_FRANCISCO,
-  "seattle,wa": SEATTLE,
-  "austin,tx": AUSTIN,
-  "denver,co": DENVER,
-  "phoenix,az": PHOENIX,
-  "atlanta,ga": ATLANTA
-};
-
-const STATE_MODELS: Record<string, RegionalCostModel> = {
-  CA: CALIFORNIA,
-  TX: TEXAS,
-  FL: FLORIDA,
-  MA: MASSACHUSETTS
+  "anchorage,AK": cityModel("anchorage-ak", "Anchorage, AK", 1.2),
+  "los angeles,CA": cityModel("los-angeles-ca", "Los Angeles, CA", 1.15),
+  "san diego,CA": cityModel("san-diego-ca", "San Diego, CA", 1.18),
+  "san francisco,CA": cityModel("san-francisco-ca", "San Francisco, CA", 1.3),
+  "san jose,CA": cityModel("san-jose-ca", "San Jose, CA", 1.27),
+  "oakland,CA": cityModel("oakland-ca", "Oakland, CA", 1.3),
+  "berkeley,CA": cityModel("berkeley-ca", "Berkeley, CA", 1.3),
+  "palo alto,CA": cityModel("palo-alto-ca", "Palo Alto, CA", 1.27),
+  "mountain view,CA": cityModel("mountain-view-ca", "Mountain View, CA", 1.27),
+  "sunnyvale,CA": cityModel("sunnyvale-ca", "Sunnyvale, CA", 1.27),
+  "santa clara,CA": cityModel("santa-clara-ca", "Santa Clara, CA", 1.27),
+  "bridgeport,CT": cityModel("bridgeport-ct", "Bridgeport, CT", 1.18),
+  "wilmington,DE": cityModel("wilmington-de", "Wilmington, DE", 1.07),
+  "washington,DC": cityModel("washington-dc", "Washington, DC", 1.02),
+  "honolulu,HI": cityModel("honolulu-hi", "Honolulu, HI", 1.25),
+  "chicago,IL": cityModel("chicago-il", "Chicago, IL", 1.17),
+  "indianapolis,IN": cityModel("indianapolis-in", "Indianapolis, IN", 1.0),
+  "boston,MA": cityModel("boston-ma", "Boston, MA", 1.2),
+  "detroit,MI": cityModel("detroit-mi", "Detroit, MI", 1.08),
+  "minneapolis,MN": cityModel("minneapolis-mn", "Minneapolis, MN", 1.1),
+  "las vegas,NV": cityModel("las-vegas-nv", "Las Vegas, NV", 1.05),
+  "newark,NJ": cityModel("newark-nj", "Newark, NJ", 1.14),
+  "new york,NY": cityModel("new-york-city-ny", "New York City, NY", 1.38),
+  "new york city,NY": cityModel("new-york-city-ny", "New York City, NY", 1.38),
+  "brooklyn,NY": cityModel("brooklyn-ny", "Brooklyn, NY", 1.38),
+  "queens,NY": cityModel("queens-ny", "Queens, NY", 1.38),
+  "manhattan,NY": cityModel("manhattan-ny", "Manhattan, NY", 1.38),
+  "bronx,NY": cityModel("bronx-ny", "Bronx, NY", 1.35),
+  "portland,OR": cityModel("portland-or", "Portland, OR", 1.1),
+  "philadelphia,PA": cityModel("philadelphia-pa", "Philadelphia, PA", 1.05),
+  "pittsburgh,PA": cityModel("pittsburgh-pa", "Pittsburgh, PA", 1.06),
+  "providence,RI": cityModel("providence-ri", "Providence, RI", 1.1),
+  "nashville,TN": cityModel("nashville-tn", "Nashville, TN", 1.0),
+  "austin,TX": cityModel("austin-tx", "Austin, TX", 1.0),
+  "dallas,TX": cityModel("dallas-tx", "Dallas, TX", 1.0),
+  "houston,TX": cityModel("houston-tx", "Houston, TX", 1.0),
+  "seattle,WA": cityModel("seattle-wa", "Seattle, WA", 1.12),
+  "milwaukee,WI": cityModel("milwaukee-wi", "Milwaukee, WI", 1.05)
 };
 
 const STATE_ABBREVIATION_MAP: Record<string, string> = {
-  california: "CA",
-  texas: "TX",
-  florida: "FL",
-  massachusetts: "MA",
-  washington: "WA",
+  alabama: "AL",
+  alaska: "AK",
   arizona: "AZ",
+  arkansas: "AR",
+  california: "CA",
   colorado: "CO",
-  georgia: "GA"
+  connecticut: "CT",
+  delaware: "DE",
+  "district of columbia": "DC",
+  florida: "FL",
+  georgia: "GA",
+  hawaii: "HI",
+  idaho: "ID",
+  illinois: "IL",
+  indiana: "IN",
+  iowa: "IA",
+  kansas: "KS",
+  kentucky: "KY",
+  louisiana: "LA",
+  maine: "ME",
+  maryland: "MD",
+  massachusetts: "MA",
+  michigan: "MI",
+  minnesota: "MN",
+  mississippi: "MS",
+  missouri: "MO",
+  montana: "MT",
+  nebraska: "NE",
+  nevada: "NV",
+  "new hampshire": "NH",
+  "new jersey": "NJ",
+  "new mexico": "NM",
+  "new york": "NY",
+  "north carolina": "NC",
+  "north dakota": "ND",
+  ohio: "OH",
+  oklahoma: "OK",
+  oregon: "OR",
+  pennsylvania: "PA",
+  "rhode island": "RI",
+  "south carolina": "SC",
+  "south dakota": "SD",
+  tennessee: "TN",
+  texas: "TX",
+  utah: "UT",
+  vermont: "VT",
+  virginia: "VA",
+  washington: "WA",
+  "west virginia": "WV",
+  wisconsin: "WI",
+  wyoming: "WY"
 };
 
 function normalizeCity(city?: string | null): string | null {
-  return city?.trim().toLowerCase() ?? null;
+  const raw = city?.trim().toLowerCase();
+  return raw && raw.length > 0 ? raw : null;
 }
 
 function normalizeState(state?: string | null): string | null {
@@ -260,44 +199,41 @@ function normalizeState(state?: string | null): string | null {
 }
 
 export function resolveRegionalCostModel(region: RegionLookup): RegionalCostModel {
-  const cityKey = region.city && region.state ? `${normalizeCity(region.city)},${normalizeState(region.state)}` : null;
+  const city = normalizeCity(region.city);
+  const state = normalizeState(region.state);
 
-  if (cityKey && CITY_MODELS[cityKey]) {
-    return CITY_MODELS[cityKey];
+  if (city && state) {
+    const cityKey = `${city},${state}`;
+    const cityMatch = CITY_MODELS[cityKey];
+    if (cityMatch) return cityMatch;
   }
 
-  if (normalizeState(region.state) === "CA" && region.zipCode?.startsWith("900")) {
-    return LOS_ANGELES;
-  }
-
-  if (normalizeState(region.state) === "CA" && region.zipCode?.startsWith("941")) {
-    return SAN_FRANCISCO;
-  }
-
-  if (normalizeState(region.state) === "WA" && region.zipCode?.startsWith("981")) {
-    return SEATTLE;
-  }
-
-  if (normalizeState(region.state) === "TX" && region.zipCode?.startsWith("787")) {
-    return AUSTIN;
-  }
-
-  const stateKey = normalizeState(region.state);
-  if (stateKey && STATE_MODELS[stateKey]) {
-    return STATE_MODELS[stateKey];
+  if (state && STATE_MODELS[state]) {
+    return STATE_MODELS[state];
   }
 
   return NATIONAL_DEFAULT;
 }
 
 export const TRAVEL_DISTANCE_CAP_MILES = 200;
+const TRAVEL_DOLLARS_PER_MILE = 2.5;
+const TRAVEL_FREE_MILES = 10;
 
-export function getTravelAdjustmentPct(distanceMiles: number | null | undefined): number {
-  if (distanceMiles == null || distanceMiles <= 10) return 0;
+/**
+ * Per-mile travel cost scaled by region. Returns a dollar addend (not a multiplier).
+ *
+ *   travelCost = miles × $2.50 × regionalMultiplier
+ *
+ * - No charge under 10 miles.
+ * - Miles above the 200-mile cap use the 200-mile rate.
+ */
+export function computeTravelCost(
+  distanceMiles: number | null | undefined,
+  regionalMultiplier: number
+): number {
+  if (distanceMiles == null || distanceMiles <= TRAVEL_FREE_MILES) return 0;
   const capped = Math.min(distanceMiles, TRAVEL_DISTANCE_CAP_MILES);
-  if (capped <= 25) return 0.05;
-  if (capped <= 50) return 0.1;
-  return 0.15;
+  return capped * TRAVEL_DOLLARS_PER_MILE * regionalMultiplier;
 }
 
 export function getTerrainAdjustmentPct(terrain: string | null | undefined): number {

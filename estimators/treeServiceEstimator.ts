@@ -85,7 +85,7 @@ export function estimateTreeService(context: EstimatorContext) {
     tieredRates: serviceRate,
     conditionMultiplier: riskMultiplier * haulAwayMultiplier,
     accessMultiplier,
-    regionalMultiplier: context.signals.regionMultiplier ?? regionalMultiplier(context.regionalModel),
+    regionalMultiplier: regionalMultiplier(context.regionalModel),
     minimumJobPrice: resolvedSubtype === "stump_grinding" ? 250 : 350,
     internalConfidence: confidenceTrace.finalScore,
     pricingDrivers: [

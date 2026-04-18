@@ -162,7 +162,7 @@ export function estimateLighting(context: EstimatorContext) {
         propertyMultiplier *
         difficultyMultiplier *
         securityMultiplier,
-      regionalMultiplier: context.signals.regionMultiplier ?? regionalMultiplier(context.regionalModel),
+      regionalMultiplier: regionalMultiplier(context.regionalModel),
       minimumJobPrice: installBucket === "repair" ? 240 : 420,
       internalConfidence: confidenceTrace.finalScore,
     pricingDrivers: [
