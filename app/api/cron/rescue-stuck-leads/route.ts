@@ -13,8 +13,8 @@ const STUCK_THRESHOLD_MINUTES = 5;
 
 // After this many total minutes of "processing", we give up on retrying
 // and mark the lead failed so the contractor still gets a notification.
-// Picked to allow ~2 retry windows (each ~3 minutes via vercel.json
-// schedule) before giving up.
+// Picked to allow ~2 retry windows (each ~3 minutes via the Supabase
+// pg_cron job "rescue-stuck-leads") before giving up.
 const GIVE_UP_MINUTES = 15;
 
 const STUCK_NOTE =
@@ -23,6 +23,12 @@ const STUCK_NOTE =
 /**
  * Rescues leads stuck at ai_status="processing" past the estimator's
  * normal completion window.
+ *
+ * Scheduled from Supabase, not Vercel. A pg_cron job named
+ * "rescue-stuck-leads" fires every 3 minutes and hits this endpoint with
+ * Authorization: Bearer ${CRON_SECRET}. Vercel Hobby only permits daily
+ * crons so scheduling here was not an option; pg_cron + pg_net provides
+ * the sub-hour cadence we need without upgrading plans.
  *
  * Two-stage recovery:
  *   1. Between STUCK_THRESHOLD_MINUTES and GIVE_UP_MINUTES: re-trigger

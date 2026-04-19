@@ -27,10 +27,6 @@
     {
       "path": "/api/cron/estimate-nudge-unviewed",
       "schedule": "0 17 * * *"
-    },
-    {
-      "path": "/api/cron/rescue-stuck-leads",
-      "schedule": "*/3 * * * *"
     }
   ]
 }
