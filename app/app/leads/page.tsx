@@ -50,8 +50,18 @@ export default async function LeadsPage({ searchParams }: Props) {
     }
   }
 
+  // Scope lead_unlocks to the 25 visible lead IDs rather than fetching
+  // every unlock row for the org. At org sizes we see in production this
+  // is a small win today (61 rows total) but keeps the query constant-
+  // time as orgs accumulate unlocks.
   const [{ data: unlockedRows }, credits] = await Promise.all([
-    supabase.from("lead_unlocks").select("lead_id").eq("org_id", auth.orgId),
+    leadIds.length > 0
+      ? supabase
+          .from("lead_unlocks")
+          .select("lead_id")
+          .eq("org_id", auth.orgId)
+          .in("lead_id", leadIds)
+      : Promise.resolve({ data: [] as { lead_id: string }[] }),
     getOrgCredits(auth.orgId)
   ]);
 
@@ -65,36 +75,66 @@ export default async function LeadsPage({ searchParams }: Props) {
   // Pick up to 2 photos per lead for preview, then mint fresh 1-hour signed
   // URLs from storage_path. The public_url column holds a 24-hour signed URL
   // from upload time and expires, so relying on it makes previews disappear
-  // for anyone viewing older leads. Generating signed URLs at render time
-  // matches how the lead detail page serves photos.
-  const previewCandidates = relevantPhotos.reduce<Record<string, typeof relevantPhotos>>((acc, row) => {
-    const leadId = row.lead_id as string;
-    const existing = acc[leadId] ?? [];
-    if (existing.length >= 2) return acc;
-    acc[leadId] = [...existing, row];
-    return acc;
-  }, {});
+  // for anyone viewing older leads.
+  //
+  // Signing is done in ONE batched call (createSignedUrls) rather than a
+  // per-photo round-trip. A previous implementation fired up to
+  // 2 * LEADS_PER_PAGE = 50 individual Storage API requests per page
+  // load, which was the dominant contributor to 30-second load times.
+  type PreviewCandidate = (typeof relevantPhotos)[number];
+  const previewCandidates = relevantPhotos.reduce<Record<string, PreviewCandidate[]>>(
+    (acc, row) => {
+      const leadId = row.lead_id as string;
+      const existing = acc[leadId] ?? [];
+      if (existing.length >= 2) return acc;
+      acc[leadId] = [...existing, row];
+      return acc;
+    },
+    {}
+  );
+
   const ONE_HOUR = 60 * 60;
   const previewPhotosByLead: Record<string, string[]> = {};
-  await Promise.all(
-    Object.entries(previewCandidates).map(async ([leadId, rows]) => {
-      const urls = await Promise.all(
-        rows.map(async (row) => {
-          const storagePath = row.storage_path as string | null;
-          if (storagePath) {
-            const { data: signed } = await adminClient.storage
-              .from("lead-photos")
-              .createSignedUrl(storagePath, ONE_HOUR);
-            if (signed?.signedUrl) return signed.signedUrl;
-          }
-          const fallback = row.public_url as string | null;
-          return fallback && fallback.trim() ? fallback : null;
-        })
+  const pathOrder: { leadId: string; path: string; fallback: string | null }[] = [];
+
+  for (const [leadId, rows] of Object.entries(previewCandidates)) {
+    for (const row of rows) {
+      const storagePath = (row.storage_path as string | null) ?? null;
+      const rawFallback = (row.public_url as string | null) ?? null;
+      const fallback = rawFallback && rawFallback.trim() ? rawFallback : null;
+      if (storagePath) {
+        pathOrder.push({ leadId, path: storagePath, fallback });
+      } else if (fallback) {
+        previewPhotosByLead[leadId] = [...(previewPhotosByLead[leadId] ?? []), fallback];
+      }
+    }
+  }
+
+  if (pathOrder.length > 0) {
+    const { data: signedResults } = await adminClient.storage
+      .from("lead-photos")
+      .createSignedUrls(
+        pathOrder.map((entry) => entry.path),
+        ONE_HOUR
       );
-      const filtered = urls.filter((url): url is string => Boolean(url));
-      if (filtered.length > 0) previewPhotosByLead[leadId] = filtered;
-    })
-  );
+    if (signedResults) {
+      // createSignedUrls preserves input order.
+      signedResults.forEach((result, idx) => {
+        const { leadId, fallback } = pathOrder[idx];
+        const url = result.signedUrl || fallback;
+        if (!url) return;
+        previewPhotosByLead[leadId] = [...(previewPhotosByLead[leadId] ?? []), url];
+      });
+    } else {
+      // Signing batch failed — fall back to whatever 24-hour public_url
+      // we stored at upload time. Previews for older leads may not
+      // resolve, but that's strictly better than showing nothing.
+      for (const { leadId, fallback } of pathOrder) {
+        if (!fallback) continue;
+        previewPhotosByLead[leadId] = [...(previewPhotosByLead[leadId] ?? []), fallback];
+      }
+    }
+  }
   const unlockedLeadIds = new Set((unlockedRows ?? []).map((row) => row.lead_id as string));
   const totalLeads = count ?? 0;
   const totalPages = Math.max(1, Math.ceil(totalLeads / LEADS_PER_PAGE));

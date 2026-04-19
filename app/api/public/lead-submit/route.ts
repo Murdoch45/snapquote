@@ -1,5 +1,6 @@
 import { randomUUID } from "crypto";
 import { after, NextResponse } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 import { triggerEstimatorForLead } from "@/lib/ai/triggerEstimator";
 import { buildCustomerConfirmationEmail } from "@/lib/emailTemplates";
 import { haversineMiles } from "@/lib/maps";
@@ -14,6 +15,109 @@ export const runtime = "nodejs";
 export const maxDuration = 60;
 
 const MAX_PHOTO_UPLOADS = 10;
+
+// Upload tuning. Transient 5xx / network resets from Supabase Storage were
+// the main driver of the "one of six photos failed" reports; three attempts
+// with short exponential backoff recovers those without adding noticeable
+// latency on the happy path. A concurrency cap keeps us from slamming
+// Storage (and keeps our own memory footprint bounded) while still
+// overlapping photos so the 6-photo case doesn't serialize to ~12s.
+const PHOTO_UPLOAD_MAX_ATTEMPTS = 3;
+const PHOTO_UPLOAD_RETRY_BASE_DELAY_MS = 400;
+const PHOTO_UPLOAD_CONCURRENCY = 3;
+
+type PhotoUploadSuccess = { ok: true; index: number; path: string; url: string };
+type PhotoUploadFailure = { ok: false; index: number; reason: string };
+type PhotoUploadOutcome = PhotoUploadSuccess | PhotoUploadFailure;
+
+async function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function uploadOnePhoto(
+  admin: ReturnType<typeof createAdminClient>,
+  orgId: string,
+  leadId: string,
+  photo: File,
+  index: number
+): Promise<PhotoUploadOutcome> {
+  const ext = photo.type.includes("png") ? "png" : "jpg";
+  const path = `${orgId}/${leadId}/${randomUUID()}.${ext}`;
+
+  // arrayBuffer() can fail for oddly-shaped File handles (HEIC coming
+  // from some Safari versions, for example). Capture that separately so
+  // the reason is visible in Sentry instead of being lumped in with
+  // "upload failed".
+  let arrayBuffer: ArrayBuffer;
+  try {
+    arrayBuffer = await photo.arrayBuffer();
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    Sentry.captureException(error, {
+      tags: { area: "lead-submit", stage: "photo-buffer" },
+      extra: { orgId, leadId, photoIndex: index, photoType: photo.type, photoSize: photo.size }
+    });
+    return { ok: false, index, reason: `buffer: ${reason}` };
+  }
+
+  for (let attempt = 1; attempt <= PHOTO_UPLOAD_MAX_ATTEMPTS; attempt++) {
+    const { error: uploadError } = await admin.storage
+      .from("lead-photos")
+      .upload(path, arrayBuffer, {
+        contentType: photo.type || "image/jpeg",
+        upsert: false
+      });
+
+    if (!uploadError) {
+      const { data: signed } = await admin.storage
+        .from("lead-photos")
+        .createSignedUrl(path, 60 * 60 * 24);
+      return { ok: true, index, path, url: signed?.signedUrl ?? "" };
+    }
+
+    const isLastAttempt = attempt === PHOTO_UPLOAD_MAX_ATTEMPTS;
+    if (isLastAttempt) {
+      Sentry.captureException(uploadError, {
+        tags: { area: "lead-submit", stage: "photo-upload", final: "true" },
+        extra: {
+          orgId,
+          leadId,
+          photoIndex: index,
+          photoType: photo.type,
+          photoSize: photo.size,
+          attempts: attempt
+        }
+      });
+      const reason = uploadError.message || "upload failed";
+      return { ok: false, index, reason };
+    }
+
+    await sleep(PHOTO_UPLOAD_RETRY_BASE_DELAY_MS * 2 ** (attempt - 1));
+  }
+
+  // Unreachable — the loop either returns success or returns on the last
+  // attempt — but TypeScript can't prove that.
+  return { ok: false, index, reason: "unknown" };
+}
+
+async function runWithConcurrency<T, R>(
+  items: T[],
+  limit: number,
+  worker: (item: T, index: number) => Promise<R>
+): Promise<R[]> {
+  const results = new Array<R>(items.length);
+  let cursor = 0;
+  const runners = Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (true) {
+      const idx = cursor;
+      cursor += 1;
+      if (idx >= items.length) return;
+      results[idx] = await worker(items[idx], idx);
+    }
+  });
+  await Promise.all(runners);
+  return results;
+}
 
 function parseNumber(input: FormDataEntryValue | null): number | undefined {
   if (!input || typeof input !== "string" || input.length === 0) return undefined;
@@ -276,41 +380,53 @@ export async function POST(request: Request) {
     }
 
     const leadId = lead.id as string;
-    const uploadedPaths: { path: string; url: string }[] = [];
     const attemptedPhotoUploads = photos.slice(0, MAX_PHOTO_UPLOADS);
 
-    for (const photo of attemptedPhotoUploads) {
-      const ext = photo.type.includes("png") ? "png" : "jpg";
-      const path = `${orgId}/${leadId}/${randomUUID()}.${ext}`;
-      // eslint-disable-next-line no-await-in-loop
-      const arrayBuffer = await photo.arrayBuffer();
-      // eslint-disable-next-line no-await-in-loop
-      const { error: uploadError } = await admin.storage
-        .from("lead-photos")
-        .upload(path, arrayBuffer, {
-          contentType: photo.type || "image/jpeg",
-          upsert: false
-        });
-      if (uploadError) continue;
-      // We DON'T persist a long-lived signed URL anymore. The path is stored
-      // permanently and fresh signed URLs are generated on demand at render
-      // time (1-hour TTL). public_url is kept for AI ingest which needs a
-      // URL right away — give it a 24-hour token, plenty for processing.
-      // eslint-disable-next-line no-await-in-loop
-      const { data: signed } = await admin.storage
-        .from("lead-photos")
-        .createSignedUrl(path, 60 * 60 * 24);
-      uploadedPaths.push({ path, url: signed?.signedUrl ?? "" });
-    }
+    // Upload photos in parallel with a small concurrency cap, retrying
+    // transient failures. Each photo has a bounded outcome so we know
+    // exactly which ones failed (and can surface that per-photo to the
+    // client instead of the old binary "some photos failed" flag).
+    const outcomes = await runWithConcurrency(
+      attemptedPhotoUploads,
+      PHOTO_UPLOAD_CONCURRENCY,
+      (photo, index) => uploadOnePhoto(admin, orgId, leadId, photo, index)
+    );
+
+    const uploadedPaths = outcomes.filter(
+      (outcome): outcome is PhotoUploadSuccess => outcome.ok
+    );
+    const failedPhotos = outcomes.filter(
+      (outcome): outcome is PhotoUploadFailure => !outcome.ok
+    );
 
     if (uploadedPaths.length > 0) {
       const photoRows = uploadedPaths.map((photo) => ({
         lead_id: leadId,
         org_id: orgId,
         storage_path: photo.path,
+        // We DON'T persist a long-lived signed URL anymore. The path is
+        // stored permanently and fresh signed URLs are generated on
+        // demand at render time (1-hour TTL). public_url keeps a
+        // 24-hour token for AI ingest which needs a URL right away.
         public_url: photo.url
       }));
-      await admin.from("lead_photos").insert(photoRows);
+      const { error: photoInsertError } = await admin.from("lead_photos").insert(photoRows);
+      if (photoInsertError) {
+        // If the DB write fails after a successful Storage upload the
+        // files are orphaned — surface the error to Sentry with enough
+        // context to clean up later. The lead itself has already been
+        // persisted so we still return success to the client; the lead
+        // will just show up without photos.
+        Sentry.captureException(photoInsertError, {
+          tags: { area: "lead-submit", stage: "photo-row-insert" },
+          extra: {
+            orgId,
+            leadId,
+            photoCount: photoRows.length,
+            storagePaths: photoRows.map((p) => p.storage_path)
+          }
+        });
+      }
     }
 
     // Kick off the estimator on a Supabase Edge Function. The hand-off is
@@ -390,10 +506,21 @@ export async function POST(request: Request) {
       success: true,
       leadId,
       received: true,
-      photoUploadPartialFailure: uploadedPaths.length < attemptedPhotoUploads.length
+      photoUploadPartialFailure: failedPhotos.length > 0,
+      photoUpload: {
+        attempted: attemptedPhotoUploads.length,
+        succeeded: uploadedPaths.length,
+        failed: failedPhotos.map((failure) => ({
+          index: failure.index,
+          reason: failure.reason
+        }))
+      }
     });
   } catch (error) {
     console.error("lead-submit failed:", error);
+    Sentry.captureException(error, {
+      tags: { area: "lead-submit", stage: "top-level" }
+    });
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Lead submission failed." },
       { status: 400 }
