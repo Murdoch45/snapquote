@@ -45,8 +45,13 @@ BEGIN
   -- net.http_get returns immediately with a request_id; the response
   -- body lands in net._http_response for debugging. Fire-and-forget is
   -- what we want — the Next.js endpoint owns the actual rescue logic.
+  --
+  -- Hit the canonical www host directly. The apex snapquote.us
+  -- 307-redirects to www.snapquote.us, and the HTTP client in pg_net
+  -- (like curl's default) drops the Authorization header on cross-
+  -- origin redirects, which would land us on a 401 every tick.
   SELECT net.http_get(
-    url := 'https://snapquote.us/api/cron/rescue-stuck-leads',
+    url := 'https://www.snapquote.us/api/cron/rescue-stuck-leads',
     headers := jsonb_build_object(
       'Authorization', 'Bearer ' || v_secret
     )
