@@ -1,13 +1,9 @@
 import { randomUUID } from "crypto";
 import { after, NextResponse } from "next/server";
-import { generateEstimateAsync } from "@/lib/ai/estimate";
-import {
-  buildCustomerConfirmationEmail,
-  buildNewLeadNotificationEmail
-} from "@/lib/emailTemplates";
+import { triggerEstimatorForLead } from "@/lib/ai/triggerEstimator";
+import { buildCustomerConfirmationEmail } from "@/lib/emailTemplates";
 import { haversineMiles } from "@/lib/maps";
 import { notifyContractor, notifyCustomer, sendEmail } from "@/lib/notify";
-import { getOwnerEmailForOrg } from "@/lib/organizationOwners";
 import { rateLimit } from "@/lib/rateLimit";
 import { normalizeServiceTypes } from "@/lib/services";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -317,67 +313,31 @@ export async function POST(request: Request) {
       await admin.from("lead_photos").insert(photoRows);
     }
 
+    // Kick off the estimator on a Supabase Edge Function. The hand-off is
+    // a single HTTP call (~1s) so it's safe inside after() — after() is
+    // only carrying the trigger, not the estimator itself. The edge
+    // function then drives the estimator via /api/internal/run-estimator,
+    // where it runs on a fresh Vercel invocation with a full budget and
+    // can't be reclaimed by the lead-submit instance returning.
+    //
+    // Contractor email (previously sent here) now fires from
+    // sendNewLeadNotifications inside the estimator's terminal paths, so
+    // it reaches the contractor on success, failure, and rescue alike.
     after(async () => {
-      try {
-        await generateEstimateAsync(leadId);
-      } catch (error) {
-        console.error("lead-submit estimator failed:", error);
-
+      const triggerResult = await triggerEstimatorForLead(leadId);
+      if (!triggerResult.ok) {
+        console.error("lead-submit estimator trigger failed:", triggerResult.error);
         const { error: failureUpdateError } = await admin
           .from("leads")
           .update({ ai_status: "failed" })
           .eq("id", leadId)
           .eq("org_id", orgId);
-
         if (failureUpdateError) {
-          console.error("lead-submit failed to persist estimator failure state:", failureUpdateError);
+          console.error(
+            "lead-submit failed to persist estimator-trigger failure state:",
+            failureUpdateError
+          );
         }
-      }
-
-      try {
-
-        if (!contractor.notification_lead_email) {
-          return;
-        }
-
-        const ownerEmail = await getOwnerEmailForOrg(admin, orgId);
-        if (!ownerEmail) {
-          return;
-        }
-
-        const { data: hydratedLead } = await admin
-          .from("leads")
-          .select("id,job_city,job_state,ai_estimate_low,ai_estimate_high,customer_name,services")
-          .eq("id", leadId)
-          .single();
-
-        if (!hydratedLead) {
-          return;
-        }
-
-        const email = buildNewLeadNotificationEmail({
-          customerName: hydratedLead.customer_name as string,
-          serviceType: ((hydratedLead.services ?? []) as string[]).join(", "),
-          cityState: [hydratedLead.job_city, hydratedLead.job_state].filter(Boolean).join(", "),
-          estimateLow:
-            hydratedLead.ai_estimate_low != null ? Number(hydratedLead.ai_estimate_low) : null,
-          estimateHigh:
-            hydratedLead.ai_estimate_high != null ? Number(hydratedLead.ai_estimate_high) : null,
-          leadUrl: `${getAppUrl()}/app/leads/${leadId}`
-        });
-
-        const sent = await sendEmail({
-          to: ownerEmail,
-          subject: email.subject,
-          text: email.text,
-          html: email.html
-        });
-
-        if (!sent) {
-          console.warn("lead-submit contractor email notification failed.");
-        }
-      } catch (error) {
-        console.error("lead-submit contractor email flow failed:", error);
       }
     });
 

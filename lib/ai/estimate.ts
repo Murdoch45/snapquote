@@ -57,6 +57,10 @@ import {
 } from "@/lib/serviceQuestions";
 import { SERVICE_OPTIONS } from "@/lib/services";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { buildNewLeadNotificationEmail } from "@/lib/emailTemplates";
+import { sendEmail } from "@/lib/notify";
+import { getOwnerEmailForOrg } from "@/lib/organizationOwners";
+import { getAppUrl } from "@/lib/utils";
 import type { LeadConfidence, ServiceCategory } from "@/lib/types";
 
 const hardSurfaceTypeSchema = z.enum(HARD_SURFACE_TYPES);
@@ -4378,6 +4382,77 @@ export async function sendNewLeadNotifications(
     }
   } catch (error) {
     console.warn("new lead notification insert failed:", error);
+  }
+
+  // Contractor email. Previously lived in lead-submit's after() block — it's
+  // now colocated with push + in-app so all three channels share one code
+  // path and fire together from every terminal state the estimator hits
+  // (ready, failed, and the rescue-cron "timed out" flip). That removes the
+  // hole where the lead page showed up via push but no email was sent.
+  try {
+    await sendContractorNewLeadEmail(admin, {
+      leadId: params.leadId,
+      orgId: params.orgId
+    });
+  } catch (error) {
+    console.warn("new lead contractor email failed:", error);
+  }
+}
+
+async function sendContractorNewLeadEmail(
+  admin: ReturnType<typeof createAdminClient>,
+  params: { leadId: string; orgId: string }
+): Promise<void> {
+  const { data: contractor, error: contractorError } = await admin
+    .from("contractor_profile")
+    .select("notification_lead_email")
+    .eq("org_id", params.orgId)
+    .maybeSingle();
+
+  if (contractorError) {
+    console.warn("contractor email lookup failed:", contractorError);
+    return;
+  }
+
+  if (!contractor?.notification_lead_email) {
+    return;
+  }
+
+  const ownerEmail = await getOwnerEmailForOrg(admin, params.orgId);
+  if (!ownerEmail) {
+    return;
+  }
+
+  const { data: hydratedLead } = await admin
+    .from("leads")
+    .select("id,job_city,job_state,ai_estimate_low,ai_estimate_high,customer_name,services")
+    .eq("id", params.leadId)
+    .single();
+
+  if (!hydratedLead) {
+    return;
+  }
+
+  const email = buildNewLeadNotificationEmail({
+    customerName: hydratedLead.customer_name as string,
+    serviceType: ((hydratedLead.services ?? []) as string[]).join(", "),
+    cityState: [hydratedLead.job_city, hydratedLead.job_state].filter(Boolean).join(", "),
+    estimateLow:
+      hydratedLead.ai_estimate_low != null ? Number(hydratedLead.ai_estimate_low) : null,
+    estimateHigh:
+      hydratedLead.ai_estimate_high != null ? Number(hydratedLead.ai_estimate_high) : null,
+    leadUrl: `${getAppUrl()}/app/leads/${params.leadId}`
+  });
+
+  const sent = await sendEmail({
+    to: ownerEmail,
+    subject: email.subject,
+    text: email.text,
+    html: email.html
+  });
+
+  if (!sent) {
+    console.warn("contractor new-lead email send failed.");
   }
 }
 
