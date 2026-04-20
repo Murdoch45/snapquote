@@ -82,8 +82,20 @@ function getStatValueSizeClass(value: string): string {
 // Deduped via React.cache so DashboardSubtitle and DashboardRecentLeads —
 // two separate Suspense children that each await it — share a single
 // request-scoped fetch instead of hitting Supabase twice per render.
+// Outer bound on how far back the dashboard's "recent leads" list ever
+// looks. The 20-row limit alone would keep the wire payload small for any
+// org, but an org with tens of thousands of leads would still have Postgres
+// walking a huge index range to find the most recent 20; pinning the
+// window to the last 90 days keeps the planner honest regardless of total
+// volume. The DashboardSubtitle's "new leads this week" calculation is a
+// 7-day window, safely inside the 90-day guardrail.
+const DASHBOARD_LEADS_WINDOW_DAYS = 90;
+
 const getDashboardLeads = cache(async (orgId: string): Promise<DashboardLead[]> => {
   const supabase = await createServerSupabaseClient();
+  const windowStart = new Date(
+    Date.now() - DASHBOARD_LEADS_WINDOW_DAYS * 24 * 60 * 60 * 1000
+  ).toISOString();
   const [{ data: latestLeads }, { data: unlockedRows }] = await Promise.all([
     supabase
       .from("leads")
@@ -92,6 +104,7 @@ const getDashboardLeads = cache(async (orgId: string): Promise<DashboardLead[]> 
       )
       .eq("org_id", orgId)
       .eq("ai_status", "ready")
+      .gte("submitted_at", windowStart)
       .order("submitted_at", { ascending: false })
       .limit(20),
     supabase.from("lead_unlocks").select("lead_id").eq("org_id", orgId)

@@ -200,10 +200,10 @@ SnapQuote is an AI-powered quoting and lead management SaaS for outdoor service 
 - **TRIAL_EXPIRED dedup** via `organizations.trial_ended_notified_at` (column added in migration 0046). `/api/cron/trial-expired/route.ts` filters by `trial_ended_notified_at IS NULL` and sets the marker with a CAS update after the email succeeds; Vercel retries within the 24h window skip already-notified orgs. Resend's idempotency key (`cron-trial-expired-${orgId}-${runDay}`) still layered on top at the provider level.
 - **Toast burst coalescing** (web) — rapid realtime INSERTs within a 1.5s window fire one immediate toast + a trailing "N more notifications" summary, so bursts don't stack on screen.
 - **Tap-handler logging** (web) — `components/TopBar.tsx` `handleNotificationClick` logs a `console.warn` (forwarded to Sentry via `captureConsoleIntegration`) for `screen='lead'` with no `screenParams.id` and for any unknown `screen` value. Malformed notifications are now traceable instead of being silent no-ops.
-- *Note: there is no "midnight clear" — retention is a rolling 7-day window, not a daily wipe.*
+- Retention is a **rolling 7-day window** — rows older than that are swept by the daily cron. There is no calendar-based (midnight / end-of-day) wipe; age-based only.
 
 **Push (mobile only) — `lib/notifications.ts` + `expo-notifications`:**
-- Permission requested on mount; returns null silently if denied (no UI feedback).
+- Permission requested on mount. The Notifications settings screen (`app/(tabs)/more/notifications.tsx`) surfaces the current permission status as a badge (Enabled / Blocked / Not set / Not available) with contextual CTAs: "Open Settings" when blocked (routes to OS settings via `Linking.openSettings()`), "Enable push notifications" when undetermined (re-triggers `requestPermissionsAsync`), and a neutral badge when granted. Status is re-read via `useFocusEffect` whenever the screen regains focus so returning from the OS Settings app updates the badge immediately. Helpers: `getPushPermissionStatus()`, `requestPushPermission()`, `openSystemNotificationSettings()`.
 - Stable `device_id` generated once and stored in AsyncStorage.
 - Expo push tokens upserted to `push_tokens` table with composite key `(user_id, device_id)` (migration 0039 — replaced prior single-token-per-org model).
 - Android channel "Default", max importance, 250ms vibration.
@@ -261,7 +261,7 @@ Single `get_org_analytics` Postgres RPC (migration 0052) used by both web and mo
 
 **Web (`app/app/page.tsx`):** Async Server Component that `requireAuth()`s, then streams three independent async sub-components wrapped in `<Suspense>` boundaries — `DashboardSubtitle` (this-week lead count), `DashboardStats` (analytics + credits), `DashboardRecentLeads` (leads list). The shared leads query is deduped across Subtitle and RecentLeads via `React.cache()` so Supabase is hit only once per request. Each Suspense has its own skeleton fallback (`SubtitleSkeleton`, `StatsSkeleton` for 7 cards, `RecentLeadsSkeleton` for 6 cards). Segment-level `app/app/loading.tsx` handles navigation-time fallback; segment-level `app/app/error.tsx` catches thrown errors, calls `Sentry.captureException` explicitly, and surfaces `error.digest` as a support reference. `ActivityTracker` pings `/api/app/activity/touch` on mount (updates `organizations.last_active_at`).
 
-**Mobile (`app/(tabs)/index.tsx`):** Client screen with 4 parallel hooks (`useLeads`, `useCredits`, `useAnalytics`, `useProfile`). SafeAreaView + native RefreshControl for pull-to-refresh. Full-screen `LoadingScreen` on initial load, `StatCardSkeleton × 7` while analytics loads, `ErrorScreen` with Retry if any hook fails. `useAnalytics` retries with exponential backoff (max 2 retries, 400ms base) and aborts in-flight fetches on unmount.
+**Mobile (`app/(tabs)/index.tsx`):** Client screen with 4 parallel hooks (`useLeads`, `useCredits`, `useAnalytics`, `useProfile`). SafeAreaView + native RefreshControl for pull-to-refresh. Full-screen `LoadingScreen` on initial cold launch when no cached data is available, `StatCardSkeleton × 7` while analytics loads, `<StaleDataBanner />` (`components/shared/StaleDataBanner.tsx`) above the content when any hook is serving cached-but-unrefreshed data. The full `ErrorScreen` with Retry now only fires when there's a fetch error AND no data anywhere — cache hits keep the dashboard rendered. `useAnalytics` retries with exponential backoff (max 2 retries, 400ms base) and aborts in-flight fetches on unmount.
 
 **Seven stats (identical across platforms):**
 Credits Remaining · Leads This Month · Estimates Sent · Estimates Accepted · Acceptance Rate % · Avg Estimate Value · Avg Response Time (hours)
@@ -274,7 +274,7 @@ Credits Remaining · Leads This Month · Estimates Sent · Estimates Accepted ·
 
 **Caching:**
 - Web: `unstable_cache(getAnalytics)` 5-min TTL, tag `analytics:${orgId}`. Tag is invalidated via the `invalidateAnalytics(orgId)` helper (`lib/db.ts`) after: lead `ai_status='ready'` (in `lib/ai/estimate.ts`), quote SENT (`app/api/app/quote/send/route.ts`), quote ACCEPTED (`app/api/public/quote/[publicId]/accept/route.ts`), lazy per-read quote expire (`app/api/public/quote/[publicId]/route.ts`), and the auto-expire cron per affected org (`app/api/cron/auto-expire-stale-quotes/route.ts`).
-- Mobile: module-level 5-min analytics cache + Supabase Realtime `postgres_changes` subscription on `leads` for invalidation (no polling).
+- Mobile: module-level 5-min in-memory analytics cache + **AsyncStorage persistent cache per hook** (`cache:credits:${orgId}`, `cache:leads:${orgId}:${status}`, `cache:analytics:${orgId}:${range}`, `cache:profile:${orgId}`) that survives app relaunches so an offline cold start renders yesterday's dashboard instead of an error screen. Each hook exposes an `isStale` flag; on fetch failure with a cache on screen, the hook keeps the data visible and flips `isStale` instead of surfacing an error. Supabase Realtime `postgres_changes` still invalidates `leads` in the background (no polling).
 
 **Cross-tab deps:** Pure URL navigation — no shared Zustand/Jotai/Context stores. Each tab re-fetches its own data. Dashboard and Notifications are **fully decoupled** — no shared queries, cache, or state.
 
@@ -370,8 +370,6 @@ Fix: token attached, `parseJsonResponse` won't trigger auth refresh on 401 if no
 - **Sign in with Apple JWT** — regeneration needed ~Sept 2026
 - **Google Play Store submission** — not started
 - **No staging environment** — all migrations and pushes go directly to production
-- **Silent push-permission denial on mobile** — `lib/notifications.ts` returns `null` with no UI feedback when the user denies push permission; no Settings surface indicator.
-- **No offline cache on mobile dashboard** — all 4 dashboard hooks error on offline → full ErrorScreen with no degraded view. AsyncStorage is only used for Stripe-return detection, not data caching.
 - **Web notifications popover 5s auto-close timer** — can fire while user is reading longer notification bodies; no pause on hover-within or scroll-within.
 
 ---
