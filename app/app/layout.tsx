@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { ActivityTracker } from "@/components/ActivityTracker";
 import { AppShell } from "@/components/AppShell";
 import { OnboardingTour } from "@/components/OnboardingTour";
@@ -29,14 +30,18 @@ export default async function AppLayout({
       .from("contractor_profile")
       .select("business_name, public_slug")
       .eq("org_id", auth.orgId)
-      .single(),
+      .maybeSingle(),
     supabase
       .from("organizations")
       .select("onboarding_completed")
       .eq("id", auth.orgId)
-      .single(),
+      .maybeSingle(),
     getMonthlyUsage(auth.orgId)
   ]);
+
+  if (!profile || !organization) {
+    redirect("/onboarding");
+  }
 
   return (
     <>

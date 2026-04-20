@@ -3,7 +3,7 @@
 > ⚠️ **FOR REFERENCE ONLY — DO NOT TREAT AS GROUND TRUTH.**
 > This document is maintained by hand and may lag behind the actual codebase.
 > Always verify against the real code before acting on anything here.
-> The audit session content (April 15–18, 2026) is the most reliable portion.
+> The audit session content (April 15–20, 2026) is the most reliable portion.
 > Older sections carry more uncertainty.
 
 ---
@@ -174,15 +174,42 @@ SnapQuote is an AI-powered quoting and lead management SaaS for outdoor service 
 
 ## Notifications
 
-**Contractor notifications:** Push (mobile) + in-app + email — all fire together after `ai_status` flips, NOT at lead insert. Previously notifications fired before AI finished; now fixed.
+**Architecture:** In-app feed (bell icon dropdown, both platforms) + push (mobile only) + email + SMS. All contractor notifications fire together after `ai_status` flips, NOT at lead insert. Single shared `notifications` table backs web and mobile.
+
+**In-app feed (bell icon dropdown):**
+- Web: `components/TopBar.tsx` renders bell + badge + popover. Desktop popover auto-closes after 5s of no hover; mobile popover closes on outside click. Feed: `components/NotificationsFeed.tsx`. Hook: `hooks/useNotifications.ts`.
+- Mobile: `components/navigation/TopBar.tsx` + `components/navigation/AccountPopover.tsx`. Badge caps at "9+" visually. Hook: `lib/hooks/useNotifications.tsx`.
+- Realtime via Supabase channels — web subscribes to `notifications-${orgId}`, mobile to `mobile-notifications-${orgId}` (distinct names so both clients can coexist for the same user/org).
+- Mark-all-read fires automatically when the popover opens — optimistic UI flip, then bulk `update({read:true}).eq("org_id", orgId).eq("read", false)`.
+- Initial load: 50 rows, ordered newest first.
+
+**`notifications` table (migration 0045):**
+- Columns: `id`, `org_id` (FK cascade), `user_id` (nullable, currently unused — no per-user filtering), `type`, `title`, `body`, `screen`, `screen_params` (jsonb), `read`, `created_at`
+- Indexes: `(org_id, created_at DESC)`, partial `(org_id) WHERE read = false`
+- RLS: SELECT + UPDATE restricted via `organization_members` membership. No client INSERT/DELETE policies — backend admin client only.
+
+**8 notification types:**
+- `NEW_LEAD`, `ESTIMATE_VIEWED`, `ESTIMATE_ACCEPTED`, `ESTIMATE_NOT_VIEWED`, `ESTIMATE_EXPIRING_SOON`, `ESTIMATE_EXPIRED`, `TRIAL_EXPIRED`, `INVITE_ACCEPTED`
+- Nudge, expiry, and trial notifications fire from daily Vercel crons; expiry + nudge are grouped per org.
+
+**Lifecycle:**
+- **50-per-org cap** via DB trigger `trg_prune_org_notifications` after every INSERT (keeps only newest 50 per org).
+- **7-day rolling TTL** via daily cron `/api/cron/cleanup-notifications` — deletes rows with `created_at < now() - 7 days`.
+- *Note: there is no "midnight clear" — retention is a rolling 7-day window, not a daily wipe.*
+
+**Push (mobile only) — `lib/notifications.ts` + `expo-notifications`:**
+- Permission requested on mount; returns null silently if denied (no UI feedback).
+- Stable `device_id` generated once and stored in AsyncStorage.
+- Expo push tokens upserted to `push_tokens` table with composite key `(user_id, device_id)` (migration 0039 — replaced prior single-token-per-org model).
+- Android channel "Default", max importance, 250ms vibration.
+- Dead-token auto-cleanup server-side on terminal Expo errors (`DeviceNotRegistered`, `InvalidCredentials`, `MismatchSenderId`).
+- Tap handler (`app/_layout.tsx`) reads `data.screen` + `data.id`, routes to lead / leads / quotes / team / settings — **pathname guard prevents duplicate screen stacking and Realtime channel collisions** when a user taps a notification while already on the target screen.
+
+**Viewed notification:** `/api/public/quote/[publicId]/viewed` wrapped in compare-and-swap on `viewed_at IS NULL` — only the first viewer wins the CAS and fires push + in-app.
 
 **SMS:** Telnyx. 10DLC campaign registered. 3 retries with 500ms/1s/1.5s backoff. Idempotency keys on all sends.
 
 **Email:** Resend. Idempotency keys on all 5 cron email routes to handle Vercel retry deduplication.
-
-**Push:** Mobile only. Deep link handler exists in `app/_layout.tsx`. Trial-expired notification routes to `/(tabs)/more/plan`.
-
-**Viewed notification:** `/api/public/quote/[publicId]/viewed` rewired around compare-and-swap — only first viewer triggers push + in-app notification.
 
 ---
 
@@ -222,6 +249,34 @@ Single `get_org_analytics` Postgres RPC (migration 0052) used by both web and mo
 - Avg response time: scoped to selected range (not all-time)
 - Web: 4 date presets (30d, 90d, YTD, All). 5-min cache via `unstable_cache`.
 - Mobile: same 4 presets, timezone-aware via `Intl.DateTimeFormat`
+
+---
+
+## Dashboard
+
+**Web (`app/app/page.tsx`):** Async Server Component. Fetches analytics + credits + recent leads + lead_unlocks in parallel via `Promise.all()`. Renders a 7-stat horizontal strip and a recent leads list (progressive: 5 → +5, capped at 20). `ActivityTracker` pings `/api/app/activity/touch` on mount (updates `organizations.last_active_at`). **No loading UI, no error boundary on the page itself** — bubbles to Next.js default `error.tsx`.
+
+**Mobile (`app/(tabs)/index.tsx`):** Client screen with 4 parallel hooks (`useLeads`, `useCredits`, `useAnalytics`, `useProfile`). SafeAreaView + native RefreshControl for pull-to-refresh. Full-screen `LoadingScreen` on initial load, `StatCardSkeleton × 7` while analytics loads, `ErrorScreen` with Retry if any hook fails. `useAnalytics` retries with exponential backoff (max 2 retries, 400ms base) and aborts in-flight fetches on unmount.
+
+**Seven stats (identical across platforms):**
+Credits Remaining · Leads This Month · Estimates Sent · Estimates Accepted · Acceptance Rate % · Avg Estimate Value · Avg Response Time (hours)
+
+**Data sources:**
+- Credits: `get_org_credit_row` RPC (mobile falls back to direct `organizations` query on permission error)
+- Analytics: `get_org_analytics` RPC (migration 0052/0053)
+- Recent leads: direct `leads` query (`org_id`, `ai_status='ready'`, limit 20)
+- Lead unlocks: direct bulk `lead_unlocks` query
+
+**Caching:**
+- Web: `unstable_cache(getAnalytics)` 5-min TTL, tag `analytics:${orgId}`. **Tag is never `revalidateTag()`'d on mutation** — dashboard stats are stale up to 5 min after a new lead is submitted or a quote is accepted.
+- Mobile: module-level 5-min analytics cache + Supabase Realtime `postgres_changes` subscription on `leads` for invalidation (no polling).
+
+**Cross-tab deps:** Pure URL navigation — no shared Zustand/Jotai/Context stores. Each tab re-fetches its own data. Dashboard and Notifications are **fully decoupled** — no shared queries, cache, or state.
+
+**Mobile lead-list performance notes:**
+- Batch photo signing (up to 2 preview photos per lead) in a single round-trip — prior 50 serial `createSignedUrl` calls were "the dominant contributor to the leads tab feeling slow/frozen" (see [lib/api/leads.ts](lib/api/leads.ts) comment).
+- `LEAD_LIST_COLUMNS` (19 fields) projection avoids multi-KB JSONB (`ai_cost_breakdown`, `ai_service_estimates`, `ai_pricing_drivers`, `yard_layout`).
+- `LeadCard` memoized with custom comparator that ignores callback identity and only tracks visible-change fields.
 
 ---
 
@@ -310,6 +365,16 @@ Fix: token attached, `parseJsonResponse` won't trigger auth refresh on 401 if no
 - **Sign in with Apple JWT** — regeneration needed ~Sept 2026
 - **Google Play Store submission** — not started
 - **No staging environment** — all migrations and pushes go directly to production
+- **Web notifications popover silently drops `settings` screen clicks** — `components/TopBar.tsx` `handleNotificationClick` only handles `lead | quotes | team`. TRIAL_EXPIRED (screen=`settings`) routes correctly on mobile but no-ops on web.
+- **Unguarded `.single()` in web app layout** — `app/app/layout.tsx` lines 32 and 36 call `.single()` on `contractor_profile` and `organizations` with no error check. A missing row would crash every authenticated page, not just dashboard.
+- **Duplicate NEW_LEAD notifications possible** — `sendNewLeadNotifications` is reachable from 3 code paths (lead-submit after-block, rescue-stuck-leads cron, estimator terminal-state transitions) with no unique constraint on (org_id, type, lead_id).
+- **TRIAL_EXPIRED cron idempotency is Resend-side only** — `organizations.trial_ended_notified_at` column was added in migration 0046 (with partial index), but `app/api/cron/trial-expired/route.ts` never actually reads or writes to it. Docstring claims the marker is used, but the only real dedup is the Resend idempotency key `cron-trial-expired-${orgId}-${runDay}`.
+- **Web dashboard analytics cache not invalidated on mutation** — tag `analytics:${orgId}` is never `revalidateTag()`'d anywhere in the codebase; stats stale up to 5 min after a new lead or accepted quote.
+- **No loading or error UI on web dashboard** — mobile has both (skeletons + ErrorScreen); web has neither. Cold `get_org_analytics` call = blank page until render.
+- **Toast stacking on burst web notifications** — `hooks/useNotifications.ts` fires `toast(item.text)` on every Realtime INSERT; N rapid leads = N stacked toasts, no debounce.
+- **Silent push-permission denial on mobile** — `lib/notifications.ts` returns `null` with no UI feedback when the user denies push permission; no Settings surface indicator.
+- **No offline cache on mobile dashboard** — all 4 dashboard hooks error on offline → full ErrorScreen with no degraded view. AsyncStorage is only used for Stripe-return detection, not data caching.
+- **Web notifications popover 5s auto-close timer** — can fire while user is reading longer notification bodies; no pause on hover-within or scroll-within.
 
 ---
 

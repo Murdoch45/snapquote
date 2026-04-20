@@ -50,6 +50,8 @@ export function TopBar({
         router.push("/app/quotes");
       } else if (item.screen === "team") {
         router.push("/app/team");
+      } else if (item.screen === "settings") {
+        router.push("/app/plan");
       }
     },
     [router]
