@@ -1,5 +1,5 @@
 import "server-only";
-import { unstable_cache } from "next/cache";
+import { revalidateTag, unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { AnalyticsResponse } from "@/lib/analyticsTypes";
@@ -66,6 +66,22 @@ type WebAnalytics = Omit<AnalyticsResponse, "totals"> & {
 
 const ANALYTICS_CACHE_TTL_SECONDS = 300;
 
+// Shared between getAnalytics() (which tags its cached entry) and
+// invalidateAnalytics() (which busts that tag on write paths) so the two
+// can't drift.
+function analyticsCacheTag(orgId: string): string {
+  return `analytics:${orgId}`;
+}
+
+// Call after any write that would change dashboard stats: a lead's
+// ai_status flipping to 'ready', a quote moving through SENT/ACCEPTED/
+// EXPIRED. The 5-minute unstable_cache TTL is replaced with immediate
+// refresh on the next dashboard render, so contractors see fresh numbers
+// right after a key event instead of waiting out the window.
+export function invalidateAnalytics(orgId: string): void {
+  revalidateTag(analyticsCacheTag(orgId));
+}
+
 async function fetchAnalyticsFromRpc(
   orgId: string,
   range: AnalyticsRange
@@ -118,7 +134,7 @@ export async function getAnalytics(
     ["analytics-rpc", orgId, range],
     {
       revalidate: ANALYTICS_CACHE_TTL_SECONDS,
-      tags: [`analytics:${orgId}`]
+      tags: [analyticsCacheTag(orgId)]
     }
   );
   return cached();

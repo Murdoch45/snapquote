@@ -5,6 +5,7 @@ import { sendEmail } from "@/lib/notify";
 import { getOwnerEmailForOrg } from "@/lib/organizationOwners";
 import { sendPushToOrg } from "@/lib/pushNotifications";
 import { computeEffectiveQuoteStatus } from "@/lib/quoteExpiry";
+import { invalidateAnalytics } from "@/lib/db";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAppUrl } from "@/lib/utils";
 
@@ -80,6 +81,8 @@ export async function POST(_request: Request, { params }: Props) {
   }
 
   await admin.from("leads").update({ status: "ACCEPTED" }).eq("id", acceptedQuote.lead_id);
+
+  invalidateAnalytics(acceptedQuote.org_id as string);
 
   // Record the ACCEPTED event for the notification feed. This is best-effort
   // — if it fails (e.g. missing unique constraint from unapplied migration),

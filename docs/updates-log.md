@@ -83,3 +83,27 @@ Ran a deep, read-only audit of two features across web (`C:\Users\murdo\SnapQuot
 - `current-state.md` Known Outstanding Issues gained 10 new entries covering the findings above.
 - This log entry.
 
+---
+
+## Session — April 20, 2026 (fixes)
+
+### Fix: Layout `.single()` guards + `settings` notification routing
+
+Shipped the first two fixes from this morning's audit. Commit `5285d14` on `main`.
+
+**Bug 1 — Unguarded `.single()` in web app layout (`app/app/layout.tsx`):**
+- The layout called `.single()` on `contractor_profile` and `organizations` with no null check. A missing row would throw and crash every `/app/*` page for that user.
+- Fix: Switched both to `.maybeSingle()` so queries return `{ data: null }` instead of throwing. After the `Promise.all()`, added `if (!profile || !organization) redirect("/onboarding")` — same pattern `requireAuth` uses when a user has no membership row. TypeScript narrows correctly after the guard thanks to `redirect()`'s `never` return type.
+- Added `redirect` import from `next/navigation`.
+- The redirect target is `/onboarding` for both cases: profile-missing is the expected case for a half-finished signup; organization-missing is a data-integrity edge case that onboarding can reset.
+
+**Bug 2 — Web notifications silently drop `settings` screen clicks (`components/TopBar.tsx`):**
+- `handleNotificationClick` had branches for `lead`, `quotes`, and `team` but no case for `settings`. `TRIAL_EXPIRED` notifications (which carry `screen: "settings"`) did nothing when clicked on web, even though they route correctly on mobile.
+- Fix: Added `else if (item.screen === "settings") { router.push("/app/plan"); }` — `/app/plan` matches the authenticated plan route and mirrors the mobile tap handler's target of `/(tabs)/more/plan`.
+
+**Doc updates (this section):**
+- Removed the two now-fixed bullets from Known Outstanding Issues in `current-state.md` (Unguarded `.single()` and silent `settings` screen clicks).
+- Appended this log entry.
+
+**Note on commit scope:** The commit also bundled the `docs/current-state.md` + `docs/updates-log.md` audit edits that were still uncommitted from earlier in the day (per the `git add .` instruction). Commit message is narrow to the fix; the docs reflect the broader audit.
+

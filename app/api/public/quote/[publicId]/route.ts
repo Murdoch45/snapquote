@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { computeEffectiveQuoteStatus } from "@/lib/quoteExpiry";
 import type { QuoteStatus } from "@/lib/quoteStatus";
+import { invalidateAnalytics } from "@/lib/db";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { publicQuoteExpiry } from "@/lib/quoteExpiry";
 
@@ -53,6 +54,7 @@ export async function GET(_request: Request, { params }: Props) {
   // between sweeps.
   if (effectiveStatus === "EXPIRED" && rawStatus !== "EXPIRED") {
     await admin.from("quotes").update({ status: "EXPIRED" }).eq("id", quote.id);
+    invalidateAnalytics(quote.org_id as string);
   }
 
   return NextResponse.json({

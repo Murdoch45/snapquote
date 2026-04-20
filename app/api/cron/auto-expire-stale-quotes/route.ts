@@ -3,6 +3,7 @@ import { buildEstimateExpiredEmail } from "@/lib/emailTemplates";
 import { sendEmail } from "@/lib/notify";
 import { getOwnerEmailForOrg } from "@/lib/organizationOwners";
 import { sendPushToOrg } from "@/lib/pushNotifications";
+import { invalidateAnalytics } from "@/lib/db";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAppUrl } from "@/lib/utils";
 
@@ -66,6 +67,8 @@ export async function GET(request: Request) {
 
   let orgsNotified = 0;
   for (const [orgId, count] of orgCounts.entries()) {
+    invalidateAnalytics(orgId);
+
     const body =
       count === 1
         ? "An estimate just expired. Tap to follow up before the customer cools off."

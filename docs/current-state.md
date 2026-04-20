@@ -365,8 +365,6 @@ Fix: token attached, `parseJsonResponse` won't trigger auth refresh on 401 if no
 - **Sign in with Apple JWT** — regeneration needed ~Sept 2026
 - **Google Play Store submission** — not started
 - **No staging environment** — all migrations and pushes go directly to production
-- **Web notifications popover silently drops `settings` screen clicks** — `components/TopBar.tsx` `handleNotificationClick` only handles `lead | quotes | team`. TRIAL_EXPIRED (screen=`settings`) routes correctly on mobile but no-ops on web.
-- **Unguarded `.single()` in web app layout** — `app/app/layout.tsx` lines 32 and 36 call `.single()` on `contractor_profile` and `organizations` with no error check. A missing row would crash every authenticated page, not just dashboard.
 - **Duplicate NEW_LEAD notifications possible** — `sendNewLeadNotifications` is reachable from 3 code paths (lead-submit after-block, rescue-stuck-leads cron, estimator terminal-state transitions) with no unique constraint on (org_id, type, lead_id).
 - **TRIAL_EXPIRED cron idempotency is Resend-side only** — `organizations.trial_ended_notified_at` column was added in migration 0046 (with partial index), but `app/api/cron/trial-expired/route.ts` never actually reads or writes to it. Docstring claims the marker is used, but the only real dedup is the Resend idempotency key `cron-trial-expired-${orgId}-${runDay}`.
 - **Web dashboard analytics cache not invalidated on mutation** — tag `analytics:${orgId}` is never `revalidateTag()`'d anywhere in the codebase; stats stale up to 5 min after a new lead or accepted quote.

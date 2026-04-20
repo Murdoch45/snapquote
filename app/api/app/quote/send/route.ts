@@ -7,6 +7,7 @@ import { sendEmail } from "@/lib/notify";
 import { buildEstimateLink, renderEstimateTemplate } from "@/lib/quote-template";
 import { sendQuoteSchema } from "@/lib/quoteSendSchema";
 import { SubscriptionRequiredError, requireActiveSubscription } from "@/lib/subscription";
+import { invalidateAnalytics } from "@/lib/db";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { sendQuoteSms } from "@/lib/telnyx";
@@ -302,6 +303,8 @@ export async function POST(request: Request) {
     } catch (usageError) {
       console.error("quote send usage increment failed:", usageError);
     }
+
+    invalidateAnalytics(auth.orgId);
 
     // Best-effort audit — runs after the response is sent so the user
     // never waits on the log write. recordAudit swallows internal errors

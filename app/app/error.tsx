@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import * as Sentry from "@sentry/nextjs";
 import { Button } from "@/components/ui/button";
 
 export default function AppError({
@@ -11,6 +12,13 @@ export default function AppError({
   reset: () => void;
 }) {
   useEffect(() => {
+    // Explicit capture — more robust than relying on captureConsoleIntegration,
+    // and attaches the full error object (message + stack) with the segment
+    // digest as a tag so Sentry entries are linkable to user-visible
+    // references.
+    Sentry.captureException(error, {
+      tags: { segment: "app", digest: error.digest ?? "none" }
+    });
     console.error("App error boundary caught:", error);
   }, [error]);
 
@@ -21,6 +29,11 @@ export default function AppError({
         <p className="text-sm text-muted-foreground">
           An unexpected error occurred. Try refreshing the page or contact support if the problem persists.
         </p>
+        {error.digest ? (
+          <p className="text-xs text-muted-foreground/70">
+            Reference: <code className="font-mono">{error.digest}</code>
+          </p>
+        ) : null}
         <Button onClick={reset}>Try again</Button>
       </div>
     </div>

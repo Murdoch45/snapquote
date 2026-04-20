@@ -56,6 +56,7 @@ import {
   type ServiceQuestionAnswers
 } from "@/lib/serviceQuestions";
 import { SERVICE_OPTIONS } from "@/lib/services";
+import { invalidateAnalytics } from "@/lib/db";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { buildNewLeadNotificationEmail } from "@/lib/emailTemplates";
 import { sendEmail } from "@/lib/notify";
@@ -4655,6 +4656,8 @@ export async function generateEstimateAsync(leadId: string) {
     if (updateError) {
       throw updateError;
     }
+
+    invalidateAnalytics(lead.org_id as string);
 
     await sendNewLeadNotifications(admin, {
       leadId,
