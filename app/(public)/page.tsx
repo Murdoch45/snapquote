@@ -19,17 +19,17 @@ export default function HomePage() {
   return (
     <main className={manrope.className}>
       <div className="min-h-screen overflow-x-hidden bg-[#101320] text-foreground">
+        <nav className="fixed top-0 z-50 w-full bg-transparent shadow-none backdrop-blur-0">
+          <div className="mx-auto flex h-20 max-w-7xl items-center px-6 sm:px-8">
+            <Link href="/" className="inline-flex items-center gap-3">
+              <BrandLogo size="sm" showWordmark={false} iconClassName="text-white" />
+              <span className="text-2xl font-bold tracking-tight text-white">SnapQuote</span>
+            </Link>
+          </div>
+        </nav>
+
         <section className="relative overflow-hidden bg-[radial-gradient(circle_at_50%_-20%,#1e2a4a_0%,#101320_70%)]">
           <div className="pointer-events-none absolute left-1/2 top-24 h-[220px] w-[420px] -translate-x-1/2 rounded-full bg-[rgba(180,197,255,0.1)] blur-[90px] sm:top-1/4 sm:h-[300px] sm:w-[620px] sm:blur-[110px] lg:h-[400px] lg:w-[800px] lg:blur-[120px]" />
-
-          <nav className="fixed top-0 z-50 w-full bg-transparent shadow-none backdrop-blur-0">
-            <div className="mx-auto flex h-20 max-w-7xl items-center px-6 sm:px-8">
-              <Link href="/" className="inline-flex items-center gap-3">
-                <BrandLogo size="sm" showWordmark={false} iconClassName="text-white" />
-                <span className="text-2xl font-bold tracking-tight text-white">SnapQuote</span>
-              </Link>
-            </div>
-          </nav>
 
           <div className="relative mx-auto max-w-6xl px-6 pb-16 pt-6 sm:px-8 lg:px-10">
             <div className="mx-auto flex max-w-4xl flex-col items-center pb-10 pt-32 text-center sm:pt-40">

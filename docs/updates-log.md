@@ -150,6 +150,20 @@ Shipped the next two fixes from the morning's audit. Commit `b5cae91` on `main`.
 
 ---
 
+## Session — April 20, 2026 (landing nav fix)
+
+### Fix: Landing navbar scrolling with the page instead of staying pinned
+
+Reported: on snapquote.us the SnapQuote logo + wordmark in the top-left scrolled away with the hero instead of staying fixed.
+
+Root cause: the `<nav>` in `app/(public)/page.tsx` already had `fixed top-0 z-50 w-full`, but it was nested inside the hero `<section className="relative overflow-hidden ...">` which also contains a decorative sibling using `filter: blur(90–120px)`. An ancestor with `filter` (or certain `overflow` + stacking combinations) can establish a containing block for `position: fixed` descendants, so the nav was being positioned relative to the section instead of the viewport.
+
+Fix: lifted the `<nav>` out of the `<section>` and made it a direct child of the outer `<div className="min-h-screen …">`. No className, markup, or visual changes — same `BrandLogo`, same Link, same typography. Now `position: fixed` correctly anchors to the viewport.
+
+No other changes.
+
+---
+
 ## Session — April 20, 2026 (brand — new lightning glyph)
 
 ### Update: Brand logo swapped to refined lightning bolt
