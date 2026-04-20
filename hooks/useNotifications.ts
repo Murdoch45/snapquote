@@ -78,6 +78,43 @@ function setFeed(nextFeed: FeedItem[]) {
   emit();
 }
 
+// --------------- Toast burst handling ---------------
+//
+// Realtime can deliver multiple notifications in quick succession (e.g. a
+// photo upload triggers several downstream events, or a cron flips a batch
+// of estimates to EXPIRED). Without batching, each INSERT fires its own
+// toast and they stack visibly. Show the first one immediately, then
+// collapse every arrival within a short burst window into a single summary
+// toast so a burst reads as one interruption instead of N.
+
+const TOAST_BURST_WINDOW_MS = 1500;
+
+let toastBurstActive = false;
+let toastBurstCount = 0;
+let toastBurstTimer: ReturnType<typeof setTimeout> | null = null;
+
+function flushToastBurst() {
+  if (toastBurstCount > 0) {
+    toast(
+      `${toastBurstCount} more notification${toastBurstCount === 1 ? "" : "s"}`
+    );
+  }
+  toastBurstActive = false;
+  toastBurstCount = 0;
+  toastBurstTimer = null;
+}
+
+function queueToast(text: string) {
+  if (!toastBurstActive) {
+    toast(text);
+    toastBurstActive = true;
+    toastBurstCount = 0;
+    toastBurstTimer = setTimeout(flushToastBurst, TOAST_BURST_WINDOW_MS);
+  } else {
+    toastBurstCount += 1;
+  }
+}
+
 // --------------- Formatting ---------------
 
 export function formatNotificationTime(value: string) {
@@ -144,7 +181,7 @@ function startNotifications(orgId: string) {
       (payload) => {
         const item = toFeedItem(payload.new as DbNotification);
         setFeed([item, ...store.feed].slice(0, 50));
-        toast(item.text);
+        queueToast(item.text);
       }
     )
     .on(

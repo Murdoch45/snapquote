@@ -4378,7 +4378,11 @@ export async function sendNewLeadNotifications(
       screen: "lead",
       screen_params: { id: params.leadId }
     });
-    if (insertError) {
+    // Migration 0059 adds a partial unique index on (org_id, lead_id) for
+    // NEW_LEAD rows. A duplicate insert from a second code path firing for
+    // the same lead returns SQLSTATE 23505 (unique_violation) — treat it
+    // as a soft success so it's not logged as a warning.
+    if (insertError && insertError.code !== "23505") {
       console.warn("new lead notification insert failed:", insertError);
     }
   } catch (error) {

@@ -46,12 +46,28 @@ export function TopBar({
 
       if (item.screen === "lead" && item.screenParams?.id) {
         router.push(`/app/leads/${item.screenParams.id}`);
+      } else if (item.screen === "lead") {
+        // Malformed NEW_LEAD notification — missing lead id in
+        // screen_params. captureConsoleIntegration forwards this to Sentry
+        // so the bad writer can be traced; fall back to the list page so
+        // the click still does something.
+        console.warn(
+          "notification click: screen='lead' but missing screenParams.id",
+          { notificationId: item.id, type: item.type, screenParams: item.screenParams }
+        );
+        router.push("/app/leads");
       } else if (item.screen === "quotes") {
         router.push("/app/quotes");
       } else if (item.screen === "team") {
         router.push("/app/team");
       } else if (item.screen === "settings") {
         router.push("/app/plan");
+      } else {
+        console.warn("notification click: unknown screen value", {
+          notificationId: item.id,
+          type: item.type,
+          screen: item.screen
+        });
       }
     },
     [router]

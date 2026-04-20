@@ -14,9 +14,23 @@ export function ActivityTracker() {
       method: "POST",
       credentials: "same-origin",
       keepalive: true
-    }).catch(() => {
-      // Activity tracking is best-effort; never surface errors to the user.
-    });
+    })
+      .then((response) => {
+        // fetch() only rejects on network failure; a non-2xx response
+        // (401, 500, etc.) still resolves. Log non-ok responses so a
+        // silently broken endpoint surfaces in the browser console and
+        // Sentry (captureConsoleIntegration) instead of disappearing.
+        if (!response.ok) {
+          console.warn(
+            `Activity tracker ping returned ${response.status} ${response.statusText}`
+          );
+        }
+      })
+      .catch((error) => {
+        // Best-effort — don't surface to the user, but log so genuine
+        // network failures are traceable in Vercel logs and Sentry.
+        console.warn("Activity tracker ping failed:", error);
+      });
   }, []);
 
   return null;

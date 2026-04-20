@@ -15,10 +15,12 @@ export const maxDuration = 60;
  * staying on SOLO if they never converted). This cron only handles the
  * notification.
  *
- * Idempotency: marks `trial_ended_notified_at` so we don't double-send.
- * (Schema note: this column should be added in a follow-up migration. We
- * gracefully no-op the marker if it doesn't exist yet so this cron is
- * safe to deploy first.)
+ * Idempotency: the query filters by `trial_ended_notified_at IS NULL` and
+ * the marker is set (via a CAS UPDATE) right after the email succeeds, so
+ * a Vercel retry within the same 24h window skips orgs that were already
+ * notified. The column was added in migration 0046. Combined with the
+ * Resend-side idempotency key this gives us dedup at both the app and
+ * provider layers.
  */
 export async function GET(request: Request) {
   const authHeader = request.headers.get("authorization");
@@ -30,14 +32,16 @@ export async function GET(request: Request) {
   const now = new Date();
   const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 
-  // Orgs whose trial ended in the last 24h. Use a 24h window so daily runs
-  // catch every org exactly once even if a run is missed by a few hours.
+  // Orgs whose trial ended in the last 24h AND haven't been notified yet.
+  // The 24h window + notified-at filter together make daily runs catch
+  // every org exactly once even if a run is missed by a few hours.
   const { data: orgs, error } = await admin
     .from("organizations")
     .select("id, plan, trial_ends_at")
     .not("trial_ends_at", "is", null)
     .gte("trial_ends_at", yesterday.toISOString())
-    .lt("trial_ends_at", now.toISOString());
+    .lt("trial_ends_at", now.toISOString())
+    .is("trial_ended_notified_at", null);
 
   if (error) {
     console.error("trial-expired cron query failed:", error);
@@ -57,10 +61,6 @@ export async function GET(request: Request) {
       }
 
       const email = buildTrialExpiredEmail();
-      // Idempotency key scoped to org + UTC day. The cron has no app-
-      // side "already notified" marker, so a Vercel retry within the
-      // same 24h window would otherwise re-send. Resend-side dedupe
-      // catches this.
       const runDay = new Date().toISOString().slice(0, 10);
       const ok = await sendEmail({
         to: ownerEmail,
@@ -74,6 +74,22 @@ export async function GET(request: Request) {
       if (!ok) {
         console.warn("trial-expired: send failed for org", orgId);
         continue;
+      }
+
+      // Mark notified. CAS on `trial_ended_notified_at IS NULL` so a
+      // concurrent run that already set the marker isn't overwritten with
+      // a later timestamp.
+      const { error: markerError } = await admin
+        .from("organizations")
+        .update({ trial_ended_notified_at: new Date().toISOString() })
+        .eq("id", orgId)
+        .is("trial_ended_notified_at", null);
+      if (markerError) {
+        console.warn(
+          "trial-expired: marker update failed for org",
+          orgId,
+          markerError
+        );
       }
 
       // In-app notification feed entry.
