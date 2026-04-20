@@ -508,7 +508,7 @@ async function loadDataset(): Promise<DemoDataset> {
     shell: {
       businessName: profile.business_name,
       ownerName: owner?.name ?? DEMO_OWNER_NAME,
-      ownerEmail: owner?.email ?? profile.email ?? DEMO_USER_EMAIL,
+      ownerEmail: DEMO_USER_EMAIL,
       location: profile.business_address_full ?? DEMO_LOCATION_LABEL,
       publicSlug: profile.public_slug,
       plan: (org.plan as OrganizationRow["plan"]) ?? DEMO_PLAN,
