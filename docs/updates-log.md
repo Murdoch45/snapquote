@@ -150,6 +150,18 @@ Shipped the next two fixes from the morning's audit. Commit `b5cae91` on `main`.
 
 ---
 
+## Session — April 20, 2026 (landing nav — color regression fix)
+
+### Fix: Navbar showing black background at the top
+
+The previous commit left the navbar hoisted out of the hero `<section>` (from the earlier "make it fixed" attempt). Without the section's radial-gradient bg beneath it, the outer `#101320` solid was showing through the transparent nav — visible as a flat black strip at the top of the page.
+
+Fix: moved `<nav>` back inside the hero `<section>` (same DOM position as the pre-regression original), keeping the static positioning (no `fixed`/`sticky`) so the logo still scrolls away naturally. Nav className and all inner markup are identical to the original. No colors or backgrounds touched.
+
+Updated the Landing navbar note in `current-state.md` to lock in "must stay inside the hero section".
+
+---
+
 ## Session — April 20, 2026 (landing nav — revert to static)
 
 ### Change: Remove fixed positioning from landing navbar

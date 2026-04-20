@@ -365,9 +365,6 @@ Fix: token attached, `parseJsonResponse` won't trigger auth refresh on 401 if no
 - **Sign in with Apple JWT** — regeneration needed ~Sept 2026
 - **Google Play Store submission** — not started
 - **No staging environment** — all migrations and pushes go directly to production
-- **Duplicate NEW_LEAD notifications possible** — `sendNewLeadNotifications` is reachable from 3 code paths (lead-submit after-block, rescue-stuck-leads cron, estimator terminal-state transitions) with no unique constraint on (org_id, type, lead_id).
-- **TRIAL_EXPIRED cron idempotency is Resend-side only** — `organizations.trial_ended_notified_at` column was added in migration 0046 (with partial index), but `app/api/cron/trial-expired/route.ts` never actually reads or writes to it. Docstring claims the marker is used, but the only real dedup is the Resend idempotency key `cron-trial-expired-${orgId}-${runDay}`.
-- **Toast stacking on burst web notifications** — `hooks/useNotifications.ts` fires `toast(item.text)` on every Realtime INSERT; N rapid leads = N stacked toasts, no debounce.
 - **Silent push-permission denial on mobile** — `lib/notifications.ts` returns `null` with no UI feedback when the user denies push permission; no Settings surface indicator.
 - **No offline cache on mobile dashboard** — all 4 dashboard hooks error on offline → full ErrorScreen with no degraded view. AsyncStorage is only used for Stripe-return detection, not data caching.
 - **Web notifications popover 5s auto-close timer** — can fire while user is reading longer notification bodies; no pause on hover-within or scroll-within.
@@ -384,7 +381,7 @@ Fix: token attached, `parseJsonResponse` won't trigger auth refresh on 401 if no
 - Stripe/Linear aesthetic
 - UI language rule: Always "estimate" in user-facing text. "quote" acceptable internally in code only.
 
-**Landing navbar:** `<nav>` in `app/(public)/page.tsx` is static flow (no `fixed`/`sticky`), mounted as a direct child of the outermost landing container above the hero `<section>`. It scrolls away naturally with the page.
+**Landing navbar:** `<nav>` in `app/(public)/page.tsx` is static flow (no `fixed`/`sticky`) and sits **inside** the hero `<section>` (above the inner content container). It must stay inside the section so it inherits the radial-gradient background — hoisting it outside exposes the outer `#101320` solid and visibly breaks the top of the page. It scrolls away naturally with the page.
 
 **Brand mark:** Blue chat bubble (`#3FA1F7` → `#174BB7` linear gradient) with a white lightning bolt inscribed, viewBox `0 0 104 92`. Source of truth is the inline SVG in `components/BrandLogo.tsx`; also mirrored as standalone vector at `AppIcon.svg` (repo root). Lightning-bolt path updated April 20, 2026 to a refined glyph (path `M51.49 15.33L39.40 38.73…`); bubble path and gradient unchanged. `AppIcon-1024.png` (the ASC upload) is a rasterization of an earlier stylized canvas and does not match the current glyph — re-render when the ASC icon is next shipped.
 
