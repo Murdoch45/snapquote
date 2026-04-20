@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 104 92" shape-rendering="geometricPrecision">
+  <defs>
+    <linearGradient id="snapquote-bubble" x1="12" y1="12" x2="88" y2="80">
+      <stop offset="0%" stop-color="#3FA1F7" />
+      <stop offset="100%" stop-color="#174BB7" />
+    </linearGradient>
+  </defs>
+  <path
+    d="M29 12H76C89.255 12 100 22.745 100 36C100 49.255 89.255 60 76 60H46L24 78V60.5C16.69 58.4 10 51.06 10 40V36C10 22.745 15.745 12 29 12Z"
+    fill="url(#snapquote-bubble)"
+  />
+  <path
+    d="M50.5 18L35 48H51L42 71L75 36H59L68 18H50.5Z"
+    fill="white"
+    stroke="white"
+    stroke-width="1"
+    stroke-linejoin="round"
+  />
+</svg>

@@ -54,7 +54,7 @@ export function BrandLogo({
           fill="url(#snapquote-bubble)"
         />
         <path
-          d="M50.5 18L35 48H51L42 71L75 36H59L68 18H50.5Z"
+          d="M51.49 15.33L39.40 38.73H51.88L44.86 56.67L70.60 29.37H58.12L65.14 15.33H51.49Z"
           fill="white"
           stroke="white"
           strokeWidth="1"

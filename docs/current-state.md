@@ -254,7 +254,7 @@ Single `get_org_analytics` Postgres RPC (migration 0052) used by both web and mo
 
 ## Dashboard
 
-**Web (`app/app/page.tsx`):** Async Server Component. Fetches analytics + credits + recent leads + lead_unlocks in parallel via `Promise.all()`. Renders a 7-stat horizontal strip and a recent leads list (progressive: 5 → +5, capped at 20). `ActivityTracker` pings `/api/app/activity/touch` on mount (updates `organizations.last_active_at`). **No loading UI, no error boundary on the page itself** — bubbles to Next.js default `error.tsx`.
+**Web (`app/app/page.tsx`):** Async Server Component that `requireAuth()`s, then streams three independent async sub-components wrapped in `<Suspense>` boundaries — `DashboardSubtitle` (this-week lead count), `DashboardStats` (analytics + credits), `DashboardRecentLeads` (leads list). The shared leads query is deduped across Subtitle and RecentLeads via `React.cache()` so Supabase is hit only once per request. Each Suspense has its own skeleton fallback (`SubtitleSkeleton`, `StatsSkeleton` for 7 cards, `RecentLeadsSkeleton` for 6 cards). Segment-level `app/app/loading.tsx` handles navigation-time fallback; segment-level `app/app/error.tsx` catches thrown errors, calls `Sentry.captureException` explicitly, and surfaces `error.digest` as a support reference. `ActivityTracker` pings `/api/app/activity/touch` on mount (updates `organizations.last_active_at`).
 
 **Mobile (`app/(tabs)/index.tsx`):** Client screen with 4 parallel hooks (`useLeads`, `useCredits`, `useAnalytics`, `useProfile`). SafeAreaView + native RefreshControl for pull-to-refresh. Full-screen `LoadingScreen` on initial load, `StatCardSkeleton × 7` while analytics loads, `ErrorScreen` with Retry if any hook fails. `useAnalytics` retries with exponential backoff (max 2 retries, 400ms base) and aborts in-flight fetches on unmount.
 
@@ -268,7 +268,7 @@ Credits Remaining · Leads This Month · Estimates Sent · Estimates Accepted ·
 - Lead unlocks: direct bulk `lead_unlocks` query
 
 **Caching:**
-- Web: `unstable_cache(getAnalytics)` 5-min TTL, tag `analytics:${orgId}`. **Tag is never `revalidateTag()`'d on mutation** — dashboard stats are stale up to 5 min after a new lead is submitted or a quote is accepted.
+- Web: `unstable_cache(getAnalytics)` 5-min TTL, tag `analytics:${orgId}`. Tag is invalidated via the `invalidateAnalytics(orgId)` helper (`lib/db.ts`) after: lead `ai_status='ready'` (in `lib/ai/estimate.ts`), quote SENT (`app/api/app/quote/send/route.ts`), quote ACCEPTED (`app/api/public/quote/[publicId]/accept/route.ts`), lazy per-read quote expire (`app/api/public/quote/[publicId]/route.ts`), and the auto-expire cron per affected org (`app/api/cron/auto-expire-stale-quotes/route.ts`).
 - Mobile: module-level 5-min analytics cache + Supabase Realtime `postgres_changes` subscription on `leads` for invalidation (no polling).
 
 **Cross-tab deps:** Pure URL navigation — no shared Zustand/Jotai/Context stores. Each tab re-fetches its own data. Dashboard and Notifications are **fully decoupled** — no shared queries, cache, or state.
@@ -367,8 +367,6 @@ Fix: token attached, `parseJsonResponse` won't trigger auth refresh on 401 if no
 - **No staging environment** — all migrations and pushes go directly to production
 - **Duplicate NEW_LEAD notifications possible** — `sendNewLeadNotifications` is reachable from 3 code paths (lead-submit after-block, rescue-stuck-leads cron, estimator terminal-state transitions) with no unique constraint on (org_id, type, lead_id).
 - **TRIAL_EXPIRED cron idempotency is Resend-side only** — `organizations.trial_ended_notified_at` column was added in migration 0046 (with partial index), but `app/api/cron/trial-expired/route.ts` never actually reads or writes to it. Docstring claims the marker is used, but the only real dedup is the Resend idempotency key `cron-trial-expired-${orgId}-${runDay}`.
-- **Web dashboard analytics cache not invalidated on mutation** — tag `analytics:${orgId}` is never `revalidateTag()`'d anywhere in the codebase; stats stale up to 5 min after a new lead or accepted quote.
-- **No loading or error UI on web dashboard** — mobile has both (skeletons + ErrorScreen); web has neither. Cold `get_org_analytics` call = blank page until render.
 - **Toast stacking on burst web notifications** — `hooks/useNotifications.ts` fires `toast(item.text)` on every Realtime INSERT; N rapid leads = N stacked toasts, no debounce.
 - **Silent push-permission denial on mobile** — `lib/notifications.ts` returns `null` with no UI feedback when the user denies push permission; no Settings surface indicator.
 - **No offline cache on mobile dashboard** — all 4 dashboard hooks error on offline → full ErrorScreen with no degraded view. AsyncStorage is only used for Stripe-return detection, not data caching.
@@ -385,6 +383,8 @@ Fix: token attached, `parseJsonResponse` won't trigger auth refresh on 401 if no
 - 220px white sidebar (web)
 - Stripe/Linear aesthetic
 - UI language rule: Always "estimate" in user-facing text. "quote" acceptable internally in code only.
+
+**Brand mark:** Blue chat bubble (`#3FA1F7` → `#174BB7` linear gradient) with a white lightning bolt inscribed, viewBox `0 0 104 92`. Source of truth is the inline SVG in `components/BrandLogo.tsx`; also mirrored as standalone vector at `AppIcon.svg` (repo root). Lightning-bolt path updated April 20, 2026 to a refined glyph (path `M51.49 15.33L39.40 38.73…`); bubble path and gradient unchanged. `AppIcon-1024.png` (the ASC upload) is a rasterization of an earlier stylized canvas and does not match the current glyph — re-render when the ASC icon is next shipped.
 
 ---
 
