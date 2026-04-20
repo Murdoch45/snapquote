@@ -16,7 +16,7 @@ export type DemoPlan = OrgPlan;
 
 export const DEMO_BUSINESS_NAME = "Rivera's Pressure Washing";
 export const DEMO_OWNER_NAME = "Carlos Rivera";
-export const DEMO_USER_EMAIL = "demo@snapquote.com";
+export const DEMO_USER_EMAIL = "demo@snapquote.us";
 export const DEMO_LOCATION_LABEL = "Phoenix, AZ";
 export const DEMO_ORG_SLUG = "demo-riveras-pressure-washing";
 export const DEMO_PUBLIC_SLUG = "riveras-pressure-washing";

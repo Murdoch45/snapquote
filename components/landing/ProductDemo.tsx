@@ -753,7 +753,7 @@ export function ProductDemo() {
                         {activeData?.shell.businessName ?? "Rivera's Pressure Washing"}
                       </p>
                       <p className="text-sm text-[#6B7280]">
-                        {activeData?.shell.ownerEmail ?? "demo@snapquote.com"}
+                        {activeData?.shell.ownerEmail ?? "demo@snapquote.us"}
                       </p>
                     </div>
                   </div>

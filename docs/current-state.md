@@ -96,7 +96,7 @@ SnapQuote is an AI-powered quoting and lead management SaaS for outdoor service 
 - `audit_log` — audit actions including `lead.unlocked`, `quote.sent`, `account.deleted`, `member.self_removed`
 - `iap_subscription_events` — RevenueCat webhook events
 
-**Migrations applied through:** 0058
+**Migrations applied through:** 0059
 - 0051: `organizations.last_active_at` with descending index
 - 0052: `get_org_analytics` RPC (SECURITY INVOKER + is_org_member gate)
 - 0053: RPC service-role bypass (skips is_org_member when `auth.uid() IS NULL`)
@@ -105,6 +105,7 @@ SnapQuote is an AI-powered quoting and lead management SaaS for outdoor service 
 - 0056: Reverted contractor_profile UPDATE to allow members (for delivery prefs)
 - 0057: Supabase pg_cron rescue-stuck-leads cron (every 3 min)
 - 0058: `idx_lead_photos_lead_id` index (dropped photo join from 148ms to 8.5ms)
+- 0059: `notifications_new_lead_dedup_idx` — partial unique index on (org_id, screen_params->>'id') WHERE type='NEW_LEAD'
 
 **RLS:** Enabled. Multi-tenant isolation via `org_id`. Key RPC functions bypass PostgREST schema cache (established pattern — do not fight cache, write RPCs instead).
 
@@ -195,6 +196,10 @@ SnapQuote is an AI-powered quoting and lead management SaaS for outdoor service 
 **Lifecycle:**
 - **50-per-org cap** via DB trigger `trg_prune_org_notifications` after every INSERT (keeps only newest 50 per org).
 - **7-day rolling TTL** via daily cron `/api/cron/cleanup-notifications` — deletes rows with `created_at < now() - 7 days`.
+- **NEW_LEAD dedup** via partial unique index `(org_id, (screen_params->>'id')) WHERE type='NEW_LEAD'` (migration 0059). The estimator insert wraps around the expected 23505 (unique_violation) so a second code path firing for the same lead is a soft success, not a warning log.
+- **TRIAL_EXPIRED dedup** via `organizations.trial_ended_notified_at` (column added in migration 0046). `/api/cron/trial-expired/route.ts` filters by `trial_ended_notified_at IS NULL` and sets the marker with a CAS update after the email succeeds; Vercel retries within the 24h window skip already-notified orgs. Resend's idempotency key (`cron-trial-expired-${orgId}-${runDay}`) still layered on top at the provider level.
+- **Toast burst coalescing** (web) — rapid realtime INSERTs within a 1.5s window fire one immediate toast + a trailing "N more notifications" summary, so bursts don't stack on screen.
+- **Tap-handler logging** (web) — `components/TopBar.tsx` `handleNotificationClick` logs a `console.warn` (forwarded to Sentry via `captureConsoleIntegration`) for `screen='lead'` with no `screenParams.id` and for any unknown `screen` value. Malformed notifications are now traceable instead of being silent no-ops.
 - *Note: there is no "midnight clear" — retention is a rolling 7-day window, not a daily wipe.*
 
 **Push (mobile only) — `lib/notifications.ts` + `expo-notifications`:**
@@ -380,6 +385,8 @@ Fix: token attached, `parseJsonResponse` won't trigger auth refresh on 401 if no
 - 220px white sidebar (web)
 - Stripe/Linear aesthetic
 - UI language rule: Always "estimate" in user-facing text. "quote" acceptable internally in code only.
+
+**Demo account constants:** `lib/demo/shared.ts` is the source of truth for the landing-page demo org identity (`DEMO_USER_EMAIL = "demo@snapquote.us"`, `DEMO_BUSINESS_NAME`, `DEMO_OWNER_NAME`, `DEMO_LOCATION_LABEL`, slugs). The landing demo component (`components/landing/ProductDemo.tsx`) renders the email from its data payload but falls back to the same `demo@snapquote.us` literal — keep the two in sync if the address ever changes.
 
 **Landing navbar:** `<nav>` in `app/(public)/page.tsx` is static flow (no `fixed`/`sticky`) and sits **inside** the hero `<section>` (above the inner content container). It must stay inside the section so it inherits the radial-gradient background — hoisting it outside exposes the outer `#101320` solid and visibly breaks the top of the page. It scrolls away naturally with the page.
 
