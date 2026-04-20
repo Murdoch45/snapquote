@@ -19,7 +19,7 @@ export default function HomePage() {
   return (
     <main className={manrope.className}>
       <div className="min-h-screen overflow-x-hidden bg-[#101320] text-foreground">
-        <nav className="fixed top-0 z-50 w-full bg-transparent shadow-none backdrop-blur-0">
+        <nav className="w-full bg-transparent shadow-none backdrop-blur-0">
           <div className="mx-auto flex h-20 max-w-7xl items-center px-6 sm:px-8">
             <Link href="/" className="inline-flex items-center gap-3">
               <BrandLogo size="sm" showWordmark={false} iconClassName="text-white" />

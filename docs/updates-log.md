@@ -150,6 +150,16 @@ Shipped the next two fixes from the morning's audit. Commit `b5cae91` on `main`.
 
 ---
 
+## Session — April 20, 2026 (landing nav — revert to static)
+
+### Change: Remove fixed positioning from landing navbar
+
+User reversed the previous decision — wants the navbar to scroll away with the page instead of staying pinned. Removed `fixed top-0 z-50` from the `<nav>` className in `app/(public)/page.tsx`, leaving `w-full bg-transparent shadow-none backdrop-blur-0`. Nav position in the DOM unchanged (still a direct child of the outer landing container, above the hero `<section>`), so it renders flush with the top of the page and scrolls naturally. No other visual or markup changes.
+
+Updated the Landing navbar note in `current-state.md` to reflect static-flow positioning.
+
+---
+
 ## Session — April 20, 2026 (landing nav fix)
 
 ### Fix: Landing navbar scrolling with the page instead of staying pinned

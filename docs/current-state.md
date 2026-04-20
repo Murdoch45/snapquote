@@ -384,7 +384,7 @@ Fix: token attached, `parseJsonResponse` won't trigger auth refresh on 401 if no
 - Stripe/Linear aesthetic
 - UI language rule: Always "estimate" in user-facing text. "quote" acceptable internally in code only.
 
-**Landing navbar:** `<nav>` in `app/(public)/page.tsx` uses `fixed top-0 z-50 w-full` and is mounted as a direct child of the outermost landing container (not inside the hero `<section>`) so `position: fixed` resolves to the viewport and isn't trapped by the section's `overflow-hidden` + filter-blur decorative child. Keep it out of the hero section when editing.
+**Landing navbar:** `<nav>` in `app/(public)/page.tsx` is static flow (no `fixed`/`sticky`), mounted as a direct child of the outermost landing container above the hero `<section>`. It scrolls away naturally with the page.
 
 **Brand mark:** Blue chat bubble (`#3FA1F7` → `#174BB7` linear gradient) with a white lightning bolt inscribed, viewBox `0 0 104 92`. Source of truth is the inline SVG in `components/BrandLogo.tsx`; also mirrored as standalone vector at `AppIcon.svg` (repo root). Lightning-bolt path updated April 20, 2026 to a refined glyph (path `M51.49 15.33L39.40 38.73…`); bubble path and gradient unchanged. `AppIcon-1024.png` (the ASC upload) is a rasterization of an earlier stylized canvas and does not match the current glyph — re-render when the ASC icon is next shipped.
 
