@@ -1,0 +1,37 @@
+-- Migration 0064: GRANT EXECUTE on handle_auth_user_pending_invites to supabase_auth_admin
+--
+-- Regression hotfix for migration 0063 (revoke_anon_auth_security_definer_rpcs).
+--
+-- 0063 revoked EXECUTE from PUBLIC, anon, and authenticated on
+-- handle_auth_user_pending_invites() to close PostgREST exposure of the
+-- trigger function. That was correct as far as it went — the function should
+-- never be reachable from /rest/v1/rpc/. But the function is also wired as
+-- an AFTER INSERT trigger on auth.users (`on_auth_user_created_attach_invites`),
+-- and Supabase's GoTrue auth service inserts into auth.users as the
+-- `supabase_auth_admin` role. That role had been getting EXECUTE implicitly
+-- via PUBLIC; once we revoked PUBLIC, it lost EXECUTE entirely.
+--
+-- Net effect of 0063 (post-mortem confirmation): every new-user creation
+-- (Google sign-in first-time, email signup, Apple sign-in first-time) would
+-- have failed with a Postgres "permission denied for function" error during
+-- the AFTER INSERT trigger. The 500 the Cowork test surfaced on /callback
+-- was actually a *different* root cause (leading-space in flow_state.referrer
+-- sourced from the Supabase Studio Site URL config — a config-side issue
+-- that has to be fixed in the dashboard, not via migration). However, even
+-- after that config issue is resolved, the trigger would still have failed
+-- to fire under supabase_auth_admin without this GRANT. So 0064 is required
+-- as defense for the post-config-fix path.
+--
+-- Verified live via has_function_privilege:
+--   supabase_auth_admin: false  (after 0063, before 0064)
+--   supabase_auth_admin: true   (after 0064)
+--   postgres            : true  (unchanged)
+--   service_role        : true  (unchanged)
+--   authenticated       : false (correct — no PostgREST exposure)
+--   anon                : false (correct — no PostgREST exposure)
+--
+-- The other six functions revoked in 0063 are unaffected: none are wired as
+-- triggers on auth.* tables, and none are invoked by supabase_auth_admin.
+
+GRANT EXECUTE ON FUNCTION public.handle_auth_user_pending_invites()
+  TO supabase_auth_admin;

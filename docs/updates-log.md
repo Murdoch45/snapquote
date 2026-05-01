@@ -1118,3 +1118,154 @@ Explicit priority: ACTIVE first, then TRIALING, then the most-recent of any othe
 
 No build, no submit, no OTA. Code changes + DB cleanup + git push only.
 
+---
+
+## Session — May 1, 2026 (Google Sign-In 500 — post-mortem + hotfix)
+
+Cowork tested Google Sign-In end-to-end on snapquote.us after enabling the provider in Supabase Studio. The OAuth handshake worked (Google issued a valid auth code and bounced back), but Supabase's `/callback` endpoint returned a generic 500: `{"code":500,"error_code":"unexpected_failure","msg":"Unexpected failure, please check server logs for more information"}`. The user-visible symptom: every Google sign-in attempt lands on a 500 error page.
+
+This entry documents the investigation, the actual root cause (different from initial hypothesis), the migration hotfix that landed, and the remaining Studio-side action Murdoch must take to fully close it.
+
+### Investigation timeline
+
+1. **Initial hypothesis (mine):** the prior session's migration `0063_revoke_anon_auth_security_definer_rpcs` revoked EXECUTE on `handle_auth_user_pending_invites()` from PUBLIC, anon, authenticated. That function is wired as an AFTER INSERT trigger on `auth.users`. Supabase's GoTrue auth service inserts as the `supabase_auth_admin` role. If supabase_auth_admin had been getting EXECUTE *implicitly* via PUBLIC, my REVOKE would have broken it — and every new-user creation would 500 with "permission denied for function" during the trigger.
+
+2. **Verification of hypothesis (partially correct):** queried `has_function_privilege('supabase_auth_admin', 'public.handle_auth_user_pending_invites()', 'EXECUTE')` — returned `false`. So 0063 had indeed broken the trigger path. **Migration 0064 applied** as a hotfix: `GRANT EXECUTE ON FUNCTION public.handle_auth_user_pending_invites() TO supabase_auth_admin`. Re-verified: now `true`.
+
+3. **Pulling the actual auth log** (via Supabase MCP `get_logs(service=auth)` — output was 50KB so I sliced it via subagent + Bash grep): the actual error message is **not** "permission denied for function". It's:
+   ```
+   level=error  path=/callback  status=500
+   msg="Unhandled server error: parse \" https://snapquote.us\": first path segment in URL cannot contain colon"
+   referer=" https://snapquote.us"
+   request_id=9f5164f14c6b2b54-LAX  time=2026-05-01T20:04:16Z
+   ```
+   That's a Go `url.Parse` failure on the literal string `" https://snapquote.us"` — leading space, no path. The `referer` field in the structured log shows the same value with leading whitespace.
+
+4. **Source of the leading-space value:** queried `auth.flow_state.referrer` for the failing flow id (extractable from the OAuth state cookie, but more practically: the most recent google-provider row by created_at). Result:
+   ```sql
+   id=1b31243f-...  provider_type=google  
+   referrer="| https://snapquote.us|"  length=21  ascii(left(referrer,1))=32
+   ```
+   Confirmed: every OAuth flow_state row from May 1 17:36 UTC onward (Google + Apple) has the same `" https://snapquote.us"` value — leading space, length 21 (= 1 space + `https://snapquote.us` 20 chars).
+
+5. **Why the SDK's explicit `redirect_to` isn't being used:** our web code passes `redirectTo: \`${origin}/auth/callback?next=/app\`` to `signInWithOAuth`, which the SDK forwards as a `redirect_to` query param to GoTrue's `/authorize`. GoTrue is supposed to validate that against the Redirect URLs allowlist and store it as the redirect target. But `flow_state.referrer` only contains the origin (`https://snapquote.us`, no path) — meaning GoTrue rejected our explicit redirect_to and fell back to the Site URL config. The most plausible reason it rejected: the Redirect URLs allowlist also has leading whitespace in the entry that should match `https://snapquote.us/auth/callback`, so the wildcard/exact match fails.
+
+6. **Where the leading space lives:** in the GoTrue config (Supabase Studio → Authentication → URL Configuration → Site URL field, and almost certainly the Redirect URLs allowlist entries too). Studio config is stored in the Supabase platform's auth-config service, not in Postgres — so SQL can't fix it. Has to be edited via Supabase Studio dashboard or Supabase Management API.
+
+### Actual root cause
+
+**Two distinct bugs, both real, only one of which I could fix from MCP:**
+
+| # | Bug | Impact | Fix path |
+|---|---|---|---|
+| A | `0063` regression: `supabase_auth_admin` lost EXECUTE on the trigger function `handle_auth_user_pending_invites()` because the GRANT was implicit-via-PUBLIC and 0063 revoked PUBLIC. After every successful OAuth handshake, the `auth.users` AFTER INSERT trigger would fire and fail with "permission denied for function". | Pre-fix, this would have 500'd every new-user creation **even if Bug B were resolved.** | **CLOSED via migration `0064`** (this session). Applied to live DB; verified via `has_function_privilege`. |
+| B | Supabase Auth URL Configuration has leading whitespace in the Site URL field (and likely in one or more Redirect URLs entries). GoTrue copies the Site URL into `flow_state.referrer` on /authorize, parses it on /callback, and Go's `url.Parse` rejects the leading space because `https` becomes a path segment with a colon. Existed since at least 17:36 UTC May 1 (Cowork's earliest OAuth attempts), well before migration 0063. | This is what's actually surfacing the 500 today. Until cleaned up, every OAuth /callback (Google AND Apple on web) will 500. | **NOT CLOSEABLE via MCP** — requires Studio dashboard edit or Supabase Management API call. Documented exact click path in `current-state.md` Known Outstanding Issues + the Cowork-ready prompt below. |
+
+### Migration 0064 — applied + in source control
+
+```sql
+-- supabase/migrations/0064_grant_auth_admin_execute_on_pending_invites_trigger.sql
+GRANT EXECUTE ON FUNCTION public.handle_auth_user_pending_invites()
+  TO supabase_auth_admin;
+```
+
+Live DB version: `20260501190248` (apply_migration name `grant_auth_admin_execute_on_pending_invites_trigger`).
+
+Post-flight `has_function_privilege` check (the table below shows the state after 0064):
+
+| Role | Before 0063 | After 0063 | After 0064 |
+|---|---|---|---|
+| anon | true (via PUBLIC) | false | false |
+| authenticated | true (via PUBLIC) | false | false |
+| supabase_auth_admin | true (via PUBLIC) | **false** ← broken | **true** ← fixed |
+| postgres | true | true | true |
+| service_role | true | true | true |
+
+The other six functions revoked by 0063 (`update_org_plan_credits`, `reset_org_credits`, `refund_bonus_credits`, `reset_due_solo_monthly_credits`, `trigger_rescue_stuck_leads`, `accept_invite_token`) are unaffected by this regression: none are wired as triggers on `auth.*` tables, and none are invoked by `supabase_auth_admin`. They are correctly still locked to service_role / postgres.
+
+### What still has to happen for Google Sign-In to actually work
+
+A 60-second dashboard fix. Hand this to Cowork or do it directly:
+
+```text
+SUPABASE STUDIO — fix leading-whitespace in Auth URL Configuration
+
+CONTEXT
+=======
+Every entry in auth.flow_state stores `referrer = " https://snapquote.us"`
+with a leading space. GoTrue parses this on the OAuth /callback path and
+500s with "first path segment in URL cannot contain colon". Confirmed
+live. Fix is to clean up the Site URL and Redirect URLs in Supabase
+Studio so GoTrue stops persisting the leading space.
+
+STEPS
+=====
+1. Open https://supabase.com/dashboard. Select project `upqvbdldoyiqqshxquxa`
+   (display name "snapquote" or similar).
+2. Left sidebar → Authentication → URL Configuration.
+3. SITE URL field:
+   a. Click into the field.
+   b. Triple-click to select the entire current value.
+   c. DELETE everything (Backspace until empty).
+   d. Type from scratch (do NOT paste): `https://snapquote.us`
+      (exactly 20 chars, no leading/trailing whitespace, no quotes)
+   e. Click Save. Wait for the green "Saved" toast.
+4. REDIRECT URLs allowlist:
+   a. Inspect each existing entry. For any with leading or trailing
+      whitespace, delete and re-add it cleanly. Final allowlist should
+      contain exactly these entries (case sensitive, no whitespace):
+        https://snapquote.us/auth/callback
+        https://snapquote.us/**
+        snapquotemobile://*
+      (If the existing allowlist has more entries that aren't whitespace-
+      polluted, leave them.)
+   b. Save.
+5. VERIFICATION (don't skip this step):
+   a. Open a fresh Chrome incognito tab.
+   b. Go to https://snapquote.us/login
+   c. Click "Sign in with Google".
+   d. Complete the Google flow with a real Google account.
+   e. You should end up signed into the SnapQuote app at /app or
+      /onboarding (depending on whether the account already had an org).
+      A 500 error page = fix didn't take. Try again or report back.
+   f. Sign out and try once more — first-time create AND existing-user
+      sign-in should both work.
+6. Take screenshots of:
+   - Site URL field after Save (visible green "Saved" toast)
+   - Redirect URLs allowlist after Save
+   - Successful sign-in landing page (/app or /onboarding)
+```
+
+### Verification SQL (run after Murdoch/Cowork completes the Studio fix)
+
+```sql
+-- Should return |https://snapquote.us| (no leading space, length 20)
+-- after a fresh OAuth attempt:
+SELECT '|' || referrer || '|' AS referrer, length(referrer) AS len
+FROM auth.flow_state
+ORDER BY created_at DESC
+LIMIT 1;
+```
+
+Expected before fix: `| https://snapquote.us|`, length 21.
+Expected after fix:  `|https://snapquote.us|`, length 20.
+
+### Files changed this session
+
+| Path | Change |
+|---|---|
+| `supabase/migrations/0064_grant_auth_admin_execute_on_pending_invites_trigger.sql` | new — restores supabase_auth_admin EXECUTE on the trigger function |
+| (Supabase live DB) | migration `20260501190248` applied |
+| `docs/current-state.md` | migrations list extended through 0064; Known Outstanding Issues gained "Supabase Auth URL Configuration leading whitespace" hard blocker; Google OAuth blocker note expanded |
+| `docs/updates-log.md` | this entry |
+
+### Pre-ship status after this session
+
+| Status | Items |
+|---|---|
+| ✅ Closed | All prior closed items (anon-callable RPCs, requireAuth determinism, anon-link seat cap, Plan UI refresh, sub-rows dedup, mobile Google PKCE) + supabase_auth_admin trigger grant (0064) |
+| ⚠ Murdoch action required | Telnyx 10DLC campaign binding (portal); Supabase Studio: enable Google OAuth provider AND fix leading-whitespace in Site URL + Redirect URLs |
+| 📋 Optional pre-launch | Mobile signup password length 6 → 8; mobile per-device push token signOut; subscriptions UNIQUE constraint follow-up |
+
+No build, no submit, no OTA. Migration applied to live DB; code change + git push only. The Studio fix above has to be done in the browser before a fresh end-to-end Google Sign-In test can succeed.
+
