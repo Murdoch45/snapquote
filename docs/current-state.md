@@ -63,12 +63,12 @@ SnapQuote is an AI-powered quoting and lead management SaaS for outdoor service 
 
 | Plan | Price (Web/Stripe) | Monthly Credits | Seats |
 |---|---|---|---|
-| Solo | Free | (to be verified) | 1 |
-| Team | $19.99/mo or $15.99/mo (billed $191.99/yr) | (to be verified) | Up to 5 |
-| Business | $39.99/mo or $33.99/mo (billed $383.99/yr) | (to be verified) | Up to 10 |
+| Solo | Free | 5 | 1 |
+| Team | $19.99/mo or $15.99/mo (billed $191.99/yr) | 20 | 2 |
+| Business | $39.99/mo or $33.99/mo (billed $383.99/yr) | 100 | **5** |
 
-> ⚠️ Exact monthly credit counts per plan: verify in `lib/plans.ts` — not confirmed here.
-> BUSINESS plan is capped at **100 sends/month** (not unlimited as originally designed).
+> Source-of-truth for seat + credit allowances: [`lib/plans.ts`](../lib/plans.ts). Mobile hydrates the same values from `/api/plans/config`.
+> BUSINESS plan was raised from 4 → 5 seats on April 30, 2026 to align with App Store Connect's "5 team seats" copy. See `updates-log.md` for the migration record.
 
 **Apple IAP prices (RevenueCat):**
 - Team Monthly: $19.99 | Team Annual: $189.99
@@ -269,7 +269,7 @@ Credits Remaining · Leads This Month · Estimates Sent · Estimates Accepted ·
 **Data sources:**
 - Credits: `get_org_credit_row` RPC (mobile falls back to direct `organizations` query on permission error)
 - Analytics: `get_org_analytics` RPC (migration 0052/0053)
-- Recent leads: direct `leads` query (`org_id`, `ai_status='ready'`, limit 20)
+- Recent leads: direct `leads` query (`org_id`, `ai_status='ready'`, `submitted_at >= now() - 90 days`, ordered newest first, limit 20). The 90-day guardrail (`DASHBOARD_LEADS_WINDOW_DAYS` in `app/app/page.tsx`) keeps the Postgres planner from walking a huge index range for high-volume orgs; the "new leads this week" calculation is a 7-day window safely inside it.
 - Lead unlocks: direct bulk `lead_unlocks` query
 
 **Caching:**

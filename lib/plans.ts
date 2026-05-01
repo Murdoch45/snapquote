@@ -9,7 +9,7 @@ export const PLAN_MONTHLY_CREDITS: Record<OrgPlan, number> = {
 export const PLAN_SEAT_LIMITS: Record<OrgPlan, number> = {
   SOLO: 1,
   TEAM: 2,
-  BUSINESS: 4
+  BUSINESS: 5
 };
 
 export function getPlanMonthlyCredits(plan: OrgPlan): number {
