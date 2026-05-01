@@ -322,7 +322,7 @@ function DesktopUserMenu({
         type="button"
         onClick={handleSignOut}
         disabled={signingOut}
-        className="flex min-h-[44px] w-full items-center gap-3 rounded-[10px] border-l-[3px] border-l-transparent px-4 py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-60"
+        className="flex min-h-[44px] w-full items-center gap-3 rounded-[10px] border-l-[3px] border-l-transparent bg-red-600 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-60"
         aria-label="Sign out"
       >
         <LogOut className="h-4 w-4 shrink-0" />

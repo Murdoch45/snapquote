@@ -1450,3 +1450,21 @@ So the same `Sidebar` component renders one way on desktop and a different way o
 `npx tsc --noEmit` exit 0. No build, no submit, no OTA. Code change + git push only.
 
 No mobile-repo changes — mobile rendering is intentionally untouched.
+
+---
+
+## Session — May 1, 2026 (red Sign Out button in desktop sidebar)
+
+Tiny styling tweak. The desktop `DesktopUserMenu`'s Sign Out button was using the muted nav-item styling (`text-muted-foreground` with `hover:bg-muted`) — visually identical to a non-destructive nav link, which understated the action. Recoloured to:
+
+- Default: `bg-red-600` + `text-white`
+- Hover: `bg-red-700`
+- Disabled (mid-signout): `disabled:opacity-60` (unchanged)
+
+Kept everything else the same — same `min-h-[44px]`, `rounded-[10px]`, `border-l-[3px]`, `px-4 py-3`, `text-sm font-medium`, same icon + label, same position. Only the colour palette changed.
+
+Mobile is untouched. The `AccountSheet` modal's Sign Out button (used by `MobileSidebar`) was already red (`bg-red-600 hover:bg-red-700`) — desktop now matches that visual treatment for the destructive action.
+
+**File changed:** `components/Sidebar.tsx` — single className tweak inside `DesktopUserMenu`.
+
+`npx tsc --noEmit` not re-run (single Tailwind className change, no type implications). No build, no submit, no OTA.
