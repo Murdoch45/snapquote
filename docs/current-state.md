@@ -96,7 +96,7 @@ SnapQuote is an AI-powered quoting and lead management SaaS for outdoor service 
 - `audit_log` — audit actions including `lead.unlocked`, `quote.sent`, `account.deleted`, `member.self_removed`
 - `iap_subscription_events` — RevenueCat webhook events
 
-**Migrations applied through:** 0059
+**Migrations applied through:** 0063
 - 0051: `organizations.last_active_at` with descending index
 - 0052: `get_org_analytics` RPC (SECURITY INVOKER + is_org_member gate)
 - 0053: RPC service-role bypass (skips is_org_member when `auth.uid() IS NULL`)
@@ -106,6 +106,10 @@ SnapQuote is an AI-powered quoting and lead management SaaS for outdoor service 
 - 0057: Supabase pg_cron rescue-stuck-leads cron (every 3 min)
 - 0058: `idx_lead_photos_lead_id` index (dropped photo join from 148ms to 8.5ms)
 - 0059: `notifications_new_lead_dedup_idx` — partial unique index on (org_id, screen_params->>'id') WHERE type='NEW_LEAD'
+- 0060: BUSINESS plan seat limit 4 → 5 in `accept_invite_token` and `handle_auth_user_pending_invites` RPCs
+- 0061: E.164 phone backfill on `leads.customer_phone`, `customers.phone`, `contractor_profile.phone` (268+4 historical rows)
+- 0062: `quotes.telnyx_message_id text` for post-hoc SMS lookup via `mcp__Telnyx__get_message`
+- 0063: REVOKE EXECUTE on 7 SECURITY DEFINER RPCs from PUBLIC/anon/authenticated (`update_org_plan_credits`, `reset_org_credits`, `refund_bonus_credits`, `reset_due_solo_monthly_credits`, `trigger_rescue_stuck_leads`, `handle_auth_user_pending_invites`, `accept_invite_token`). Closes the anonymous credit-rewrite vulnerability surfaced by the May 1 pre-ship audit. service_role and postgres retain EXECUTE; `is_org_member` / `is_org_owner` deliberately untouched (used in RLS USING expressions, must stay callable by anon/auth).
 
 **RLS:** Enabled. Multi-tenant isolation via `org_id`. Key RPC functions bypass PostgREST schema cache (established pattern — do not fight cache, write RPCs instead).
 
@@ -356,16 +360,29 @@ Fix: token attached, `parseJsonResponse` won't trigger auth refresh on 401 if no
 
 ---
 
-## Known Outstanding Issues (As of April 18, 2026)
+## Known Outstanding Issues (As of May 1, 2026 post-fix session)
 
+**Closed in this session (May 1, 2026):**
+- ~~**Anon-callable SECURITY DEFINER RPCs**~~ — closed via migration `0063`. 7 functions revoked from PUBLIC/anon/authenticated; service_role + postgres retain EXECUTE. Advisor went from 18 anon/auth-callable warnings down to 5 (all on legitimate RLS helpers).
+- ~~**Google sign-in button removed from LoginForm.tsx**~~ — pre-ship audit confirmed already restored in commit `c6739ce`. Both web login + signup have the button; root cause of "broken Google sign-in" is the Supabase Auth provider not being enabled at the project level (separate fix, see remaining issues below).
+- ~~**Apple sign-in on signup page**~~ — pre-ship audit confirmed already shipped (`SignupForm.tsx:190-195`).
+
+**Remaining hard blockers (must fix before App Store submit):**
+- **Telnyx 10DLC campaign-to-number binding** — `+17169938159` still shows `messaging_campaign_id: null` (re-confirmed via MCP May 1, 2026 18:00 UTC). Murdoch reportedly assigned the number in the Telnyx portal but the binding did not take effect. Likely causes (in order of probability): (a) wrong Telnyx organization context — the SnapQuote messaging profile lives under Telnyx org `44ea795f-672b-4bb4-9adb-f7e27e0bd3ad`, so the assignment must be made while that org is selected in the top-right org switcher in Mission Control; (b) the 10DLC campaign chosen is not in `ACTIVE` state (only ACTIVE campaigns can have phone numbers assigned); (c) campaign has reached its `maximum_phone_numbers` capacity. Re-attempt: portal.telnyx.com → top-right verify org is "SnapQuote" → Messaging → 10DLC → Campaigns → click the SnapQuote campaign (verify Status = ACTIVE) → Phone Numbers tab → Assign → select +17169938159 → Save. After: `mcp__Telnyx__get_phone_number({id: "2933798527966381131"})` should return non-null `messaging_campaign_id`. Until this is done, every contractor SMS-send is silently dropped at the carrier layer regardless of how clean the code path is.
+- **Supabase Google OAuth provider not enabled** — Web Google sign-in button is wired correctly; provider just isn't on. Live verification: `auth.identities` has 90 `email` rows and 1 `google` row (developer's own account, never reused over 3 weeks). Fix in Supabase Studio → Authentication → Providers → Google.
+- **Anonymous-link invite consumes seat slot** — `/api/app/team/invite-link` calls `assertSeatAvailable` which counts `pending_invites` rows (incl. anon `email IS NULL` rows) toward the cap. Live: org "falconn" already locked at 5/5 from 4 link clicks + 1 owner. Fix: remove `assertSeatAvailable` from that route OR scope to `email IS NOT NULL` in `lib/teamInvites.ts:50-56`.
+- **`requireAuth` non-determinism for multi-org users** — `lib/auth/requireAuth.ts:21-26` and `lib/auth/requireRole.ts:75-80, 122-127` do `.limit(1).single()` with no `ORDER BY`. Live: developer is OWNER of two orgs → Plan page and Team page can return different plans across requests. Fix: add `.order("created_at", { ascending: true })` (or any deterministic key).
+
+**Remaining post-launch / non-blockers:**
+- **Telnyx DLR webhook handler** — `quotes.telnyx_message_id` is persisted (migration `0062`); the natural follow-up is a `POST /api/public/telnyx/webhook` route that verifies the `Telnyx-Signature` header and updates a future `quotes.sms_delivery_status` column. Without it the app has no way to know whether a queued message actually delivered. Recommended sequence: (1) ship handler stub, (2) add `quotes.sms_delivery_status` column, (3) `mcp__Telnyx__update_messaging_profile({profile_id: "40019d6e-d8b1-447b-8d8b-bdc03ca9ceab", request: {webhook_url: "https://www.snapquote.us/api/public/telnyx/webhook"}})` to point Telnyx at the handler. Don't set the webhook_url before the handler exists — Telnyx will get 404s and may eventually disable the URL.
 - **RevenueCat 404 error** — "None of the products registered could be fetched from App Store Connect" — suspected App Store Connect product config issue, not yet confirmed resolved
-- **Google sign-in button** — accidentally removed from `LoginForm.tsx` by Codex, needs restoration
-- **Apple sign-in on signup page** — button exists on login page, needs to be added to signup page
 - **Apple OAuth redirect flow** — full end-to-end test not yet completed
 - **Stripe live mode** — still on test mode, must switch before launch
-- ~~**Twilio/Telnyx SMS full verification** — 10DLC registered, full notification flow needs end-to-end verification~~ — completed April 30, 2026; campaign is active, end-to-end paths verified, opt-out footer + consent disclosure shipped. See `updates-log.md`.
-- **Telnyx 10DLC campaign-to-number binding** — `+17169938159` shows `messaging_campaign_id: null` (May 1, 2026). Must be bound in the Telnyx Mission Control portal (Messaging → 10DLC → Campaigns → SnapQuote → Phone Numbers → assign). Until this is done, every contractor SMS-send is silently dropped at the carrier layer.
-- **Telnyx DLR webhook handler** — `quotes.telnyx_message_id` is now persisted (migration `0062`); the natural follow-up is a `POST /api/public/telnyx/webhook` route that verifies the `Telnyx-Signature` header and updates a future `quotes.sms_delivery_status` column. Without it the app has no way to know whether a queued message actually delivered.
+- **Mobile Google OAuth flow-type mismatch** — `lib/supabase.ts:38-45` defaults to PKCE flow but `app/(auth)/login.tsx:119-129` and `app/(auth)/signup.tsx:125-135` parse access_token from URL fragment (implicit-flow shape). Even after Supabase Google is enabled, mobile Google login will silently no-op until either flowType is set to `implicit` or the handlers are switched to `exchangeCodeForSession`.
+- **Subscriptions table has multiple rows per user_id** — developer's user_id has 4 stale subscription rows (`sub_test_manual` + 3 real Stripe sub IDs). Need either a UNIQUE constraint with cleanup, or `ORDER BY status DESC, created_at DESC LIMIT 1` in readers.
+- **Web Plan upgrade UI doesn't `router.refresh()`** — `components/plan/PlanOptionsSection.tsx:134,141` does `router.replace("/app/plan")` without refresh; Server Component data won't re-fetch until manual reload.
+- **Mobile signup password 6 chars vs reset/web 8 chars** — `app/(auth)/signup.tsx:37` (mobile) accepts min:6; reset + web require 8. User signed up with 6-char password can't reset later.
+- **Mobile `signOut` deletes ALL `push_tokens` for user_id** — should scope to current `device_id`. Multi-device push regression.
 - **Light/dark mode (mobile)** — removed during render crash investigation, ready to re-implement cleanly
 - **Delete Account cleanup gaps** — RevenueCat/Apple IAP subscriptions not cancelled, Storage blobs not removed
 - **11 pre-existing failing tests** — 2 real bugs (out-of-service-area lawn quote, concrete repeatability), 6 stale plan-limit tests, 3 API contract fixtures

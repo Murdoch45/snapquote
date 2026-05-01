@@ -835,3 +835,173 @@ After all of the above, re-run this audit's critical checks (security advisor, T
 
 No code committed in this session. This entry appended to `docs/updates-log.md` in both repos as the only file change.
 
+---
+
+## Session — May 1, 2026 (post-audit fixes — security REVOKE migration + Telnyx campaign binding instructions)
+
+Closing two ship-blockers from this morning's pre-ship audit. One landed as a Postgres migration; the other could not be done via MCP and is documented for Murdoch to action in the Telnyx portal.
+
+### Fix #1 — REVOKE EXECUTE on dangerous SECURITY DEFINER RPCs (CLOSED)
+
+**What landed.** New migration `0063_revoke_anon_auth_security_definer_rpcs.sql` revokes EXECUTE from PUBLIC, anon, and authenticated for seven server-side-only SECURITY DEFINER functions. Migration version `20260501190248`. Applied to live DB via Supabase MCP `apply_migration`.
+
+**Function-by-function decisions** (all verified live via `has_function_privilege` post-flight):
+
+| Function | Before | After | Why |
+|---|---|---|---|
+| `update_org_plan_credits(uuid, int, timestamptz)` | anon=YES, auth=YES, service_role=YES | anon=NO, auth=NO, service_role=YES | Called only from server-side webhook handlers (`app/api/iap/sync/route.ts:99`, `app/api/stripe/webhook/route.ts:115`, `app/api/revenuecat/webhook/route.ts:93`) via admin client. The most dangerous of the bunch — accepts arbitrary `org_id` + `monthly_credits` and rewrites unconditionally. |
+| `reset_org_credits(uuid, int, timestamptz, timestamptz)` | anon=YES, auth=YES, service_role=YES | anon=NO, auth=NO, service_role=YES | Called only from `lib/credits.ts:65` via admin client. |
+| `refund_bonus_credits(uuid, int)` | anon=YES, auth=YES, service_role=YES | anon=NO, auth=NO, service_role=YES | Called only from `app/api/stripe/webhook/route.ts:515` and `app/api/revenuecat/webhook/route.ts:393` via admin client. |
+| `reset_due_solo_monthly_credits()` | anon=YES, auth=YES, service_role=YES | anon=NO, auth=NO, service_role=YES | Called only by pg_cron job (runs as `postgres` superuser, bypasses grants — REVOKE doesn't break it). |
+| `trigger_rescue_stuck_leads()` | anon=YES, auth=YES, service_role=YES | anon=NO, auth=NO, service_role=YES | Same — pg_cron-only, runs as postgres. |
+| `handle_auth_user_pending_invites()` | anon=YES, auth=YES, service_role=YES | anon=NO, auth=NO, service_role=YES | AFTER INSERT trigger on `auth.users`. Triggers fire regardless of role grants, so revoking PostgREST exposure costs us nothing. |
+| `accept_invite_token(text, uuid, text)` | anon=YES, auth=YES, service_role=YES | anon=NO, auth=NO, service_role=YES | Called only from `app/api/public/invite/accept/route.ts:44` via admin client. The route is at `/api/public/invite/accept` (matches the unauth-allowed prefix) but the route itself requires a Supabase user (lines 33-39, returns 401 if no user) and routes the RPC call through `createAdminClient()` — service_role is what lands in Postgres. |
+
+**Functions deliberately NOT touched** (verified still working):
+
+| Function | Status | Reason |
+|---|---|---|
+| `is_org_member(uuid)` | anon=YES, auth=YES (unchanged) | Used inside RLS USING expressions across multiple tables. Postgres checks EXECUTE at the call site even for SECURITY DEFINER functions; revoking would make every RLS-protected query fail for authenticated users. The advisor will continue to flag this as informational — accepted by design. |
+| `is_org_owner(uuid)` | anon=YES, auth=YES (unchanged) | Same reason. |
+| `get_org_credit_row(uuid)` | anon=NO, auth=YES (unchanged) | Authenticated-only RLS-aware read. Already correct. |
+| `record_credit_purchase(uuid, text, int)` | anon=NO, auth=NO (unchanged) | Already locked to admin-only. |
+| `unlock_lead_with_credits(uuid, uuid)` | anon=NO, auth=NO (unchanged) | Already locked to admin-only. |
+
+**Post-flight verification.**
+1. `has_function_privilege` queried live for all 12 functions — every one matches the table above.
+2. `get_advisors(type=security)` re-run. Before: 9 `anon_security_definer_function_executable` warnings + 9 `authenticated_security_definer_function_executable` warnings (18 total). After: 2 + 3 = 5 total. The remaining 5 are all on `is_org_member`, `is_org_owner`, and `get_org_credit_row` — all legitimate per the table above. **The dangerous attack surface (credit rewrite, cron triggers, trigger function, invite acceptance) is now closed.**
+3. pg_cron jobs continue to run as the `postgres` superuser, so `trigger_rescue_stuck_leads` and `reset_due_solo_monthly_credits` are unaffected by the REVOKE.
+4. The `handle_auth_user_pending_invites` trigger on `auth.users` continues to fire on user creation; trigger invocation does not go through the EXECUTE grant chain.
+5. All four real-world call sites (Stripe webhook, RevenueCat webhook, IAP sync, accept-invite route, lib/credits) continue to work because they all use the admin client (`createAdminClient()`) which carries `service_role` — and `service_role` retains EXECUTE on every revoked function.
+
+**Files changed.**
+- `supabase/migrations/0063_revoke_anon_auth_security_definer_rpcs.sql` (new) — migration source
+- Migration applied to live DB via Supabase MCP (recorded in DB as version `20260501190248`)
+- `docs/current-state.md` — migrations list extended through 0063; Known Outstanding Issues section reorganized into "Closed in this session", "Remaining hard blockers", "Remaining post-launch / non-blockers"
+- `docs/updates-log.md` — this entry
+
+### Fix #2 — Telnyx 10DLC campaign binding (NOT FULLY CLOSEABLE FROM MCP — Murdoch action required)
+
+**Live state confirmed via `mcp__Telnyx__get_phone_number({id: "2933798527966381131"})` at audit-fix time (May 1, 2026 ~18:00 UTC):**
+
+```
+phone_number: "+17169938159"
+status: "active"
+messaging_profile_id: "40019d6e-d8b1-447b-8d8b-bdc03ca9ceab"
+messaging_profile_name: "SnapQuote"
+messaging_campaign_id: null      ← STILL UNBOUND
+```
+
+Murdoch reportedly went into the Telnyx portal earlier and assigned the number, but the assignment didn't take effect. Three plausible causes (in order of probability):
+
+1. **Wrong Telnyx organization context.** The SnapQuote messaging profile lives under Telnyx organization `44ea795f-672b-4bb4-9adb-f7e27e0bd3ad`. Mission Control has an org switcher in the top-right; if Murdoch's account belongs to multiple orgs and a different one was selected when the assignment was made, the assignment would have landed on a campaign in a different org's tenancy — invisible to the SnapQuote profile. Verify by ensuring the top-right org switcher shows "SnapQuote" before navigating to 10DLC.
+2. **Campaign not in `ACTIVE` state.** Only campaigns whose The Campaign Registry (TCR) status is `ACTIVE` can have phone numbers assigned. If the campaign is still `PENDING_VETTING`, `EXPIRED`, or in any other state, the Add Number form will accept the click but the binding will silently not take effect. Verify Status column on the Campaigns list page.
+3. **Campaign capacity exhausted.** TCR campaigns have a `maximum_phone_numbers` limit. If the SnapQuote campaign has reached its limit, the assignment fails silently. Check the campaign's "Phone Numbers" tab — if the count equals the cap, increase the cap with the carriers (or remove an unused number).
+
+**Why the Telnyx MCP can't do this directly.** The available Telnyx MCP tools cover phone-number metadata (`update_phone_number`, `update_phone_number_messaging_settings`), messaging profiles (`update_messaging_profile`), call control, voice, and storage. There is no exposed tool for `assign_phone_to_campaign` or any 10DLC campaign-management endpoint. This is consistent with the Telnyx public API — 10DLC campaign binding goes through a separate `/v2/messaging_brands` and `/v2/messaging_campaigns` API surface that the MCP server does not currently wrap. The portal is the only path.
+
+**Exact click path for Murdoch:**
+
+1. Go to https://portal.telnyx.com/#/app/messaging
+2. Top-right org switcher: confirm "SnapQuote" is selected (or whatever name corresponds to org id `44ea795f-672b-4bb4-9adb-f7e27e0bd3ad`)
+3. Left sidebar → 10DLC → Campaigns
+4. Find the SnapQuote campaign in the list. **Verify Status = ACTIVE** (not PENDING_VETTING, not EXPIRED). If anything other than ACTIVE, stop here — that's the problem.
+5. Click the campaign name to open it
+6. Click the "Phone Numbers" tab
+7. **Verify current count vs `maximum_phone_numbers` cap.** If count = cap, the campaign is full — that's the problem (would need to increase the cap with the carriers).
+8. Click "Add Numbers" or "Assign Phone Numbers" (button label varies)
+9. Search for or select `+17169938159`
+10. Save / Confirm
+
+**Verification step (after Murdoch finishes the click path):**
+
+Run `mcp__Telnyx__get_phone_number({id: "2933798527966381131"})` again. The response should now have `messaging_campaign_id` set to a non-null UUID. Once that lands, every contractor SMS will route through the registered campaign and carriers will accept it.
+
+**Webhook URL — deliberately NOT set in this session.** The messaging profile still has `webhook_url: null` and `health_webhook_url: null`. The audit identified this as HIGH-priority (no DLR = no carrier delivery visibility) but explicitly NOT ship-blocking. Setting the webhook URL via `mcp__Telnyx__update_messaging_profile({profile_id: "40019d6e-d8b1-447b-8d8b-bdc03ca9ceab", request: {webhook_url: "https://www.snapquote.us/api/public/telnyx/webhook"}})` BEFORE the handler ships would cause Telnyx to send DLRs to a 404 endpoint, which Telnyx may eventually mark as broken and disable. Correct sequence post-launch:
+
+1. Add `quotes.sms_delivery_status text` column (new migration)
+2. Build `app/api/public/telnyx/webhook/route.ts` that verifies the `Telnyx-Signature` HMAC header and updates `quotes.sms_delivery_status` based on `event_type` (`message.sent`, `message.finalized`, `message.received`)
+3. Deploy the route
+4. Run the `update_messaging_profile` MCP call above to point Telnyx at the now-existing handler
+5. Verify by sending a test SMS and watching `quotes.sms_delivery_status` flip
+
+### Audit MEDIUM and LOW findings — full dump for visibility
+
+The pre-ship audit's executive summary covered CRITICAL and HIGH only. Below is the complete MEDIUM and LOW set so nothing's hidden, even though most won't be fixed pre-launch.
+
+**MEDIUM — post-ship priority**
+
+| # | Severity | Location | Finding | Fix complexity |
+|---|---|---|---|---|
+| M1 | MEDIUM | mobile — `lib/supabase.ts:38-45` + `app/(auth)/login.tsx:119-129` + `app/(auth)/signup.tsx:125-135` | Mobile Google OAuth uses deprecated implicit-flow shape (parses `access_token` from URL fragment) but Supabase JS client defaults to PKCE flow. After the Supabase Google provider is enabled, mobile Google login will silently no-op — the WebBrowser closes but the session never lands. **Apple Sign-In is the iOS primary path, so this is non-blocking, but Google won't work on mobile until fixed.** | S — either add `flowType: 'pkce'` and switch handlers to `exchangeCodeForSession(code)`, OR force `flowType: 'implicit'` to match existing token-parsing code |
+| M2 | MEDIUM | mobile — `app/(auth)/invite/[token].tsx:56` | Mobile invite token is wiped from `pendingInviteToken` storage on **any** error, including transient network errors. A network blip during invite acceptance forces the user to re-click the original email/SMS link. | S — wrap the `clearPendingInviteToken()` call so it only fires on terminal errors (already-used / expired / wrong-user), not on network failures |
+| M3 | MEDIUM | mobile — `app/_layout.tsx:115-117` | OTP-confirm deep-link handler swallows `verifyOtp` errors silently. If the password-reset link is expired or used, the user is dropped on whatever screen with no error feedback or fallback. | S — surface error toast or `router.replace("/(auth)/forgot-password")` on failure |
+| M4 | MEDIUM | DB — 6 SECURITY DEFINER functions | `plan_monthly_credits`, `prune_org_notifications`, `reset_org_credits`, `update_org_plan_credits`, `set_updated_at`, `storage_org_id_from_path` have `search_path` mutable per role. Combined with their SECURITY DEFINER status, this is a privilege-escalation hijack vector if any other privilege bug exists. The newer functions (`accept_invite_token`, `is_org_member`, `is_org_owner`, etc.) are correctly hardened with explicit `SET search_path`. | S — add `SET search_path = public, pg_catalog` to each function definition in a new migration |
+| M5 | MEDIUM | DB — `iap_subscription_events` table | Index `idx_iap_subscription_events_event_id` exists but is non-unique. If a webhook handler errors after the audit-row insert but before completing the orchestration (and `releaseWebhookEvent` is called), the retry will insert a duplicate audit row. Cosmetic for now (count = 0 in production). | S — `ALTER TABLE iap_subscription_events ADD CONSTRAINT iap_subscription_events_event_id_key UNIQUE (event_id)` in a new migration |
+| M6 | MEDIUM | both | Stripe annual prices differ from Apple IAP annual prices by Apple-tier constraint (not a bug). Web Team Annual: `$191.99/yr`. Apple: `$189.99/yr`. Web Business Annual: `$383.99/yr`. Apple: `$389.99/yr`. Apple constrains annual prices to discrete tiers. | N/A — document in App Review notes if not already |
+| M7 | MEDIUM | App Store Connect — subscription group "SnapQuote Plans" | Subscription levels still ordered Team Monthly at L1, Business Annual at L4. Apple convention is Level 1 = highest tier. Drag-and-drop in ASC; manual-only step. Cosmetic but visible to App Review reviewers. | S — Edit Level dialog in ASC, drag-and-drop |
+| M8 | MEDIUM | mobile — `C:\Users\murdo\SnapQuote-mobile\.env` | `.env` is committed to the mobile repo (not in `.gitignore`). All current values are `EXPO_PUBLIC_*` which Expo bundles into the JS bundle anyway, so this is **not a leak today**. But: if anyone ever adds a non-public secret there, it gets silently committed. Dangerous pattern. | S — add `.env` to `.gitignore`, keep `.env.example` tracked |
+| M9 | MEDIUM | mobile — `lib/hooks/useEntitlementSync.ts:96,108` | `console.log` of plan name (TEAM/BUSINESS) on entitlement sync, not `__DEV__`-guarded. Low-impact telemetry but technically logs internal state to Sentry's `captureConsoleIntegration` (only if level filter includes `log`, which it doesn't by default). | S — wrap in `if (__DEV__)` |
+| M10 | MEDIUM | Supabase Auth | Leaked-password protection (HaveIBeenPwned check) is disabled. One toggle in Supabase Studio → Authentication → Providers → Email → Settings. | S — dashboard toggle |
+| M11 | MEDIUM | web — `lib/auditLog.ts:7` | Of 9 declared `AuditAction` enum values, only 4 are observed in production `audit_log` rows. Missing: `account.deleted`, `plan.changed`, `team.invite_sent`, `team.invite_accepted`, `member.self_removed`, `settings.password_changed`, `credits.purchased`. Either those code paths haven't been exercised yet, or writers are missing. Worth grepping for `recordAuditAction` callers to find the gap. | M — investigate and fill in missing writers |
+
+**LOW — nice-to-have**
+
+| # | Severity | Location | Finding | Fix complexity |
+|---|---|---|---|---|
+| L1 | LOW | DB | 5 unindexed FKs: `audit_log.actor_user_id`, `notifications.user_id`, `pending_invites.invited_by`, `quote_events.org_id`, `quote_events.quote_id`. Low impact at current scale (small tables). | S — `CREATE INDEX` migration |
+| L2 | LOW | DB | 4 `auth_rls_initplan` advisor warnings on policies for `subscriptions`, `push_tokens`, `notifications`, `audit_log`. RLS function calls re-evaluate per row. Will degrade as `notifications` grows past the 50-cap on busy orgs. Standard fix: replace `auth.uid()` with `(select auth.uid())` inside policy USING/WITH CHECK expressions. | S — migration that recreates the affected policies |
+| L3 | LOW | mobile — `package-lock.json` | `@expo/ngrok` still listed as a transitive dep (`@expo/cli` → `@expo/ngrok`). Not in production bundle, but a stale lockfile entry. Will clear on next `npm install`. | XS — `rm package-lock.json && npm install` |
+| L4 | LOW | mobile — `lib/quote-template.ts:1`, `lib/hooks/useOnlineStatus.ts:27`, `app/(tabs)/more/my-link.tsx:37` | Three hardcoded `APP_URL = "https://snapquote.us"` constants instead of using `EXPO_PUBLIC_APP_URL`. Production URL is stable; not blocking but inconsistent. | S — replace with env var read |
+| L5 | LOW | mobile — `package.json` | No `tsc --noEmit` script. Pre-commit hook would catch type drift. | XS — add `"typecheck": "tsc --noEmit"` |
+| L6 | LOW | web — `components/TopBar.tsx` desktop popover | Auto-closes after 5s of no hover. Can fire while user is reading a long notification. | S — pause-on-hover-within or scroll-within |
+| L7 | LOW | mobile | Light/dark mode support intentionally removed during render-loop investigation. Ready to re-implement post-launch. | M |
+| L8 | LOW | web — `app/api/app/account/delete/route.ts` | Delete Account doesn't cancel Apple IAP / RevenueCat subscriptions, doesn't remove lead photo blobs from Storage. Two separate gaps. | M for IAP cancel (RC Server API), S for storage cleanup |
+| L9 | LOW | both — tests | "11 pre-existing failing tests" per docs (2 real bugs in estimator: out-of-service-area lawn quote, concrete repeatability; 6 stale plan-limit tests; 3 API contract fixtures). Worth a sweep post-launch. | M — needs investigation per failure |
+| L10 | LOW | mobile — Sentry | `SNAPQUOTE-MOBILE-3` issue is `[RevenueCat] 🍎‼️ Purchase was cancelled.` from RC SDK's `setLogHandler` getting captured by `captureConsoleIntegration`. 160 occurrences over 2 weeks but it's user-cancelled IAP = expected behavior. | S — Sentry beforeSend filter or RC log level downgrade |
+| L11 | LOW | web — `webhook_events` and `iap_subscription_events` tables | Both empty in production. Either no Stripe / RevenueCat webhook has ever fired in prod, or the tables were truncated. Webhook handlers themselves are production-quality (signature-verified, idempotent). Not a blocker — but verify before launch by sending a test event from each provider's dashboard. | XS — provider-side test event |
+| L12 | LOW | mobile — App Store readiness | iOS App Review notes should explicitly explain the Stripe-vs-IAP split to prevent 3.1.1 reviewer confusion. | XS — text update in ASC |
+
+### What's confirmed ship-ready (status today)
+
+After this session:
+- ✅ Critical anon-callable RPC vulnerability — closed via migration `0063`
+- ✅ Mobile Build 9 already in TestFlight (Apr 21)
+- ✅ Sentry quiet on Build 9 (the 160-event SNAPQUOTE-MOBILE-3 stream is RC purchase-cancelled noise, not a real bug)
+- ✅ Stripe + RevenueCat webhook handlers production-ready (signature-verified, idempotent)
+- ✅ TypeScript clean both repos
+- ✅ Cross-repo API contract (14/14 routes match)
+- ✅ Phone E.164 normalization at every boundary (since migrations 0061 + commits 88928d2)
+- ✅ Render-loop fix chain verified in place (4 commits, all in Build 9)
+- ✅ Apple Sign-In native flow solid
+- ✅ RevenueCat product config complete and active
+
+### Still required before App Store submit
+
+The remaining ship-blockers are not in code:
+1. **Murdoch action — Telnyx portal binding** (see Fix #2 above for exact path).
+2. **Murdoch action — Supabase Studio toggle** to enable Google OAuth provider; add Google Cloud Console OAuth credentials with the right redirect URLs.
+3. **Code fix — `requireAuth` ORDER BY** (1-line change in 3 helpers; high impact for multi-org users including the developer).
+4. **Code fix — anonymous-link invite seat-cap bypass** (1-line change; org "falconn" is currently locked out of generating any more invite links).
+5. **(Optional but recommended) Mobile flow-type fix** for Google OAuth so it works after Supabase is enabled.
+
+Items 3 and 4 are next session.
+
+### Verification
+
+- `0063` listed as version `20260501190248` in `mcp__0f97026c-7d53-48d1-a863-ca1790b1ba77__list_migrations` output.
+- `mcp__0f97026c-7d53-48d1-a863-ca1790b1ba77__get_advisors(type=security)`: 9+9 anon/authenticated SECURITY DEFINER warnings → 2+3 (only `is_org_member`, `is_org_owner`, `get_org_credit_row` remain — all legitimate per the table above).
+- `has_function_privilege` confirmed live: 7 functions now anon=NO, auth=NO, service_role=YES, postgres=YES.
+- Telnyx phone state: still `messaging_campaign_id: null`. No code change needed; Murdoch portal action required.
+
+### Files changed this session
+
+| Path | Change |
+|---|---|
+| `supabase/migrations/0063_revoke_anon_auth_security_definer_rpcs.sql` | new — REVOKE EXECUTE on 7 SECURITY DEFINER RPCs |
+| (Supabase live DB) | migration `20260501190248` applied via MCP |
+| `docs/current-state.md` | migration list extended through 0063; Known Outstanding Issues section reorganized |
+| `docs/updates-log.md` | this entry |
+
+No build, no submit, no OTA. Migration applied to live DB; code change + git push only.
+
