@@ -276,6 +276,62 @@ function MobileSidebar({
   );
 }
 
+function DesktopUserMenu({
+  businessName,
+  email
+}: {
+  businessName?: string | null;
+  email?: string | null;
+}) {
+  // Desktop-only inline user menu. On mobile, the bottom slide-up
+  // AccountSheet handles the same role (full-width is fine for thumb taps).
+  // On desktop the slide-up looked oversized spanning the full viewport
+  // width; tucking everything inline inside the 220px sidebar keeps it
+  // tonally consistent with the rest of the nav. (May 1, 2026 UX fix.)
+  const router = useRouter();
+  const [signingOut, setSigningOut] = useState(false);
+
+  const handleSignOut = async () => {
+    if (signingOut) return;
+    setSigningOut(true);
+    try {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+      router.push("/login");
+    } finally {
+      setSigningOut(false);
+    }
+  };
+
+  return (
+    <div className="mt-auto border-t border-border px-3 pb-4 pt-3">
+      <div className="mb-2 flex min-h-[44px] items-center gap-3 px-4 py-3">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent text-xs font-semibold text-primary">
+          {getInitials(businessName)}
+        </div>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-medium text-foreground">
+            {businessName ?? "SnapQuote"}
+          </p>
+          {email ? (
+            <p className="truncate text-xs text-muted-foreground">{email}</p>
+          ) : null}
+        </div>
+      </div>
+      <button
+        type="button"
+        onClick={handleSignOut}
+        disabled={signingOut}
+        className="flex min-h-[44px] w-full items-center gap-3 rounded-[10px] border-l-[3px] border-l-transparent px-4 py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-60"
+        aria-label="Sign out"
+      >
+        <LogOut className="h-4 w-4 shrink-0" />
+        <span className="truncate">{signingOut ? "Signing out..." : "Sign Out"}</span>
+      </button>
+    </div>
+  );
+}
+
 export function Sidebar({
   orgId: _orgId,
   businessName,
@@ -285,38 +341,24 @@ export function Sidebar({
   onClose
 }: SidebarProps) {
   const pathname = usePathname();
-  const [accountOpen, setAccountOpen] = useState(false);
 
   if (mode === "mobile") {
     return <MobileSidebar open={open} onClose={onClose} businessName={businessName} email={email} />;
   }
 
   return (
-    <>
-      <aside className="hidden md:fixed md:inset-y-0 md:left-0 md:z-30 md:flex md:w-[220px] md:flex-col md:border-r md:border-border md:bg-background">
-        <div className="flex h-full flex-col">
-          <div className="px-6 py-7">
-            <Link href="/app" className="inline-flex">
-              <BrandLogo size="sm" />
-            </Link>
-          </div>
-
-          <SidebarNav pathname={pathname} />
-
-          <SidebarFooter
-            businessName={businessName}
-            email={email}
-            className="mt-auto"
-            onOpenAccount={() => setAccountOpen(true)}
-          />
+    <aside className="hidden md:fixed md:inset-y-0 md:left-0 md:z-30 md:flex md:w-[220px] md:flex-col md:border-r md:border-border md:bg-background">
+      <div className="flex h-full flex-col">
+        <div className="px-6 py-7">
+          <Link href="/app" className="inline-flex">
+            <BrandLogo size="sm" />
+          </Link>
         </div>
-      </aside>
-      <AccountSheet
-        open={accountOpen}
-        onClose={() => setAccountOpen(false)}
-        businessName={businessName}
-        email={email}
-      />
-    </>
+
+        <SidebarNav pathname={pathname} />
+
+        <DesktopUserMenu businessName={businessName} email={email} />
+      </div>
+    </aside>
   );
 }

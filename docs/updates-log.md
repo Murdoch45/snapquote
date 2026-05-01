@@ -1421,3 +1421,32 @@ Next.js App Router does soft client-side navigations between routes. The base `<
 - No Conversions API (server-side) — only the browser-side Pixel. CAPI would need a Meta access token and a webhook/API route.
 - Mobile app (`SnapQuote-mobile`) is unchanged. Meta Pixel is web-only; mobile tracking would use the Facebook SDK for React Native.
 - No `NEXT_PUBLIC_META_PIXEL_ID` env var — ID hardcoded since it's public anyway.
+
+---
+
+## Session — May 1, 2026 (desktop sidebar user menu — UX fix)
+
+**Problem.** On desktop, clicking the user-info card at the bottom of the 220px sidebar opened the `AccountSheet` modal — a slide-up sheet positioned via `absolute inset-x-0 bottom-0` that spans the entire viewport width. On mobile that's intentional and right (full-width slide-up matches the rest of the mobile UX, thumb-friendly). On desktop it looked oversized — a giant horizontal bar across the bottom of the screen for a UI element that's only relevant to the narrow sidebar.
+
+**Fix.** New `DesktopUserMenu` component in `components/Sidebar.tsx`. On desktop, user info + Sign Out button render inline at the bottom of the 220px sidebar, alongside the existing nav items (Dashboard, Leads, Estimates, etc.). The desktop branch no longer renders `AccountSheet` at all. Mobile is untouched — `MobileSidebar` still uses `SidebarFooter` + `AccountSheet` for the slide-up bottom drawer.
+
+Styling matches the existing nav items:
+- Sign Out button uses the same `min-h-[44px]`, `rounded-[10px]`, `border-l-[3px]`, `px-4 py-3`, `text-sm font-medium` shape so it visually slots in with the other nav items.
+- Border-top divider above the user-info block separates it from the navigation list.
+- Avatar + business name + email read at a glance; clicking Sign Out signs out directly (no intermediate modal step on desktop).
+
+Tailwind responsive separation:
+- Desktop sidebar wrapper continues to use `hidden md:fixed md:flex` so it only renders on `md:` breakpoints and up.
+- `DesktopUserMenu` is rendered only inside that wrapper. Below `md:` (mobile + tablet), the existing `MobileSidebar` path runs unchanged.
+- `MobileSidebar` keeps its own `md:hidden` wrapper plus the `SidebarFooter` + `AccountSheet` modal pattern.
+
+So the same `Sidebar` component renders one way on desktop and a different way on mobile, with no `useEffect`/`window` matchMedia trickery — purely Tailwind breakpoint-driven branching plus the existing `mode="desktop" | "mobile"` prop wiring.
+
+**Files changed:**
+- `components/Sidebar.tsx` — new `DesktopUserMenu` component; desktop `Sidebar` no longer wraps `AccountSheet` or holds the `accountOpen` state. `SidebarFooter` and `AccountSheet` remain (used by `MobileSidebar`).
+- `docs/current-state.md` — Design System section gained a "Sidebar user menu" note describing the desktop/mobile split.
+- `docs/updates-log.md` — this entry.
+
+`npx tsc --noEmit` exit 0. No build, no submit, no OTA. Code change + git push only.
+
+No mobile-repo changes — mobile rendering is intentionally untouched.
