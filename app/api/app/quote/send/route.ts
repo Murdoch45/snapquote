@@ -231,14 +231,26 @@ export async function POST(request: Request) {
 
     const sentChannels: ("email" | "text")[] = [];
     const deliveryErrors: string[] = [];
+    // Captured from sendQuoteSms's return value so we can persist it on
+    // the quote row. Without the message id we have no way to correlate
+    // a quote with the actual Telnyx record after the fact (Telnyx
+    // returns 200 the moment the message is queued for carrier hand-off,
+    // long before any delivery decision; the only post-hoc lookup path
+    // is by message id). This is the foundational change for any future
+    // DLR webhook handler — see migration 0062 for the full reasoning.
+    let telnyxMessageId: string | null = null;
 
     if (body.sendText) {
       try {
-        await sendQuoteSms({
+        const messageId = await sendQuoteSms({
           to: lead.customer_phone as string,
           body: resolvedMessage,
           idempotencyKey: telnyxIdempotencyKey(quoteId)
         });
+        // sendQuoteSms returns "" if Telnyx's response was OK but the
+        // message-id field was missing — treat that as a non-fatal
+        // observability gap rather than dropping the success signal.
+        telnyxMessageId = messageId || null;
         sentChannels.push("text");
       } catch (error) {
         deliveryErrors.push(
@@ -280,7 +292,10 @@ export async function POST(request: Request) {
 
     await admin
       .from("quotes")
-      .update({ sent_via: sentChannels })
+      .update({
+        sent_via: sentChannels,
+        telnyx_message_id: telnyxMessageId
+      })
       .eq("id", quoteId)
       .eq("org_id", auth.orgId);
 
