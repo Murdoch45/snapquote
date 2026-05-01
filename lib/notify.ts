@@ -1,5 +1,6 @@
 import { Resend } from "resend";
 
+import { toE164UsPhone } from "@/lib/phone";
 import { TELNYX_API_URL, TELNYX_FROM_NUMBER, ensureSmsOptOutFooter } from "@/lib/telnyx";
 
 type SenderKey = "transactional" | "noreply";
@@ -60,6 +61,17 @@ export async function sendSms(to: string, body: string): Promise<boolean> {
     return false;
   }
 
+  // Normalize to E.164. Telnyx rejects 10-digit / formatted phones with
+  // 40310 "Invalid 'to' address". This site historically logged the
+  // failure to Sentry but kept the bad-format phone in the DB; the fix
+  // is to normalize at the boundary so the same SMS that failed before
+  // would now go through.
+  const normalizedTo = toE164UsPhone(to);
+  if (!normalizedTo) {
+    console.error(`Telnyx sendSms skipped: cannot normalize 'to' to E.164: ${to}`);
+    return false;
+  }
+
   // 10DLC compliance footer is appended at send time so every outbound
   // message carries the opt-out instruction, regardless of where the body
   // was constructed. ensureSmsOptOutFooter is idempotent (won't double-
@@ -77,7 +89,7 @@ export async function sendSms(to: string, body: string): Promise<boolean> {
         },
         body: JSON.stringify({
           from: TELNYX_FROM_NUMBER,
-          to,
+          to: normalizedTo,
           text: compliantBody
         })
       });

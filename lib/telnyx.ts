@@ -1,5 +1,7 @@
 import "server-only";
 
+import { toE164UsPhone } from "@/lib/phone";
+
 type SendQuoteSmsInput = {
   to: string;
   body: string;
@@ -67,6 +69,22 @@ export async function sendQuoteSms({ to, body, idempotencyKey }: SendQuoteSmsInp
   const apiKey = getTelnyxApiKey();
   const compliantBody = ensureSmsOptOutFooter(body);
 
+  // Normalize to E.164 before handing off to Telnyx. Without this, a phone
+  // stored as "4057619006" (10 digits, no country code) ships unchanged
+  // and Telnyx returns 40310 "Invalid 'to' address". The route's catch
+  // block then folds the failure into deliveryErrors[] and the customer
+  // never gets the SMS — the symptom that prompted this fix.
+  const normalizedTo = toE164UsPhone(to);
+  if (!normalizedTo) {
+    const message = `Telnyx send failed: invalid 'to' address (cannot normalize to E.164): ${to}`;
+    // console.error so Sentry's captureConsoleIntegration picks it up.
+    // sendQuoteSms throws on failure, so without this log the caller's
+    // catch silently swallows the error into a `warning` field — that's
+    // why this class of failure was invisible in Sentry pre-fix.
+    console.error(message);
+    throw new Error(message);
+  }
+
   const headers: Record<string, string> = {
     Authorization: `Bearer ${apiKey}`,
     "Content-Type": "application/json"
@@ -85,7 +103,7 @@ export async function sendQuoteSms({ to, body, idempotencyKey }: SendQuoteSmsInp
         headers,
         body: JSON.stringify({
           from: TELNYX_FROM_NUMBER,
-          to,
+          to: normalizedTo,
           text: compliantBody
         })
       });
@@ -99,6 +117,10 @@ export async function sendQuoteSms({ to, body, idempotencyKey }: SendQuoteSmsInp
         await delay(RETRY_BASE_DELAY_MS * attempt);
         continue;
       }
+      console.error(
+        `sendQuoteSms network failure (attempt ${attempt}/${MAX_ATTEMPTS}):`,
+        lastError.message
+      );
       throw lastError;
     }
 
@@ -119,6 +141,10 @@ export async function sendQuoteSms({ to, body, idempotencyKey }: SendQuoteSmsInp
     lastError = new Error(message);
 
     if (!isRetryableStatus(response.status) || attempt === MAX_ATTEMPTS) {
+      // Surface to Sentry. Without this the caller's try/catch in
+      // /api/app/quote/send swallows the throw into deliveryErrors[]
+      // and the failure is invisible outside the API response.
+      console.error(`sendQuoteSms (attempt ${attempt}/${MAX_ATTEMPTS}): ${message}`);
       throw lastError;
     }
 

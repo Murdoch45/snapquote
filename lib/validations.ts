@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { toE164UsPhone } from "@/lib/phone";
 import {
   getRequiredQuestionIssues,
   parseServiceQuestionBundles,
@@ -18,10 +19,19 @@ import {
 export { sendQuoteSchema } from "@/lib/quoteSendSchema";
 export type { SendQuoteInput } from "@/lib/quoteSendSchema";
 
+// Lead-submit phone schema: validates the user's free-form input, then
+// normalizes to E.164. The transform is the single source-of-truth for
+// the format that lands in `leads.customer_phone` going forward — every
+// downstream consumer (customer dedup lookup, lead insert, notifyCustomer
+// SMS send) sees `+1XXXXXXXXXX` consistently. Inputs that can't be
+// confidently normalized (too short, no country code we can infer) fall
+// through as `undefined` rather than corrupting the row, mirroring the
+// existing "missing phone" behavior so the lead still saves.
 const phoneSchema = z
   .string()
   .trim()
   .regex(/^[+\d().\-\s]{7,20}$/)
+  .transform((value) => toE164UsPhone(value) ?? undefined)
   .optional()
   .or(z.literal("").transform(() => undefined));
 
@@ -90,7 +100,22 @@ export function parseLeadSubmitQuestionAnswers(value: unknown) {
 export const updateSettingsSchema = z.object({
   businessName: z.string().min(2).max(120),
   publicSlug: z.string().min(3).max(80).regex(/^[a-z0-9-]+$/),
-  phone: z.string().max(40).optional().nullable(),
+  // Normalize the contractor's own phone to E.164 too — `lib/notify.ts:
+  // notifyContractor` sends SMS to `contractor_profile.phone` for new-lead
+  // and estimate-accepted notifications, so a 10-digit input here would
+  // silently fail Telnyx the same way customer phones did. An empty
+  // string clears the field; an unparseable input falls through to null.
+  phone: z
+    .string()
+    .max(40)
+    .optional()
+    .nullable()
+    .transform((value) => {
+      if (value == null) return value;
+      const trimmed = value.trim();
+      if (!trimmed) return null;
+      return toE164UsPhone(trimmed);
+    }),
   email: z.string().email().optional().nullable().or(z.literal("").transform(() => null)),
   services: z.preprocess(
     (value) => (Array.isArray(value) && value.length === 0 ? undefined : value),
