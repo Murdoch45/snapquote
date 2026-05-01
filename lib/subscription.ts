@@ -84,8 +84,17 @@ export async function getOrganizationSubscriptionStatus(
   }
 
   const rows = subscriptions ?? [];
+  // The May 1 audit found multiple subscription rows can exist per user_id
+  // (Stripe trial → upgrade flows leave the trialing row; manual test rows
+  // get added; etc). The original ".find(isActive)" picked the most-recent
+  // active OR trialing row, which incorrectly returned a stale trialing row
+  // when a subsequent active sub existed. Explicitly prefer 'active' over
+  // 'trialing', then fall back to the most recent of any other status.
   const current =
-    rows.find((row) => isActiveStatus(row.status as string | null | undefined)) ?? rows[0] ?? null;
+    rows.find((row) => row.status === "active") ??
+    rows.find((row) => row.status === "trialing") ??
+    rows[0] ??
+    null;
 
   const billingSource = await resolveBillingSource(admin, orgId, rows.length);
 

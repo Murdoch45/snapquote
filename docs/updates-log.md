@@ -1005,3 +1005,116 @@ Items 3 and 4 are next session.
 
 No build, no submit, no OTA. Migration applied to live DB; code change + git push only.
 
+---
+
+## Session — May 1, 2026 (5 HIGH-priority fixes from the pre-ship audit)
+
+Five remaining HIGH items from the May 1 audit. All landed as code or DB changes; `tsc --noEmit` exit 0 on both repos; the dev user's stale subscription rows are cleaned up. The two pre-ship blockers that are NOT closed in this session are out-of-band actions Murdoch must take in dashboards (Telnyx 10DLC binding + Supabase Google OAuth provider toggle); both are documented in the May 1 post-audit-fixes entry above.
+
+### Fix #1 — Mobile Google OAuth flow-type mismatch (CLOSED, but Supabase provider must still be enabled)
+
+**Web side: nothing to change in code.** The web login + signup pages already wire `signInWithOAuth({ provider: "google" })` correctly and the PKCE callback at `app/auth/callback/route.ts` exchanges `?code=...` for a session. The reason Google sign-in doesn't work on web today is that the **Supabase Google provider isn't enabled at the project level** — out-of-band Studio toggle, no code fix possible. Murdoch action documented in `current-state.md` Known Outstanding Issues.
+
+**Mobile side: code fix landed.** `lib/supabase.ts:38-45` uses `@supabase/supabase-js` v2.100.1, which defaults `flowType: 'pkce'`. But `app/(auth)/login.tsx:117-130` and `app/(auth)/signup.tsx:123-136` were parsing `access_token` from the URL fragment — that's the deprecated implicit-flow shape. Even after Supabase Google is enabled, mobile Google login would have appeared to succeed (WebBrowser closes) but the session never lands.
+
+The handlers now extract `?code=...` from the redirect URL's query string and call `supabase.auth.exchangeCodeForSession(code)`. As a robustness fallback, the legacy implicit-flow fragment-parser is kept for the case where someone forces `flowType: 'implicit'` in the future — both shapes work either way. Errors from `exchangeCodeForSession` surface to the existing error UI (`setPasswordError` on login, `setEmailError` on signup).
+
+**Files changed:**
+- `C:\Users\murdo\SnapQuote-mobile\app\(auth)\login.tsx` — `signInWithGoogle` now uses PKCE-first
+- `C:\Users\murdo\SnapQuote-mobile\app\(auth)\signup.tsx` — `signUpWithGoogle` same
+
+### Fix #2 — `requireAuth` non-determinism for multi-org users (CLOSED)
+
+The May 1 audit confirmed live: user `murdochmarcum@icloud.com` is OWNER of both "falconn" (BUSINESS) and "Worcester Test Contractor" (SOLO). Three helpers were doing `.from("organization_members").select("org_id, role").eq("user_id", user.id).limit(1).single()` with **no ORDER BY**. Postgres returned rows in arbitrary order; Plan page and Team page would land on different orgs across requests, producing the user-visible "BUSINESS vs Team plan" mismatch.
+
+All three helpers now order `.order("role", { ascending: false }).order("created_at", { ascending: true })`:
+- **Why role DESC:** the enum values are `OWNER` and `MEMBER`. Alphabetical 'M' < 'O', so descending puts OWNER first. A user who is OWNER of one org and MEMBER of another deterministically lands on the OWNER org (which is the right UX — they have admin authority there).
+- **Why created_at ASC tiebreaker:** if a user is OWNER of multiple orgs, the oldest membership wins. Stable, deterministic, easy to reason about.
+
+For the developer's user, this means `requireAuth` will now always resolve to "falconn" (BUSINESS, OWNER, joined 2026-03-06) — older than "Worcester Test Contractor" (SOLO, OWNER, joined 2026-03-16), so falconn wins on the created_at tiebreaker. The Plan tab and Team tab will both show BUSINESS consistently.
+
+**Files changed:**
+- `lib/auth/requireAuth.ts:21-31` (added .select with created_at, .order × 2)
+- `lib/auth/requireRole.ts:75-82` (`requireOwnerForApi`)
+- `lib/auth/requireRole.ts:122-130` (`requireMemberForApi`)
+
+### Fix #3 — Anonymous-link invite no longer consumes seat slot (CLOSED)
+
+`assertSeatAvailable` in `lib/teamInvites.ts:43-71` was counting **every** unexpired pending invite — including anonymous shareable-link rows where `email IS NULL`. Net effect: clicking "Copy Invite Link" 4 times on a BUSINESS-plan org with 1 owner inserted 4 anon `pending_invites` rows, putting the org at 5/5 cap → next link generation rejected with `SeatLimitReachedError`. Verified live: org "falconn" was already locked at 5/5 from this exact pattern.
+
+The pending-invite count query now adds `.not("email", "is", null)` so only directed email invites count toward the cap. Anonymous links remain unlimited; the cap still fires correctly when there are too many directed-email invites pending.
+
+The `accept_invite_token` Postgres RPC continues to enforce the cap at acceptance time based on `organization_members` count only (no change there). So even if 100 anonymous links are generated, only the first N acceptors who fit under the seat cap actually become members. The rest get the standard "already full" error from the RPC, which is the right semantic.
+
+**File changed:** `lib/teamInvites.ts:50-58` (one `.not("email", "is", null)` added; comment expanded).
+
+**Note on the existing 4 anon-link rows in org "falconn":** intentionally left in place. Each is a valid invite token that someone may have shared. They no longer block link generation thanks to the count fix. They'll naturally expire 7 days after creation (existing TTL).
+
+### Fix #4 — Web Plan upgrade UI now refreshes after success (CLOSED)
+
+`components/plan/PlanOptionsSection.tsx:130-145` was doing `router.replace("/app/plan")` after a successful `?updated=1` or `?change=scheduled` query param landed. `router.replace` strips the query string but **doesn't trigger a Server Component re-fetch** in the App Router. The "Current Plan" badge stayed on the pre-upgrade tier until the user manually reloaded.
+
+Both code paths (immediate upgrade success and deferred-downgrade scheduled) now also call `router.refresh()` immediately after `router.replace`. Server Component data refetches; the Plan card reflects post-upgrade state without manual reload.
+
+**File changed:** `components/plan/PlanOptionsSection.tsx:130-148` (two `router.refresh()` calls + comment).
+
+### Fix #5 — Stale subscription rows removed + read path hardened (CLOSED)
+
+**Data side.** Live query showed the developer's user_id had 4 subscription rows (audit had flagged this). Three were stale and one was real:
+
+| stripe_subscription_id | plan | status | created_at | Disposition |
+|---|---|---|---|---|
+| `sub_test_manual` | BUSINESS | active | 2026-04-12 07:32 | DELETED — fake test row (real Stripe IDs are `sub_1...`) |
+| `sub_1TCivOLT0JKiq1dxAkKl3uT5` | TEAM | trialing | 2026-03-19 15:55:56 | DELETED — stale, superseded ~8 min later by the BUSINESS active sub |
+| `sub_1T9C4ZLT0JKiq1dxbiEJWEZO` | SOLO | trialing | 2026-03-09 22:14 | DELETED — stale, very old, superseded by later upgrades |
+| `sub_1TCj32LT0JKiq1dxn5tGrGh2` | BUSINESS | active | 2026-03-19 16:03 | KEPT — the one true current sub for this user |
+
+DELETE issued via `mcp__0f97026c-7d53-48d1-a863-ca1790b1ba77__execute_sql`, returning the 3 deleted rows. Post-cleanup verification: `select count(*) from subscriptions where user_id = '71622212-...'` returns 1; cross-check `users_with_dupes = 0` across all subscriptions in the table; total subscription row count went from 7 to 4 (the other 3 belong to other users and were not touched).
+
+**Read path.** `lib/subscription.ts:75-91` previously did `.order("created_at", { ascending: false })` then `rows.find(isActiveStatus)` — which returned the most-recent ACTIVE OR TRIALING row. If a stale TRIALING row was newer than an active row (an unlikely but possible race, e.g. user starts a TEAM trial, immediately upgrades, but the trial-row created_at is later than the active-row created_at by Stripe's webhook ordering), the reader would return TRIALING.
+
+Now reads:
+```ts
+const current =
+  rows.find((row) => row.status === "active") ??
+  rows.find((row) => row.status === "trialing") ??
+  rows[0] ?? null;
+```
+
+Explicit priority: ACTIVE first, then TRIALING, then the most-recent of any other status as a last-resort fallback. The `created_at DESC` order on the underlying query is preserved so the ".find" within each status bucket still picks the most recent.
+
+**Files changed:**
+- `lib/subscription.ts:86-95` (replaced single `.find(isActive)` with the priority-then-fallback chain)
+- live DB: 3 rows DELETEd (no migration file — this is data cleanup specific to the dev user, not a schema change)
+
+### Verification
+
+- `npx tsc --noEmit` exit 0 on both repos.
+- `mcp__0f97026c-7d53-48d1-a863-ca1790b1ba77__execute_sql` confirms 1 subscription row remaining for the dev user (the real BUSINESS active sub) and 0 users with duplicate subscriptions.
+- All 5 affected files compile clean and the surrounding logic was preserved (no behavior change for users who weren't hitting the bugs).
+
+### Files changed this session
+
+| Path | Change |
+|---|---|
+| `lib/auth/requireAuth.ts` | deterministic ORDER BY (role DESC, created_at ASC) |
+| `lib/auth/requireRole.ts` | same in 2 helpers (`requireOwnerForApi`, `requireMemberForApi`) |
+| `lib/teamInvites.ts` | filter pending count to `email IS NOT NULL` |
+| `components/plan/PlanOptionsSection.tsx` | `router.refresh()` after upgrade + scheduled change |
+| `lib/subscription.ts` | active > trialing > newest-fallback priority |
+| `C:\Users\murdo\SnapQuote-mobile\app\(auth)\login.tsx` | PKCE-first OAuth handler with implicit-flow fallback |
+| `C:\Users\murdo\SnapQuote-mobile\app\(auth)\signup.tsx` | same |
+| (Supabase live DB) | 3 stale subscription rows DELETEd for user `71622212-...` |
+| `docs/current-state.md` | Known Outstanding Issues reorganized — 5 items moved to "Closed in this session" |
+| `docs/updates-log.md` | this entry |
+
+### Pre-ship status after this session
+
+| Status | Items |
+|---|---|
+| ✅ Closed | Anon-callable SECURITY DEFINER RPCs (migration 0063, prior session); requireAuth multi-org determinism; anon-link seat cap; Plan UI refresh; sub-rows dedup + read-path priority; mobile Google OAuth flow-type |
+| ⚠ Murdoch action required | Telnyx 10DLC campaign binding (portal); Supabase Google OAuth provider toggle (Studio) |
+| 📋 Optional pre-launch | Mobile signup password length 6 → 8; mobile `signOut` per-device push token cleanup; `subscriptions` UNIQUE constraint follow-up migration |
+
+No build, no submit, no OTA. Code changes + DB cleanup + git push only.
+

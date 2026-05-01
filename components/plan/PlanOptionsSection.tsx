@@ -131,6 +131,11 @@ export function PlanOptionsSection({ currentPlan, hasUsedTrial }: Props) {
       hasShownToastRef.current = true;
       toast.success("Plan upgraded successfully!");
       router.replace("/app/plan");
+      // router.replace alone strips the query param but doesn't re-fetch the
+      // Server Component data, so the "Current Plan" card still shows the
+      // pre-upgrade tier until manual reload. Force a refetch so the UI
+      // reflects the post-upgrade state immediately. (May 1 audit fix.)
+      router.refresh();
       return;
     }
 
@@ -138,6 +143,7 @@ export function PlanOptionsSection({ currentPlan, hasUsedTrial }: Props) {
       hasShownToastRef.current = true;
       toast.success("Your plan change has been scheduled.");
       router.replace("/app/plan");
+      router.refresh();
     }
   }, [router, searchParams]);
 

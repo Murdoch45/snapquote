@@ -37,7 +37,12 @@ export class SeatLimitReachedError extends Error {
  * owners can queue up unlimited invites that will all fail later. Surfacing
  * the error here gives immediate feedback.
  *
- * Counts active members + unexpired pending invites. Caller should invoke
+ * Counts active members + unexpired pending invites with a NON-NULL email
+ * (i.e. directed email invites — each one reserves a seat for a known
+ * recipient). Anonymous shareable link rows (`email IS NULL`) are NOT counted
+ * because clicking "Copy Invite Link" multiple times shouldn't reserve N
+ * seats. The May 1 audit caught org "falconn" locked at 5/5 from 1 owner +
+ * 4 anon link clicks — see updates-log.md. Caller should invoke
  * `deleteExpiredPendingInvites` first so expired rows don't inflate the count.
  */
 export async function assertSeatAvailable(admin: AdminClient, orgId: string): Promise<void> {
@@ -53,6 +58,9 @@ export async function assertSeatAvailable(admin: AdminClient, orgId: string): Pr
       .eq("org_id", orgId)
       .eq("status", "PENDING")
       .gt("expires_at", new Date().toISOString())
+      // Anonymous shareable-link rows have email = NULL and don't reserve a
+      // seat. Only directed email invites count toward the cap pre-flight.
+      .not("email", "is", null)
   ]);
 
   if (orgError || !org) {

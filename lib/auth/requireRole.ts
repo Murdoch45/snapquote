@@ -72,10 +72,18 @@ export async function requireOwnerForApi(
     return { ok: false, response: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) };
   }
 
+  // Multi-org users: deterministic ordering so the same user always lands on
+  // the same org across requests. ORDER BY role DESC puts OWNER ahead of
+  // MEMBER (alphabetical 'M' < 'O', so descending = OWNER-first) — important
+  // for owner-only API gates so a user who is OWNER of one org and MEMBER of
+  // another always resolves to the OWNER org first. created_at ASC is the
+  // stable tiebreaker. See updates-log.md May 1 entry for the audit context.
   const { data: membership } = await supabase
     .from("organization_members")
-    .select("org_id, role")
+    .select("org_id, role, created_at")
     .eq("user_id", user.id)
+    .order("role", { ascending: false })
+    .order("created_at", { ascending: true })
     .limit(1)
     .single();
 
@@ -119,10 +127,14 @@ export async function requireMemberForApi(
     return { ok: false, response: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) };
   }
 
+  // Multi-org users: same deterministic ordering as requireOwnerForApi above.
+  // OWNER role wins over MEMBER, oldest membership tiebreaker.
   const { data: membership } = await supabase
     .from("organization_members")
-    .select("org_id, role")
+    .select("org_id, role, created_at")
     .eq("user_id", user.id)
+    .order("role", { ascending: false })
+    .order("created_at", { ascending: true })
     .limit(1)
     .single();
 
