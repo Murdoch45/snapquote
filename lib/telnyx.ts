@@ -10,8 +10,29 @@ type SendQuoteSmsInput = {
   idempotencyKey?: string;
 };
 
-const TELNYX_API_URL = "https://api.telnyx.com/v2/messages";
-const TELNYX_FROM_NUMBER = "+17169938159";
+export const TELNYX_API_URL = "https://api.telnyx.com/v2/messages";
+
+// Single source of truth for the SMS sender. lib/notify.ts imports this
+// so changing the production From number is a one-line edit. Default is
+// the 10DLC-campaign-approved number; override via env for staging /
+// alternate-campaign testing.
+export const TELNYX_FROM_NUMBER =
+  process.env.TELNYX_FROM_NUMBER?.trim() || "+17169938159";
+
+// 10DLC compliance footer. US carriers require an opt-out instruction on
+// A2P SMS, especially on the first message in a conversation. The default
+// estimate template includes this as the closing line, but contractors can
+// edit their template in profile settings — appending it again at send
+// time guarantees the outbound message is always compliant regardless of
+// what the contractor chose. Already-compliant messages aren't double-
+// appended; we detect "reply stop" case-insensitively.
+const SMS_OPT_OUT_FOOTER = "Reply STOP to opt out.";
+
+export function ensureSmsOptOutFooter(body: string): string {
+  if (/reply\s+stop/i.test(body)) return body;
+  const trimmed = body.replace(/\s+$/, "");
+  return `${trimmed}\n\n${SMS_OPT_OUT_FOOTER}`;
+}
 
 // Matches the retry policy used by Resend in lib/notify.ts so email and
 // SMS behave consistently on the send path. Three attempts, exponential
@@ -44,6 +65,7 @@ async function delay(ms: number): Promise<void> {
 
 export async function sendQuoteSms({ to, body, idempotencyKey }: SendQuoteSmsInput): Promise<string> {
   const apiKey = getTelnyxApiKey();
+  const compliantBody = ensureSmsOptOutFooter(body);
 
   const headers: Record<string, string> = {
     Authorization: `Bearer ${apiKey}`,
@@ -64,7 +86,7 @@ export async function sendQuoteSms({ to, body, idempotencyKey }: SendQuoteSmsInp
         body: JSON.stringify({
           from: TELNYX_FROM_NUMBER,
           to,
-          text: body
+          text: compliantBody
         })
       });
     } catch (error) {

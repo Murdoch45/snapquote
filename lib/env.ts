@@ -14,6 +14,9 @@ const serverEnvSchema = clientEnvSchema.extend({
   OPENAI_MODEL: z.string().optional(),
   GOOGLE_MAPS_API_KEY: z.string().optional(),
   TELNYX_API_KEY: z.string().min(1),
+  // Optional override for the SMS sender. When unset, lib/telnyx.ts falls
+  // back to the production 10DLC-campaign-approved number.
+  TELNYX_FROM_NUMBER: z.string().optional(),
   RESEND_API_KEY: z.string().optional(),
   RESEND_FROM_EMAIL: z.string().optional()
 });

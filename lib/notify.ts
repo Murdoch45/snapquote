@@ -1,5 +1,7 @@
 import { Resend } from "resend";
 
+import { TELNYX_API_URL, TELNYX_FROM_NUMBER, ensureSmsOptOutFooter } from "@/lib/telnyx";
+
 type SenderKey = "transactional" | "noreply";
 
 type SendEmailInput = {
@@ -29,8 +31,8 @@ type SendEmailInput = {
   idempotencyKey?: string;
 };
 
-const TELNYX_API_URL = "https://api.telnyx.com/v2/messages";
-const TELNYX_FROM_NUMBER = "+17169938159";
+// TELNYX_API_URL and TELNYX_FROM_NUMBER are imported from lib/telnyx.ts
+// so the production sender is configured in exactly one place.
 
 // Match the retry policy used by Resend below so SMS and email behave
 // consistently under transient provider failure.
@@ -58,6 +60,12 @@ export async function sendSms(to: string, body: string): Promise<boolean> {
     return false;
   }
 
+  // 10DLC compliance footer is appended at send time so every outbound
+  // message carries the opt-out instruction, regardless of where the body
+  // was constructed. ensureSmsOptOutFooter is idempotent (won't double-
+  // append if the body already has "Reply STOP").
+  const compliantBody = ensureSmsOptOutFooter(body);
+
   for (let attempt = 1; attempt <= SMS_MAX_ATTEMPTS; attempt++) {
     let response: Response;
     try {
@@ -70,7 +78,7 @@ export async function sendSms(to: string, body: string): Promise<boolean> {
         body: JSON.stringify({
           from: TELNYX_FROM_NUMBER,
           to,
-          text: body
+          text: compliantBody
         })
       });
     } catch (error) {

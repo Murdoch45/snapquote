@@ -212,7 +212,7 @@ SnapQuote is an AI-powered quoting and lead management SaaS for outdoor service 
 
 **Viewed notification:** `/api/public/quote/[publicId]/viewed` wrapped in compare-and-swap on `viewed_at IS NULL` — only the first viewer wins the CAS and fires push + in-app.
 
-**SMS:** Telnyx. 10DLC campaign registered. 3 retries with 500ms/1s/1.5s backoff. Idempotency keys on all sends.
+**SMS:** Telnyx. 10DLC campaign **active and approved** (verified April 30, 2026 — production from-number `+17169938159`). 3 retries with 500ms/1s/1.5s backoff. Idempotency keys on all sends. `TELNYX_FROM_NUMBER` and `TELNYX_API_URL` are exported once from [`lib/telnyx.ts`](../lib/telnyx.ts) and re-imported by `lib/notify.ts` so the production sender is configured in exactly one place; both honor an optional `TELNYX_FROM_NUMBER` env override. **10DLC opt-out compliance:** `ensureSmsOptOutFooter()` is applied at the actual Telnyx-handoff in both `sendQuoteSms` and `sendSms` (idempotent — won't double-append) so every outbound message ends with `Reply STOP to opt out.` regardless of how the body was constructed or what the contractor edited in their template. **Consent capture:** the public lead form (`components/PublicLeadForm.tsx`) shows a disclosure paragraph below the phone field stating that submitting the form constitutes consent to receive a confirmation SMS and a follow-up estimate SMS.
 
 **Email:** Resend. Idempotency keys on all 5 cron email routes to handle Vercel retry deduplication.
 
@@ -363,7 +363,7 @@ Fix: token attached, `parseJsonResponse` won't trigger auth refresh on 401 if no
 - **Apple sign-in on signup page** — button exists on login page, needs to be added to signup page
 - **Apple OAuth redirect flow** — full end-to-end test not yet completed
 - **Stripe live mode** — still on test mode, must switch before launch
-- **Twilio/Telnyx SMS full verification** — 10DLC registered, full notification flow needs end-to-end verification
+- ~~**Twilio/Telnyx SMS full verification** — 10DLC registered, full notification flow needs end-to-end verification~~ — completed April 30, 2026; campaign is active, end-to-end paths verified, opt-out footer + consent disclosure shipped. See `updates-log.md`.
 - **Light/dark mode (mobile)** — removed during render crash investigation, ready to re-implement cleanly
 - **Delete Account cleanup gaps** — RevenueCat/Apple IAP subscriptions not cancelled, Storage blobs not removed
 - **11 pre-existing failing tests** — 2 real bugs (out-of-service-area lawn quote, concrete repeatability), 6 stale plan-limit tests, 3 API contract fixtures

@@ -356,8 +356,22 @@ export function PublicLeadForm({ contractorSlug }: Props) {
               type="tel"
               value={customerPhone}
               onChange={(e) => setCustomerPhone(e.target.value)}
+              aria-describedby="customer-phone-consent"
               className="h-auto rounded-[8px] border-border bg-card px-[14px] py-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-[rgba(37,99,235,0.1)]"
             />
+            {/* 10DLC opt-in disclosure. Submitting the form with a phone
+                number constitutes consent to receive a confirmation text
+                and a follow-up estimate text from the contractor; carriers
+                require this language to be visible at the point of
+                collection. */}
+            <p
+              id="customer-phone-consent"
+              className="text-[11px] leading-snug text-muted-foreground"
+            >
+              By providing your phone number, you agree to receive text
+              messages about your estimate. Message and data rates may
+              apply. Reply STOP at any time to opt out.
+            </p>
           </div>
         </div>
         <div className="space-y-2">

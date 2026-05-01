@@ -10,11 +10,21 @@ export const CONTRACTOR_EMAIL_TOKEN = "{{contractor_email}}";
 export const QUOTE_LINK_TOKEN = ESTIMATE_LINK_TOKEN;
 
 export function buildDefaultEstimateTemplate(): string {
+  // The trailing "Reply STOP to opt out" line is the 10DLC compliance
+  // footer required by US carriers for A2P SMS. It must remain on the
+  // first message a customer receives in a conversation; we keep it on
+  // the default estimate template so contractors who never customize
+  // their SMS message stay compliant by default. Contractors can edit
+  // their template in profile settings, but the footer is always
+  // appended by lib/notify.ts at send time so removing it from the
+  // template never lands a non-compliant outbound message.
   return `Hi ${CUSTOMER_NAME_TOKEN},
 Here is your estimate from ${COMPANY_NAME_TOKEN}.
 View your estimate:
 ${ESTIMATE_LINK_TOKEN}
-Questions? Call or email ${CONTRACTOR_PHONE_TOKEN} ${CONTRACTOR_EMAIL_TOKEN}`;
+Questions? Call or email ${CONTRACTOR_PHONE_TOKEN} ${CONTRACTOR_EMAIL_TOKEN}
+
+Reply STOP to opt out.`;
 }
 
 export const DEFAULT_ESTIMATE_SMS_TEMPLATE = buildDefaultEstimateTemplate();
