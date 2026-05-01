@@ -1,12 +1,15 @@
 import { NextResponse } from "next/server";
+import type Stripe from "stripe";
 import { z } from "zod";
 import { requireOwnerForApi } from "@/lib/auth/requireRole";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import {
+  clearStaleStripeCustomerId,
   getStripe,
   getStripeAppUrl,
   getStripeCreditPackConfig,
+  isStripeResourceMissingError,
   type StripeCreditPackKey
 } from "@/lib/stripe";
 
@@ -65,7 +68,15 @@ export async function POST(request: Request) {
     const successPath = body.successPath ?? "/app/plan?credits=added";
     const cancelPath = body.cancelPath ?? "/app/plan";
 
-    const session = await stripe.checkout.sessions.create({
+    // Build the checkout session params with a customer-resolution strategy
+    // that gracefully recovers from a stale `stripe_customer_id` (e.g. test
+    // → live mode migration, manual customer deletion). If the stored ID is
+    // present we try it first; if Stripe rejects with `resource_missing`,
+    // we null it out and retry with `customer_email` so Stripe creates a
+    // fresh customer on the user's behalf. (May 1 audit fix.)
+    const buildSessionParams = (
+      customerId: string | null
+    ): Stripe.Checkout.SessionCreateParams => ({
       mode: "payment",
       line_items: [
         {
@@ -76,14 +87,39 @@ export async function POST(request: Request) {
       success_url: `${appUrl}${successPath}`,
       cancel_url: `${appUrl}${cancelPath}`,
       client_reference_id: auth.userId,
-      customer: latestSubscription?.stripe_customer_id || undefined,
-      customer_email: latestSubscription?.stripe_customer_id ? undefined : user?.email,
+      customer: customerId ?? undefined,
+      customer_email: customerId ? undefined : user?.email,
       metadata: {
         userId: auth.userId,
         orgId: auth.orgId,
         creditAmount: packConfig.credits.toString()
       }
     });
+
+    const initialCustomerId = latestSubscription?.stripe_customer_id ?? null;
+    let session: Stripe.Checkout.Session;
+    try {
+      session = await stripe.checkout.sessions.create(buildSessionParams(initialCustomerId));
+    } catch (stripeError) {
+      if (initialCustomerId && isStripeResourceMissingError(stripeError, "customer")) {
+        // Stale customer ID. Clear it from the DB and retry with a fresh
+        // customer creation via `customer_email`. Without this recovery, the
+        // user would see "No such customer: 'cus_xxx'" with no path forward.
+        if (!user?.email) {
+          return NextResponse.json(
+            { error: "Authenticated user email is required to create a new billing profile." },
+            { status: 400 }
+          );
+        }
+        console.warn(
+          `[stripe/credits] Stale stripe_customer_id ${initialCustomerId} for user ${auth.userId}; clearing and retrying with fresh customer.`
+        );
+        await clearStaleStripeCustomerId(admin, auth.userId);
+        session = await stripe.checkout.sessions.create(buildSessionParams(null));
+      } else {
+        throw stripeError;
+      }
+    }
 
     if (!session.url) {
       throw new Error("Stripe did not return a checkout URL.");

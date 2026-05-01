@@ -1554,3 +1554,114 @@ The `over seat limit` warning at lines 44-64 was already plan-aware (`seatLimit 
 | `docs/updates-log.md` | this entry |
 
 No mobile-repo changes — mobile audit confirmed clean. No build, no submit, no OTA.
+
+---
+
+## Session — May 1, 2026 (Stripe "No such customer" on credit purchase — systemic fix)
+
+**Symptom.** Murdoch tried to buy a $70 / 100-credit pack on snapquote.us. Stripe rejected with `No such customer: 'cus_U7QwHG44vyWPzE'`. The customer doesn't exist in the live Stripe account.
+
+**Root cause.** The `subscriptions` table has a row from 2026-03-19 with `stripe_customer_id = 'cus_U7QwHG44vyWPzE'`, but that customer no longer exists in the live Stripe account it's pointed at. Most likely cause: the customer was created when the project was in Stripe **test mode**, and we've since switched to **live mode** (`.env.local` shows `STRIPE_SECRET_KEY=sk_live_...`). Test-mode and live-mode customers live in separate Stripe customer spaces; the test-mode ID is invalid against the live API.
+
+This is **systemic, not Murdoch-specific.** Three routes passed the stored `stripe_customer_id` to Stripe with no recovery if it was stale:
+
+| Route | Stripe call | Stale path |
+|---|---|---|
+| `/api/stripe/credits` | `stripe.checkout.sessions.create({ customer })` | the bug Murdoch hit |
+| `/api/stripe/checkout` | `stripe.subscriptions.retrieve(subscription_id)` then `stripe.checkout.sessions.create({ customer })` | both subscription-id and customer-id can be stale |
+| `/api/stripe/customer-portal` | `stripe.billingPortal.sessions.create({ customer })` | same |
+
+Anyone whose stored Stripe IDs got out of sync (test→live swap, manual deletion, account migration, Stripe customer-merge) would hit one of these errors and have no path to recover without manual intervention. **Ship-blocking** for any user in that state.
+
+### Fix — three layers
+
+**1. Helpers in `lib/stripe.ts`.**
+
+```ts
+export function isStripeResourceMissingError(err: unknown, param: string): boolean {
+  if (!(err instanceof Stripe.errors.StripeInvalidRequestError)) return false;
+  if (err.code !== "resource_missing") return false;
+  if (err.param === param) return true;
+  return typeof err.message === "string" && err.message.toLowerCase().includes(`no such ${param}`);
+}
+
+export async function clearStaleStripeCustomerId(admin, userId): Promise<void> {
+  // schema has NOT NULL on stripe_customer_id, so we DELETE the row(s).
+  // The next successful webhook re-inserts with fresh IDs.
+  await admin.from("subscriptions").delete().eq("user_id", userId);
+}
+```
+
+**2. Route wrappers (3 routes).**
+
+`/api/stripe/credits` and `/api/stripe/checkout` (subscription-create path) now share the same retry pattern:
+
+```ts
+const buildSessionParams = (customerId: string | null): Stripe.Checkout.SessionCreateParams => ({
+  // ... shared params ...
+  customer: customerId ?? undefined,
+  customer_email: customerId ? undefined : user?.email,
+});
+
+let session: Stripe.Checkout.Session;
+try {
+  session = await stripe.checkout.sessions.create(buildSessionParams(initialCustomerId));
+} catch (stripeError) {
+  if (initialCustomerId && isStripeResourceMissingError(stripeError, "customer")) {
+    console.warn(`[stripe/credits] Stale stripe_customer_id ${initialCustomerId} for user ${auth.userId}; clearing and retrying with fresh customer.`);
+    await clearStaleStripeCustomerId(admin, auth.userId);
+    session = await stripe.checkout.sessions.create(buildSessionParams(null));
+  } else {
+    throw stripeError;
+  }
+}
+```
+
+`/api/stripe/checkout` also wraps `stripe.subscriptions.retrieve` separately — if the stored `stripe_subscription_id` is stale, treat as "no active subscription" and fall through to fresh checkout (with the customer-id retry path catching the customer-id staleness too if it follows). It also tracks an `initialCustomerId` local that gets invalidated if the subscription-retrieve path cleared the row, so the fresh-checkout path doesn't re-pass the now-deleted-from-DB customer ID.
+
+`/api/stripe/customer-portal` clears the stale row and returns a 404 with copy "We couldn't find your billing profile. Please re-subscribe from the Plan page to refresh your billing details." — the Customer Portal API can only OPEN existing customers, not create new ones, so the user has to start a fresh checkout.
+
+**3. Murdoch-specific data fix.** DELETE the one stale row directly via Supabase MCP:
+
+```sql
+DELETE FROM subscriptions
+WHERE user_id = '71622212-9016-4360-bedb-524d5adbabf2'
+  AND stripe_customer_id = 'cus_U7QwHG44vyWPzE'
+RETURNING id, plan, status, stripe_customer_id, stripe_subscription_id;
+```
+
+Returned the row that was previously the dev user's only `subscriptions` row (BUSINESS / active / `cus_U7QwHG44vyWPzE` / `sub_1TCj32LT0JKiq1dxn5tGrGh2`). `organizations.plan` for falconn stays at BUSINESS — that's the source of truth for plan display; no UI change. After this delete, Murdoch's next credit-pack click will fall through to `customer_email` and Stripe creates a fresh customer.
+
+### Why DELETE rather than null-out
+
+Tried `UPDATE subscriptions SET stripe_customer_id = NULL` first — failed with `null value in column "stripe_customer_id" of relation "subscriptions" violates not-null constraint`. The schema has NOT NULL. The cleanest path is DELETE the row entirely; the canonical effective plan is on `organizations.plan` (set by webhook on actual transitions), so removing a `subscriptions` row doesn't affect any plan-display. The next webhook (after Murdoch completes a fresh purchase or kicks off a new checkout) will INSERT a clean row.
+
+### Note on `getOrganizationSubscriptionStatus`
+
+After Murdoch's row is deleted, `getOrganizationSubscriptionStatus` for his org returns `plan: null, active: false, billingSource: null`. That's a transient "no subscription" state that resolves the next time he completes a Stripe checkout. The Plan page reads `organizations.plan` (via `get_org_credit_row` RPC), not `subscriptions.plan`, so the user-visible plan stays at BUSINESS during the gap. The mobile `/api/app/subscription-status` reader returns the transient null — mobile would briefly show "no plan" which is a known known-acceptable state.
+
+### What didn't need fixing
+
+- **Webhook handlers** (`stripe/webhook`, `revenuecat/webhook`) — they CREATE/UPDATE rows with current Stripe IDs as those events fire. Not the source of staleness.
+- **Mobile** — does not store `stripe_customer_id` directly; it reads `/api/app/subscription-status` which routes through `getOrganizationSubscriptionStatus`. If that returns a stale row, mobile shows the wrong plan/status briefly but doesn't crash. Mobile doesn't trigger Stripe customer/portal flows itself.
+- **Stripe webhook idempotency / signature verification** — already correct.
+
+### Verification
+
+- `npx tsc --noEmit` exit 0 on web repo.
+- DB query confirms Murdoch's row is gone: 0 rows for user `71622212-...` after the DELETE.
+- Next steps for Murdoch: refresh the page and try the $70 credit pack again — checkout should succeed and a fresh `cus_...` will be created in the live Stripe account, then the webhook will INSERT a fresh `subscriptions` row.
+
+### Files changed
+
+| Path | Change |
+|---|---|
+| `lib/stripe.ts` | new helpers `isStripeResourceMissingError(err, param)` + `clearStaleStripeCustomerId(admin, userId)` |
+| `app/api/stripe/credits/route.ts` | retry-on-resource-missing wrapper around `checkout.sessions.create`; imports the new helpers |
+| `app/api/stripe/checkout/route.ts` | retry-on-resource-missing for `subscriptions.retrieve` (falls through to fresh-checkout) AND for the fresh-checkout `sessions.create` |
+| `app/api/stripe/customer-portal/route.ts` | clear-and-404-with-resubscribe-message on stale customer |
+| (Supabase live DB) | DELETE 1 stale row for user `71622212-...` |
+| `docs/current-state.md` | new "Stripe customer-id staleness recovery" note in Design System / infra section |
+| `docs/updates-log.md` | this entry |
+
+No build, no submit, no OTA. Code change + DB cleanup + git push only.

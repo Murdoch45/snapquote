@@ -130,6 +130,56 @@ export function getPlanFromPriceId(priceId: string | null | undefined): OrgPlan 
   return null;
 }
 
+/**
+ * True if `err` is a Stripe `resource_missing` error referencing the given
+ * parameter (e.g. "customer", "subscription"). This fires when our DB has a
+ * Stripe ID that no longer exists in the connected Stripe account — common
+ * after test → live mode switches, manual deletions, or account migrations.
+ */
+export function isStripeResourceMissingError(err: unknown, param: string): boolean {
+  if (!(err instanceof Stripe.errors.StripeInvalidRequestError)) return false;
+  if (err.code !== "resource_missing") return false;
+  // Some Stripe responses set err.param; others embed the param in the message.
+  // Check both so we don't miss either shape.
+  if (err.param === param) return true;
+  return typeof err.message === "string" && err.message.toLowerCase().includes(`no such ${param}`);
+}
+
+/**
+ * Delete stale `subscriptions` rows for a user. Called when Stripe returns
+ * `resource_missing` for a customer or subscription so subsequent attempts
+ * re-create a fresh customer via `customer_email` and the next webhook
+ * (after a real purchase completes) inserts a clean row.
+ *
+ * The `stripe_customer_id` column is NOT NULL in the schema, so we can't
+ * just null it — DELETE is the cleanest path. The canonical source of
+ * effective plan is `organizations.plan` (set by webhook), so removing
+ * the subscription row doesn't affect the user's plan display until the
+ * webhook fires for the next subscription event.
+ *
+ * Accepts an admin Supabase client so the caller controls the transaction
+ * surface; we don't import the admin client here to avoid pulling
+ * server-only modules into Stripe-utility consumers.
+ */
+export async function clearStaleStripeCustomerId(
+  admin: { from: (table: string) => any },
+  userId: string
+): Promise<void> {
+  // Delete every subscriptions row for this user. If any of them references
+  // a stale Stripe customer/subscription, the user is in a broken state
+  // and a fresh checkout is the only recovery path. We don't narrow by
+  // stale-ID here because once one is stale (e.g. test→live swap), all of
+  // them are likely stale (they live in the same Stripe account). After
+  // deletion, the user's next successful Stripe webhook
+  // (handleSubscriptionChanged / handleCheckoutCompleted) will insert a
+  // fresh row with the new IDs.
+  const { error } = await admin
+    .from("subscriptions")
+    .delete()
+    .eq("user_id", userId);
+  if (error) throw error;
+}
+
 export function getStripeCreditPackConfig(pack: StripeCreditPackKey): StripeCreditPackConfig {
   const packs: Record<StripeCreditPackKey, StripeCreditPackConfig> = {
     "10": {

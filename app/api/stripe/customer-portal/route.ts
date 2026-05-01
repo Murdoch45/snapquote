@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { requireOwnerForApi } from "@/lib/auth/requireRole";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getStripe, getStripeAppUrl } from "@/lib/stripe";
+import {
+  clearStaleStripeCustomerId,
+  getStripe,
+  getStripeAppUrl,
+  isStripeResourceMissingError
+} from "@/lib/stripe";
 
 export const runtime = "nodejs";
 
@@ -69,10 +74,36 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "No Stripe billing profile found yet." }, { status: 404 });
     }
 
-    const session = await stripe.billingPortal.sessions.create({
-      customer: stripeCustomerId,
-      return_url: returnUrl
-    });
+    // The Customer Portal cannot create a customer — it only opens an
+    // existing one. If our stored ID is stale (test → live swap, manual
+    // delete in Stripe), clear it and surface a 404 so the UI directs the
+    // user to subscribe-fresh. (May 1 audit fix.)
+    let session;
+    try {
+      session = await stripe.billingPortal.sessions.create({
+        customer: stripeCustomerId,
+        return_url: returnUrl
+      });
+    } catch (stripeError) {
+      if (isStripeResourceMissingError(stripeError, "customer")) {
+        console.warn(
+          `[stripe/customer-portal] Stale stripe_customer_id ${stripeCustomerId} for org ${auth.orgId}; clearing.`
+        );
+        // Clear across every owner's row so a future portal attempt either
+        // finds a real customer or correctly surfaces "no billing profile".
+        for (const ownerId of ownerUserIds.length > 0 ? ownerUserIds : allUserIds) {
+          await clearStaleStripeCustomerId(admin, ownerId);
+        }
+        return NextResponse.json(
+          {
+            error:
+              "We couldn't find your billing profile. Please re-subscribe from the Plan page to refresh your billing details."
+          },
+          { status: 404 }
+        );
+      }
+      throw stripeError;
+    }
 
     return NextResponse.json({ url: session.url });
   } catch (error) {
