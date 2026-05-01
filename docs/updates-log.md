@@ -1269,3 +1269,113 @@ Expected after fix:  `|https://snapquote.us|`, length 20.
 
 No build, no submit, no OTA. Migration applied to live DB; code change + git push only. The Studio fix above has to be done in the browser before a fresh end-to-end Google Sign-In test can succeed.
 
+---
+
+## Session — May 1, 2026 (Google Sign-In post-callback redirect to landing — root cause + middleware fix)
+
+After Murdoch fixed the Site URL whitespace in Supabase Studio, the OAuth /callback stopped 500'ing. But the user-facing flow was still broken: clicking "Sign in with Google" → completing the Google account picker → bouncing back to snapquote.us → ending up on the marketing landing page instead of /app or /onboarding. As if no sign-in happened.
+
+This entry documents the diagnosis, the root cause, the code-side belt-and-suspenders fix that landed, and the recommended Studio cleanup.
+
+### Diagnostic timeline
+
+1. **flow_state** check after Murdoch's fix:
+   - 5 new google-provider rows from 21:00:55Z onward, all with `referrer = "|https://snapquote.us|"` length 20 (no leading space — whitespace fix worked).
+   - **All 5 have `referrer = "https://snapquote.us"`** (origin only — no `/auth/callback` path). That's the Site URL value, not our explicit `redirect_to`.
+   - All 5 have `auth_code_issued_at` set (GoTrue did issue an exchange code).
+   - All resolved to `user_id = 71622212-...` (the dev user, linked via google email).
+
+2. **auth.users** for the dev user:
+   - `last_sign_in_at = 2026-05-01 17:37:08Z` (stale, from earlier today before the URL fix).
+   - `updated_at = 2026-05-01 21:02:34Z` (touched at the most recent attempt).
+   - 2 sessions total, most recent at 17:37:08Z. **Zero new sessions from the 5 post-fix attempts.**
+
+3. **Auth log** (slice via Bash grep on the saved file):
+   - 4× `/callback` events at 21:01:52, 21:02:02, 21:02:07, 21:02:34 — all returned status `302`. No errors.
+   - 4× `/authorize` events at the same timestamps — all `302`.
+   - **Zero `/token` events post-fix.** `/token` is the endpoint supabase-js calls server-side from snapquote.us/auth/callback to exchange the code for a session. Zero calls means the Vercel `/auth/callback` route handler never ran.
+   - GoTrue config-reload event at 20:55:27Z (Murdoch's URL save took effect).
+
+### Root cause
+
+When `LoginForm.tsx:handleOAuth` calls `signInWithOAuth({ options: { redirectTo: \`${origin}/auth/callback?next=${...}\` } })`, supabase-js sends that as `?redirect_to=https://snapquote.us/auth/callback?next=/app` on GoTrue's `/authorize`. **GoTrue validates the redirect_to against the Studio Redirect URLs allowlist.** The current allowlist apparently only matches the bare origin (`https://snapquote.us`), not `/auth/callback`. GoTrue silently rejects the path-bearing redirect_to and falls back to Site URL.
+
+On OAuth /callback success, GoTrue uses `flow_state.referrer = "https://snapquote.us"` (the fallback Site URL, origin only) as the redirect target. It bounces the browser to `https://snapquote.us?code=<auth_code>` — the **marketing landing page** — instead of `/auth/callback`. The Vercel `/auth/callback` route handler (which calls `exchangeCodeForSession`, sets cookies, and redirects to /app) never runs. The auth code goes unused. No session cookies get set on snapquote.us. The user sees the marketing landing page like they were never logged in.
+
+That perfectly explains the symptom Murdoch reported.
+
+### Two fixes — one landed in code, one needs Studio
+
+**Code-side fix (LANDED):** middleware now intercepts the OAuth-bounce-to-origin failure mode and forwards to the real callback handler:
+
+```ts
+// middleware.ts — at the very top of the middleware function
+const requestUrl = new URL(request.url);
+if (requestUrl.pathname === "/" && requestUrl.searchParams.has("code")) {
+  const callbackUrl = new URL("/auth/callback", requestUrl.origin);
+  callbackUrl.searchParams.set("code", requestUrl.searchParams.get("code")!);
+  const incomingNext = requestUrl.searchParams.get("next");
+  callbackUrl.searchParams.set(
+    "next",
+    incomingNext && incomingNext.startsWith("/") ? incomingNext : "/app"
+  );
+  return NextResponse.redirect(callbackUrl);
+}
+```
+
+Behavior: any request to `/` with `?code=...` (the OAuth bounce shape) is forwarded to `/auth/callback?code=...&next=/app` (preserves any `next=` if the OAuth round-trip happened to carry one through, otherwise defaults to `/app`). The Vercel `/auth/callback` route handler runs `exchangeCodeForSession`, sets cookies, and redirects to /app. End-to-end works **even with the misconfigured Studio allowlist.**
+
+This is intentional defense-in-depth: the Studio config can drift again (whitespace, removed entries, dashboard-side changes by anyone with admin access), and Google sign-in shouldn't silently fail every time. Cost of the guard: ~2 lines of comparison per request, only matters at all on `/`. Zero impact on other paths.
+
+**Studio fix (RECOMMENDED but no longer ship-blocking):** Authentication → URL Configuration → Redirect URLs allowlist. Add the entries that should accept the path-bearing redirect_to values directly:
+
+- `https://snapquote.us/auth/callback` (exact — narrow, safe)
+- OR `https://snapquote.us/**` (wildcard — covers `/auth/callback`, future invite-token routes, etc)
+- AND `snapquotemobile://*` (or `snapquotemobile://**`) — **CRITICAL for mobile OAuth.** Without this, the in-app WebBrowser on mobile bounces to `https://snapquote.us` (web origin) when GoTrue rejects the mobile scheme, and the user is stuck in the WebBrowser modal looking at the marketing page with no way back into the app. The middleware fix above only helps web; mobile WebBrowser doesn't watch web URLs.
+
+After the Studio fix lands, every fresh OAuth attempt should produce a flow_state row whose `referrer` is the full `https://snapquote.us/auth/callback?next=/app` (path included), and the middleware-redirect path becomes a no-op for the happy case (only fires on misconfig). Verify via:
+
+```sql
+SELECT '|' || referrer || '|' AS referrer, length(referrer)
+FROM auth.flow_state
+ORDER BY created_at DESC LIMIT 1;
+```
+
+Expected post-Studio-fix: `|https://snapquote.us/auth/callback?next=/app|` (or similar with full path), length 41+.
+Acceptable interim (with code-side fix only): `|https://snapquote.us|` length 20 (the middleware redirect picks up the slack).
+
+### What did NOT need fixing
+
+- `app/auth/callback/route.ts` — already correct: `exchangeCodeForSession`, cookie handling via `createServerSupabaseClient`, x-forwarded-host honored, safe `next` path validation, redirect lands on /app correctly. The handler just never got reached because GoTrue redirected to the wrong URL.
+- `lib/supabase/server.ts` cookie config — confirmed correct via the existing pattern; the cookie-setting infrastructure works (already verified by other auth flows like email/password sign-in).
+- `requireAuth` / `requireRole` — the multi-org ORDER BY fix from earlier today is unrelated. The user never reached requireAuth because no session was ever set.
+- Mobile `app/(auth)/login.tsx` / `signup.tsx` — already PKCE-correct (commit `0e65d3f`). Mobile-side issue is purely Studio allowlist config (snapquotemobile:// scheme), no mobile code change.
+
+### Files changed
+
+| Path | Change |
+|---|---|
+| `middleware.ts` | Added OAuth-bounce-to-origin rescue redirect at top of middleware, before the Supabase session-cookie-refresh logic |
+| `docs/current-state.md` | Known Outstanding Issues — moved "Site URL whitespace" to closed; replaced "Google OAuth provider disabled" with the new "Redirect URLs allowlist doesn't match /auth/callback" entry (partially closed by code-side fix) |
+| `docs/updates-log.md` | this entry |
+
+### Verification
+
+- `npx tsc --noEmit` exit 0 on web repo.
+- After deploy, the next Google Sign-In attempt should land on `/app` (or `/onboarding` for first-time users without an org).
+- Auth log should show new `/token` events appearing (was zero post-fix; will be non-zero after this commit + redeploy + a real attempt).
+- `auth.users.last_sign_in_at` for the developer should advance past `17:37:08Z` once they sign in successfully.
+- `auth.sessions` count for the developer should go from 2 → 3+.
+
+### Remaining pre-ship status
+
+| Status | Items |
+|---|---|
+| ✅ Closed (code/DB) | Site URL whitespace; Google Sign-In post-callback dead-end (this commit); migration 0064; all prior closed items |
+| ⚠ Murdoch action recommended (not ship-blocking now) | Studio Redirect URLs cleanup (add `https://snapquote.us/**` + `snapquotemobile://*`); Telnyx 10DLC campaign binding |
+| 📋 Optional pre-launch | Mobile signup password length 6 → 8; mobile per-device push token signOut; subscriptions UNIQUE constraint |
+
+The mobile Google OAuth path is still effectively broken without the `snapquotemobile://*` Studio entry, even with this commit (the middleware redirect only helps the web origin). Mobile users should use Apple Sign-In (which works natively, bypasses OAuth/WebBrowser) or wait for the Studio fix.
+
+No build, no submit, no OTA. Code change + git push only.
+
