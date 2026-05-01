@@ -38,6 +38,14 @@ export default async function TeamPage() {
   const orgPlan = (organizationQuery.data?.plan as OrgPlan | null) ?? "SOLO";
   const seatLimit = getPlanSeatLimit(orgPlan);
   const isOverSeatLimit = membersWithEmail.length > seatLimit;
+  // Plan name for user-facing copy. Reads the org's current effective plan
+  // (organizations.plan, set by the Stripe webhook on actual phase
+  // transitions — never reflects a queued/scheduled future plan).
+  const planDisplayName: Record<OrgPlan, string> = {
+    SOLO: "Solo",
+    TEAM: "Team",
+    BUSINESS: "Business"
+  };
 
   return (
     <div className="space-y-6">
@@ -69,8 +77,25 @@ export default async function TeamPage() {
               You&apos;re flying solo
             </h3>
             <p className="max-w-md text-sm text-muted-foreground">
-              Invite a teammate below to share leads, send estimates together,
-              and keep everyone in sync. Team plan includes up to {getPlanSeatLimit("TEAM")} seats.
+              {orgPlan === "SOLO" ? (
+                <>
+                  Solo plans include 1 seat.{" "}
+                  <Link
+                    href="/app/plan"
+                    className="font-medium text-primary hover:text-primary/90"
+                  >
+                    Upgrade to Team or Business
+                  </Link>{" "}
+                  to invite teammates.
+                </>
+              ) : (
+                <>
+                  Invite a teammate below to share leads, send estimates
+                  together, and keep everyone in sync. Your{" "}
+                  {planDisplayName[orgPlan]} plan includes up to {seatLimit}{" "}
+                  {seatLimit === 1 ? "seat" : "seats"}.
+                </>
+              )}
             </p>
           </CardContent>
         </Card>

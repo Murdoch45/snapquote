@@ -1468,3 +1468,89 @@ Mobile is untouched. The `AccountSheet` modal's Sign Out button (used by `Mobile
 **File changed:** `components/Sidebar.tsx` — single className tweak inside `DesktopUserMenu`.
 
 `npx tsc --noEmit` not re-run (single Tailwind className change, no type implications). No build, no submit, no OTA.
+
+---
+
+## Session — May 1, 2026 (plan-display reflects current plan, not queued/future plan)
+
+**Bug context.** A user on Business plan with a queued downgrade to Team for the next billing cycle saw the Team page (/app/team) render the "You're flying solo" empty-state with the copy "Team plan includes up to 2 seats" — even though they were currently on Business with 5 seats. Symptom looks like future-plan leakage; actual root cause is a single hardcoded string. Audit confirms the data layer correctly tracks effective plan and no other UI surface leaks queued changes.
+
+### Audit findings
+
+**Data layer — correct, no fix needed.** Stripe webhook (`app/api/stripe/webhook/route.ts`) calls `setOrganizationPlan(orgId, plan)` only on `customer.subscription.updated` / `.created` / `invoice.paid`. The `plan` value is derived from the current subscription items via `getSubscriptionPlan(subscription)` which reads `subscription.items[0].price.id` — not `subscription.pending_update`, not `subscription_schedule.phases`. When a user schedules a downgrade via Stripe Customer Portal, Stripe creates a `subscription_schedule` whose phases swap items at the period boundary; the active subscription's items continue to point at the current plan until the phase transition fires another `customer.subscription.updated`. So `organizations.plan` never reflects a queued/scheduled future plan — it flips at the actual transition. **`subscriptions.plan` follows the same path** (saved by the same webhook handler from the same source).
+
+Grep across the web repo for `pending_update` / `cancel_at_period_end` / `phase` / `schedule_change` / `future.*plan` / `next.*billing` returned only doc references — no production code reads pending changes from Stripe. The codebase has no concept of "scheduled plan change"; everything reads current effective plan.
+
+**UI consumers audited — all read `orgPlan` / `currentPlan` / `subscription.plan` dynamically except one.**
+
+| File | What it shows | Source | Status |
+|---|---|---|---|
+| `app/app/plan/page.tsx` | Current plan badge, seat/credit allowances, plan-options carousel | `plan` from `get_org_credit_row` RPC → `organizations.plan`; `getPlanSeatLimit(plan)` / `getPlanMonthlyCredits(plan)` | ✓ correct |
+| `app/app/team/page.tsx:38-40` | Seat-limit warning ("Over seat limit (X/Y)") | `orgPlan` from `organizations.plan` | ✓ correct |
+| `app/app/team/page.tsx:73` (was) | "You're flying solo" empty-state | **hardcoded `"TEAM"` literal** | ✗ **BUG FIXED THIS COMMIT** |
+| `components/plan/PlanOptionsSection.tsx` | Plan carousel, "Current Plan" highlight | `currentPlan` prop (passed from page); per-card `PLAN_OPTIONS` constants intentionally hardcoded (these describe each plan, not the user's current state) | ✓ correct |
+| `components/SubscriptionStatusCard.tsx` | "Current Plan" + status badge | `subscription.plan` prop (from `getOrganizationSubscriptionStatus`) | ✓ correct |
+| `lib/teamInvites.ts:assertSeatAvailable` | Seat-cap pre-flight | reads `org.plan` from row | ✓ correct |
+| `lib/credits.ts`, `lib/usage.ts`, `lib/planChangeEmails.ts` | Credit-allowance computation, plan-change emails | `plan` parameter passed in by caller | ✓ correct |
+| `lib/demo/server.ts` | Landing-page demo data builder | `plan` parameter | ✓ correct (demo, not production user-facing) |
+
+**Mobile audit.** Mobile reads plan info via `/api/plans/config` (per-tier limits, fetched once, cached) + `/api/app/subscription-status` (the org's current effective plan). Both endpoints route through the same web-side data path that the audit confirms is correct. Mobile-side hardcoded plan strings are confined to:
+
+- `app/(tabs)/more/plan.tsx` `PLAN_OPTIONS` array (lines ~79-95) — option-card definitions for the plan carousel, intentionally hardcoded (these describe what each plan offers).
+- `app/(tabs)/more/plan.tsx:100-102` `formatPlan` helper — pure display-name mapping function, takes plan parameter.
+- `app/(tabs)/more/team.tsx` empty-state copy — verified clean (uses generic "No team members yet." / "Invite a team member" / "Generate a secure invite link" — no plan tier referenced).
+
+**Mobile is not affected by this class of bug**, no follow-up commit needed.
+
+### Fix applied
+
+`app/app/team/page.tsx` — replaced the hardcoded `getPlanSeatLimit("TEAM")` literal with plan-aware copy that switches on `orgPlan`:
+
+```tsx
+{orgPlan === "SOLO" ? (
+  <>
+    Solo plans include 1 seat.{" "}
+    <Link href="/app/plan" className="font-medium text-primary hover:text-primary/90">
+      Upgrade to Team or Business
+    </Link>{" "}
+    to invite teammates.
+  </>
+) : (
+  <>
+    Invite a teammate below to share leads, send estimates together, and keep
+    everyone in sync. Your {planDisplayName[orgPlan]} plan includes up to{" "}
+    {seatLimit} {seatLimit === 1 ? "seat" : "seats"}.
+  </>
+)}
+```
+
+`planDisplayName` is a literal record `{ SOLO: "Solo", TEAM: "Team", BUSINESS: "Business" }` defined in the page module. Behavior:
+
+- **SOLO** user sees an upgrade CTA — invite isn't possible on their plan, so the previous "Invite a teammate below" copy was misleading even before this bug.
+- **TEAM** user sees "Your Team plan includes up to 2 seats." — accurate.
+- **BUSINESS** user sees "Your Business plan includes up to 5 seats." — accurate. **This is the case Murdoch surfaced;** previously it said "Team plan includes up to 2 seats" regardless of plan.
+
+The `over seat limit` warning at lines 44-64 was already plan-aware (`seatLimit = getPlanSeatLimit(orgPlan)`); only the empty-state was buggy.
+
+### What did NOT need fixing
+
+- **`organizations.plan` data flow** — verified webhook never writes a queued/scheduled plan; reads current items only.
+- **Plan-options carousel hardcoded values** — intentionally hardcoded per option card (what each plan offers); the user's "current" highlight is separate and reads `currentPlan` dynamically.
+- **`SubscriptionStatusCard`** — already reads from `subscription.plan` prop dynamically.
+- **Mobile codebase** — already routes plan info through API endpoints and dynamic `plan` parameters; no hardcoded user-facing plan-tier copy beyond the option-card definitions.
+
+### Verification
+
+- `npx tsc --noEmit` exit 0.
+- The fix is purely additive copy + a record literal; no behavior or data changes for users not in the bug-affected state.
+- Manual test path (Murdoch can verify after deploy): on the Business org with 1 owner and 0 members, navigate to /app/team — empty-state should now read "Your Business plan includes up to 5 seats." instead of "Team plan includes up to 2 seats."
+
+### Files changed
+
+| Path | Change |
+|---|---|
+| `app/app/team/page.tsx` | added `planDisplayName` record + plan-aware empty-state copy switching on `orgPlan`; SOLO gets upgrade CTA; TEAM/BUSINESS get accurate "Your {plan} plan includes up to {N} seats" line |
+| `docs/current-state.md` | Design System section gained a "Plan-display invariant" note documenting the data-layer guarantee + the historical fix |
+| `docs/updates-log.md` | this entry |
+
+No mobile-repo changes — mobile audit confirmed clean. No build, no submit, no OTA.
