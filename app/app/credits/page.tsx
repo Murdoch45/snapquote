@@ -1,27 +1,16 @@
 import { Sparkles } from "lucide-react";
 import { CreditPackCheckoutButton } from "@/components/plan/CreditPackCheckoutButton";
 import { CreditsAddedToast } from "@/components/plan/CreditsAddedToast";
+import { getStripeCreditPackPriceLabel } from "@/lib/stripe";
 
-const creditPacks = [
-  {
-    pack: "10" as const,
-    credits: 10,
-    price: "$10",
-    accent: "from-card to-muted"
-  },
-  {
-    pack: "50" as const,
-    credits: 50,
-    price: "$40",
-    accent: "from-muted to-accent"
-  },
-  {
-    pack: "100" as const,
-    credits: 100,
-    price: "$70",
-    accent: "from-accent to-card",
-    featured: true
-  }
+// Static metadata for the three credit packs. The displayed price comes from
+// `getStripeCreditPackPriceLabel` at render time so the UI never drifts from
+// what Stripe actually charges (the previous hardcoded "$10 / $40 / $70"
+// drifted from Stripe's "$9.99 / $39.99 / $69.99"). May 1, 2026 audit fix.
+const CREDIT_PACK_META = [
+  { pack: "10" as const, credits: 10, accent: "from-card to-muted" },
+  { pack: "50" as const, credits: 50, accent: "from-muted to-accent" },
+  { pack: "100" as const, credits: 100, accent: "from-accent to-card", featured: true }
 ];
 
 type Props = {
@@ -30,6 +19,15 @@ type Props = {
 
 export default async function CreditsPage({ searchParams }: Props) {
   const params = await searchParams;
+
+  // Fetch live prices from Stripe in parallel. Wrapped in React.cache inside
+  // the helper so a single render dedupes any redundant calls.
+  const creditPacks = await Promise.all(
+    CREDIT_PACK_META.map(async (meta) => ({
+      ...meta,
+      price: await getStripeCreditPackPriceLabel(meta.pack)
+    }))
+  );
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">

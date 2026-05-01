@@ -1665,3 +1665,112 @@ After Murdoch's row is deleted, `getOrganizationSubscriptionStatus` for his org 
 | `docs/updates-log.md` | this entry |
 
 No build, no submit, no OTA. Code change + DB cleanup + git push only.
+
+---
+
+## Session — May 1, 2026 (credit-pack price labels match Stripe; mobile sign-out per-device push token cleanup)
+
+### Fix #1 — Web credit-pack display prices match Stripe ($9.99 / $39.99 / $69.99)
+
+**Problem.** The /credits page displayed "$10", "$40", "$70" for the three credit packs. Stripe's actual configured prices are $9.99, $39.99, $69.99. The mismatch wasn't a checkout-time bug (Stripe correctly charges the configured amount), but a UX/trust issue — the user sees one number on the page and a different number in the Stripe Checkout session. Also: the prices were duplicated across `lib/stripe.ts` and `app/app/credits/page.tsx`, so the next price change would need TWO edits to stay in sync (and almost certainly drift again).
+
+**Fix — single source of truth, live from Stripe.**
+
+`lib/stripe.ts` gets a new helper:
+
+```ts
+export const getStripeCreditPackPriceLabel = cache(async (pack: StripeCreditPackKey): Promise<string> => {
+  const env = stripeCoreEnvSchema.parse(process.env);
+  const priceIdMap = { "10": env.STRIPE_CREDIT_PACK_10_PRICE_ID, /* ... */ };
+  const priceId = priceIdMap[pack];
+  const fallback = getStripeCreditPackConfig(pack).priceLabel;
+
+  if (!priceId) return fallback;
+  try {
+    const stripe = getStripe();
+    const price = await stripe.prices.retrieve(priceId);
+    if (typeof price.unit_amount !== "number") return fallback;
+    return `$${(price.unit_amount / 100).toFixed(2)}`;
+  } catch (err) {
+    console.warn(`[stripe] Failed to retrieve price ${priceId} for credit pack ${pack}:`, err);
+    return fallback;
+  }
+});
+```
+
+Wrapped in `React.cache` so a single Server Component request that needs all 3 packs only fires 3 Stripe API calls deduped within that request. Fetches `Price.unit_amount` (cents) from the live Stripe Price object pointed at by `STRIPE_CREDIT_PACK_X_PRICE_ID` env vars; divides by 100; formats `$X.XX`. **Drift impossible** — the displayed label is the actual amount Stripe will charge.
+
+`app/app/credits/page.tsx` switched from a static `creditPacks` array with hardcoded `price: "$10"` to a runtime `Promise.all` over `CREDIT_PACK_META` that fetches each label via the helper. Static metadata (credits count, accent gradient, "featured" flag) stays in code; only the `price` string is now sourced from Stripe.
+
+`lib/stripe.ts:getStripeCreditPackConfig` `priceLabel` values updated to `$9.99 / $39.99 / $69.99` so the **fallback** path (Stripe API down, env var missing) shows the correct prices too. The fallback is only hit on Stripe outages — in normal operation the live helper wins.
+
+**Mobile.** Already correct. `app/(tabs)/more/credits.tsx:253` uses `pkg?.product.priceString` from the RevenueCat SDK, which is the actual Apple App Store / RevenueCat-reported price string ("$9.99" etc). Mobile never had this drift because it always asked the platform for the real price.
+
+### Fix #2 — Mobile sign-out push token cleanup, scoped to current device
+
+**Problem (current state on `main`):** `lib/auth.tsx:signOut` was deleting **every** `push_tokens` row for the user (`.eq("user_id", userId)`). That meant a multi-device user signing out on iPhone A would lose pushes on iPhone B too — even though they're still signed in on B. Equivalent to logging the user out of every device when they only intended to sign out of one.
+
+(In Build 9, the cleanup may have been entirely absent — leaving the row stale with a now-invalid token. Either failure mode — wipe-everything OR leave-stale — is wrong; per-device delete is the correct behavior.)
+
+**Fix.**
+
+`lib/notifications.ts` exports a new read-only helper:
+
+```ts
+export async function getCurrentDeviceId(): Promise<string | null> {
+  return (await get<string>(DEVICE_ID_KEY)) ?? null;
+}
+```
+
+Distinct from `getOrCreateDeviceId` — on sign-out, if the device never registered for push, there's nothing to delete. Returning `null` lets the caller skip the DB call.
+
+`lib/auth.tsx:signOut` now scopes the delete to `(user_id, device_id)`:
+
+```ts
+try {
+  const deviceId = await getCurrentDeviceId();
+  if (userId && deviceId) {
+    const { error: tokenError } = await supabase
+      .from("push_tokens")
+      .delete()
+      .eq("user_id", userId)
+      .eq("device_id", deviceId);
+    if (tokenError) {
+      console.warn("[auth] Failed to clean up push token on sign-out:", tokenError);
+    }
+  }
+} catch (tokenError) {
+  console.warn("[auth] Failed to clean up push token on sign-out:", tokenError);
+}
+```
+
+Wrapped in try/catch so any failure (network, RLS edge case, etc.) `console.warn`s but does not block the rest of the sign-out flow (clearing local session state, calling `supabase.auth.signOut`, etc). Murdoch's intent: sign-out must always succeed even if the cleanup network call fails.
+
+Net behavior:
+- **Single-device user signs out** → row for `(user_id, device_id)` deleted → no stale token sitting in the DB.
+- **Multi-device user signs out on one device** → only that device's row deleted; other devices keep receiving pushes.
+- **User on a never-registered device signs out** → no `device_id` stored → skip the DB call entirely.
+- **Network failure during cleanup** → warn only; sign-out proceeds.
+- **User signs back in on the same device later** → `registerForPushNotifications` fires from `app/_layout.tsx`, upserts a fresh row with the same `device_id`, normal operation resumes.
+
+### Files changed
+
+| Repo | Path | Change |
+|---|---|---|
+| Web | `lib/stripe.ts` | new `getStripeCreditPackPriceLabel` helper (cached, React.cache); fallback `priceLabel` constants updated to `$9.99 / $39.99 / $69.99` |
+| Web | `app/app/credits/page.tsx` | imports the helper, fetches all 3 labels via `Promise.all` at render time; removed hardcoded `"$10/$40/$70"` literals |
+| Mobile | `lib/notifications.ts` | new exported `getCurrentDeviceId` (read-only) |
+| Mobile | `lib/auth.tsx` | imports `getCurrentDeviceId`; signOut delete scoped to `(user_id, device_id)` |
+| Web | `docs/current-state.md` | new "Credit-pack price labels" note; minor update |
+| Web | `docs/updates-log.md` | this entry |
+| Mobile | `docs/current-state.md` | new "Sign-out push-token cleanup" note |
+| Mobile | `docs/updates-log.md` | this entry |
+
+### Verification
+
+- `npx tsc --noEmit` exit 0 on both repos.
+- Manual test path Murdoch can run after deploy:
+  - Web: visit /credits → all three pack cards now show `$9.99 / $39.99 / $69.99` (or the fallback values match Stripe; either way, no `$10/$40/$70`). Click any pack → Stripe Checkout shows the same `$X.99` amount; price drift impossible.
+  - Mobile: sign in on iPhone A, register for push, send self a notification → arrives. Sign out on A. The single matching `push_tokens` row should be gone (verify via `select * from push_tokens where user_id = '<murdoch>'`). Sign back in → fresh row with same `device_id`. If a second device is signed in concurrently, signing out on A leaves B's row intact and notifications keep working there.
+
+No build, no submit, no OTA. Code change + git push only.

@@ -1,3 +1,4 @@
+import { cache } from "react";
 import Stripe from "stripe";
 import { z } from "zod";
 import { enforceServerOnly } from "@/lib/serverOnlyGuard";
@@ -181,26 +182,90 @@ export async function clearStaleStripeCustomerId(
 }
 
 export function getStripeCreditPackConfig(pack: StripeCreditPackKey): StripeCreditPackConfig {
+  // priceLabel is a fallback used only when the live Stripe price fetch
+  // fails (preview deploys without Stripe creds, transient API errors). The
+  // canonical render-time label comes from `getStripeCreditPackPriceLabel`
+  // which retrieves the actual unit_amount from the Stripe Price object so
+  // the UI can never drift from what Stripe actually charges. Keep these
+  // values in sync with the Stripe dashboard when prices change.
   const packs: Record<StripeCreditPackKey, StripeCreditPackConfig> = {
     "10": {
       key: "10",
       credits: 10,
       label: "10 credits",
-      priceLabel: "$10"
+      priceLabel: "$9.99"
     },
     "50": {
       key: "50",
       credits: 50,
       label: "50 credits",
-      priceLabel: "$40"
+      priceLabel: "$39.99"
     },
     "100": {
       key: "100",
       credits: 100,
       label: "100 credits",
-      priceLabel: "$70"
+      priceLabel: "$69.99"
     }
   };
 
   return packs[pack];
 }
+
+/**
+ * Format a Stripe `unit_amount` (cents) as a `$X.XX` display label.
+ * Stripe represents currency in the smallest unit (cents for USD); divide
+ * by 100 and pad to two decimals so $9.99 always renders as "$9.99" and
+ * $9 renders as "$9.00" (consistent with how Stripe Checkout shows prices).
+ */
+function formatStripeAmount(unitAmount: number): string {
+  return `$${(unitAmount / 100).toFixed(2)}`;
+}
+
+/**
+ * Live-fetch the display label for a credit pack from Stripe. Single source
+ * of truth for the user-visible price: the actual `unit_amount` on the
+ * Stripe Price object the env var points at. Wrapped in React.cache so a
+ * single Server Component request that asks for all 3 packs only fires 3
+ * Stripe API calls total, deduped within the same request.
+ *
+ * On any failure (Stripe down, env var missing, price has no `unit_amount`)
+ * falls back to the hardcoded `priceLabel` from `getStripeCreditPackConfig`
+ * so the page still renders. Failures `console.warn` so the misconfig is
+ * visible in Sentry.
+ *
+ * Why fetch from Stripe instead of a static constant: prevents drift. The
+ * previous static labels ($10 / $40 / $70) drifted from the actual Stripe
+ * prices ($9.99 / $39.99 / $69.99) and customers saw a mismatched amount
+ * at checkout. (May 1 audit fix.)
+ */
+export const getStripeCreditPackPriceLabel = cache(
+  async (pack: StripeCreditPackKey): Promise<string> => {
+    const env = stripeCoreEnvSchema.parse(process.env);
+    const priceIdMap: Record<StripeCreditPackKey, string | undefined> = {
+      "10": env.STRIPE_CREDIT_PACK_10_PRICE_ID,
+      "50": env.STRIPE_CREDIT_PACK_50_PRICE_ID,
+      "100": env.STRIPE_CREDIT_PACK_100_PRICE_ID
+    };
+    const priceId = priceIdMap[pack];
+    const fallback = getStripeCreditPackConfig(pack).priceLabel;
+
+    if (!priceId) {
+      console.warn(`[stripe] Missing STRIPE_CREDIT_PACK_${pack}_PRICE_ID env var; using fallback label.`);
+      return fallback;
+    }
+
+    try {
+      const stripe = getStripe();
+      const price = await stripe.prices.retrieve(priceId);
+      if (typeof price.unit_amount !== "number") {
+        console.warn(`[stripe] Price ${priceId} has no unit_amount; using fallback label.`);
+        return fallback;
+      }
+      return formatStripeAmount(price.unit_amount);
+    } catch (err) {
+      console.warn(`[stripe] Failed to retrieve price ${priceId} for credit pack ${pack}:`, err);
+      return fallback;
+    }
+  }
+);
