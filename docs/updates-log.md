@@ -1379,3 +1379,45 @@ The mobile Google OAuth path is still effectively broken without the `snapquotem
 
 No build, no submit, no OTA. Code change + git push only.
 
+
+---
+
+## Session — May 1, 2026 (Meta Pixel install for Facebook ads tracking)
+
+### What was done
+
+Installed Meta Pixel base code on the web app for Facebook ads conversion tracking. Pixel ID: `1500154638449582`.
+
+### Implementation
+
+- **`app/layout.tsx`**: Added `next/script` block (`id="meta-pixel"`, `strategy="afterInteractive"`) running the standard Meta `fbevents.js` loader and `fbq('init', '1500154638449582')`. Added the `<noscript>` 1x1 tracking pixel fallback. The inline `fbq('track', 'PageView')` from Meta's snippet was intentionally **omitted** here to avoid double-counting — see next item.
+- **`components/MetaPixelPageView.tsx`** (new, client): Uses `usePathname` + `useSearchParams` in a `useEffect` to fire `fbq('track', 'PageView')` on every route change. Wrapped in `<Suspense fallback={null}>` in the layout because `useSearchParams` triggers the App Router CSR bailout.
+- Pixel ID hardcoded as a `const META_PIXEL_ID` at the top of `layout.tsx`. It's a public identifier (visible in any browser's network tab once the script loads), so no env-var gating was added — keeps the code simple and means no Vercel env-var coordination required for deploy.
+
+### Why a client component for PageView
+
+Next.js App Router does soft client-side navigations between routes. The base `<Script>` only runs once per hard load, so without a route-change listener the pixel would only count the first PageView per session. The `usePathname`/`useSearchParams` effect re-fires on every soft nav (including back/forward and query-string changes), giving Meta one PageView per route the user actually visits.
+
+### Verification
+
+- `npx tsc --noEmit` exit 0.
+- After deploy, Meta's Pixel Helper Chrome extension on snapquote.us should show:
+  - "Pixel base code" detected
+  - "PageView" event firing on initial load AND on navigations between routes (e.g. `/` → `/auth/login` → `/dashboard`).
+- Events Manager → Test Events tab should show PageView pings within ~30s of opening any page.
+
+### Files changed
+
+| Path | Change |
+|---|---|
+| `app/layout.tsx` | Added `next/script` Pixel base loader + `<noscript>` fallback + `<Suspense>` wrapper around `<MetaPixelPageView />`. Imported `Script`, `Suspense`, and the new component. |
+| `components/MetaPixelPageView.tsx` | New file. Client component that fires `fbq('track', 'PageView')` on every route change via `usePathname`/`useSearchParams`. |
+| `docs/current-state.md` | Web tech stack — added Meta Pixel line under Sentry. |
+| `docs/updates-log.md` | This entry. |
+
+### Not done / out of scope
+
+- No custom event tracking (Lead, CompleteRegistration, Purchase, etc.). Only PageView right now. Custom events require deciding which user actions count as conversions and wiring `fbq('track', 'Lead')` etc. into the relevant flows.
+- No Conversions API (server-side) — only the browser-side Pixel. CAPI would need a Meta access token and a webhook/API route.
+- Mobile app (`SnapQuote-mobile`) is unchanged. Meta Pixel is web-only; mobile tracking would use the Facebook SDK for React Native.
+- No `NEXT_PUBLIC_META_PIXEL_ID` env var — ID hardcoded since it's public anyway.
