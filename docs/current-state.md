@@ -36,6 +36,7 @@ SnapQuote is an AI-powered quoting and lead management SaaS for outdoor service 
 - Vercel (hosting + cron — Hobby plan)
 - Sentry (error monitoring — project: snapquote-web, ID 4511244273123328)
 - Meta Pixel (Facebook ads conversion tracking — pixel ID `1500154638449582`)
+- Google Analytics 4 (web analytics — measurement ID `G-2QM16SWP9D`)
 
 **Mobile:**
 - React Native + Expo Router

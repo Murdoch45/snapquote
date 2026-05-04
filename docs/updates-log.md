@@ -1774,3 +1774,49 @@ Net behavior:
   - Mobile: sign in on iPhone A, register for push, send self a notification → arrives. Sign out on A. The single matching `push_tokens` row should be gone (verify via `select * from push_tokens where user_id = '<murdoch>'`). Sign back in → fresh row with same `device_id`. If a second device is signed in concurrently, signing out on A leaves B's row intact and notifications keep working there.
 
 No build, no submit, no OTA. Code change + git push only.
+
+---
+
+## Session — May 4, 2026 (Google Analytics 4 install)
+
+### What was done
+
+Installed Google Analytics 4 on the web app alongside the existing Meta Pixel. GA4 measurement ID: `G-2QM16SWP9D`.
+
+### Implementation
+
+- **`app/layout.tsx`**: Added two `next/script` blocks (both `strategy="afterInteractive"`):
+  - `id="ga4-loader"` — loads `https://www.googletagmanager.com/gtag/js?id=G-2QM16SWP9D`.
+  - `id="ga4-init"` — initialises `window.dataLayer`, defines `gtag`, calls `gtag('js', new Date())`, then `gtag('config', 'G-2QM16SWP9D', { send_page_view: false })`. The `send_page_view: false` flag is intentional — it suppresses GA's automatic initial-load page_view so the only page_view per route comes from the route-change effect (mirrors the Meta Pixel pattern, prevents double-counting).
+- **`components/GA4PageView.tsx`** (new, client): Same shape as `MetaPixelPageView`. Uses `usePathname` + `useSearchParams` in a `useEffect` to fire `gtag('event', 'page_view', { page_path, page_location, page_title })` on every route change including soft navs and query-string changes. Augments the global `Window` interface with `gtag?` and `dataLayer?`.
+- Layout reuses the existing `<Suspense fallback={null}>` boundary that already wraps `<MetaPixelPageView />`. Both components now sit inside it (`useSearchParams` triggers App Router CSR bailout in either component).
+- Measurement ID hardcoded as `const GA4_MEASUREMENT_ID` next to the existing `META_PIXEL_ID`. Same reasoning as Meta Pixel — public identifier, no env-var coordination needed for deploy.
+
+### Why it's safe alongside Meta Pixel
+
+The two pixels live on different globals (`window.fbq` vs `window.gtag`/`window.dataLayer`) and load from different domains (`connect.facebook.net` vs `googletagmanager.com`). No shared state, no hooked event listeners, no script ordering dependency. Both are loaded `afterInteractive`. Both rely on the same `Suspense` boundary for the route-change client component, which is fine — `<Suspense>` does not coordinate sibling effects.
+
+### Verification
+
+- `npx tsc --noEmit` exit 0.
+- After Vercel deploy:
+  - GA4 Realtime report should show users on snapquote.us and `page_view` events for each route navigated.
+  - DevTools → Network: requests to `googletagmanager.com/gtag/js?id=G-2QM16SWP9D` and beacons to `google-analytics.com/g/collect` per page nav.
+  - Meta Pixel should continue working unchanged (Pixel Helper still detects PageView per route).
+
+### Files changed
+
+| Path | Change |
+|---|---|
+| `app/layout.tsx` | Added GA4 loader + init `next/script` blocks. Added `<GA4PageView />` inside the existing Suspense boundary. New `GA4_MEASUREMENT_ID` const. |
+| `components/GA4PageView.tsx` | New file. Client component fires `gtag('event', 'page_view', ...)` on every route change via `usePathname` / `useSearchParams`. |
+| `docs/current-state.md` | Web tech stack — added Google Analytics 4 line under Meta Pixel. |
+| `docs/updates-log.md` | This entry. |
+
+### Not done / out of scope
+
+- No GA4 custom events (sign_up, generate_lead, purchase). Only page_view. Custom events require deciding which actions to instrument and wiring `gtag('event', ...)` into the relevant flows (signup completion, lead submission, quote sent, plan upgrade, credit pack purchase).
+- No GA4 user_id linking to Supabase auth user — currently anonymous-only tracking.
+- No Measurement Protocol / server-side events. Browser-side only.
+- No consent banner / cookie banner gating GA4. If a future EU/UK launch needs GDPR consent gating, both pixels will need to be wrapped behind a consent guard.
+- Mobile (`SnapQuote-mobile`) is unchanged. GA4 is web-only here; mobile would use Firebase Analytics if/when added.

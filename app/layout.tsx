@@ -6,6 +6,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "@/components/ui/toaster";
 import { MetaPixelPageView } from "@/components/MetaPixelPageView";
+import { GA4PageView } from "@/components/GA4PageView";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -13,6 +14,7 @@ const inter = Inter({
 });
 
 const META_PIXEL_ID = "1500154638449582";
+const GA4_MEASUREMENT_ID = "G-2QM16SWP9D";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -52,8 +54,20 @@ fbq('init', '${META_PIXEL_ID}');`}
             alt=""
           />
         </noscript>
+        <Script
+          id="ga4-loader"
+          src={`https://www.googletagmanager.com/gtag/js?id=${GA4_MEASUREMENT_ID}`}
+          strategy="afterInteractive"
+        />
+        <Script id="ga4-init" strategy="afterInteractive">
+          {`window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', '${GA4_MEASUREMENT_ID}', { send_page_view: false });`}
+        </Script>
         <Suspense fallback={null}>
           <MetaPixelPageView />
+          <GA4PageView />
         </Suspense>
         <script
           dangerouslySetInnerHTML={{
