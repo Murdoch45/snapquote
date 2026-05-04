@@ -154,7 +154,22 @@ SnapQuote is an AI-powered quoting and lead management SaaS for outdoor service 
 2. Leads stuck "processing" 5–15 min → re-trigger via edge function. Row stays "processing".
 3. Leads "failed" within the last 6 hours with `ai_retry_count < 2` → atomically transition back to "processing" (CAS on both `ai_status` and `ai_retry_count`), increment the counter, re-trigger via edge function. Hard cap of 2 retries per lead so a permanently-broken lead doesn't loop forever.
 
-**AbortController timeout:** `generateEstimate()` wrapped in `Promise.race` against 55s abort (raised from 40s on May 4, 2026 after 100% failure window — see updates-log). On timeout, the catch block writes `ai_status="failed"` and fires notifications. Retries happen externally via the rescue cron stage 3, not inside `generateEstimate` (the inner `STRUCTURED_AI_TIMEOUT_MS = 40000` per-call timeout means there is room for exactly one AI attempt per invocation; the legacy 3-attempt retry loop was structurally unreachable and was removed).
+**Failure topology (May 4, 2026 — second fix):** AI timeout → in-pipeline heuristic fallback → catch-block fallback → rescue cron retry. The legacy outer wrapper around `generateEstimate` was removed because it killed the heuristic fallback alongside the AI call. Now each external boundary has its own narrow timeout instead:
+1. **Property data lookup**: `PROPERTY_DATA_TIMEOUT_MS = 8000`. On timeout, falls back to a degraded `PropertyData` (all-null fields, `locationSource="unavailable"`) and the pipeline continues. `estimateEngine` then uses `NATIONAL_DEFAULT` cost model.
+2. **AI call (`callOpenAI`)**: `STRUCTURED_AI_TIMEOUT_MS = 35000` per attempt, single attempt. On timeout/failure, `generateEstimate` falls through to the in-pipeline heuristic fallback at `lib/ai/estimate.ts:~4010`. The fallback runs unimpeded because no outer wrapper kills it.
+3. **Polish summary**: 10s timeout. On timeout/failure, returns the deterministic raw summary. Does not gate the lead's appearance.
+4. **In-pipeline heuristic fallback**: `inferSignalsFallback` + `fallbackEstimate` via `estimateEngine`. Always returns a valid `GeneratedLeadEstimate`. Marker: `"Estimator signal source: fallback."`
+5. **Catch-block fallback** (in `generateEstimateAsync`): if anything inside the try block throws, the catch attempts the deterministic engine directly using the hoisted `EstimateInput` and a degraded `PropertyData`. Polish is skipped. Writes `ai_status="ready"` with the resulting price. Marker: `"Estimator origin: catch_fallback."` Sentry-tagged with `stage: "catch-fallback-recovered"`.
+6. **Rescue cron** (last resort): if the function is hard-killed by Vercel's 60s ceiling before the catch can finish, the lead stays at `ai_status="processing"`; the pg_cron job picks it up within 3 minutes per stages 1-3 documented above.
+
+**"AI estimate unavailable" is now structurally impossible** except in the corner case where Vercel hard-kills the function before the catch fallback can write — in which case the rescue cron retries within 3 minutes.
+
+**`ai_estimator_notes` audit markers** (each pushed at its respective pipeline stage; grep these to answer "what fired?" for a given lead):
+- `"Property data resolved: <city>, <state> (lot <sqft> sqft)."` / `"Property data lookup failed: <reason>; using degraded defaults."`
+- `"Satellite image attached."` / `"Satellite image unavailable: no location coordinates|no Google Maps API key|fetch failed."` / `"Satellite image: skipped (estimator mode=off)."`
+- `"Summary polish: applied."` / `"Summary polish: failed (<reason>); using raw deterministic summary."` / `"Summary polish: skipped (catch fallback|estimator mode=off|no OPENAI_API_KEY|empty raw summary)."`
+- `"Estimator origin: catch_fallback."` and `"Catch fallback triggered by: <message>"` — only on the catch fallback path; distinguishes from `"Estimator signal source: fallback."` which is the in-pipeline path.
+- Existing markers from `attachAiExtractionTrace`: `"Estimator AI mode: <auto|require|off>."`, `"Estimator signal source: <structured_ai|fallback>."`, `"Estimator AI execution: <execution>."`, plus `buildAiExtractionNotes` lines about attempt outcomes and failure categories.
 
 **OpenAI request shape (`callOpenAI` in `lib/ai/estimate.ts`):**
 - Model: `gpt-5-mini` (overridable via `OPENAI_MODEL`). Reasoning effort: `low`. Single attempt per invocation.

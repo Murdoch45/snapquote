@@ -2,6 +2,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import path from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
+import * as Sentry from "@sentry/nextjs";
 import OpenAI from "openai";
 import {
   APIConnectionError,
@@ -42,7 +43,7 @@ import {
 } from "@/estimators/shared";
 import { resolveRegionalCostModel } from "@/lib/ai/cost-models";
 import { getGoogleMapsApiKey, buildSatelliteStaticMapUrl, haversineMiles } from "@/lib/maps";
-import { getPropertyData, type PropertyData } from "@/lib/property-data";
+import { buildDegradedPropertyData, getPropertyData, type PropertyData } from "@/lib/property-data";
 import { sendPushToOrg } from "@/lib/pushNotifications";
 import {
   OTHER_OUTDOOR_UNSUPPORTED_MESSAGE,
@@ -368,13 +369,25 @@ function normalizeRemainingUncertainty(value: string | null | undefined): Remain
   return value === "low" || value === "high" ? value : "medium";
 }
 
-// Per-call AI request timeout. Must stay below ESTIMATE_GENERATION_TIMEOUT_MS
-// minus the time taken by property-data lookup, satellite image resolve,
-// and the optional summary polish (10s) — so a single AI call has at
-// most ~40s to come back before the outer wrapper aborts the whole flow.
-// We give one shot per lead submission; the rescue-stuck-leads cron
-// retries failed leads externally with an attempt cap on the row.
-const STRUCTURED_AI_TIMEOUT_MS = 40000;
+// Per-call AI request timeout. The legacy outer wrapper around the entire
+// generateEstimate pipeline was removed (see Bugs & Fixes 2026-05-04 second
+// fix) — that wrapper killed the heuristic fallback alongside the AI call.
+// Each external boundary now has its own narrow timeout instead, and the
+// pipeline relies on the deterministic fallback at the bottom of the
+// generateEstimate AI-failure branch + the catch-block fallback in
+// generateEstimateAsync to guarantee a price always lands. Cross-call
+// retries happen externally in the rescue-stuck-leads cron with the
+// per-row ai_retry_count cap.
+const STRUCTURED_AI_TIMEOUT_MS = 35000;
+
+// Per-call timeout for the property-data lookup (Google Places + parcel +
+// solar). Long enough that a normal lookup almost always completes; short
+// enough that a Google-side outage doesn't eat enough of the Vercel 60s
+// budget to starve AI + polish. On timeout the lookup falls back to a
+// degraded PropertyData (all-nulls + locationSource="unavailable") and the
+// pipeline continues — estimateEngine then uses NATIONAL_DEFAULT cost
+// model and per-service estimators degrade to their internal defaults.
+const PROPERTY_DATA_TIMEOUT_MS = 8000;
 
 export type AiFailureCategory =
   | "timeout"
@@ -1785,22 +1798,41 @@ async function fetchImageAsDataUrl(url: string): Promise<string | null> {
   }
 }
 
-async function resolveSatelliteImageUrl(input: EstimateInput): Promise<string | null> {
-  if (input.satelliteImageUrl) return input.satelliteImageUrl;
-  if (input.lat == null || input.lng == null) return null;
+async function resolveSatelliteImageUrl(
+  input: EstimateInput,
+  auditMarkers?: string[]
+): Promise<string | null> {
+  if (input.satelliteImageUrl) {
+    auditMarkers?.push("Satellite image attached.");
+    return input.satelliteImageUrl;
+  }
+  if (input.lat == null || input.lng == null) {
+    auditMarkers?.push("Satellite image unavailable: no location coordinates.");
+    return null;
+  }
 
   const key = getGoogleMapsApiKey();
-  if (!key) return null;
+  if (!key) {
+    auditMarkers?.push("Satellite image unavailable: no Google Maps API key.");
+    return null;
+  }
 
   const staticMapUrl = buildSatelliteStaticMapUrl(input.lat, input.lng, key);
-  return fetchImageAsDataUrl(staticMapUrl);
+  const dataUrl = await fetchImageAsDataUrl(staticMapUrl);
+  if (dataUrl) {
+    auditMarkers?.push("Satellite image attached.");
+  } else {
+    auditMarkers?.push("Satellite image unavailable: fetch failed.");
+  }
+  return dataUrl;
 }
 
 // Single-attempt structured AI invocation. The legacy retry loop was
-// removed because the inner per-attempt timeout already exceeded the outer
-// ESTIMATE_GENERATION_TIMEOUT_MS, making "retry" structurally
-// unreachable. Cross-call retries now happen externally in the
-// rescue-stuck-leads cron, which respects the per-row ai_retry_count cap.
+// removed because each per-attempt timeout would have exceeded the
+// previously-existing outer estimator wrapper (since removed), making
+// "retry" structurally unreachable. Cross-call retries now happen
+// externally in the rescue-stuck-leads cron, which respects the per-row
+// ai_retry_count cap.
 async function runStructuredAiOperation<T>(params: {
   operation: () => Promise<T>;
 }): Promise<
@@ -3592,7 +3624,11 @@ async function writeStructuredAiTestCacheEntry(
   return cachePath;
 }
 
-async function callOpenAI(prompt: string, input: EstimateInput): Promise<StructuredAiCallResult> {
+async function callOpenAI(
+  prompt: string,
+  input: EstimateInput,
+  auditMarkers?: string[]
+): Promise<StructuredAiCallResult> {
   try {
     validateStructuredAiRequest(input);
   } catch (error) {
@@ -3680,7 +3716,7 @@ async function callOpenAI(prompt: string, input: EstimateInput): Promise<Structu
   }
 
   const client = new OpenAI({ apiKey });
-  const satelliteImage = await resolveSatelliteImageUrl(input);
+  const satelliteImage = await resolveSatelliteImageUrl(input, auditMarkers);
   const imageInputs = [
     ...input.photoUrls.map((url) => ({
       type: "input_image" as const,
@@ -3895,8 +3931,12 @@ export function fallbackEstimate(
     signals: finalSignals
   });
   const multiplierVisibilityNote = buildMultiplierVisibilityNote(engineEstimate, propertyData);
+  // Limit raised from 12 → 20 to accommodate the pipeline-audit markers
+  // (property-data, satellite, polish, catch-fallback origin) added on top
+  // of the existing trace + per-service notes. 20 is empirically enough for
+  // the worst-case multi-service lead with all markers present.
   engineEstimate.estimatorNotes = Array.from(new Set([multiplierVisibilityNote, ...engineEstimate.estimatorNotes]))
-    .slice(0, 12);
+    .slice(0, 20);
   const serviceStages = normalizeAudit?.serviceStages ?? {};
   const aiSignalsChangedByGuardrails = Object.values(serviceStages).some((stage) => Boolean(stage?.changedByGuardrails));
   const aiSignalsChangedByReconciliation = Object.values(serviceStages).some((stage) =>
@@ -3945,21 +3985,49 @@ export function fallbackEstimate(
   );
 }
 
-async function polishEstimateSummary(estimate: GeneratedLeadEstimate): Promise<GeneratedLeadEstimate> {
-  const polished = await polishJobSummary(estimate.summary);
+async function polishEstimateSummary(
+  estimate: GeneratedLeadEstimate,
+  auditMarkers?: string[]
+): Promise<GeneratedLeadEstimate> {
+  const polished = await polishJobSummary(estimate.summary, auditMarkers);
   if (polished === estimate.summary) return estimate;
   return { ...estimate, summary: polished };
 }
 
 export async function generateEstimate(input: EstimateInput): Promise<GeneratedLeadEstimate> {
-  const propertyData = await getPropertyData({
-    address: input.address,
-    placeId: input.addressPlaceId,
-    lat: input.lat,
-    lng: input.lng,
-    parcelLotSizeSqft: input.parcelLotSizeSqft,
-    travelDistanceMiles: input.travelDistanceMiles
-  });
+  // Pipeline-audit markers collected as the estimator runs. Each major
+  // boundary (property data, satellite, AI, polish) pushes a marker so
+  // claude.ai can grep `ai_estimator_notes` and answer "what fired?" for
+  // a given lead. Threaded down into callOpenAI / resolveSatelliteImageUrl
+  // / polishEstimateSummary, then merged into the final estimatorNotes
+  // before return.
+  const auditMarkers: string[] = [];
+
+  let propertyData: PropertyData;
+  try {
+    propertyData = await runWithAbortTimeout(PROPERTY_DATA_TIMEOUT_MS, () =>
+      getPropertyData({
+        address: input.address,
+        placeId: input.addressPlaceId,
+        lat: input.lat,
+        lng: input.lng,
+        parcelLotSizeSqft: input.parcelLotSizeSqft,
+        travelDistanceMiles: input.travelDistanceMiles
+      })
+    );
+    auditMarkers.push(
+      `Property data resolved: ${propertyData.city ?? "unknown"}, ${propertyData.state ?? "unknown"} (lot ${propertyData.lotSizeSqft ?? "unknown"} sqft).`
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    auditMarkers.push(`Property data lookup failed: ${message}; using degraded defaults.`);
+    propertyData = buildDegradedPropertyData({
+      address: input.address,
+      parcelLotSizeSqft: input.parcelLotSizeSqft ?? null,
+      travelDistanceMiles: input.travelDistanceMiles ?? null
+    });
+  }
+
   const systemRegion = resolveSystemRegion(propertyData);
   const aiMode = getEstimatorAiMode();
 
@@ -3970,25 +4038,30 @@ export async function generateEstimate(input: EstimateInput): Promise<GeneratedL
       fallbackUsed: true,
       attemptsMade: 0
     });
+    auditMarkers.push("Satellite image: skipped (estimator mode=off).");
 
-    return polishEstimateSummary(
+    const polished = await polishEstimateSummary(
       fallbackEstimate(
         input,
         propertyData,
         attachAiExtractionTrace(inferSignalsFallback(input, propertyData), skippedTrace, aiMode)
-      )
+      ),
+      auditMarkers
     );
+    return mergeAuditMarkers(polished, auditMarkers);
   }
 
-  const aiResult = await callOpenAI(prompt, input);
+  const aiResult = await callOpenAI(prompt, input, auditMarkers);
 
   if (aiResult.ok) {
-    return polishEstimateSummary(
+    const polished = await polishEstimateSummary(
       fallbackEstimate(input, propertyData, {
         ...attachAiExtractionTrace(aiResult.signals, aiResult.trace, aiMode),
         region: systemRegion,
-      })
+      }),
+      auditMarkers
     );
+    return mergeAuditMarkers(polished, auditMarkers);
   }
 
   if (aiMode === "require") {
@@ -4007,13 +4080,31 @@ export async function generateEstimate(input: EstimateInput): Promise<GeneratedL
     attempts: aiResult.trace.attempts
   });
 
-  return polishEstimateSummary(
+  const polished = await polishEstimateSummary(
     fallbackEstimate(
       input,
       propertyData,
       attachAiExtractionTrace(inferSignalsFallback(input, propertyData), aiResult.trace, aiMode)
-    )
+    ),
+    auditMarkers
   );
+  return mergeAuditMarkers(polished, auditMarkers);
+}
+
+// Prepends the collected audit markers onto the estimate's estimatorNotes
+// (deduped, capped) so the notes that reach the lead row include both the
+// per-service trace from the engine AND the pipeline-stage markers. The
+// markers go FIRST so they survive the existing slice-cap at the engine
+// level if the estimator itself produced a long trace.
+function mergeAuditMarkers(
+  estimate: GeneratedLeadEstimate,
+  markers: string[]
+): GeneratedLeadEstimate {
+  if (markers.length === 0) return estimate;
+  return {
+    ...estimate,
+    estimatorNotes: Array.from(new Set([...markers, ...(estimate.estimatorNotes ?? [])])).slice(0, 24)
+  };
 }
 
 export async function debugEstimateTrace(input: EstimateInput) {
@@ -4242,13 +4333,22 @@ export function buildDeterministicJobSummary(input: EstimateInput): string {
 // Polishes the deterministic summary into natural contractor-briefing voice.
 // The AI gets ONE job: rewrite the provided text without adding or removing
 // facts. A failure here is non-fatal — callers keep the raw summary.
-async function polishJobSummary(rawSummary: string): Promise<string> {
-  if (!rawSummary.trim()) return rawSummary;
-  if (getEstimatorAiMode() === "off") return rawSummary;
+async function polishJobSummary(rawSummary: string, auditMarkers?: string[]): Promise<string> {
+  if (!rawSummary.trim()) {
+    auditMarkers?.push("Summary polish: skipped (empty raw summary).");
+    return rawSummary;
+  }
+  if (getEstimatorAiMode() === "off") {
+    auditMarkers?.push("Summary polish: skipped (estimator mode=off).");
+    return rawSummary;
+  }
 
   try {
     const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) return rawSummary;
+    if (!apiKey) {
+      auditMarkers?.push("Summary polish: skipped (no OPENAI_API_KEY).");
+      return rawSummary;
+    }
 
     const client = new OpenAI({ apiKey });
     const model = process.env.OPENAI_SUMMARY_POLISH_MODEL ?? process.env.OPENAI_MODEL ?? "gpt-5-mini";
@@ -4287,13 +4387,19 @@ async function polishJobSummary(rawSummary: string): Promise<string> {
       );
 
       const polished = response.output_text?.trim();
-      if (!polished) return rawSummary;
+      if (!polished) {
+        auditMarkers?.push("Summary polish: failed (empty response); using raw deterministic summary.");
+        return rawSummary;
+      }
+      auditMarkers?.push("Summary polish: applied.");
       return polished.slice(0, 600);
     } finally {
       clearTimeout(timeoutId);
     }
   } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
     console.warn("Job summary polish failed; using raw deterministic summary.", error);
+    auditMarkers?.push(`Summary polish: failed (${message}); using raw deterministic summary.`);
     return rawSummary;
   }
 }
@@ -4417,18 +4523,14 @@ async function sendContractorNewLeadEmail(
   }
 }
 
-// Upper bound on the whole estimator call. The run-estimator route has
-// `maxDuration = 60` so we leave ~5s of headroom for the terminal
-// state-write + notifications fan-out after this returns. The previous
-// 40s ceiling was too tight for gpt-5-mini with multi-image inputs and
-// caused 100% failure on a sustained-latency window on 2026-05-04 — see
-// Bugs & Fixes for the incident.
-const ESTIMATE_GENERATION_TIMEOUT_MS = 55000;
-
+// Generic AbortController-backed timeout wrapper. Used now only for narrow
+// per-call protection (e.g. the property-data lookup); the prior outer
+// wrapper around the entire generateEstimate pipeline was removed because
+// it killed the deterministic fallback alongside the AI call.
 async function runWithAbortTimeout<T>(timeoutMs: number, work: () => Promise<T>): Promise<T> {
   const controller = new AbortController();
   const timeoutId = setTimeout(
-    () => controller.abort(new Error(`Estimator timed out after ${timeoutMs}ms.`)),
+    () => controller.abort(new Error(`Operation timed out after ${timeoutMs}ms.`)),
     timeoutMs
   );
   try {
@@ -4453,6 +4555,14 @@ async function runWithAbortTimeout<T>(timeoutMs: number, work: () => Promise<T>)
 export async function generateEstimateAsync(leadId: string) {
   const admin = createAdminClient();
 
+  // Hoisted so the catch block can attempt a guaranteed last-resort
+  // fallback ("never $0") if anything inside the try throws. Each is
+  // populated as the pipeline progresses; the catch checks for the
+  // minimum set (estimateInput + leadOrgId) before attempting recovery.
+  let estimateInput: EstimateInput | null = null;
+  let leadOrgId: string | null = null;
+  let leadAddressFull: string | null = null;
+
   try {
     const aiMode = getEstimatorAiMode();
 
@@ -4471,6 +4581,9 @@ export async function generateEstimateAsync(leadId: string) {
     if (lead.ai_generated_at) {
       return;
     }
+
+    leadOrgId = lead.org_id as string;
+    leadAddressFull = (lead.address_full as string | null) ?? null;
 
     const [{ data: contractor, error: contractorError }, { data: photos, error: photosError }] =
       await Promise.all([
@@ -4565,24 +4678,28 @@ export async function generateEstimateAsync(leadId: string) {
       }
     }
 
-    const estimate = await runWithAbortTimeout(ESTIMATE_GENERATION_TIMEOUT_MS, () =>
-      generateEstimate({
-        businessName: contractor.business_name as string,
-        services: ((lead.services as string[]) ?? []).map((service) => service),
-        serviceQuestionAnswers: parsedServiceQuestionAnswers,
-        address: lead.address_full as string,
-        addressPlaceId: (lead.address_place_id as string | null) ?? null,
-        lat: leadLat,
-        lng: leadLng,
-        description: lead.description as string | null,
-        photoUrls: (photos ?? []).map((photo) => (photo.public_url as string) || "").filter(Boolean),
-        parcelLotSizeSqft: lead.parcel_lot_size_sqft ? Number(lead.parcel_lot_size_sqft) : null,
-        businessAddress: (contractor.business_address_full as string | null) ?? null,
-        businessLat: contractorLat,
-        businessLng: contractorLng,
-        travelDistanceMiles
-      })
-    );
+    estimateInput = {
+      businessName: contractor.business_name as string,
+      services: ((lead.services as string[]) ?? []).map((service) => service),
+      serviceQuestionAnswers: parsedServiceQuestionAnswers,
+      address: lead.address_full as string,
+      addressPlaceId: (lead.address_place_id as string | null) ?? null,
+      lat: leadLat,
+      lng: leadLng,
+      description: lead.description as string | null,
+      photoUrls: (photos ?? []).map((photo) => (photo.public_url as string) || "").filter(Boolean),
+      parcelLotSizeSqft: lead.parcel_lot_size_sqft ? Number(lead.parcel_lot_size_sqft) : null,
+      businessAddress: (contractor.business_address_full as string | null) ?? null,
+      businessLat: contractorLat,
+      businessLng: contractorLng,
+      travelDistanceMiles
+    };
+
+    // No outer wrapper. The pipeline's per-call timeouts (property data
+    // 8s, AI 35s, polish 10s) plus the inline heuristic fallback at the
+    // bottom of generateEstimate guarantee a real estimate lands in
+    // ~normal cases. The catch block below is the last-resort safety net.
+    const estimate = await generateEstimate(estimateInput);
 
     const { error: updateError } = await admin
       .from("leads")
@@ -4631,6 +4748,120 @@ export async function generateEstimateAsync(leadId: string) {
     const failureMessage = error instanceof Error ? error.message : "Unknown estimator failure.";
     console.error("AI estimate failed:", error);
 
+    // -------- Catch-block fallback ("never $0") --------
+    // If we reached the point of having a built EstimateInput, run the
+    // deterministic engine directly with degraded property data so a
+    // real price lands on the row. Polish is intentionally skipped — the
+    // catch path's job is a guaranteed price, not a polished summary.
+    if (estimateInput && leadOrgId) {
+      try {
+        const aiModeForCatch = (() => {
+          try {
+            return getEstimatorAiMode();
+          } catch {
+            return "auto" as EstimatorAiMode;
+          }
+        })();
+        const catchAuditMarkers = [
+          "Estimator origin: catch_fallback.",
+          `Catch fallback triggered by: ${failureMessage}`,
+          "Summary polish: skipped (catch fallback).",
+          "Property data: skipped (catch fallback uses degraded defaults)."
+        ];
+        const degradedPropertyData = buildDegradedPropertyData({
+          address: estimateInput.address,
+          parcelLotSizeSqft: estimateInput.parcelLotSizeSqft ?? null,
+          travelDistanceMiles: estimateInput.travelDistanceMiles ?? null
+        });
+        const catchTrace = buildAiExtractionTrace([], {
+          structuredAiSucceeded: false,
+          fallbackUsed: true,
+          attemptsMade: 0
+        });
+        const catchEstimate = fallbackEstimate(
+          estimateInput,
+          degradedPropertyData,
+          attachAiExtractionTrace(
+            inferSignalsFallback(estimateInput, degradedPropertyData),
+            catchTrace,
+            aiModeForCatch
+          )
+        );
+        // Merge the catch markers into the estimator notes so the row
+        // carries an unambiguous "this was the catch fallback" trail.
+        const catchNotes = Array.from(
+          new Set([...catchAuditMarkers, ...(catchEstimate.estimatorNotes ?? [])])
+        ).slice(0, 24);
+
+        const { error: catchWriteError } = await admin
+          .from("leads")
+          .update({
+            job_city: catchEstimate.propertyData.city,
+            job_state: catchEstimate.propertyData.state,
+            job_zip: catchEstimate.propertyData.zipCode,
+            pricing_region: catchEstimate.region ?? catchEstimate.pricingRegion,
+            parcel_lot_size_sqft: catchEstimate.propertyData.lotSizeSqft,
+            house_sqft: catchEstimate.propertyData.houseSqft,
+            estimated_backyard_sqft: catchEstimate.propertyData.estimatedBackyardSqft,
+            service_category: catchEstimate.serviceCategory as ServiceCategory,
+            job_type: catchEstimate.jobType,
+            terrain_classification: catchEstimate.terrain ?? null,
+            access_difficulty: catchEstimate.access ?? null,
+            material_tier: catchEstimate.material ?? null,
+            ai_confidence: confidenceLabel(catchEstimate.confidenceScore),
+            ai_confidence_score: catchEstimate.confidenceScore,
+            ai_cost_breakdown: catchEstimate.costBreakdown,
+            ai_service_estimates: catchEstimate.serviceEstimates,
+            ai_pricing_drivers: catchEstimate.pricingDrivers,
+            ai_estimator_notes: catchNotes,
+            ai_job_summary: catchEstimate.summary,
+            ai_estimate_low: catchEstimate.lowEstimate,
+            ai_estimate_high: catchEstimate.highEstimate,
+            ai_suggested_price: catchEstimate.snapQuote,
+            ai_status: "ready",
+            ai_generated_at: new Date().toISOString(),
+            travel_distance_miles: estimateInput.travelDistanceMiles ?? null
+          })
+          .eq("id", leadId)
+          .eq("org_id", leadOrgId);
+
+        if (catchWriteError) {
+          console.error("Catch fallback write failed:", catchWriteError);
+          // Fall through to the last-resort failure-write below.
+        } else {
+          // Capture the original error to Sentry so we can monitor what
+          // forced the catch fallback even on the recovery path.
+          Sentry.captureException(error, {
+            tags: { area: "estimator", stage: "catch-fallback-recovered" },
+            extra: { leadId, orgId: leadOrgId, failureMessage }
+          });
+          invalidateAnalytics(leadOrgId);
+          await sendNewLeadNotifications(admin, {
+            leadId,
+            orgId: leadOrgId,
+            addressFull: leadAddressFull
+          });
+          return;
+        }
+      } catch (catchFallbackError) {
+        console.error("Catch fallback itself threw:", catchFallbackError);
+        Sentry.captureException(catchFallbackError, {
+          tags: { area: "estimator", stage: "catch-fallback-threw" },
+          extra: { leadId, orgId: leadOrgId, originalError: failureMessage }
+        });
+      }
+    }
+
+    // -------- Last-resort failure write --------
+    // Reached only if estimateInput wasn't built (e.g. lead/contractor
+    // load failed) or the catch fallback itself failed to land. Lead is
+    // recorded as failed and the rescue cron's failed-retry stage may
+    // pick it up later. Tagged distinctly so we can monitor.
+    Sentry.captureException(error, {
+      tags: { area: "estimator", stage: "catch-fallback-unreachable" },
+      extra: { leadId, orgId: leadOrgId, failureMessage }
+    });
+
     const aiModeNote = (() => {
       try {
         return `Estimator AI mode: ${getEstimatorAiMode()}.`;
@@ -4649,15 +4880,20 @@ export async function generateEstimateAsync(leadId: string) {
       message: failureMessage
     });
 
-    // Look up org_id first so the failure UPDATE can include it for
-    // defense-in-depth (parity with the success path's update at line
-    // ~4615). Without the org_id filter a stale leadId could in
-    // principle clobber a different org's row through the admin client.
-    const { data: failureLead } = await admin
-      .from("leads")
-      .select("org_id,address_full")
-      .eq("id", leadId)
-      .single();
+    // Look up org_id first if we don't already have it (e.g. lead row
+    // load failed before we could hoist it). Without this, the UPDATE
+    // can't include the defense-in-depth org_id filter.
+    const resolvedOrgId = leadOrgId ?? (await (async () => {
+      const { data: failureLead } = await admin
+        .from("leads")
+        .select("org_id,address_full")
+        .eq("id", leadId)
+        .single();
+      if (failureLead?.address_full && !leadAddressFull) {
+        leadAddressFull = failureLead.address_full as string;
+      }
+      return (failureLead?.org_id as string | null) ?? null;
+    })());
 
     const failureUpdateBuilder = admin
       .from("leads")
@@ -4666,19 +4902,19 @@ export async function generateEstimateAsync(leadId: string) {
         ai_estimator_notes: failureNotes
       })
       .eq("id", leadId);
-    const { error: failureUpdateError } = failureLead?.org_id
-      ? await failureUpdateBuilder.eq("org_id", failureLead.org_id as string)
+    const { error: failureUpdateError } = resolvedOrgId
+      ? await failureUpdateBuilder.eq("org_id", resolvedOrgId)
       : await failureUpdateBuilder;
 
     if (failureUpdateError) {
       console.error("Failed to persist estimator failure state:", failureUpdateError);
     }
 
-    if (failureLead?.org_id) {
+    if (resolvedOrgId) {
       await sendNewLeadNotifications(admin, {
         leadId,
-        orgId: failureLead.org_id as string,
-        addressFull: (failureLead.address_full as string | null) ?? null
+        orgId: resolvedOrgId,
+        addressFull: leadAddressFull
       });
     }
   }

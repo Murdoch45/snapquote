@@ -1883,3 +1883,84 @@ The two pixels live on different globals (`window.fbq` vs `window.gtag`/`window.
 - Did not touch quote expiry, archive cron, or RLS policies.
 - Did not run a build or deploy. Code pushed to GitHub; Vercel will auto-deploy.
 - The 3 failed test leads from the original incident (Tree Service `006c1b2c…`, Deck `89a38c8c…`, Deck `e5c894fc…`) will be picked up by the rescue cron's new failed-retry stage on its next 3-min tick — they're within the 6-hour window and at `ai_retry_count = 0`.
+
+---
+
+## Session — May 4, 2026 (fix #2)
+
+### Fix: Remove outer estimator timeout, guarantee catch-block fallback, property-data timeout, pipeline audit markers
+
+**Why a second fix on the same day:** The earlier May 4 commit (`4346563`) addressed the symptom (AI was timing out at the outer wrapper) by bumping the wrapper from 40s → 55s and tightening the inner AI timeout. That helped but did not close the architectural hole: the outer wrapper still wrapped both *the thing that can hang* (AI) and *the safety net for when it does* (the heuristic fallback at `lib/ai/estimate.ts:~4010`) in the same kill switch. So on a sustained AI degradation, the fallback would still get killed alongside the AI call. Murdoch's product requirement is that contractors NEVER see "AI estimate unavailable" / $0 — that has to be structurally guaranteed, not probabilistically reduced. This commit makes the guarantee structural.
+
+**Three architectural changes + five new audit markers:**
+
+1. **Removed the outer `runWithAbortTimeout` wrapper around `generateEstimate`.** Deleted `ESTIMATE_GENERATION_TIMEOUT_MS = 55000`. The pipeline now relies on per-call timeouts at every external boundary instead. Each timeout is narrower than the prior umbrella and they don't compete with each other:
+   - Property data: `PROPERTY_DATA_TIMEOUT_MS = 8000` (new)
+   - AI call: `STRUCTURED_AI_TIMEOUT_MS = 35000` (lowered from 40000 — no longer needs to leave room for an outer wrapper)
+   - Polish: 10000 (unchanged)
+   - Pure JS (fallback engine compute, DB writes): no timeout needed
+   The `runWithAbortTimeout` helper is kept (used now for the property-data lookup) but it no longer wraps the entire pipeline.
+
+2. **Added a guaranteed catch-block fallback in `generateEstimateAsync`.** Hoisted `estimateInput`, `leadOrgId`, `leadAddressFull` from inside the try block to `let` declarations at function scope. In the catch block, if `estimateInput` and `leadOrgId` are populated, the catch:
+   - Builds a degraded `PropertyData` via `buildDegradedPropertyData` (new helper exported from `lib/property-data.ts`).
+   - Calls `fallbackEstimate(estimateInput, degradedPropertyData, ...inferSignalsFallback(...))` directly — pure JS, deterministic, no external network calls.
+   - Writes the success-style UPDATE with `ai_status="ready"` and the resulting prices.
+   - Skips polish entirely (catch path's job is GUARANTEE A PRICE, not a polished one).
+   - Captures the original error to Sentry with tag `stage: "catch-fallback-recovered"` so we can monitor what forced the catch even on the recovery path.
+   - Fires `sendNewLeadNotifications` and returns.
+   If the catch fallback itself throws (which would require `fallbackEstimate` to throw — it doesn't under any input we feed it), Sentry-tagged `stage: "catch-fallback-threw"`, then falls through to the last-resort `ai_status="failed"` write tagged `stage: "catch-fallback-unreachable"`.
+
+3. **Added 8s timeout + degraded-fallback to the `getPropertyData` call site.** Wrapped in `runWithAbortTimeout(PROPERTY_DATA_TIMEOUT_MS, ...)` inside `generateEstimate`. On timeout/throw, pushes `"Property data lookup failed: <reason>; using degraded defaults."` and continues with `buildDegradedPropertyData(...)` — no throw, the rest of the pipeline runs identically.
+
+**Five new pipeline audit markers added to `ai_estimator_notes`** (all 1-2 line `auditMarkers.push(...)` additions; no schema change). The markers are threaded through `generateEstimate` via a local `auditMarkers: string[]` array, then merged into the result's `estimatorNotes` via the new `mergeAuditMarkers` helper:
+
+a. **Property data success/failure** — `"Property data resolved: <city>, <state> (lot <sqft> sqft)."` or `"Property data lookup failed: <reason>; using degraded defaults."`
+b. **Satellite image** — pushed inside `resolveSatelliteImageUrl`: `"Satellite image attached."` or one of `"Satellite image unavailable: no location coordinates|no Google Maps API key|fetch failed."` Plus `"Satellite image: skipped (estimator mode=off)."` when AI is disabled entirely.
+c. **Polish summary** — pushed inside `polishJobSummary`: `"Summary polish: applied."` / `"Summary polish: failed (<reason>); using raw deterministic summary."` / `"Summary polish: skipped (catch fallback|estimator mode=off|no OPENAI_API_KEY|empty raw summary)."`
+d. **Catch fallback origin** — pushed in the catch path: `"Estimator origin: catch_fallback."` and `"Catch fallback triggered by: <message>"`. Distinguishes from the in-pipeline fallback (which still uses `"Estimator signal source: fallback."`).
+
+The slice limit on `engineEstimate.estimatorNotes` was bumped from 12 → 20 (line ~3899) and `mergeAuditMarkers` caps at 24 to ensure the new markers don't get truncated by the existing engine-level cap.
+
+### Files changed
+
+| Path | Change |
+|---|---|
+| `lib/ai/estimate.ts` | Added `import * as Sentry from "@sentry/nextjs"`. Imported `buildDegradedPropertyData`. Removed `ESTIMATE_GENERATION_TIMEOUT_MS`. Added `PROPERTY_DATA_TIMEOUT_MS = 8000`. Lowered `STRUCTURED_AI_TIMEOUT_MS` 40000 → 35000. `resolveSatelliteImageUrl` accepts optional `auditMarkers` and pushes satellite markers. `callOpenAI` accepts optional `auditMarkers` and forwards. `polishJobSummary` and `polishEstimateSummary` accept optional `auditMarkers` and push polish markers. `generateEstimate` collects `auditMarkers` locally, wraps `getPropertyData` in `runWithAbortTimeout(8000, ...)` with degraded fallback, threads markers through callOpenAI / polishEstimateSummary, and merges into result via new `mergeAuditMarkers` helper. `engineEstimate.estimatorNotes` slice cap raised 12 → 20. `generateEstimateAsync` had `estimateInput / leadOrgId / leadAddressFull` hoisted to `let` declarations, removed the outer `runWithAbortTimeout` around `generateEstimate`, added a full catch-block fallback path that runs `fallbackEstimate` directly with degraded property data, writes the success-style UPDATE, fires notifications, and Sentry-tags the recovery. Last-resort `ai_status="failed"` write is now reached only if the catch fallback itself fails (Sentry-tagged `catch-fallback-unreachable`). |
+| `lib/property-data.ts` | New exported helper `buildDegradedPropertyData(input)` that returns a fully-shaped `PropertyData` with all-null fields and `locationSource="unavailable"` for use when the real lookup fails or times out. |
+| `docs/current-state.md` | Estimator Pipeline section rewritten with the new failure topology (in-pipeline fallback → catch fallback → rescue cron) and the five new audit-marker conventions documented. |
+| `docs/updates-log.md` | This entry. |
+
+### Verification before push
+
+- `npm run typecheck` — exit 0.
+- `npm run lint` — exit 0 (only pre-existing `<img>` warning in `app/layout.tsx`, unrelated).
+- `npm run test` — 75/75 tests passing across 10 files.
+- Verified `ESTIMATE_GENERATION_TIMEOUT_MS` is fully removed from code (only references remaining are historical mentions in `docs/updates-log.md` from the prior fix entry — left intact as record).
+- Spot-checked all five new audit markers reach a code path that's not behind a dead branch:
+  - Property data success: pushed after successful `getPropertyData` return at the top of `generateEstimate`.
+  - Property data failure: pushed in the catch around the property data timeout.
+  - Satellite: pushed at all 4 exit points of `resolveSatelliteImageUrl` + once for `aiMode === "off"` in `generateEstimate`.
+  - Polish: pushed at success, failure (empty + thrown), and 3 skip paths in `polishJobSummary`.
+  - Catch fallback origin: pushed in the catch path of `generateEstimateAsync`.
+- Verified `ai_estimator_notes` is written on the catch path (success-style UPDATE writes `catchEstimate.estimatorNotes` which includes the merged audit markers).
+- Verified the catch path writes `ai_status="ready"` (not "failed") since the deterministic estimate IS a real estimate.
+- Verified `getPropertyData` timeout returns degraded data (via `buildDegradedPropertyData`) rather than throwing.
+- Verified `lead`, `contractor`, `photos` data correctly hoisted via `estimateInput` capture (compiles clean; catch-path TS is happy with the `null` checks before use).
+
+### Sentry tagging
+
+Three new `area: "estimator"` tag values to monitor:
+- `stage: "catch-fallback-recovered"` — the catch ran, produced a price, lead is `ai_status="ready"`. The original error is captured for diagnostic purposes.
+- `stage: "catch-fallback-threw"` — the catch fallback itself crashed (very unexpected; would require `fallbackEstimate` to throw).
+- `stage: "catch-fallback-unreachable"` — the catch fired but `estimateInput` wasn't populated (e.g. lead row load failed before we could hoist it).
+
+Healthy steady state: `catch-fallback-recovered` should be rare (single-digit per day at most). Spikes mean AI/property-data is degraded — useful operational signal.
+
+### Not done / out of scope
+
+- Did not change the model. `gpt-5-mini` stays.
+- Did not move polish to async / fire-and-forget. Polish still runs synchronously in the critical path on success and in-pipeline-fallback paths; only the catch fallback skips it.
+- Did not add an `ai_signal_source` column. The audit markers above provide the same info via `ai_estimator_notes`.
+- Did not add a typed JSONB audit column. The string-array markers are sufficient for the testing/grep use case.
+- Did not touch retry cron, leads list filters, ConfidenceMeter, or any UI from the prior fix.
+- Did not run a build or deploy. Code pushed to GitHub; Vercel will auto-deploy.

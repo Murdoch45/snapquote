@@ -283,6 +283,35 @@ function resolveBackyardSqft(lotSizeSqft: number | null, houseSqft: number | nul
   return roundToWhole(Math.max(lotSizeSqft * 0.35, 250));
 }
 
+// Returns a fully-shaped PropertyData with all-nulls / "unavailable" sources
+// for use when a real getPropertyData call has failed or timed out. The
+// downstream estimateEngine then falls back to NATIONAL_DEFAULT cost model
+// and per-service estimators degrade to their own internal defaults rather
+// than throwing — guaranteeing a price is still produced.
+export function buildDegradedPropertyData(input: {
+  address: string;
+  parcelLotSizeSqft?: number | null;
+  travelDistanceMiles?: number | null;
+}): PropertyData {
+  const parcelLotSizeSqft =
+    input.parcelLotSizeSqft && input.parcelLotSizeSqft > 0
+      ? roundToWhole(input.parcelLotSizeSqft)
+      : null;
+  return {
+    formattedAddress: input.address,
+    city: null,
+    state: null,
+    zipCode: null,
+    lotSizeSqft: parcelLotSizeSqft,
+    houseSqft: null,
+    estimatedBackyardSqft: null,
+    travelDistanceMiles: input.travelDistanceMiles ?? null,
+    lotSizeSource: parcelLotSizeSqft != null ? "lead_parcel" : "unavailable",
+    houseSqftSource: "unavailable",
+    locationSource: "unavailable"
+  };
+}
+
 export async function getPropertyData(input: PropertyLookupInput): Promise<PropertyData> {
   const key = getGoogleMapsApiKey();
 
