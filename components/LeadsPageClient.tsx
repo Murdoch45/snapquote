@@ -12,6 +12,7 @@ type Lead = {
   locality: string;
   services: string[];
   submitted_at: string;
+  ai_status: string;
   ai_suggested_price: number | null;
   ai_estimate_low: number | null;
   ai_estimate_high: number | null;

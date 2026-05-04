@@ -6,8 +6,7 @@ import {
   buildDeterministicJobSummary,
   classifyStructuredAiFailure,
   fallbackEstimate,
-  parseAiOutput,
-  retryStructuredAiOperation
+  parseAiOutput
 } from "../../lib/ai/estimate";
 
 describe("ai estimate parsing", () => {
@@ -80,42 +79,13 @@ describe("ai estimate parsing", () => {
     expect(failure.retryable).toBe(true);
   });
 
-  it("retries retryable structured AI failures with bounded attempts", async () => {
-    const delays: number[] = [];
-    let attemptCount = 0;
-
-    const result = await retryStructuredAiOperation({
-      maxAttempts: 3,
-      sleepFn: async (ms) => {
-        delays.push(ms);
-      },
-      operation: async () => {
-        attemptCount += 1;
-        if (attemptCount < 3) {
-          throw { status: 429, message: "Rate limited." };
-        }
-        return { summary: "ok" };
-      }
-    });
-
-    expect(result.ok).toBe(true);
-    if (!result.ok) {
-      throw new Error("Expected retryStructuredAiOperation to succeed.");
-    }
-    expect(result.result.summary).toBe("ok");
-    expect(result.trace.attemptsMade).toBe(3);
-    expect(result.trace.attempts).toHaveLength(2);
-    expect(delays).toHaveLength(2);
-  });
-
   it("formats fallback trace notes with exact failure metadata", () => {
     expect(
       buildAiExtractionNotes({
         source: "fallback",
         structuredAiSucceeded: false,
         fallbackUsed: true,
-        attemptsMade: 3,
-        maxAttempts: 3,
+        attemptsMade: 1,
         finalFailureCategory: "timeout",
         finalFailureRetryable: true,
         attempts: [
@@ -128,7 +98,7 @@ describe("ai estimate parsing", () => {
         ]
       })
     ).toEqual([
-      "Structured AI extraction failed after 3/3 attempts; fallback was used.",
+      "Structured AI extraction failed after 1 attempt; fallback was used.",
       "Structured AI final failure category: timeout (retryable).",
       "Structured AI failure history: attempt 1=timeout retryable."
     ]);

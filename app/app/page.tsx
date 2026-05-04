@@ -47,6 +47,7 @@ type DashboardLead = {
   submitted_at: string;
   services: string[];
   status: string;
+  ai_status: string;
   ai_estimate_low: number | string | null;
   ai_estimate_high: number | string | null;
   ai_suggested_price: number | string | null;
@@ -61,6 +62,7 @@ function getLocationLabel(lead: DashboardLead): string {
 }
 
 function getEstimateLabel(lead: DashboardLead): string {
+  if (lead.ai_status === "failed") return "AI unavailable";
   const range = formatCurrencyRange(lead.ai_estimate_low, lead.ai_estimate_high, lead.ai_suggested_price);
   return range ?? "AI estimate pending";
 }
@@ -100,10 +102,10 @@ const getDashboardLeads = cache(async (orgId: string): Promise<DashboardLead[]> 
     supabase
       .from("leads")
       .select(
-        "id,customer_name,address_full,job_city,job_state,submitted_at,services,status,ai_estimate_low,ai_estimate_high,ai_suggested_price"
+        "id,customer_name,address_full,job_city,job_state,submitted_at,services,status,ai_status,ai_estimate_low,ai_estimate_high,ai_suggested_price"
       )
       .eq("org_id", orgId)
-      .eq("ai_status", "ready")
+      .in("ai_status", ["ready", "failed"])
       .gte("submitted_at", windowStart)
       .order("submitted_at", { ascending: false })
       .limit(20),
@@ -121,6 +123,7 @@ const getDashboardLeads = cache(async (orgId: string): Promise<DashboardLead[]> 
     submitted_at: lead.submitted_at as string,
     services: ((lead.services as string[] | null) ?? []).filter(Boolean),
     status: lead.status as string,
+    ai_status: (lead.ai_status as string | null) ?? "ready",
     ai_estimate_low: lead.ai_estimate_low as number | string | null,
     ai_estimate_high: lead.ai_estimate_high as number | string | null,
     ai_suggested_price: lead.ai_suggested_price as number | string | null,
@@ -225,7 +228,11 @@ async function DashboardRecentLeads({ orgId }: { orgId: string }) {
           <p className="text-[11px] font-semibold uppercase tracking-[0.04em] text-muted-foreground/70">
             AI Estimate
           </p>
-          <p className="mt-1 text-lg font-bold text-primary">{getEstimateLabel(lead)}</p>
+          <p
+            className={`mt-1 text-lg font-bold ${lead.ai_status === "failed" ? "text-amber-700" : "text-primary"}`}
+          >
+            {getEstimateLabel(lead)}
+          </p>
         </div>
         <div className="text-right">
           <p className="text-[11px] font-semibold uppercase tracking-[0.04em] text-muted-foreground/70">

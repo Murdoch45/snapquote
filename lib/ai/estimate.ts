@@ -368,10 +368,13 @@ function normalizeRemainingUncertainty(value: string | null | undefined): Remain
   return value === "low" || value === "high" ? value : "medium";
 }
 
-const STRUCTURED_AI_MAX_ATTEMPTS = 3;
-const STRUCTURED_AI_TIMEOUT_MS = 45000;
-const STRUCTURED_AI_BASE_BACKOFF_MS = 600;
-const STRUCTURED_AI_MAX_BACKOFF_MS = 3500;
+// Per-call AI request timeout. Must stay below ESTIMATE_GENERATION_TIMEOUT_MS
+// minus the time taken by property-data lookup, satellite image resolve,
+// and the optional summary polish (10s) — so a single AI call has at
+// most ~40s to come back before the outer wrapper aborts the whole flow.
+// We give one shot per lead submission; the rescue-stuck-leads cron
+// retries failed leads externally with an attempt cap on the row.
+const STRUCTURED_AI_TIMEOUT_MS = 40000;
 
 export type AiFailureCategory =
   | "timeout"
@@ -398,7 +401,6 @@ export type AiExtractionTrace = {
   structuredAiSucceeded: boolean;
   fallbackUsed: boolean;
   attemptsMade: number;
-  maxAttempts: number;
   finalFailureCategory: AiFailureCategory | null;
   finalFailureRetryable: boolean | null;
   attempts: AiExtractionAttemptTrace[];
@@ -1592,7 +1594,6 @@ function buildAiExtractionTrace(
     structuredAiSucceeded: params.structuredAiSucceeded,
     fallbackUsed: params.fallbackUsed,
     attemptsMade: params.attemptsMade,
-    maxAttempts: STRUCTURED_AI_MAX_ATTEMPTS,
     finalFailureCategory: params.finalFailureCategory ?? null,
     finalFailureRetryable: params.finalFailureRetryable ?? null,
     attempts
@@ -1730,13 +1731,13 @@ export function buildAiExtractionNotes(trace: AiExtractionTrace, mode: Estimator
 
   if (trace.structuredAiSucceeded) {
     return [
-      `Structured AI extraction succeeded on attempt ${trace.attemptsMade}/${trace.maxAttempts}.`,
+      `Structured AI extraction succeeded on attempt ${trace.attemptsMade}.`,
       history
     ];
   }
 
   return [
-    `Structured AI extraction failed after ${trace.attemptsMade}/${trace.maxAttempts} attempts; fallback was used.`,
+    `Structured AI extraction failed after ${trace.attemptsMade} attempt${trace.attemptsMade === 1 ? "" : "s"}; fallback was used.`,
     `Structured AI final failure category: ${trace.finalFailureCategory ?? "unknown_error"} (${trace.finalFailureRetryable ? "retryable" : "non-retryable"}).`,
     history
   ];
@@ -1767,15 +1768,6 @@ function attachAiExtractionTrace(
   };
 }
 
-function computeStructuredAiRetryDelayMs(attempt: number): number {
-  const exponentialDelay = Math.min(
-    STRUCTURED_AI_BASE_BACKOFF_MS * 2 ** Math.max(attempt - 1, 0),
-    STRUCTURED_AI_MAX_BACKOFF_MS
-  );
-  const jitter = Math.floor(Math.random() * 250);
-  return exponentialDelay + jitter;
-}
-
 function parseAiOutput(raw: string): AiEstimatorSignals {
   const parsedJson = JSON.parse(raw);
   return normalizeLooseAiSignals(aiSignalsSchema.parse(parsedJson));
@@ -1804,94 +1796,53 @@ async function resolveSatelliteImageUrl(input: EstimateInput): Promise<string | 
   return fetchImageAsDataUrl(staticMapUrl);
 }
 
-export async function retryStructuredAiOperation<T>(params: {
-  operation: (attempt: number) => Promise<T>;
-  maxAttempts?: number;
-  sleepFn?: (ms: number) => Promise<unknown>;
+// Single-attempt structured AI invocation. The legacy retry loop was
+// removed because the inner per-attempt timeout already exceeded the outer
+// ESTIMATE_GENERATION_TIMEOUT_MS, making "retry" structurally
+// unreachable. Cross-call retries now happen externally in the
+// rescue-stuck-leads cron, which respects the per-row ai_retry_count cap.
+async function runStructuredAiOperation<T>(params: {
+  operation: () => Promise<T>;
 }): Promise<
   | { ok: true; result: T; trace: AiExtractionTrace }
   | { ok: false; result: null; failure: StructuredAiFailure; trace: AiExtractionTrace }
 > {
-  const attempts: AiExtractionAttemptTrace[] = [];
-  const maxAttempts = Math.max(1, params.maxAttempts ?? STRUCTURED_AI_MAX_ATTEMPTS);
-  const sleepFn = params.sleepFn ?? ((ms: number) => sleep(ms));
-
-  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
-    try {
-      const result = await params.operation(attempt);
-      return {
-        ok: true,
-        result,
-        trace: {
-          ...buildAiExtractionTrace(attempts, {
-            structuredAiSucceeded: true,
-            fallbackUsed: false,
-            attemptsMade: attempt
-          }),
-          maxAttempts
-        }
-      };
-    } catch (error) {
-      const failure = classifyStructuredAiFailure(error);
-      attempts.push({
-        attempt,
+  try {
+    const result = await params.operation();
+    return {
+      ok: true,
+      result,
+      trace: buildAiExtractionTrace([], {
+        structuredAiSucceeded: true,
+        fallbackUsed: false,
+        attemptsMade: 1
+      })
+    };
+  } catch (error) {
+    const failure = classifyStructuredAiFailure(error);
+    const attempts: AiExtractionAttemptTrace[] = [
+      {
+        attempt: 1,
         category: failure.category,
         retryable: failure.retryable,
         message: failure.message,
         statusCode: failure.statusCode,
         code: failure.code
-      });
-
-      if (!failure.retryable || attempt >= maxAttempts) {
-        return {
-          ok: false,
-          result: null,
-          failure,
-          trace: {
-            ...buildAiExtractionTrace(attempts, {
-              structuredAiSucceeded: false,
-              fallbackUsed: true,
-              attemptsMade: attempt,
-              finalFailureCategory: failure.category,
-              finalFailureRetryable: failure.retryable
-            }),
-            maxAttempts
-          }
-        };
       }
-
-      const delayMs = computeStructuredAiRetryDelayMs(attempt);
-      console.warn("Structured AI attempt failed; retrying.", {
-        attempt,
-        maxAttempts,
-        category: failure.category,
-        retryable: failure.retryable,
-        statusCode: failure.statusCode,
-        code: failure.code,
-        delayMs
-      });
-      await sleepFn(delayMs);
-    }
+    ];
+    return {
+      ok: false,
+      result: null,
+      failure,
+      trace: buildAiExtractionTrace(attempts, {
+        structuredAiSucceeded: false,
+        fallbackUsed: true,
+        attemptsMade: 1,
+        finalFailureCategory: failure.category,
+        finalFailureRetryable: failure.retryable
+      })
+    };
   }
-
-  const failure = new StructuredAiFailure({
-    category: "unknown_error",
-    retryable: false,
-    message: "Structured AI retry loop exited unexpectedly."
-  });
-
-  return {
-    ok: false,
-    result: null,
-    failure,
-    trace: buildAiExtractionTrace(attempts, {
-      structuredAiSucceeded: false,
-      fallbackUsed: true,
-      attemptsMade: attempts.length,
-      finalFailureCategory: failure.category,
-      finalFailureRetryable: failure.retryable
-    })
-  };
 }
 
 function buildServiceRequests(input: EstimateInput): ServiceRequest[] {
@@ -3736,18 +3687,23 @@ async function callOpenAI(prompt: string, input: EstimateInput): Promise<Structu
       image_url: url,
       detail: "high" as const
     })),
+    // The satellite tile is a top-down 600x400 reference image used only
+    // for property context (lot shape, structure footprint). "low" keeps
+    // model-side preprocessing fast — biggest single latency win for the
+    // request — while still being more than enough resolution for the
+    // signal we extract from it. Customer photos stay "high".
     ...(satelliteImage
       ? [
           {
             type: "input_image" as const,
             image_url: satelliteImage,
-            detail: "high" as const
+            detail: "low" as const
           }
         ]
       : [])
   ];
 
-  const attemptResult = await retryStructuredAiOperation({
+  const attemptResult = await runStructuredAiOperation({
     operation: async () => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort("Structured AI request timed out."), STRUCTURED_AI_TIMEOUT_MS);
@@ -4461,10 +4417,13 @@ async function sendContractorNewLeadEmail(
   }
 }
 
-// Upper bound on the whole estimator call. Keeps us well under the 60s
-// lead-submit function budget so the outer catch actually runs on a stall
-// instead of Vercel reclaiming the instance mid-flight.
-const ESTIMATE_GENERATION_TIMEOUT_MS = 40000;
+// Upper bound on the whole estimator call. The run-estimator route has
+// `maxDuration = 60` so we leave ~5s of headroom for the terminal
+// state-write + notifications fan-out after this returns. The previous
+// 40s ceiling was too tight for gpt-5-mini with multi-image inputs and
+// caused 100% failure on a sustained-latency window on 2026-05-04 — see
+// Bugs & Fixes for the incident.
+const ESTIMATE_GENERATION_TIMEOUT_MS = 55000;
 
 async function runWithAbortTimeout<T>(timeoutMs: number, work: () => Promise<T>): Promise<T> {
   const controller = new AbortController();
@@ -4690,23 +4649,30 @@ export async function generateEstimateAsync(leadId: string) {
       message: failureMessage
     });
 
-    const { error: failureUpdateError } = await admin
+    // Look up org_id first so the failure UPDATE can include it for
+    // defense-in-depth (parity with the success path's update at line
+    // ~4615). Without the org_id filter a stale leadId could in
+    // principle clobber a different org's row through the admin client.
+    const { data: failureLead } = await admin
+      .from("leads")
+      .select("org_id,address_full")
+      .eq("id", leadId)
+      .single();
+
+    const failureUpdateBuilder = admin
       .from("leads")
       .update({
         ai_status: "failed",
         ai_estimator_notes: failureNotes
       })
       .eq("id", leadId);
+    const { error: failureUpdateError } = failureLead?.org_id
+      ? await failureUpdateBuilder.eq("org_id", failureLead.org_id as string)
+      : await failureUpdateBuilder;
 
     if (failureUpdateError) {
       console.error("Failed to persist estimator failure state:", failureUpdateError);
     }
-
-    const { data: failureLead } = await admin
-      .from("leads")
-      .select("org_id,address_full")
-      .eq("id", leadId)
-      .single();
 
     if (failureLead?.org_id) {
       await sendNewLeadNotifications(admin, {

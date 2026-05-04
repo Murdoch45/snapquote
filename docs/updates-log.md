@@ -1820,3 +1820,66 @@ The two pixels live on different globals (`window.fbq` vs `window.gtag`/`window.
 - No Measurement Protocol / server-side events. Browser-side only.
 - No consent banner / cookie banner gating GA4. If a future EU/UK launch needs GDPR consent gating, both pixels will need to be wrapped behind a consent guard.
 - Mobile (`SnapQuote-mobile`) is unchanged. GA4 is web-only here; mobile would use Firebase Analytics if/when added.
+
+---
+
+## Session — May 4, 2026 (fixes)
+
+### Fix: AI estimator timeout + failed lead visibility + retry cron
+
+**Symptom (3 production bugs from a single test session):**
+1. Three test leads (deck install, deck repair, tree service) all returned "AI estimate unavailable" with degenerate UI: $25 max on the Send Estimate slider, "AI Confidence 40% / Medium confidence" rendered even though no estimate existed.
+2. In-app toast notification appeared for each lead but the lead was nowhere in the leads list or dashboard "recent leads."
+3. Leads appeared to "disappear" from the list. (Investigation showed they never appeared at all — they were filtered out from the moment AI failed.)
+
+**Root cause (single, cascading):**
+- AI estimator was timing out at the outer `ESTIMATE_GENERATION_TIMEOUT_MS = 40000` wrapper in `lib/ai/estimate.ts`. Sentry [SNAPQUOTE-WEB-4](https://snapquote.sentry.io/issues/SNAPQUOTE-WEB-4) recorded 3 events in 8 minutes matching the test leads exactly.
+- 40s wrapper budget was structurally too tight for `gpt-5-mini` with multi-image inputs (`detail: "high"` on every customer photo + the satellite tile). The inner `STRUCTURED_AI_MAX_ATTEMPTS = 3` retry loop, with a 45s per-attempt timeout, was dead code — the outer wrapper killed everything before even one full retry could complete.
+- Both lead-list queries (`app/app/leads/page.tsx` and `app/app/page.tsx`) hard-filtered `.eq("ai_status", "ready")`, so leads that landed in `failed` were silently invisible. Toast still fired correctly from the estimator's terminal-state notifications path, but the lead the toast pointed to was never in the list.
+- UI: `ConfidenceMeter` defaulted to `0.4` (rendering "40% / Medium confidence") when both `ai_confidence_score` and `ai_confidence` were null. `PriceSlider` collapsed to `trackMax = STEP = $25` when both endpoints were 0/null.
+
+**Fix (6 changes, all in this commit):**
+
+1. **Bumped `ESTIMATE_GENERATION_TIMEOUT_MS` 40000 → 55000** in `lib/ai/estimate.ts`. Route `/api/internal/run-estimator` already has `maxDuration = 60`, so this leaves ~5s of headroom for the terminal write + notifications fan-out. Also tightened `STRUCTURED_AI_TIMEOUT_MS` from 45000 → 40000 so the per-call budget fits inside the wrapper.
+2. **Lowered satellite image `detail` from `"high"` → `"low"`** in `callOpenAI` (`lib/ai/estimate.ts:~3697`). Customer photos stay high. The 600x400 satellite tile is property-context only and doesn't need high-detail tokens; biggest single latency win for the request.
+3. **Removed dead retry config.** Deleted `STRUCTURED_AI_MAX_ATTEMPTS`, `STRUCTURED_AI_BASE_BACKOFF_MS`, `STRUCTURED_AI_MAX_BACKOFF_MS`, `computeStructuredAiRetryDelayMs`, and `retryStructuredAiOperation`. Replaced with single-attempt helper `runStructuredAiOperation` that runs the operation once and returns the same trace shape. Cross-call retries now happen externally in the rescue cron with a per-row attempt cap. Removed `maxAttempts` field from `AiExtractionTrace` and updated `buildAiExtractionTrace` / `buildAiExtractionNotes` accordingly. Updated `tests/unit/ai.test.ts` (removed the retry test, fixed the trace-notes test to match new wording).
+4. **Made failed leads visible.** Both list queries (`app/app/leads/page.tsx:33`, `app/app/page.tsx:106`) changed from `.eq("ai_status", "ready")` to `.in("ai_status", ["ready", "failed"])`. Plumbed `ai_status` through `LeadList` / `LeadCard` / dashboard recent-leads card. `LeadCard` now renders "AI estimate unavailable" with amber color + "Review and send a manual estimate" sub-copy when `ai_status === "failed"`. Dashboard recent-leads shows the same "AI unavailable" amber label. Lead detail page (`app/app/leads/[id]/page.tsx`):
+   - `ConfidenceMeter` is now hidden entirely when both `ai_confidence_score` and `ai_confidence` are null/unknown — instead of falling through to the misleading 0.4 "Medium" default.
+   - `QuoteComposer` now receives sane fallback values (`$500–$2000` range, `$1000` snap quote) when the lead has no AI estimate AND no existing draft/expired quote, instead of `Number(null) = 0` collapsing the slider to $0–$25. New `composerDefaults` helper handles the resolution chain (existing quote → AI estimate → fallback).
+   - Added an amber banner above the QuoteComposer card: "AI estimate unavailable for this lead. Set your price manually below and send the estimate as usual." (Only shows on `ai_status === "failed"`.)
+   - `PriceSlider` hardened with a `(0, 0)` defense-in-depth fallback to `$0–$5000` working range.
+5. **Extended `rescue-stuck-leads` cron to retry failed leads.** Added migration `0065_lead_ai_retry_count.sql` (`ALTER TABLE leads ADD COLUMN IF NOT EXISTS ai_retry_count integer NOT NULL DEFAULT 0`). Added a third stage to `app/api/cron/rescue-stuck-leads/route.ts`: leads in `ai_status="failed"` within the last 6 hours and with `ai_retry_count < 2` get atomically transitioned back to `processing` (CAS on both `ai_status` and `ai_retry_count`) with the counter incremented, then re-triggered through the existing `triggerEstimatorForLead` path. Caps retries at 2 per lead so a permanently-broken lead doesn't loop forever.
+6. **Added missing `org_id` filter on the failure-path UPDATE** in `lib/ai/estimate.ts`. Reordered the catch block to look up `failureLead` first (already needed for notifications), then add `.eq("org_id", failureLead.org_id)` to the failure UPDATE — parity with the success-path UPDATE's defense-in-depth at line ~4615.
+
+### Files changed
+
+| Path | Change |
+|---|---|
+| `lib/ai/estimate.ts` | Timeout 40000→55000; STRUCTURED_AI_TIMEOUT_MS 45000→40000; satellite `detail: "low"`; removed retry constants + `retryStructuredAiOperation` + `computeStructuredAiRetryDelayMs`; replaced with single-attempt `runStructuredAiOperation`; removed `maxAttempts` from `AiExtractionTrace`; updated `buildAiExtractionTrace` / `buildAiExtractionNotes`; reordered failure-path catch block to add `org_id` filter on UPDATE. |
+| `app/app/leads/page.tsx` | List filter `.eq("ai_status","ready")` → `.in("ai_status",["ready","failed"])`. Added `ai_status` to projection and lead card mapping. |
+| `app/app/page.tsx` | Dashboard recent-leads filter widened to include `failed`; added `ai_status` to projection and `DashboardLead` type; `getEstimateLabel` returns "AI unavailable" when failed; recent-leads card renders amber color when failed. |
+| `app/app/leads/[id]/page.tsx` | `ConfidenceMeter` now conditional on having actual confidence data (no more 0.4/Medium fallback). New `composerDefaults` helper computes price values from existing-quote → AI estimate → fallback ($500/$2000/$1000). Added amber banner above the QuoteComposer card when `ai_status === "failed"`. |
+| `components/LeadList.tsx`, `components/LeadsPageClient.tsx`, `components/LeadCard.tsx` | Added `ai_status` to Lead type. `LeadCard` renders "AI estimate unavailable" + "Review and send a manual estimate" sub-copy + amber color when failed. |
+| `components/PriceSlider.tsx` | Hardened against (0, 0) inputs — falls back to $0–$5000 working range instead of collapsing to $0–$25. |
+| `app/api/cron/rescue-stuck-leads/route.ts` | Added stage 3: retry recent failed leads with `ai_retry_count < 2` via per-lead CAS update. Constants `MAX_AI_RETRIES = 2`, `FAILED_RETRY_WINDOW_HOURS = 6`. Response now also returns `failedRetried` count. |
+| `supabase/migrations/0065_lead_ai_retry_count.sql` | New. `ADD COLUMN IF NOT EXISTS ai_retry_count integer NOT NULL DEFAULT 0`. Forward-only, idempotent. Applied to live DB via Supabase MCP. |
+| `tests/unit/ai.test.ts` | Removed the `retryStructuredAiOperation` import + test. Updated the trace-notes test to match the new "1 attempt" wording (no more "1/3"). |
+| `docs/current-state.md` | Updated Estimator Pipeline section: timeout 40s → 55s, single-attempt AI calls, satellite detail `low`, retry happens at the cron layer with per-row cap. Added migration 0065 to the migrations list. |
+| `docs/updates-log.md` | This entry. |
+
+### Verification before push
+
+- `npm run typecheck` — exit 0.
+- `npm run lint` — exit 0 (only pre-existing `<img>` warning in `app/layout.tsx`, unrelated).
+- `npm run test` — 75/75 tests passing across 10 files (incl. updated `ai.test.ts`).
+- Verified DB schema: `ai_retry_count integer NOT NULL DEFAULT 0` present on `leads` table.
+- Verified no leftover references to `retryStructuredAiOperation`, `STRUCTURED_AI_MAX_ATTEMPTS`, `computeStructuredAiRetryDelayMs`, `STRUCTURED_AI_BASE_BACKOFF_MS`, `STRUCTURED_AI_MAX_BACKOFF_MS`, or `trace.maxAttempts` anywhere in the codebase.
+- Verified both production list queries updated; `lib/demo/server.ts` intentionally left at `.eq("ai_status","ready")` (curated demo data, never has failed leads).
+
+### Not done / out of scope
+
+- Did not change the model. `gpt-5-mini` stays.
+- Did not refactor the estimator pipeline beyond the listed timeouts + retry collapse.
+- Did not touch quote expiry, archive cron, or RLS policies.
+- Did not run a build or deploy. Code pushed to GitHub; Vercel will auto-deploy.
+- The 3 failed test leads from the original incident (Tree Service `006c1b2c…`, Deck `89a38c8c…`, Deck `e5c894fc…`) will be picked up by the rescue cron's new failed-retry stage on its next 3-min tick — they're within the 6-hour window and at `ai_retry_count = 0`.

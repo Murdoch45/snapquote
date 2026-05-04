@@ -180,6 +180,39 @@ export default async function LeadDetailPage({ params }: Props) {
     lead.ai_estimate_high as number | null,
     lead.ai_suggested_price as number | null
   );
+  // Resolve the price values handed to QuoteComposer / PriceSlider.
+  // Three sources, highest-priority first:
+  //   1. existing draft/expired quote's saved estimate (contractor edits stick)
+  //   2. AI estimate persisted on the lead row
+  //   3. Sensible fallback range so the slider is usable on AI-failed leads
+  // The fallback only kicks in when the lead has NO AI estimate AND NO
+  // existing quote estimate — previously we passed through 0/null which
+  // collapsed the PriceSlider track to $0–$25 (PriceSlider's `trackMin +
+  // STEP` floor) and showed a confusing $0 range to the contractor.
+  const FALLBACK_ESTIMATE_LOW = 500;
+  const FALLBACK_ESTIMATE_HIGH = 2000;
+  const FALLBACK_SNAP_QUOTE = 1000;
+  const toPositiveNumber = (value: unknown): number | null => {
+    if (value === null || value === undefined) return null;
+    const num = Number(value);
+    return Number.isFinite(num) && num > 0 ? num : null;
+  };
+  const aiLow = toPositiveNumber(lead.ai_estimate_low);
+  const aiHigh = toPositiveNumber(lead.ai_estimate_high);
+  const aiSnap = toPositiveNumber(lead.ai_suggested_price);
+  const quoteLow =
+    isDraftQuote || isExpiredQuote
+      ? toPositiveNumber(existingQuote.estimated_price_low)
+      : null;
+  const quoteHigh =
+    isDraftQuote || isExpiredQuote
+      ? toPositiveNumber(existingQuote.estimated_price_high)
+      : null;
+  const composerDefaults = {
+    estimateLow: quoteLow ?? aiLow ?? FALLBACK_ESTIMATE_LOW,
+    estimateHigh: quoteHigh ?? aiHigh ?? FALLBACK_ESTIMATE_HIGH,
+    snapQuote: aiSnap ?? FALLBACK_SNAP_QUOTE
+  };
   const quoteEstimateDisplay = formatCurrencyRange(
     existingQuote?.estimated_price_low as number | string | null | undefined,
     existingQuote?.estimated_price_high as number | string | null | undefined
@@ -355,17 +388,22 @@ export default async function LeadDetailPage({ params }: Props) {
               )}
             </CardContent>
           </Card>
-          <ConfidenceMeter
-            confidence={
-              lead.ai_confidence_score != null
-                ? Number(lead.ai_confidence_score)
-                : lead.ai_confidence === "high"
-                  ? 0.85
-                  : lead.ai_confidence === "medium"
-                    ? 0.65
-                    : 0.4
-            }
-          />
+          {lead.ai_confidence_score != null ||
+          lead.ai_confidence === "high" ||
+          lead.ai_confidence === "medium" ||
+          lead.ai_confidence === "low" ? (
+            <ConfidenceMeter
+              confidence={
+                lead.ai_confidence_score != null
+                  ? Number(lead.ai_confidence_score)
+                  : lead.ai_confidence === "high"
+                    ? 0.85
+                    : lead.ai_confidence === "medium"
+                      ? 0.65
+                      : 0.3
+              }
+            />
+          ) : null}
           <Card>
             <CardHeader>
               <CardTitle>Send Estimate</CardTitle>
@@ -396,6 +434,11 @@ export default async function LeadDetailPage({ params }: Props) {
                 </div>
               ) : canComposeQuote ? (
                 <div className="space-y-3">
+                  {lead.ai_status === "failed" && !isExpiredQuote ? (
+                    <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+                      AI estimate unavailable for this lead. Set your price manually below and send the estimate as usual.
+                    </div>
+                  ) : null}
                   {isExpiredQuote ? (
                     <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
                       This estimate expired. Edit the details below and hit
@@ -406,17 +449,9 @@ export default async function LeadDetailPage({ params }: Props) {
                   <QuoteComposer
                     leadId={lead.id as string}
                     publicId={activePublicId}
-                    snapQuote={Number(lead.ai_suggested_price ?? 900)}
-                    estimateLow={
-                      isDraftQuote || isExpiredQuote
-                        ? Number(existingQuote.estimated_price_low ?? lead.ai_estimate_low ?? null)
-                        : ((lead.ai_estimate_low as number | null) ?? null)
-                    }
-                    estimateHigh={
-                      isDraftQuote || isExpiredQuote
-                        ? Number(existingQuote.estimated_price_high ?? lead.ai_estimate_high ?? null)
-                        : ((lead.ai_estimate_high as number | null) ?? null)
-                    }
+                    snapQuote={composerDefaults.snapQuote}
+                    estimateLow={composerDefaults.estimateLow}
+                    estimateHigh={composerDefaults.estimateHigh}
                     serviceEstimates={aiServiceEstimates}
                     initialMessage={
                       isExpiredQuote

@@ -26,11 +26,11 @@ export default async function LeadsPage({ searchParams }: Props) {
   const { data: leads, count } = await supabase
     .from("leads")
     .select(
-      "id,address_full,customer_name,customer_phone,customer_email,services,submitted_at,ai_suggested_price,ai_estimate_low,ai_estimate_high,ai_job_summary",
+      "id,address_full,customer_name,customer_phone,customer_email,services,submitted_at,ai_status,ai_suggested_price,ai_estimate_low,ai_estimate_high,ai_job_summary",
       { count: "exact" }
     )
     .eq("org_id", auth.orgId)
-    .eq("ai_status", "ready")
+    .in("ai_status", ["ready", "failed"])
     .order("submitted_at", { ascending: false })
     .range(rangeFrom, rangeTo);
 
@@ -151,6 +151,7 @@ export default async function LeadsPage({ searchParams }: Props) {
       locality: addressParts.locality,
       services,
       submitted_at: lead.submitted_at as string,
+      ai_status: (lead.ai_status as string | null) ?? "ready",
       ai_suggested_price: (lead.ai_suggested_price as number | null) ?? null,
       ai_estimate_low: (lead.ai_estimate_low as number | null) ?? null,
       ai_estimate_high: (lead.ai_estimate_high as number | null) ?? null,

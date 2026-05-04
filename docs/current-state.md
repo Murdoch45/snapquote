@@ -98,7 +98,7 @@ SnapQuote is an AI-powered quoting and lead management SaaS for outdoor service 
 - `audit_log` — audit actions including `lead.unlocked`, `quote.sent`, `account.deleted`, `member.self_removed`
 - `iap_subscription_events` — RevenueCat webhook events
 
-**Migrations applied through:** 0064
+**Migrations applied through:** 0065
 - 0051: `organizations.last_active_at` with descending index
 - 0052: `get_org_analytics` RPC (SECURITY INVOKER + is_org_member gate)
 - 0053: RPC service-role bypass (skips is_org_member when `auth.uid() IS NULL`)
@@ -113,6 +113,7 @@ SnapQuote is an AI-powered quoting and lead management SaaS for outdoor service 
 - 0062: `quotes.telnyx_message_id text` for post-hoc SMS lookup via `mcp__Telnyx__get_message`
 - 0063: REVOKE EXECUTE on 7 SECURITY DEFINER RPCs from PUBLIC/anon/authenticated (`update_org_plan_credits`, `reset_org_credits`, `refund_bonus_credits`, `reset_due_solo_monthly_credits`, `trigger_rescue_stuck_leads`, `handle_auth_user_pending_invites`, `accept_invite_token`). Closes the anonymous credit-rewrite vulnerability surfaced by the May 1 pre-ship audit. service_role and postgres retain EXECUTE; `is_org_member` / `is_org_owner` deliberately untouched (used in RLS USING expressions, must stay callable by anon/auth).
 - 0064: GRANT EXECUTE on `handle_auth_user_pending_invites()` to `supabase_auth_admin`. Regression hotfix — 0063's REVOKE FROM PUBLIC dropped supabase_auth_admin's implicit EXECUTE on the trigger function, which would have caused every new-user creation (Google/Apple/email signup) to fail with "permission denied for function" on the AFTER INSERT trigger. (Note: the 500 Cowork surfaced on `/callback` was actually a different bug — leading-space in Supabase Studio Site URL config — but 0064 was still required as defense for the post-config-fix path.)
+- 0065: `leads.ai_retry_count integer NOT NULL DEFAULT 0`. Tracks how many times the rescue-stuck-leads cron has re-triggered the AI estimator on a given lead. Cron caps at 2 retries to avoid looping forever on a permanently-broken lead. Forward-only and idempotent (`ADD COLUMN IF NOT EXISTS`).
 
 **RLS:** Enabled. Multi-tenant isolation via `org_id`. Key RPC functions bypass PostgREST schema cache (established pattern — do not fight cache, write RPCs instead).
 
@@ -148,9 +149,24 @@ SnapQuote is an AI-powered quoting and lead management SaaS for outdoor service 
 
 **Out-of-service-area behavior:** Travel multiplier caps at 200 miles. Leads still come in and estimates still generate normally. `outOfServiceArea` flag was previously broken (never set) — now fixed.
 
-**Rescue cron:** Supabase pg_cron runs every 3 minutes. Leads stuck 5–15 min → retry via edge function. Leads stuck 15+ min → flip to failed + send full notification chain.
+**Rescue cron:** Supabase pg_cron runs every 3 minutes. Three stages, each gated to keep a lead from being pulled into more than one bucket per tick:
+1. Leads stuck "processing" past 15 min → flip to "failed" + send full notification chain.
+2. Leads stuck "processing" 5–15 min → re-trigger via edge function. Row stays "processing".
+3. Leads "failed" within the last 6 hours with `ai_retry_count < 2` → atomically transition back to "processing" (CAS on both `ai_status` and `ai_retry_count`), increment the counter, re-trigger via edge function. Hard cap of 2 retries per lead so a permanently-broken lead doesn't loop forever.
 
-**AbortController timeout:** `generateEstimate()` wrapped in `Promise.race` against 40s abort. On timeout, existing catch block writes `ai_status="failed"` and fires notifications.
+**AbortController timeout:** `generateEstimate()` wrapped in `Promise.race` against 55s abort (raised from 40s on May 4, 2026 after 100% failure window — see updates-log). On timeout, the catch block writes `ai_status="failed"` and fires notifications. Retries happen externally via the rescue cron stage 3, not inside `generateEstimate` (the inner `STRUCTURED_AI_TIMEOUT_MS = 40000` per-call timeout means there is room for exactly one AI attempt per invocation; the legacy 3-attempt retry loop was structurally unreachable and was removed).
+
+**OpenAI request shape (`callOpenAI` in `lib/ai/estimate.ts`):**
+- Model: `gpt-5-mini` (overridable via `OPENAI_MODEL`). Reasoning effort: `low`. Single attempt per invocation.
+- Customer photos: `detail: "high"`.
+- Satellite tile (Google Static Maps, 600x400): `detail: "low"` (May 4, 2026 latency reduction — the tile is property-context only, doesn't need high-detail tokens).
+- Summary polish: separate `gpt-5-mini` call with its own 10s timeout, falls back to deterministic raw text on failure.
+
+**Failed-lead UX:**
+- `ai_status="failed"` leads ARE visible in the leads list and dashboard recent-leads (May 4, 2026 fix — list queries use `.in("ai_status", ["ready", "failed"])`, not `.eq("ready")`).
+- `LeadCard` and dashboard recent-leads card render "AI estimate unavailable" in amber when failed, with sub-copy "Review and send a manual estimate."
+- `ConfidenceMeter` is hidden entirely when neither `ai_confidence_score` nor `ai_confidence` is set (previously rendered a misleading "40% / Medium confidence" default).
+- `QuoteComposer` receives sane fallback price values ($500–$2000 range, $1000 snap quote) when the lead has no AI estimate AND no existing draft/expired quote, so the slider works immediately for manual pricing instead of collapsing to $0–$25.
 
 **Shared files between repos (`lib/`):**
 - `plans.ts` — plan constants

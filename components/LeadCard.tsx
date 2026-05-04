@@ -14,6 +14,7 @@ type LeadCardProps = {
     locality: string;
     services: string[];
     submitted_at: string;
+    ai_status: string;
     ai_suggested_price: number | null;
     ai_estimate_low: number | null;
     ai_estimate_high: number | null;
@@ -29,9 +30,11 @@ type LeadCardProps = {
 };
 
 export function LeadCard({ lead, onLeadUnlocked }: LeadCardProps) {
-  const displayEstimate =
-    formatCurrencyRange(lead.ai_estimate_low, lead.ai_estimate_high, lead.ai_suggested_price) ??
-    "Pending estimate...";
+  const aiFailed = lead.ai_status === "failed";
+  const displayEstimate = aiFailed
+    ? "AI estimate unavailable"
+    : (formatCurrencyRange(lead.ai_estimate_low, lead.ai_estimate_high, lead.ai_suggested_price) ??
+      "Pending estimate...");
   const previewSummary = lead.ai_job_summary
     ? lead.ai_job_summary.match(/[^.!?]+[.!?]+(\s|$)|[^.!?]+$/g)?.slice(0, 2).join(" ").trim() ?? lead.ai_job_summary
     : null;
@@ -73,9 +76,18 @@ export function LeadCard({ lead, onLeadUnlocked }: LeadCardProps) {
           <p className="text-[11px] font-medium uppercase tracking-[0.05em] text-muted-foreground">
             AI Estimate
           </p>
-          <p className="text-[28px] font-bold leading-none text-primary">
+          <p
+            className={`font-bold leading-none ${
+              aiFailed ? "text-[20px] text-amber-700" : "text-[28px] text-primary"
+            }`}
+          >
             {displayEstimate}
           </p>
+          {aiFailed ? (
+            <p className="text-xs text-muted-foreground">
+              Review and send a manual estimate.
+            </p>
+          ) : null}
         </div>
 
         <div className="space-y-3">

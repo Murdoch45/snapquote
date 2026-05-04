@@ -29,11 +29,26 @@ function normalize(low: number, high: number, min: number, max: number) {
   return { low: nextLow, high: nextHigh };
 }
 
+// Fallback working range for the slider when the caller has no real
+// estimate to seed it (e.g. an AI-failed lead with no manual quote yet).
+// Picks a reasonable default span so the contractor can immediately drag
+// to a sensible price instead of the slider snapping to $0–$25.
+const FALLBACK_TRACK_MIN = 0;
+const FALLBACK_TRACK_MAX = 5000;
+
 export function PriceSlider({ low, high, onChange }: PriceSliderProps) {
-  const boundsRef = useRef({
-    min: Math.max(0, Math.round((low * 0.5) / STEP) * STEP),
-    max: Math.round((high * 2) / STEP) * STEP
-  });
+  // If both endpoints are non-positive we have no real signal to derive
+  // bounds from. Use the working-range fallback instead of the
+  // half/double math (which would collapse to 0–STEP).
+  const hasSignal = low > 0 || high > 0;
+  const boundsRef = useRef(
+    hasSignal
+      ? {
+          min: Math.max(0, Math.round((low * 0.5) / STEP) * STEP),
+          max: Math.round((high * 2) / STEP) * STEP
+        }
+      : { min: FALLBACK_TRACK_MIN, max: FALLBACK_TRACK_MAX }
+  );
 
   const trackMin = boundsRef.current.min;
   const trackMax = Math.max(boundsRef.current.max, trackMin + STEP);
