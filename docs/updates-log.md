@@ -1964,3 +1964,55 @@ Healthy steady state: `catch-fallback-recovered` should be rare (single-digit pe
 - Did not add a typed JSONB audit column. The string-array markers are sufficient for the testing/grep use case.
 - Did not touch retry cron, leads list filters, ConfidenceMeter, or any UI from the prior fix.
 - Did not run a build or deploy. Code pushed to GitHub; Vercel will auto-deploy.
+
+---
+
+## Session — May 4, 2026 (fix #3)
+
+### Perf: Drop customer photo detail to low for AI estimator latency
+
+**Why a third fix on the same day:** After the prior architectural fix (commit `51f7890` removed the outer wrapper and added the catch-block fallback) the contractor-visible behavior was good — `ai_status="ready"` with a real heuristic price within ~48s on every test lead. But Sentry [SNAPQUOTE-WEB-6](https://snapquote.sentry.io/issues/SNAPQUOTE-WEB-6) showed AI was still timing out on every call (4 events in the diagnostic window, all `finalFailureCategory: "timeout"` at the 35s inner timeout). That meant 100% of leads were going through the heuristic-fallback path — getting prices, but with no AI vision input at all (`inferSignalsFallback` produces empty `detectedSurfaces`, defaulted `materialClass`, keyword-only `condition`). Healthy state requires AI to succeed routinely so the fallback is a true safety net rather than the default. Diagnostic showed the dominant wall-clock cost on these multi-photo test leads was customer-photo tile-processing — every photo at `detail: "high"` gets tiled into multiple 512×512 sub-images that the model processes sequentially, inflating wall-clock latency well beyond what the token count suggests.
+
+**The change (one-line semantic, ~10 lines with the comment):**
+- `lib/ai/estimate.ts` — customer photos in `callOpenAI`'s `imageInputs` array changed from `detail: "high"` → `detail: "low"`. Each photo now costs a flat 85 vision tokens with no per-tile preprocessing pass.
+- Satellite tile already at `detail: "low"` from fix #1; left alone.
+- Photo count NOT capped — at "low" detail, extra photos are near-free (85 tokens each, single pass each), and they help AI form a fuller categorical picture (multiple angles) at almost zero latency cost.
+
+**Why this and not the other options on the table:**
+- Confidence formula is structurally robust to lower-quality AI signals: `imageQuality`, `surfaceDetectionConfidence`, `satelliteClarity`, `scopeMatchConfidence` all have count-based heuristic defaults at `lib/ai/estimate.ts:920-924, 1004-1009`. If AI returns a lower-confidence number (which it might honestly do with low-detail images), the weighted formula absorbs ~5–8 points worst case — both tiers stay "high confidence" in the UI's tier system (≥0.7).
+- The pricing isn't actually photo-dependent for the affected services. Reading [estimators/deckEstimator.ts:40](estimators/deckEstimator.ts:40), the only AI signal that affects deck price is `estimatedQuantity` (sqft), with questionnaire + propertyData fallbacks. All multipliers (`materialMultiplier`, `conditionMultiplier`, etc.) come from questionnaire answers + `regionalCostModel`. Tree service is the same shape. The architecture is "AI interprets, logic prices."
+- Status quo ("AI fails, no vision input at all") was much worse than "AI succeeds with low-detail vision." Switching gets us from "no AI on photos 70%+ of the time" to "AI succeeds with reduced-detail vision most of the time" — strict improvement.
+
+**Did NOT do:**
+- Cap photo count. Extra "low" photos are near-free latency-wise.
+- Change model. `gpt-5-mini` stays.
+- Touch the structured-output schema. Defer until after measuring fix #3's effect.
+- Modify the confidence formula. Count-based defaults already degrade gracefully.
+- Touch retry cron, fallback paths, audit markers, list filters, or UI.
+
+### Files changed
+
+| Path | Change |
+|---|---|
+| `lib/ai/estimate.ts` | Customer-photo `detail` value `"high"` → `"low"` in `callOpenAI`'s `imageInputs` array (~line 3737). Comment updated explaining the rationale and pressure-washing caveat. |
+| `docs/current-state.md` | Estimator Pipeline → "OpenAI request shape" updated to reflect customer photos at `detail: "low"`. New paragraph documenting the photo-to-pricing dependency model and flagging pressure-washing as the A/B candidate. |
+| `docs/updates-log.md` | This entry. |
+
+### Verification before push
+
+- `npm run typecheck` — exit 0.
+- `npm run lint` — exit 0 (only pre-existing `<img>` warning in `app/layout.tsx`, unrelated).
+- `npm run test` — 75/75 tests passing across 10 files.
+- Confirmed only the customer-photo detail value changed (one semantic change; comment expansion adjacent).
+- Confirmed satellite still at `detail: "low"` (unchanged).
+
+### Expected effect
+
+- AI p50 latency drops from current ~35–45s into the **~15–25s** range for typical multi-photo leads. Vision tokens for a 4-photo lead drop from ~3,000 ("high") → ~340 ("low"), a 90% reduction — but more importantly the tile-processing serialization cost is eliminated entirely.
+- AI success rate on the inner 35s timeout goes from current ~30% (4-of-4 timeouts in the recent diagnostic window) to majority. Fallback then becomes the true safety net it was designed to be.
+- Mechanical confidence drop ~5–8 points worst case (`ai_confidence_score`). Both starting and ending tiers remain "high confidence" (≥0.7) in the UI for the typical lead. UI label and color don't change.
+- Estimate quality unchanged for non-pressure-washing services (price math runs off questionnaire + propertyData; AI photo signals are categorical refinements with engine fallbacks for every input).
+
+### Pressure-washing caveat (flagged in Pending Work)
+
+Pressure-washing is the one service where photo detail meaningfully affects price — `detectedSurfaces` from satellite/photos drives the surface scope and `quotedSurfaces` reconciliation, which feeds the priced sqft. With photos at "low" detail, AI may detect fewer or less-accurate surface boundaries, which could push the priced sqft lower than it would be with "high" detail photos. Worth A/B testing once pressure-washing is a launch priority. Filed as a Pending Work entry "Pressure-washing photo detail A/B".

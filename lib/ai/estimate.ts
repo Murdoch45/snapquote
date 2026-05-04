@@ -3717,17 +3717,29 @@ async function callOpenAI(
 
   const client = new OpenAI({ apiKey });
   const satelliteImage = await resolveSatelliteImageUrl(input, auditMarkers);
+  // Customer photos sent at detail: "low" — each photo costs a flat 85
+  // tokens with no tile-processing pass, instead of the ~765-2125 tokens
+  // and sequential per-tile preprocessing that "high" requires. Switched
+  // 2026-05-04 fix #3 after AI was timing out on every multi-photo lead
+  // (4-6 photos × "high" was the dominant wall-clock cost). The
+  // estimator architecture is "AI interprets, logic prices" — photos
+  // contribute categorical signals (condition, access, material) and
+  // estimatedQuantity inference; the actual price math runs off
+  // questionnaire answers + propertyData + regionalCostModel, so "low"
+  // detail is more than enough resolution for what we extract.
+  // Pressure-washing's surface-area detection is the one service where
+  // detail might meaningfully affect price; flagged in Pending Work as
+  // an A/B candidate when pressure-washing becomes a launch priority.
   const imageInputs = [
     ...input.photoUrls.map((url) => ({
       type: "input_image" as const,
       image_url: url,
-      detail: "high" as const
+      detail: "low" as const
     })),
     // The satellite tile is a top-down 600x400 reference image used only
     // for property context (lot shape, structure footprint). "low" keeps
-    // model-side preprocessing fast — biggest single latency win for the
-    // request — while still being more than enough resolution for the
-    // signal we extract from it. Customer photos stay "high".
+    // model-side preprocessing fast and is more than enough resolution
+    // for the signal we extract from it.
     ...(satelliteImage
       ? [
           {

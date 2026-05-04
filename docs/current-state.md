@@ -173,9 +173,11 @@ SnapQuote is an AI-powered quoting and lead management SaaS for outdoor service 
 
 **OpenAI request shape (`callOpenAI` in `lib/ai/estimate.ts`):**
 - Model: `gpt-5-mini` (overridable via `OPENAI_MODEL`). Reasoning effort: `low`. Single attempt per invocation.
-- Customer photos: `detail: "high"`.
-- Satellite tile (Google Static Maps, 600x400): `detail: "low"` (May 4, 2026 latency reduction — the tile is property-context only, doesn't need high-detail tokens).
+- Customer photos: `detail: "low"` (May 4, 2026 fix #3 — was `"high"`; tile-processing on multi-photo "high" calls was the dominant wall-clock cost pushing AI past the 35s timeout). Each photo now costs a flat 85 vision tokens with no per-tile preprocessing pass.
+- Satellite tile (Google Static Maps, 600x400): `detail: "low"` (May 4, 2026 morning fix — the tile is property-context only).
 - Summary polish: separate `gpt-5-mini` call with its own 10s timeout, falls back to deterministic raw text on failure.
+
+**Photo-to-pricing dependency:** AI's photo analysis primarily contributes categorical signals (`condition`, `access`, `severity`, `materialClass`) and `estimatedQuantity` inference. The actual price math runs off `serviceQuestionAnswers` + `propertyData` + `regionalCostModel`. Per-service estimators have questionnaire-based fallbacks for every AI-derived input, so dropping vision detail trades a small amount of categorical refinement quality for a large latency win. **Pressure-washing is the one service where photo detail meaningfully affects price** (surface-area detection feeds `detectedSurfaces` → quoted scope sqft) — flagged in Pending Work as an A/B candidate when pressure-washing becomes a launch priority.
 
 **Failed-lead UX:**
 - `ai_status="failed"` leads ARE visible in the leads list and dashboard recent-leads (May 4, 2026 fix — list queries use `.in("ai_status", ["ready", "failed"])`, not `.eq("ready")`).
