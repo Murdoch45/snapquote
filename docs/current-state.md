@@ -98,7 +98,7 @@ SnapQuote is an AI-powered quoting and lead management SaaS for outdoor service 
 - `audit_log` — audit actions including `lead.unlocked`, `quote.sent`, `account.deleted`, `member.self_removed`
 - `iap_subscription_events` — RevenueCat webhook events
 
-**Migrations applied through:** 0065
+**Migrations applied through:** 0066
 - 0051: `organizations.last_active_at` with descending index
 - 0052: `get_org_analytics` RPC (SECURITY INVOKER + is_org_member gate)
 - 0053: RPC service-role bypass (skips is_org_member when `auth.uid() IS NULL`)
@@ -114,6 +114,7 @@ SnapQuote is an AI-powered quoting and lead management SaaS for outdoor service 
 - 0063: REVOKE EXECUTE on 7 SECURITY DEFINER RPCs from PUBLIC/anon/authenticated (`update_org_plan_credits`, `reset_org_credits`, `refund_bonus_credits`, `reset_due_solo_monthly_credits`, `trigger_rescue_stuck_leads`, `handle_auth_user_pending_invites`, `accept_invite_token`). Closes the anonymous credit-rewrite vulnerability surfaced by the May 1 pre-ship audit. service_role and postgres retain EXECUTE; `is_org_member` / `is_org_owner` deliberately untouched (used in RLS USING expressions, must stay callable by anon/auth).
 - 0064: GRANT EXECUTE on `handle_auth_user_pending_invites()` to `supabase_auth_admin`. Regression hotfix — 0063's REVOKE FROM PUBLIC dropped supabase_auth_admin's implicit EXECUTE on the trigger function, which would have caused every new-user creation (Google/Apple/email signup) to fail with "permission denied for function" on the AFTER INSERT trigger. (Note: the 500 Cowork surfaced on `/callback` was actually a different bug — leading-space in Supabase Studio Site URL config — but 0064 was still required as defense for the post-config-fix path.)
 - 0065: `leads.ai_retry_count integer NOT NULL DEFAULT 0`. Tracks how many times the rescue-stuck-leads cron has re-triggered the AI estimator on a given lead. Cron caps at 2 retries to avoid looping forever on a permanently-broken lead. Forward-only and idempotent (`ADD COLUMN IF NOT EXISTS`).
+- 0066: `lead_photos UNIQUE (lead_id, storage_path)`. Required for the upload-as-picked customer-form pattern (fix #5) where two writers can race to insert the same `lead_photos` row: `/api/public/lead-submit` writes rows for paths the client claims are already done, and `/api/public/lead-photo-upload`'s auto-attach branch writes rows for uploads that finish AFTER lead-submit ran. Unique constraint + `INSERT ... ON CONFLICT DO NOTHING` makes the second writer a no-op rather than an error. Wrapped in DO/EXCEPTION block since Postgres has no `ADD CONSTRAINT IF NOT EXISTS`.
 
 **RLS:** Enabled. Multi-tenant isolation via `org_id`. Key RPC functions bypass PostgREST schema cache (established pattern — do not fight cache, write RPCs instead).
 
@@ -215,26 +216,42 @@ SnapQuote is an AI-powered quoting and lead management SaaS for outdoor service 
 
 ## Customer lead submission (public form)
 
-> Updated 2026-05-04 fix #4. Background context: contractor-form's "Sending..." button was stalling for 60+ seconds because three notification calls were awaited synchronously before the response (`notifyContractor` Telnyx SMS, `notifyCustomer` Telnyx SMS, customer confirmation Resend email — none had per-fetch timeouts; a slow provider could hang each retry indefinitely).
+> Updated 2026-05-04 fix #5. Photo uploads now happen as the customer picks them, in parallel with form filling. Submit doesn't wait for in-flight uploads — they attach to the lead row in the background. Realistic customer wait at submit time is ~1–2s (Turnstile + DB writes), down from the prior ~3–8s floor that was dominated by photo uploads.
 
-**Synchronous (gates the customer's response):**
-1. Turnstile verification (Cloudflare).
-2. Contractor lookup, plan/inactivity check, customer dedup queries.
-3. Customer + lead inserts (`ai_status="processing"`).
-4. Photo uploads to Supabase Storage with retries + `lead_photos` insert. The response includes per-photo success/failure outcomes so the form can surface partial failures.
-5. Build the prepared notification options (objects only — no provider calls yet).
-6. Register the `after()` block.
-7. Return `NextResponse.json({ success, leadId, photoUpload, photoUploadPartialFailure })`.
+**Two endpoints + a client-generated tempLeadId.**
 
-Realistic floor: ~3–8s, dominated by photo uploads.
+The client generates a v4 UUID (`tempLeadId`) when the form mounts. That UUID is the path segment under which all of this submission's photos upload to Storage AND it becomes the lead row's primary key when the form is finally submitted. No rename, no move — the storage paths created during form-filling already point at the right lead.
 
-**Deferred via `after()` (runs after the response is sent, doesn't gate the customer):**
-- `triggerEstimatorForLead(leadId)` — Supabase edge function handoff that drives the AI estimator on a fresh Vercel invocation. On trigger failure, lead is flipped to `ai_status="failed"` and the rescue cron picks it up.
-- `notifyContractor` Telnyx SMS — "New estimate request: …". Each attempt has an 8s `AbortController` timeout (`PROVIDER_FETCH_TIMEOUT_MS` in `lib/notify.ts`).
-- `notifyCustomer` Telnyx SMS — "We received your request. You will get your estimate shortly." Same 8s timeout.
-- Customer confirmation Resend email (if `customerEmail` provided) — wrapped in `Promise.race` against an 8s timer to bound a hung Resend SDK call.
+**Endpoint 1: `POST /api/public/lead-photo-upload`** — fires per-photo as soon as the customer picks a file. Multipart body: `photo` (File), `contractorSlug`, `tempLeadId`. Server:
+- Rate limits per-IP (80/hour, well above any real customer's pick + retry pattern).
+- Validates content-type (jpeg/png/heic/heif/webp), size (≤10MB), `tempLeadId` is v4 UUID.
+- Resolves `contractorSlug` → `org_id`. Returns generic 400 on unknown slug (no slug-existence oracle).
+- Uploads to `${orgId}/${tempLeadId}/${randomShort}.${ext}` with 3-attempt retry.
+- Mints a 24h signed URL (`public_url`).
+- Checks: does a `leads` row with `id = tempLeadId AND org_id = orgId` exist?
+  - **Yes** (upload finished AFTER lead-submit ran): inserts the `lead_photos` row directly. Returns `{ storagePath, publicUrl, attached: true }`. The photo "attaches" automatically.
+  - **No** (typical case — upload finished before submit): returns `{ storagePath, publicUrl, attached: false }`. Client passes the path to `/api/public/lead-submit` at submit time.
+- No Turnstile (gating per-photo on Turnstile would defeat the upload-as-picked UX).
 
-All three notifications run in parallel via `Promise.allSettled`; a single hung/failing provider doesn't sink the others. Each call's outer promise has a `.catch` so a thrown error inside `Promise.allSettled` doesn't surface as an unhandled rejection.
+**Endpoint 2: `POST /api/public/lead-submit`** — JSON only (no more multipart, no files). Body: contractorSlug, **tempLeadId**, customer fields, services, address, **photoStoragePaths** (array of `{ storagePath, publicUrl }` for already-uploaded photos), turnstileToken. Server:
+- Rate limits, verifies Turnstile.
+- Validates payload via `leadSubmitSchema`. `tempLeadId` is enforced as a v4 UUID.
+- Filters supplied storage paths through the prefix `${orgId}/${tempLeadId}/` — anything outside is silently dropped + Sentry-warned, so a malformed/spoofed path can't write a `lead_photos` row pointing at another customer's lead.
+- Resolves contractor, plan-inactivity gate, customer dedup, customer insert.
+- Inserts the lead row with `id = payload.tempLeadId` (overrides Postgres's `gen_random_uuid()` default).
+- Upserts `lead_photos` rows for the supplied paths via `onConflict: "lead_id,storage_path", ignoreDuplicates: true`.
+- Returns `{ success, leadId, received }` immediately (no `photoUpload` block — that's per-photo state on the client now).
+- Defers via `after()`: AI estimator trigger + contractor SMS + customer SMS + customer email (Promise.allSettled, each with a per-call `.catch`). Notifications and AI both have provider-level timeouts from fix #4.
+
+**Race protection** (`lead_photos` UNIQUE on `(lead_id, storage_path)` — migration 0066): the upload endpoint and lead-submit endpoint can both legitimately try to insert the same `lead_photos` row in a tight race when an upload finishes during the lead-submit transaction. The unique constraint + `INSERT ... ON CONFLICT DO NOTHING` (lead-submit) and `if (insertError.code === "23505") continue` (upload) make the second writer a no-op rather than an error.
+
+**Customer wait floor: ~1–2s** at submit time, dominated by Turnstile + DB writes. Photo upload time is now hidden in the form-fill phase: most customers finish typing well after their photos finish uploading. If a customer hits submit fast (or has slow uploads), photos still attach in the background — submit doesn't wait.
+
+**Failure modes:**
+- Photo upload fails while customer is on the form → inline error on that photo, customer can retry or remove. Submit blocks until the failed photo is dealt with (so we don't silently drop a photo the customer thinks went up).
+- Photo upload still in flight at submit → upload completes, sees the lead row exists via the auto-attach branch, inserts its own `lead_photos` row. Customer doesn't notice; lead lands with all photos.
+- Customer abandons the form mid-upload → orphaned objects in `lead-photos` Storage bucket under `${orgId}/${tempLeadId}/...` with no corresponding `leads` row. Pending Work has an entry to add a TTL cleanup cron; current rate of abandonment is small enough to defer.
+- Notification provider stalls → the 8s `AbortController` per attempt in `lib/notify.ts` (fix #4) caps the worst case; notifications run inside `after()` so they never gate the customer's response.
 
 ## Notifications
 

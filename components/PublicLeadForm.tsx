@@ -1,11 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Turnstile } from "@marsidev/react-turnstile";
 import { MultiServiceForm, type MultiServiceEntry } from "@/components/forms/MultiServiceForm";
 import { toast } from "sonner";
 import { AddressAutocomplete } from "@/components/AddressAutocomplete";
-import { PhotoUploader } from "@/components/PhotoUploader";
+import { PhotoUploader, type PhotoEntry } from "@/components/PhotoUploader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,6 +27,15 @@ const hasGooglePlacesKey = Boolean(process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY);
 const MAX_PHOTO_UPLOADS = 10;
 const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
+// Browser-safe v4 UUID. Used for the tempLeadId — generated once at form
+// mount, becomes the lead row's id at submit time, and is the path
+// segment under which photos upload to Storage. crypto.randomUUID is
+// available in all browsers we target (HTTPS-only contexts) so no
+// polyfill needed.
+function generateTempLeadId(): string {
+  return crypto.randomUUID();
+}
+
 export function PublicLeadForm({ contractorSlug }: Props) {
   const [customerFirstName, setCustomerFirstName] = useState("");
   const [customerLastName, setCustomerLastName] = useState("");
@@ -40,15 +49,57 @@ export function PublicLeadForm({ contractorSlug }: Props) {
     { service: "", answers: {}, addAnother: "no" }
   ]);
   const [description, setDescription] = useState("");
-  const [photos, setPhotos] = useState<File[]>([]);
+  // Photos use per-entry state because each one uploads independently
+  // as the customer picks it. submit doesn't wait for in-flight
+  // uploads — anything not "done" at submit time attaches itself to
+  // the lead row in the background via /api/public/lead-photo-upload.
+  const [photoEntries, setPhotoEntries] = useState<PhotoEntry[]>([]);
+  // Generated once when the form mounts. This becomes the lead row's
+  // primary key on successful submit, AND it's already encoded in every
+  // photo's storage path (uploaded via /api/public/lead-photo-upload),
+  // which is how in-flight photos attach to the lead row when they
+  // finish — no rename or move needed.
+  const [tempLeadId] = useState<string>(() => generateTempLeadId());
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
 
+  // Track in-flight uploads via AbortController so we can cancel them
+  // on remove (otherwise a removed photo could still successfully land
+  // in Storage and have its setState race against a removed entry —
+  // mostly cosmetic but worth being clean about).
+  const inflightControllersRef = useRef<Map<string, AbortController>>(new Map());
+
+  useEffect(() => {
+    const map = inflightControllersRef.current;
+    return () => {
+      // On unmount, abort everything still in-flight. The customer is
+      // either at the thank-you screen (submitted) or has navigated
+      // away. submitted=true implies the lead row exists so a late
+      // upload would still attach via the upload endpoint's
+      // auto-attach branch — but during dev / mid-form-fill teardown
+      // we don't want orphan requests to keep running.
+      map.forEach((controller) => controller.abort());
+      map.clear();
+    };
+  }, []);
+
   const hasSelectedAddress = Boolean(
     addressPlaceId && address.trim().length >= 5 && lat !== undefined && lng !== undefined
   );
+
+  const photoCounts = useMemo(() => {
+    let done = 0;
+    let uploading = 0;
+    let failed = 0;
+    for (const entry of photoEntries) {
+      if (entry.status === "done") done += 1;
+      else if (entry.status === "uploading") uploading += 1;
+      else failed += 1;
+    }
+    return { done, uploading, failed };
+  }, [photoEntries]);
 
   const canSubmit = useMemo(() => {
     const hasSelectedServices =
@@ -59,6 +110,14 @@ export function PublicLeadForm({ contractorSlug }: Props) {
       )
       .every((serviceEntry) => getRequiredQuestionIssues(serviceEntry.service, serviceEntry.answers).length === 0);
 
+    // At least one photo must be picked. It can be done OR still
+    // uploading — we don't gate submit on uploads finishing. But any
+    // failed photos must be retried or removed first; otherwise they're
+    // dropped silently and we'd be lying to the customer about what was
+    // sent.
+    const hasUsablePhotos = photoCounts.done + photoCounts.uploading >= 1;
+    const hasNoFailedPhotos = photoCounts.failed === 0;
+
     return (
       hasGooglePlacesKey &&
       customerFirstName.trim().length >= 2 &&
@@ -66,9 +125,18 @@ export function PublicLeadForm({ contractorSlug }: Props) {
       hasSelectedAddress &&
       hasSelectedServices &&
       hasRequiredAnswers &&
-      photos.length >= 1
+      hasUsablePhotos &&
+      hasNoFailedPhotos
     );
-  }, [customerFirstName, customerEmail, hasSelectedAddress, services, photos.length]);
+  }, [
+    customerFirstName,
+    customerEmail,
+    hasSelectedAddress,
+    services,
+    photoCounts.done,
+    photoCounts.uploading,
+    photoCounts.failed
+  ]);
 
   const handleAddressChange = (nextAddress: string) => {
     setAddress(nextAddress);
@@ -140,6 +208,112 @@ export function PublicLeadForm({ contractorSlug }: Props) {
     });
   };
 
+  // Fires the per-photo upload to /api/public/lead-photo-upload. Updates
+  // the matching entry's status when it resolves. Aborted on remove.
+  const uploadEntry = async (entry: PhotoEntry) => {
+    const controller = new AbortController();
+    inflightControllersRef.current.set(entry.localId, controller);
+
+    try {
+      const formData = new FormData();
+      formData.append("photo", entry.file);
+      formData.append("contractorSlug", contractorSlug);
+      formData.append("tempLeadId", tempLeadId);
+
+      const res = await fetch("/api/public/lead-photo-upload", {
+        method: "POST",
+        body: formData,
+        signal: controller.signal
+      });
+      const json = (await res.json().catch(() => null)) as {
+        success?: boolean;
+        storagePath?: string;
+        publicUrl?: string;
+        error?: string;
+      } | null;
+
+      if (!res.ok || !json?.success || !json.storagePath) {
+        const message = json?.error || `Upload failed (${res.status}).`;
+        setPhotoEntries((prev) =>
+          prev.map((existing) =>
+            existing.localId === entry.localId
+              ? { ...existing, status: "failed", errorMessage: message }
+              : existing
+          )
+        );
+        return;
+      }
+
+      setPhotoEntries((prev) =>
+        prev.map((existing) =>
+          existing.localId === entry.localId
+            ? {
+                ...existing,
+                status: "done",
+                storagePath: json.storagePath,
+                publicUrl: json.publicUrl,
+                errorMessage: undefined
+              }
+            : existing
+        )
+      );
+    } catch (error) {
+      // AbortError = customer removed / replaced this entry; no UI
+      // change needed because the entry is already gone from state.
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      setPhotoEntries((prev) =>
+        prev.map((existing) =>
+          existing.localId === entry.localId
+            ? {
+                ...existing,
+                status: "failed",
+                errorMessage: error instanceof Error ? error.message : "Upload failed."
+              }
+            : existing
+        )
+      );
+    } finally {
+      inflightControllersRef.current.delete(entry.localId);
+    }
+  };
+
+  const handleAddPhotos = (files: File[]) => {
+    if (files.length === 0) return;
+    const newEntries: PhotoEntry[] = files.map((file) => ({
+      localId: crypto.randomUUID(),
+      file,
+      status: "uploading"
+    }));
+    setPhotoEntries((prev) => [...prev, ...newEntries]);
+    // Fire all uploads in parallel — each is its own request, and the
+    // browser caps concurrency naturally.
+    newEntries.forEach((entry) => {
+      void uploadEntry(entry);
+    });
+  };
+
+  const handleRemovePhoto = (localId: string) => {
+    const controller = inflightControllersRef.current.get(localId);
+    if (controller) {
+      controller.abort();
+      inflightControllersRef.current.delete(localId);
+    }
+    setPhotoEntries((prev) => prev.filter((entry) => entry.localId !== localId));
+  };
+
+  const handleRetryPhoto = (localId: string) => {
+    const target = photoEntries.find((entry) => entry.localId === localId);
+    if (!target) return;
+    setPhotoEntries((prev) =>
+      prev.map((existing) =>
+        existing.localId === localId
+          ? { ...existing, status: "uploading", errorMessage: undefined }
+          : existing
+      )
+    );
+    void uploadEntry({ ...target, status: "uploading", errorMessage: undefined });
+  };
+
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!hasGooglePlacesKey) {
@@ -169,12 +343,15 @@ export function PublicLeadForm({ contractorSlug }: Props) {
       return;
     }
 
-    if (photos.length < 1) {
+    if (photoCounts.done + photoCounts.uploading < 1) {
       toast.error("Upload at least one photo before submitting.");
       return;
     }
-
-    if (photos.length > MAX_PHOTO_UPLOADS) {
+    if (photoCounts.failed > 0) {
+      toast.error("Retry or remove failed photos before submitting.");
+      return;
+    }
+    if (photoEntries.length > MAX_PHOTO_UPLOADS) {
       toast.error(`Upload up to ${MAX_PHOTO_UPLOADS} photos before submitting.`);
       return;
     }
@@ -190,36 +367,50 @@ export function PublicLeadForm({ contractorSlug }: Props) {
       const customerName = [customerFirstName.trim(), customerLastName.trim()]
         .filter(Boolean)
         .join(" ");
-      const formData = new FormData();
-      const selectedServiceAnswers = selectedServiceEntries
-        .map((serviceEntry) => ({
-          service: serviceEntry.service,
-          answers: normalizeServiceQuestionAnswers(serviceEntry.service, serviceEntry.answers)
+      const selectedServiceAnswers = selectedServiceEntries.map((serviceEntry) => ({
+        service: serviceEntry.service,
+        answers: normalizeServiceQuestionAnswers(serviceEntry.service, serviceEntry.answers)
+      }));
+
+      // Snapshot the photo entries that have already finished uploading
+      // by submit time. In-flight uploads (status === "uploading") are
+      // intentionally NOT awaited — they'll attach to the lead row in
+      // the background once they finish, via the auto-attach branch in
+      // /api/public/lead-photo-upload. The form returns success
+      // immediately whether they finish before or after.
+      const donePhotoStoragePaths = photoEntries
+        .filter((entry) => entry.status === "done" && entry.storagePath && entry.publicUrl)
+        .map((entry) => ({
+          storagePath: entry.storagePath as string,
+          publicUrl: entry.publicUrl as string
         }));
 
-      formData.append("contractorSlug", contractorSlug);
-      formData.append("customerName", customerName);
-      formData.append("customerPhone", customerPhone.trim());
-      formData.append("customerEmail", customerEmail.trim());
-      formData.append("addressFull", address.trim());
-      if (addressPlaceId) formData.append("addressPlaceId", addressPlaceId);
-      if (lat !== undefined) formData.append("lat", String(lat));
-      if (lng !== undefined) formData.append("lng", String(lng));
-      selectedServiceAnswers.forEach((serviceEntry) => formData.append("services[]", serviceEntry.service));
-      formData.append("serviceQuestionAnswers", JSON.stringify(selectedServiceAnswers));
-      formData.append("description", description.trim());
-      formData.append("turnstileToken", turnstileToken);
-      photos.forEach((photo) => formData.append("photos", photo));
+      const submitBody = {
+        contractorSlug,
+        tempLeadId,
+        customerName,
+        customerPhone: customerPhone.trim(),
+        customerEmail: customerEmail.trim(),
+        addressFull: address.trim(),
+        addressPlaceId: addressPlaceId ?? "",
+        lat,
+        lng,
+        services: selectedServiceAnswers.map((entry) => entry.service),
+        description: description.trim(),
+        serviceQuestionAnswers: selectedServiceAnswers,
+        turnstileToken,
+        photoStoragePaths: donePhotoStoragePaths
+      };
 
       const res = await fetch(submitPath, {
         method: "POST",
         credentials: "same-origin",
-        body: formData
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(submitBody)
       });
       const json = (await res.json()) as {
         error?: string;
         code?: string;
-        photoUploadPartialFailure?: boolean;
       };
       if (res.status === 402 || json.code === "SUBSCRIPTION_INACTIVE") {
         setShowSubscriptionModal(true);
@@ -228,9 +419,6 @@ export function PublicLeadForm({ contractorSlug }: Props) {
       if (!res.ok) throw new Error(json.error || "Failed to submit request.");
       setSubmitted(true);
       toast.success("Request sent.");
-      if (json.photoUploadPartialFailure) {
-        toast.error("Some photos failed to upload. Please try again.");
-      }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to submit request.");
     } finally {
@@ -308,7 +496,14 @@ export function PublicLeadForm({ contractorSlug }: Props) {
           />
         </div>
 
-        <PhotoUploader files={photos} setFiles={setPhotos} maxFiles={MAX_PHOTO_UPLOADS} required />
+        <PhotoUploader
+          entries={photoEntries}
+          onAddFiles={handleAddPhotos}
+          onRemove={handleRemovePhoto}
+          onRetry={handleRetryPhoto}
+          maxFiles={MAX_PHOTO_UPLOADS}
+          required
+        />
 
         <div className="grid min-w-0 max-w-full gap-3 sm:grid-cols-2">
           <div className="min-w-0 space-y-2">

@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
-import { UploadCloud, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { AlertTriangle, CheckCircle2, Loader2, RefreshCw, UploadCloud, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const MAX_DIMENSION = 1600;
@@ -11,9 +11,31 @@ const MAX_COMPRESSED_SIZE = 400_000;
 const RETRY_DIMENSION = 1200;
 const RETRY_QUALITY = 0.5;
 
+// Per-photo status as the upload progresses through its lifecycle. The
+// PublicLeadForm consumes this to decide what the submit button does
+// (block on any "failed", proceed without waiting on "uploading").
+export type PhotoUploadStatus = "uploading" | "done" | "failed";
+
+export type PhotoEntry = {
+  // Stable client-side id used for React keys + for matching a
+  // status-update from the parent back to its row in this component.
+  // Generated when the file is picked (crypto.randomUUID()).
+  localId: string;
+  file: File;
+  status: PhotoUploadStatus;
+  // Set when status === "done". Sent to /api/public/lead-submit.
+  storagePath?: string;
+  publicUrl?: string;
+  // Set when status === "failed". Surfaced inline next to the photo so
+  // the customer can decide to retry or remove.
+  errorMessage?: string;
+};
+
 type PhotoUploaderProps = {
-  files: File[];
-  setFiles: (files: File[]) => void;
+  entries: PhotoEntry[];
+  onAddFiles: (files: File[]) => void;
+  onRemove: (localId: string) => void;
+  onRetry: (localId: string) => void;
   maxFiles?: number;
   required?: boolean;
 };
@@ -95,38 +117,60 @@ function compressImage(file: File): Promise<File> {
 }
 
 export function PhotoUploader({
-  files,
-  setFiles,
+  entries,
+  onAddFiles,
+  onRemove,
+  onRetry,
   maxFiles = 10,
   required = false
 }: PhotoUploaderProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [compressing, setCompressing] = useState(false);
 
-  const previews = useMemo(
-    () => files.map((file) => ({ file, url: URL.createObjectURL(file) })),
-    [files]
-  );
+  // Per-entry preview URLs. Held in this component so we can revoke
+  // them when the entry is removed / on unmount, avoiding memory leaks
+  // on customers who pick + remove a lot of photos.
+  const previewUrls = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const entry of entries) {
+      map.set(entry.localId, URL.createObjectURL(entry.file));
+    }
+    return map;
+  }, [entries]);
 
-  const onAddFiles = async (incoming: FileList | null) => {
+  useEffect(() => {
+    return () => {
+      previewUrls.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [previewUrls]);
+
+  const handleSelectFiles = async (incoming: FileList | null) => {
     if (!incoming) return;
 
     setCompressing(true);
     try {
-      const current = [...files];
+      const remainingSlots = Math.max(0, maxFiles - entries.length);
+      const accepted: File[] = [];
       for (const raw of Array.from(incoming)) {
-        if (current.length >= maxFiles) break;
+        if (accepted.length >= remainingSlots) break;
         if (raw.size > MAX_FILE_SIZE) continue;
         // eslint-disable-next-line no-await-in-loop
         const compressed = await compressImage(raw);
-        current.push(compressed);
+        accepted.push(compressed);
       }
-      setFiles(current.slice(0, maxFiles));
+      if (accepted.length > 0) {
+        onAddFiles(accepted);
+      }
     } finally {
       setCompressing(false);
     }
     if (inputRef.current) inputRef.current.value = "";
   };
+
+  const failedCount = entries.filter((entry) => entry.status === "failed").length;
+  const uploadingCount = entries.filter((entry) => entry.status === "uploading").length;
+  const doneCount = entries.filter((entry) => entry.status === "done").length;
+  const slotsLeft = Math.max(0, maxFiles - entries.length);
 
   return (
     <div className="min-w-0 max-w-full space-y-3 overflow-x-hidden">
@@ -141,7 +185,7 @@ export function PhotoUploader({
           type="file"
           accept="image/*"
           multiple
-          onChange={(e) => void onAddFiles(e.target.files)}
+          onChange={(e) => void handleSelectFiles(e.target.files)}
           className="hidden"
           id="photo-upload-input"
           aria-label="Upload photos"
@@ -149,41 +193,103 @@ export function PhotoUploader({
         <Button
           type="button"
           onClick={() => inputRef.current?.click()}
-          disabled={files.length >= maxFiles || compressing}
-          aria-disabled={files.length >= maxFiles || compressing}
+          disabled={slotsLeft === 0 || compressing}
+          aria-disabled={slotsLeft === 0 || compressing}
           className="max-w-full"
         >
           <UploadCloud aria-hidden="true" className="mr-2 h-4 w-4" />
-          {compressing ? "Compressing..." : "Upload photos"}
+          {compressing ? "Preparing..." : "Upload photos"}
         </Button>
+        {entries.length > 0 ? (
+          <p className="mt-3 text-xs text-muted-foreground" role="status" aria-live="polite">
+            {doneCount} ready
+            {uploadingCount > 0 ? ` · ${uploadingCount} uploading` : ""}
+            {failedCount > 0 ? ` · ${failedCount} failed` : ""}
+          </p>
+        ) : null}
       </div>
-      {previews.length > 0 && (
+      {entries.length > 0 && (
         <div className="grid min-w-0 max-w-full grid-cols-2 gap-3 sm:grid-cols-3">
-          {previews.map(({ file, url }, index) => (
-            <div
-              key={`${file.name}-${index}`}
-              className="group relative min-w-0 max-w-full overflow-hidden rounded-[12px] border border-border bg-card"
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={url}
-                alt={`Uploaded photo ${index + 1}`}
-                className="h-24 w-full max-w-full object-cover"
-              />
-              <button
-                type="button"
-                aria-label={`Remove uploaded photo ${index + 1}`}
-                className="absolute right-1 top-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-black/65 text-white opacity-0 transition group-hover:opacity-100"
-                onClick={() => setFiles(files.filter((_, i) => i !== index))}
+          {entries.map((entry) => {
+            const url = previewUrls.get(entry.localId) ?? "";
+            return (
+              <div
+                key={entry.localId}
+                className="group relative min-w-0 max-w-full overflow-hidden rounded-[12px] border border-border bg-card"
               >
-                <X aria-hidden="true" className="h-4 w-4" />
-              </button>
-            </div>
-          ))}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={url}
+                  alt="Uploaded photo"
+                  className={`h-24 w-full max-w-full object-cover ${
+                    entry.status === "uploading" ? "opacity-60" : ""
+                  } ${entry.status === "failed" ? "opacity-40" : ""}`}
+                />
+
+                {/* Status overlay — bottom-left corner */}
+                <div className="pointer-events-none absolute bottom-1 left-1 flex items-center gap-1 rounded-full bg-black/65 px-2 py-0.5 text-[10px] font-semibold text-white">
+                  {entry.status === "uploading" ? (
+                    <>
+                      <Loader2 aria-hidden="true" className="h-3 w-3 animate-spin" />
+                      Uploading
+                    </>
+                  ) : entry.status === "done" ? (
+                    <>
+                      <CheckCircle2 aria-hidden="true" className="h-3 w-3" />
+                      Ready
+                    </>
+                  ) : (
+                    <>
+                      <AlertTriangle aria-hidden="true" className="h-3 w-3" />
+                      Failed
+                    </>
+                  )}
+                </div>
+
+                {/* Top-right action(s): always-visible remove + retry-if-failed.
+                    The remove button used to fade-in on hover, but the
+                    sibling status overlay made hover discovery
+                    inconsistent on touch — keeping it always visible is
+                    clearer. */}
+                <div className="absolute right-1 top-1 flex items-center gap-1">
+                  {entry.status === "failed" ? (
+                    <button
+                      type="button"
+                      aria-label="Retry photo upload"
+                      className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-black/65 text-white"
+                      onClick={() => onRetry(entry.localId)}
+                    >
+                      <RefreshCw aria-hidden="true" className="h-3.5 w-3.5" />
+                    </button>
+                  ) : null}
+                  <button
+                    type="button"
+                    aria-label="Remove uploaded photo"
+                    className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-black/65 text-white"
+                    onClick={() => onRemove(entry.localId)}
+                  >
+                    <X aria-hidden="true" className="h-4 w-4" />
+                  </button>
+                </div>
+
+                {entry.status === "failed" && entry.errorMessage ? (
+                  <p
+                    role="alert"
+                    aria-live="polite"
+                    className="bg-red-50 px-2 py-1 text-[10px] leading-tight text-red-700 dark:bg-red-950/40 dark:text-red-300"
+                  >
+                    {entry.errorMessage}
+                  </p>
+                ) : null}
+              </div>
+            );
+          })}
         </div>
       )}
-      {required && files.length === 0 ? (
-        <p role="alert" aria-live="polite" className="text-xs text-red-600 dark:text-red-400">At least one photo is required before submission.</p>
+      {required && entries.length === 0 ? (
+        <p role="alert" aria-live="polite" className="text-xs text-red-600 dark:text-red-400">
+          At least one photo is required before submission.
+        </p>
       ) : null}
     </div>
   );

@@ -2076,3 +2076,80 @@ Notifications still fire on every successful submission — they just land secon
 - Did not touch the AI estimator, schema, or any AI-side code.
 - Did not change Vercel `maxDuration`.
 - Did not run a build or deploy. Code pushed to GitHub; Vercel auto-deploys.
+
+---
+
+## Session — May 4, 2026 (fix #5)
+
+### Feature: Public lead form — upload-as-picked photos + submit-doesn't-wait
+
+**Why:** After fix #4 the form's "Sending..." button completed in ~3–8s, but most of that floor was photo uploads happening synchronously after submit. Murdoch wants the form to feel instant (target <2s in the common case). Customers will close the tab on slower waits and either lose the lead or hit submit again creating duplicates.
+
+**Hybrid strategy:**
+1. Photos start uploading the moment the customer picks them, in parallel with form filling. Most customers finish typing well after their photos finish uploading.
+2. Submit returns success immediately whether or not in-flight uploads have finished. Lead row is created; in-flight uploads attach themselves to the lead in the background.
+3. Per-photo failures during form filling surface inline so the customer can retry or remove. Failures after submit are silent — lead just lands with whatever photos succeeded (rare tail case; per Murdoch's spec).
+
+**The "tempLeadId is the lead.id" trick:** the client generates a v4 UUID at form mount. Every photo uploaded during form-fill goes to `${orgId}/${tempLeadId}/${randomShort}.${ext}` in Storage. When the form is submitted, the lead row is inserted with `id = tempLeadId` (overriding Postgres's `gen_random_uuid()` default). No rename, no move — the storage paths from form-fill already point at the right lead row. Photos still in flight at submit time, when their upload endpoint completes, see the lead row exists and insert their own `lead_photos` row directly.
+
+### Implementation
+
+**New endpoint `app/api/public/lead-photo-upload/route.ts`** — multipart per-photo upload. Body: `photo` (File), `contractorSlug`, `tempLeadId`. Server: rate-limits per-IP (80/hour), validates content-type/size/tempLeadId-is-v4-UUID, resolves slug→org_id, uploads to `${orgId}/${tempLeadId}/${randomShort}.${ext}` with 3-attempt retry, mints 24h signed URL, then checks if a lead row with `id = tempLeadId AND org_id = orgId` exists — if yes, inserts the `lead_photos` row directly (auto-attach); if no, just returns the path. Returns `{ success, storagePath, publicUrl, attached }`.
+
+**Refactored `app/api/public/lead-submit/route.ts`** — JSON only, no more multipart. Body now includes `tempLeadId` (v4 UUID) and `photoStoragePaths: Array<{ storagePath, publicUrl }>` for the photos the client thinks are already uploaded. Server inserts the lead row with `id = payload.tempLeadId`, filters supplied paths through the prefix `${orgId}/${tempLeadId}/` (silently drops + Sentry-warns on mismatched paths so a malformed/spoofed path can't write a row pointing at another customer's lead), upserts `lead_photos` rows via `onConflict: "lead_id,storage_path", ignoreDuplicates: true`. Returns `{ success, leadId, received }`. Notification + AI deferral via `after()` from fix #4 unchanged. The lead now lands ~immediately; in-flight photo uploads attach in the background.
+
+**Migration `0066_lead_photos_unique_storage_path.sql`** — `UNIQUE (lead_id, storage_path)` on `lead_photos`. Required for the dual-writer race: lead-submit can insert a row for a path while the upload endpoint's auto-attach branch is also trying to insert the same path. Unique constraint + ON CONFLICT DO NOTHING (lead-submit) and `if (insertError.code === "23505") continue` (upload) makes the second writer a no-op rather than an error. Wrapped in DO/EXCEPTION block since Postgres has no `ADD CONSTRAINT IF NOT EXISTS`. Applied to live Supabase via MCP.
+
+**Refactored `components/PhotoUploader.tsx`** — new prop shape: `entries: PhotoEntry[]`, `onAddFiles`, `onRemove`, `onRetry`. Each entry tracks `localId`, `file`, `status: "uploading"|"done"|"failed"`, `storagePath?`, `publicUrl?`, `errorMessage?`. UI shows per-photo overlay (uploading spinner / done check / failed badge) plus inline error + retry button when failed. Always-visible remove button (touch-friendly). Compression logic preserved.
+
+**Refactored `components/PublicLeadForm.tsx`** — replaced `photos: File[]` state with `photoEntries: PhotoEntry[]`. New `tempLeadId` state generated once at mount via `crypto.randomUUID()`. New `uploadEntry`, `handleAddPhotos`, `handleRemovePhoto`, `handleRetryPhoto` helpers. Each upload is fired with its own `AbortController` so removing a photo cancels its in-flight upload (prevents the "removed photo successfully landed in storage anyway and tried to setState on a missing entry" race). `onSubmit` now sends JSON to `/api/public/lead-submit` with `tempLeadId` + only the `done`-status photo paths. `canSubmit` blocks on any failed photos (forces customer to retry or remove) but does NOT block on uploading photos. Submit body includes `description`, `serviceQuestionAnswers`, `services`, `customerName`, etc., as JSON instead of FormData.
+
+**Updated `lib/validations.ts`** — `leadSubmitSchema` now requires `tempLeadId` (v4 UUID regex) and `photoStoragePaths` (array of `{storagePath, publicUrl}`, max 10, default `[]`). Removed `photoCount` field. New `leadPhotoUploadSchema` for the upload endpoint's text fields. Added `uuidV4Schema` helper for both schemas.
+
+**Updated `tests/integration/api-contracts.test.ts`** — every `leadSubmitSchema.parse(...)` call updated for the new shape (`tempLeadId` + `photoStoragePaths` instead of `photoCount`). New tests: "accepts empty `photoStoragePaths` (in-flight uploads case)" and "rejects `tempLeadId` not a v4 UUID". 11 tests in this file (was 10), 76 total across the suite (was 75), all passing.
+
+### Files changed
+
+| Path | Change |
+|---|---|
+| `app/api/public/lead-photo-upload/route.ts` | New. Per-photo upload endpoint. Rate-limited, validated, uploads to org-scoped + tempLeadId-scoped path, auto-attaches if lead exists. |
+| `app/api/public/lead-submit/route.ts` | Refactored to JSON. Accepts `tempLeadId` + `photoStoragePaths`. Inserts lead with explicit id. Drops bad-prefix paths silently. Upserts `lead_photos` with `onConflict: ignoreDuplicates`. Notification/AI `after()` deferral preserved. |
+| `components/PhotoUploader.tsx` | New `PhotoEntry` type and prop shape. Per-photo status overlay (uploading/done/failed), inline error, retry button. Compression preserved. |
+| `components/PublicLeadForm.tsx` | New `tempLeadId` state, `photoEntries` state, `uploadEntry` helper, AbortController per upload. `onSubmit` sends JSON. Submit blocks on `failed` photos, never on `uploading`. |
+| `lib/validations.ts` | New `uuidV4Schema`, `photoStoragePathSchema`, `leadPhotoUploadSchema`. `leadSubmitSchema` now requires `tempLeadId` + `photoStoragePaths`; `photoCount` removed. |
+| `supabase/migrations/0066_lead_photos_unique_storage_path.sql` | New. `UNIQUE (lead_id, storage_path)` on `lead_photos`. Idempotent via DO/EXCEPTION. Applied to live Supabase. |
+| `tests/integration/api-contracts.test.ts` | All lead-submit tests rewritten for new payload shape. Added empty-paths and bad-uuid tests. |
+| `docs/current-state.md` | "Customer lead submission" section rewritten with new endpoint flow + race protection. Migrations list bumped to 0066. |
+| `docs/updates-log.md` | This entry. |
+
+### Verification
+
+- `npm run typecheck` — exit 0.
+- `npm run lint` — exit 0 (only pre-existing `<img>` warning).
+- `npm run test` — 76/76 tests passing across 10 files.
+- Migration verified applied: `lead_photos_lead_storage_path_unique` constraint present.
+- Manual data-flow trace:
+  - Pick photo → POST /api/public/lead-photo-upload → photo lives at `${orgId}/${tempLeadId}/...` in Storage → entry status flips `uploading` → `done` with `storagePath` + `publicUrl`.
+  - Submit → POST /api/public/lead-submit (JSON) with `tempLeadId` + done-photo paths → lead row inserted with `id = tempLeadId` → `lead_photos` upserted for done paths → response returned (~1–2s) → after() block fires AI estimator + notifications.
+  - In-flight upload completes after submit → upload endpoint's auto-attach branch finds the lead row exists → inserts `lead_photos` row → unique constraint absorbs any race against lead-submit's insert.
+  - Failed upload during form-fill → entry status `failed` + `errorMessage`, retry/remove UI surfaces inline, submit blocks until resolved.
+  - Failed upload after submit → silent; lead lands with whatever photos succeeded.
+
+### Expected effect
+
+- Customer sees the form complete in **~1–2s** at submit time (Turnstile + DB writes), down from ~3–8s post-fix-#4 / 60+s pre-fix-#4.
+- Photo upload latency moves to the form-fill phase. Most customers won't notice it because they're typing.
+- Contractor experience unchanged: the lead lands with all photos within seconds of submit (most attached at submit; trailing in-flight uploads attach within 1–10s).
+- AI estimator's image input may briefly include fewer photos than the customer ultimately attached if AI fires before late uploads attach — acceptable degradation per the broader fallback strategy from prior commits.
+
+### Pending follow-up (filed in Pending Work)
+
+**Orphan cleanup cron** — customers who pick photos and abandon the form leave objects in `lead-photos` Storage at `${orgId}/${tempLeadId}/...` with no corresponding `leads` row. Manageable for now (low abandonment volume), but should add a TTL cleanup cron that deletes Storage objects older than 24h with no lead row. Filed as `[Source: Claude Code]` "Orphan lead-photo cleanup cron" in Pending Work.
+
+### Not done / out of scope
+
+- Did not touch the AI estimator, the notification fix from fix #4, or anything else outside the photo upload + form submission flow.
+- Did not change Vercel `maxDuration`.
+- Did not add the orphan cleanup cron in this commit (filed in Pending Work).
+- Did not add Turnstile to the upload endpoint (would defeat the upload-as-picked UX). Rate limit + content validation + size cap are the protection.
+- Did not run a build or deploy. Code pushed to GitHub; Vercel auto-deploys.

@@ -1,4 +1,3 @@
-import { randomUUID } from "crypto";
 import { after, NextResponse } from "next/server";
 import * as Sentry from "@sentry/nextjs";
 import { triggerEstimatorForLead } from "@/lib/ai/triggerEstimator";
@@ -14,130 +13,34 @@ import { leadSubmitSchema, parseLeadSubmitQuestionAnswers } from "@/lib/validati
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
-const MAX_PHOTO_UPLOADS = 10;
-
-// Upload tuning. Transient 5xx / network resets from Supabase Storage were
-// the main driver of the "one of six photos failed" reports; three attempts
-// with short exponential backoff recovers those without adding noticeable
-// latency on the happy path. A concurrency cap keeps us from slamming
-// Storage (and keeps our own memory footprint bounded) while still
-// overlapping photos so the 6-photo case doesn't serialize to ~12s.
-const PHOTO_UPLOAD_MAX_ATTEMPTS = 3;
-const PHOTO_UPLOAD_RETRY_BASE_DELAY_MS = 400;
-const PHOTO_UPLOAD_CONCURRENCY = 3;
-
-type PhotoUploadSuccess = { ok: true; index: number; path: string; url: string };
-type PhotoUploadFailure = { ok: false; index: number; reason: string };
-type PhotoUploadOutcome = PhotoUploadSuccess | PhotoUploadFailure;
-
-async function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-async function uploadOnePhoto(
-  admin: ReturnType<typeof createAdminClient>,
-  orgId: string,
-  leadId: string,
-  photo: File,
-  index: number
-): Promise<PhotoUploadOutcome> {
-  const ext = photo.type.includes("png") ? "png" : "jpg";
-  const path = `${orgId}/${leadId}/${randomUUID()}.${ext}`;
-
-  // arrayBuffer() can fail for oddly-shaped File handles (HEIC coming
-  // from some Safari versions, for example). Capture that separately so
-  // the reason is visible in Sentry instead of being lumped in with
-  // "upload failed".
-  let arrayBuffer: ArrayBuffer;
-  try {
-    arrayBuffer = await photo.arrayBuffer();
-  } catch (error) {
-    const reason = error instanceof Error ? error.message : String(error);
-    Sentry.captureException(error, {
-      tags: { area: "lead-submit", stage: "photo-buffer" },
-      extra: { orgId, leadId, photoIndex: index, photoType: photo.type, photoSize: photo.size }
-    });
-    return { ok: false, index, reason: `buffer: ${reason}` };
-  }
-
-  for (let attempt = 1; attempt <= PHOTO_UPLOAD_MAX_ATTEMPTS; attempt++) {
-    const { error: uploadError } = await admin.storage
-      .from("lead-photos")
-      .upload(path, arrayBuffer, {
-        contentType: photo.type || "image/jpeg",
-        upsert: false
-      });
-
-    if (!uploadError) {
-      const { data: signed } = await admin.storage
-        .from("lead-photos")
-        .createSignedUrl(path, 60 * 60 * 24);
-      return { ok: true, index, path, url: signed?.signedUrl ?? "" };
-    }
-
-    const isLastAttempt = attempt === PHOTO_UPLOAD_MAX_ATTEMPTS;
-    if (isLastAttempt) {
-      Sentry.captureException(uploadError, {
-        tags: { area: "lead-submit", stage: "photo-upload", final: "true" },
-        extra: {
-          orgId,
-          leadId,
-          photoIndex: index,
-          photoType: photo.type,
-          photoSize: photo.size,
-          attempts: attempt
-        }
-      });
-      const reason = uploadError.message || "upload failed";
-      return { ok: false, index, reason };
-    }
-
-    await sleep(PHOTO_UPLOAD_RETRY_BASE_DELAY_MS * 2 ** (attempt - 1));
-  }
-
-  // Unreachable — the loop either returns success or returns on the last
-  // attempt — but TypeScript can't prove that.
-  return { ok: false, index, reason: "unknown" };
-}
-
-async function runWithConcurrency<T, R>(
-  items: T[],
-  limit: number,
-  worker: (item: T, index: number) => Promise<R>
-): Promise<R[]> {
-  const results = new Array<R>(items.length);
-  let cursor = 0;
-  const runners = Array.from({ length: Math.min(limit, items.length) }, async () => {
-    while (true) {
-      const idx = cursor;
-      cursor += 1;
-      if (idx >= items.length) return;
-      results[idx] = await worker(items[idx], idx);
-    }
-  });
-  await Promise.all(runners);
-  return results;
-}
-
-function parseNumber(input: FormDataEntryValue | null): number | undefined {
-  if (!input || typeof input !== "string" || input.length === 0) return undefined;
-  const num = Number(input);
-  return Number.isFinite(num) ? num : undefined;
-}
-
-function parseJsonField<T>(input: FormDataEntryValue | null, fallback: T): T {
-  if (!input || typeof input !== "string" || input.trim().length === 0) return fallback;
-
-  try {
-    return JSON.parse(input) as T;
-  } catch {
-    return fallback;
-  }
-}
-
 const ONE_HOUR = 60 * 60 * 1000;
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
+/**
+ * Customer-facing lead submission endpoint.
+ *
+ * Photo uploads no longer travel through this endpoint — they upload as
+ * the customer picks them via /api/public/lead-photo-upload, and the
+ * client sends the resulting storagePath / publicUrl pairs here at
+ * submit time. That decoupling drops the customer's wait time on this
+ * call from "Turnstile + DB writes + photo upload + provider notifies"
+ * down to "Turnstile + DB writes" — typically under 2s. See
+ * docs/current-state.md "Customer lead submission" section for the full
+ * upload-as-picked + submit-doesn't-wait pattern.
+ *
+ * The client-supplied tempLeadId becomes the lead row's id (overriding
+ * the gen_random_uuid() default) so the storage paths created by the
+ * photo upload endpoint already reference the right lead. No rename or
+ * move needed. Photos still in flight at submit time will see the lead
+ * exist when they finish and attach themselves via the unique-
+ * constrained INSERT in /api/public/lead-photo-upload.
+ *
+ * The notification fire-and-forget pattern from fix #4 stays: estimator
+ * trigger + Telnyx contractor SMS + Telnyx customer SMS + Resend
+ * customer confirmation email all run inside after(), in parallel via
+ * Promise.allSettled, so the customer's response doesn't block on any
+ * external provider.
+ */
 export async function POST(request: Request) {
   try {
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
@@ -145,9 +48,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429 });
     }
 
-    const formData = await request.formData();
-    const turnstileToken = String(formData.get("turnstileToken") ?? "");
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
+    }
+    const bodyObj = (body ?? {}) as Record<string, unknown>;
 
+    const turnstileToken = typeof bodyObj.turnstileToken === "string" ? bodyObj.turnstileToken : "";
     if (!turnstileToken) {
       return NextResponse.json({ error: "Bot verification failed." }, { status: 400 });
     }
@@ -173,24 +82,30 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Bot verification failed." }, { status: 400 });
     }
 
-    const services = normalizeServiceTypes(formData.getAll("services[]").map((value) => String(value)));
-    const rawServiceQuestionAnswers = parseJsonField<unknown>(formData.get("serviceQuestionAnswers"), null);
-    const serviceQuestionAnswers = parseLeadSubmitQuestionAnswers(rawServiceQuestionAnswers);
-    const photos = formData.getAll("photos").filter((item): item is File => item instanceof File);
+    const services = normalizeServiceTypes(
+      Array.isArray(bodyObj.services) ? (bodyObj.services as unknown[]).map((value) => String(value)) : []
+    );
+    const serviceQuestionAnswers = parseLeadSubmitQuestionAnswers(bodyObj.serviceQuestionAnswers);
 
     const payload = leadSubmitSchema.parse({
-      contractorSlug: String(formData.get("contractorSlug") ?? ""),
-      customerName: String(formData.get("customerName") ?? ""),
-      customerPhone: String(formData.get("customerPhone") ?? ""),
-      customerEmail: String(formData.get("customerEmail") ?? ""),
-      addressFull: String(formData.get("addressFull") ?? ""),
-      addressPlaceId: String(formData.get("addressPlaceId") ?? ""),
-      lat: parseNumber(formData.get("lat")),
-      lng: parseNumber(formData.get("lng")),
+      contractorSlug: typeof bodyObj.contractorSlug === "string" ? bodyObj.contractorSlug : "",
+      tempLeadId: typeof bodyObj.tempLeadId === "string" ? bodyObj.tempLeadId : "",
+      customerName: typeof bodyObj.customerName === "string" ? bodyObj.customerName : "",
+      customerPhone: typeof bodyObj.customerPhone === "string" ? bodyObj.customerPhone : "",
+      customerEmail: typeof bodyObj.customerEmail === "string" ? bodyObj.customerEmail : "",
+      addressFull: typeof bodyObj.addressFull === "string" ? bodyObj.addressFull : "",
+      addressPlaceId: typeof bodyObj.addressPlaceId === "string" ? bodyObj.addressPlaceId : "",
+      lat: typeof bodyObj.lat === "number" ? bodyObj.lat : undefined,
+      lng: typeof bodyObj.lng === "number" ? bodyObj.lng : undefined,
       services,
-      description: String(formData.get("description") ?? ""),
+      description: typeof bodyObj.description === "string" ? bodyObj.description : "",
       serviceQuestionAnswers,
-      photoCount: photos.length
+      photoStoragePaths: Array.isArray(bodyObj.photoStoragePaths)
+        ? (bodyObj.photoStoragePaths as Array<Record<string, unknown>>).map((entry) => ({
+            storagePath: typeof entry?.storagePath === "string" ? entry.storagePath : "",
+            publicUrl: typeof entry?.publicUrl === "string" ? entry.publicUrl : ""
+          }))
+        : []
     });
 
     const admin = createAdminClient();
@@ -216,6 +131,30 @@ export async function POST(request: Request) {
     }
 
     const orgId = contractor.org_id as string;
+
+    // Verify every supplied storage path is scoped to this org + tempLeadId.
+    // The upload endpoint already enforces this on write, but the submit
+    // endpoint is the trust boundary that links these paths to a real
+    // lead row, so we revalidate the prefix here. Anything that doesn't
+    // match is dropped silently rather than rejecting the whole submit
+    // (a malformed path would otherwise abandon a customer mid-form).
+    const expectedPrefix = `${orgId}/${payload.tempLeadId}/`;
+    const validPhotoPaths = payload.photoStoragePaths.filter((entry) =>
+      entry.storagePath.startsWith(expectedPrefix)
+    );
+    const droppedPathCount = payload.photoStoragePaths.length - validPhotoPaths.length;
+    if (droppedPathCount > 0) {
+      Sentry.captureMessage("lead-submit dropped photo paths with bad prefix", {
+        level: "warning",
+        tags: { area: "lead-submit", stage: "photo-path-prefix" },
+        extra: {
+          orgId,
+          tempLeadId: payload.tempLeadId,
+          droppedPathCount,
+          totalPaths: payload.photoStoragePaths.length
+        }
+      });
+    }
 
     // 30-day inactivity gate for Solo plans. Paid plans (TEAM/BUSINESS) are
     // always accepted; cancelled/expired subscriptions get downgraded to SOLO
@@ -265,19 +204,10 @@ export async function POST(request: Request) {
         : null;
 
     let createdCustomerId: string | null = null;
-    let lead:
-      | {
-          id: string;
-          parcel_lot_size_sqft: number | string | null;
-        }
-      | null = null;
+    let leadId: string | null = null;
 
     try {
-      let existingCustomer:
-        | {
-            id: string;
-          }
-        | null = null;
+      let existingCustomer: { id: string } | null = null;
 
       if (payload.customerEmail) {
         const { data: customerByEmail, error: customerByEmailError } = await admin
@@ -330,11 +260,16 @@ export async function POST(request: Request) {
         createdCustomerId = customer.id as string;
       }
 
-      // This is not a true DB transaction: if the lead insert fails after creating a brand-new
-      // customer row, we best-effort delete that orphaned customer to avoid leaving stray data behind.
+      // Lead row uses the client-supplied tempLeadId as its primary key.
+      // The Postgres column has gen_random_uuid() as its default, but
+      // explicit insertion is allowed — and it's required for our flow
+      // because photos uploaded before submit are pathed at
+      // ${orgId}/${tempLeadId}/... and need to share an id with the lead
+      // row to attach.
       const { data: insertedLead, error: leadError } = await admin
         .from("leads")
         .insert({
+          id: payload.tempLeadId,
           org_id: orgId,
           contractor_slug_snapshot: payload.contractorSlug,
           customer_name: payload.customerName,
@@ -351,14 +286,14 @@ export async function POST(request: Request) {
           status: "NEW",
           ai_status: "processing"
         })
-        .select("id,parcel_lot_size_sqft")
+        .select("id")
         .single();
 
       if (leadError || !insertedLead) {
         throw leadError || new Error("Failed to create lead.");
       }
 
-      lead = insertedLead as { id: string; parcel_lot_size_sqft: number | string | null };
+      leadId = insertedLead.id as string;
     } catch (error) {
       if (createdCustomerId) {
         const { error: cleanupError } = await admin
@@ -375,48 +310,36 @@ export async function POST(request: Request) {
       throw error;
     }
 
-    if (!lead) {
+    if (!leadId) {
       throw new Error("Failed to create lead.");
     }
 
-    const leadId = lead.id as string;
-    const attemptedPhotoUploads = photos.slice(0, MAX_PHOTO_UPLOADS);
-
-    // Upload photos in parallel with a small concurrency cap, retrying
-    // transient failures. Each photo has a bounded outcome so we know
-    // exactly which ones failed (and can surface that per-photo to the
-    // client instead of the old binary "some photos failed" flag).
-    const outcomes = await runWithConcurrency(
-      attemptedPhotoUploads,
-      PHOTO_UPLOAD_CONCURRENCY,
-      (photo, index) => uploadOnePhoto(admin, orgId, leadId, photo, index)
-    );
-
-    const uploadedPaths = outcomes.filter(
-      (outcome): outcome is PhotoUploadSuccess => outcome.ok
-    );
-    const failedPhotos = outcomes.filter(
-      (outcome): outcome is PhotoUploadFailure => !outcome.ok
-    );
-
-    if (uploadedPaths.length > 0) {
-      const photoRows = uploadedPaths.map((photo) => ({
+    // Insert lead_photos rows for the storage paths the client claims
+    // are already uploaded. Photos still in flight at submit time will
+    // attach themselves later via /api/public/lead-photo-upload's
+    // auto-attach branch — both writers are idempotent against the
+    // (lead_id, storage_path) unique constraint added in migration 0066.
+    if (validPhotoPaths.length > 0) {
+      const photoRows = validPhotoPaths.map((entry) => ({
         lead_id: leadId,
         org_id: orgId,
-        storage_path: photo.path,
-        // We DON'T persist a long-lived signed URL anymore. The path is
-        // stored permanently and fresh signed URLs are generated on
-        // demand at render time (1-hour TTL). public_url keeps a
-        // 24-hour token for AI ingest which needs a URL right away.
-        public_url: photo.url
+        storage_path: entry.storagePath,
+        // public_url here is the 24h signed URL minted by the upload
+        // endpoint. AI ingest needs a URL it can fetch; render-time
+        // signing on the dashboard separately mints a fresh 1h URL.
+        public_url: entry.publicUrl
       }));
-      const { error: photoInsertError } = await admin.from("lead_photos").insert(photoRows);
+      const { error: photoInsertError } = await admin
+        .from("lead_photos")
+        .upsert(photoRows, {
+          onConflict: "lead_id,storage_path",
+          ignoreDuplicates: true
+        });
       if (photoInsertError) {
-        // If the DB write fails after a successful Storage upload the
-        // files are orphaned — surface the error to Sentry with enough
-        // context to clean up later. The lead itself has already been
-        // persisted so we still return success to the client; the lead
-        // will just show up without photos.
+        // Storage objects exist but lead_photos rows didn't write.
+        // Surface to Sentry; the lead still ships, just possibly with
+        // missing photo references that the rescue cron / contractor
+        // can manually sort out.
         Sentry.captureException(photoInsertError, {
           tags: { area: "lead-submit", stage: "photo-row-insert" },
           extra: {
@@ -438,12 +361,9 @@ export async function POST(request: Request) {
 
     // Everything that doesn't need to block the customer's response goes
     // inside this single after() block: estimator trigger, contractor
-    // SMS, customer SMS, customer confirmation email. The form must NOT
-    // wait on Telnyx or Resend — those calls had no per-fetch timeout
-    // and could hang for 60+s on a slow provider, which was the actual
-    // cause of the "Sending..." button stalling. The customer still
-    // gets their confirmation; it just lands a few seconds AFTER the
-    // form thank-you screen instead of gating it.
+    // SMS, customer SMS, customer confirmation email. Notifications
+    // and the AI estimator are non-blocking. The customer's response
+    // returns immediately after the lead row + photo_rows write below.
     //
     // Contractor email (previously sent here) still fires from
     // sendNewLeadNotifications inside the estimator's terminal paths so
@@ -472,18 +392,18 @@ export async function POST(request: Request) {
     const customerEmailRecipient = payload.customerEmail || null;
     const customerEmailReplyTo = (contractor.email as string | null) ?? null;
 
+    const finalLeadId = leadId;
+    const finalOrgId = orgId;
+
     after(async () => {
-      // Trigger the estimator first so the AI pipeline starts as early
-      // as possible — the rest of after() is housekeeping that doesn't
-      // gate the contractor's lead arrival.
-      const triggerResult = await triggerEstimatorForLead(leadId);
+      const triggerResult = await triggerEstimatorForLead(finalLeadId);
       if (!triggerResult.ok) {
         console.error("lead-submit estimator trigger failed:", triggerResult.error);
         const { error: failureUpdateError } = await admin
           .from("leads")
           .update({ ai_status: "failed" })
-          .eq("id", leadId)
-          .eq("org_id", orgId);
+          .eq("id", finalLeadId)
+          .eq("org_id", finalOrgId);
         if (failureUpdateError) {
           console.error(
             "lead-submit failed to persist estimator-trigger failure state:",
@@ -492,12 +412,6 @@ export async function POST(request: Request) {
         }
       }
 
-      // Run all three notification calls in parallel — they hit
-      // independent providers (Telnyx + Resend) and don't depend on each
-      // other. allSettled so a single hung/failing provider doesn't
-      // sink the others. Each underlying call has its own per-attempt
-      // AbortController timeout in lib/notify.ts so this can't run
-      // forever even if all three providers stall.
       await Promise.allSettled([
         notifyContractor(contractorNotificationOptions).catch((error) => {
           console.warn("lead-submit contractor notification failed:", error);
@@ -511,7 +425,6 @@ export async function POST(request: Request) {
               subject: customerConfirmationEmail.subject,
               text: customerConfirmationEmail.text,
               html: customerConfirmationEmail.html,
-              // Replies route back to the contractor instead of estimates@.
               replyTo: customerEmailReplyTo
             }).catch((error) => {
               console.warn("lead-submit customer email failed:", error);
@@ -523,16 +436,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       leadId,
-      received: true,
-      photoUploadPartialFailure: failedPhotos.length > 0,
-      photoUpload: {
-        attempted: attemptedPhotoUploads.length,
-        succeeded: uploadedPaths.length,
-        failed: failedPhotos.map((failure) => ({
-          index: failure.index,
-          reason: failure.reason
-        }))
-      }
+      received: true
     });
   } catch (error) {
     console.error("lead-submit failed:", error);

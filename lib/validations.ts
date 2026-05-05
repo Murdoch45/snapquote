@@ -42,9 +42,29 @@ const serviceQuestionAnswerBundleSchema = z.object({
   answers: z.record(serviceQuestionAnswerValueSchema)
 });
 
+// UUID v4 is the canonical client-generated tempLeadId / lead.id used by
+// the pre-submit photo upload flow. The client picks the UUID at form
+// mount, photos upload to a path keyed on it, and lead-submit creates
+// the lead row with this exact id so the photo paths and lead row share
+// the same identifier with no rename. Validated as v4 specifically so a
+// caller can't supply something pathological (timestamp UUID, nil UUID,
+// etc.) that would still parse as "a uuid" but break path conventions.
+const uuidV4Schema = z
+  .string()
+  .regex(
+    /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+    "tempLeadId must be a v4 UUID"
+  );
+
+const photoStoragePathSchema = z.object({
+  storagePath: z.string().min(1).max(500),
+  publicUrl: z.string().url().max(2000)
+});
+
 export const leadSubmitSchema = z
   .object({
     contractorSlug: z.string().min(3),
+    tempLeadId: uuidV4Schema,
     customerName: z.string().min(2).max(120),
     customerPhone: phoneSchema,
     customerEmail: z.string().email(),
@@ -55,11 +75,12 @@ export const leadSubmitSchema = z
     services: z.array(z.enum(SERVICE_OPTIONS)).min(1),
     description: z.string().max(2000).optional(),
     serviceQuestionAnswers: z.array(serviceQuestionAnswerBundleSchema),
-    photoCount: z
-      .number()
-      .int()
-      .min(1, "Upload at least one photo before submitting.")
-      .max(10, "Upload up to 10 photos before submitting.")
+    // Storage paths the client believes have already finished uploading
+    // via /api/public/lead-photo-upload at submit time. May be empty if
+    // every picked photo is still mid-upload; in-flight uploads will
+    // attach themselves to the just-created lead row when they complete.
+    // Capped at 10 to match MAX_PHOTO_UPLOADS.
+    photoStoragePaths: z.array(photoStoragePathSchema).max(10).default([])
   })
   .superRefine((val, ctx) => {
     if (val.serviceQuestionAnswers.length !== val.services.length) {
@@ -96,6 +117,14 @@ export const leadSubmitSchema = z
 export function parseLeadSubmitQuestionAnswers(value: unknown) {
   return parseServiceQuestionBundles(value);
 }
+
+// Validates the multipart fields on /api/public/lead-photo-upload. The
+// File itself is validated by content-type / size in the route handler;
+// this schema only covers the text fields.
+export const leadPhotoUploadSchema = z.object({
+  contractorSlug: z.string().min(3),
+  tempLeadId: uuidV4Schema
+});
 
 export const updateSettingsSchema = z.object({
   businessName: z.string().min(2).max(120),
