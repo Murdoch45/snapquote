@@ -2016,3 +2016,63 @@ Healthy steady state: `catch-fallback-recovered` should be rare (single-digit pe
 ### Pressure-washing caveat (flagged in Pending Work)
 
 Pressure-washing is the one service where photo detail meaningfully affects price — `detectedSurfaces` from satellite/photos drives the surface scope and `quotedSurfaces` reconciliation, which feeds the priced sqft. With photos at "low" detail, AI may detect fewer or less-accurate surface boundaries, which could push the priced sqft lower than it would be with "high" detail photos. Worth A/B testing once pressure-washing is a launch priority. Filed as a Pending Work entry "Pressure-washing photo detail A/B".
+
+---
+
+## Session — May 4, 2026 (fix #4)
+
+### Fix: Move notifications into after() so customer form doesn't block on Telnyx/Resend
+
+**Symptom:** After commit `8478173` shipped (photo detail to "low") AI was succeeding on test leads. But Murdoch tested submitting the public lead-request form and the "Sending..." button hung for 60+ seconds before returning. Conversion-killing — real customers will think the form is broken, close the tab, hit submit again creating duplicates, or just abandon and we lose the lead.
+
+**Root cause:** `app/api/public/lead-submit/route.ts` was already deferring the AI estimator correctly via `after()`. But three other provider calls were `await`ed in the synchronous path **before** `NextResponse.json` was returned:
+1. `notifyContractor(...)` — Telnyx SMS, 3 retries with 500ms backoff, **no per-fetch timeout** in `lib/notify.ts` `sendSms`.
+2. `notifyCustomer(...)` — same shape.
+3. `sendEmail(...)` for the customer confirmation — Resend SDK call, 3 retries, no timeout passed to the SDK.
+
+With no per-fetch `AbortController` / `signal`, a hung Telnyx response (which we'd seen sporadically since the 10DLC campaign came online) could stall each `fetch` for any amount of time. Three notification calls × multi-second hangs each × 3 retries each = easily 60+s of customer-facing wait. The AI was a red herring — it was already deferred. The notifications were the real block.
+
+**Fix (commit on `main`, 2 files):**
+
+1. **`app/api/public/lead-submit/route.ts`** — moved `notifyContractor`, `notifyCustomer`, and the customer confirmation `sendEmail` from the synchronous path into the existing `after()` block alongside `triggerEstimatorForLead`. The notification option objects (`contractorNotificationOptions`, `customerNotificationOptions`, `customerEmailRecipient`, `customerEmailReplyTo`) are computed before the `after()` registration so they're closed-over by the deferred callback. All three calls run in parallel via `Promise.allSettled([...])`, each wrapped in `.catch` so a single hung/failing provider doesn't sink the others. The customer's `NextResponse.json(...)` returns as soon as photo uploads + DB writes complete — no provider gates the response. Floor on customer wait: ~3–8s, dominated by photo uploads.
+2. **`lib/notify.ts`** — added defense-in-depth `PROVIDER_FETCH_TIMEOUT_MS = 8000` per attempt for both providers. `sendSms` now wraps each Telnyx fetch with a fresh `AbortController` whose `controller.abort(...)` fires at 8s; the abort signal is passed to `fetch(..., { signal })` so the underlying request actually unwinds instead of hanging. `sendEmail` wraps the Resend SDK's `emails.send(...)` in `Promise.race` against an 8s timer (the SDK doesn't expose an AbortController directly). On timeout each call falls through the existing retry / fail-quiet path.
+
+Notifications still fire on every successful submission — they just land seconds AFTER the form's thank-you screen instead of gating it. Even after the move, the 8s per-attempt cap means worst-case after()-block time is 3 retries × 8s = 24s for a fully-stuck provider, well inside the 60s `maxDuration` budget.
+
+### Why this and not the alternatives
+
+- **Vercel queues / background jobs:** unnecessary infrastructure for a problem `after()` already solves. The estimator side already proves this pattern works.
+- **Webhook-style separate edge function:** overkill for "send 3 messages." Notifications fail-quietly; they don't need their own service boundary.
+- **Just adding the 8s timeout, leaving notifications synchronous:** still bottlenecks the form at 3 calls × 3 retries × 8s = up to 72s in the absolute worst case. Need both the move AND the timeout.
+- **Defer photo uploads too:** out of scope per Murdoch's instruction. He's planning a separate change where uploads start when photos are picked + form returns success even if photos still finishing in background. That's a different commit.
+
+### Files changed
+
+| Path | Change |
+|---|---|
+| `app/api/public/lead-submit/route.ts` | `notifyContractor`, `notifyCustomer`, customer-confirmation `sendEmail` moved from synchronous path into the existing `after()` block. All three run in parallel via `Promise.allSettled` with per-call `.catch`. Notification option objects hoisted above `after()` so they're captured. The dead `contractorNotifications` / `customerNotifications` arrays (computed but never returned in the response) removed. |
+| `lib/notify.ts` | New `PROVIDER_FETCH_TIMEOUT_MS = 8000`. `sendSms` wraps each Telnyx fetch with a fresh `AbortController` + 8s timer + `signal` passed to `fetch`. `sendEmail` wraps the Resend SDK call in `Promise.race` against an 8s timer. Each `finally` clears its timer to avoid leaks. Existing 3-retry / 500ms-backoff logic untouched. |
+| `docs/current-state.md` | New "Customer lead submission (public form)" section documenting the synchronous vs deferred work split and the realistic floor (~3–8s). |
+| `docs/updates-log.md` | This entry. |
+
+### Verification before push
+
+- `npm run typecheck` — exit 0.
+- `npm run lint` — exit 0 (only pre-existing `<img>` warning in `app/layout.tsx`, unrelated).
+- `npm run test` — 75/75 tests passing across 10 files.
+- Confirmed `NextResponse.json({ success, leadId, photoUpload, photoUploadPartialFailure })` is unchanged — photo error surfacing still works exactly as before.
+- Confirmed no orphaned `contractorNotifications` / `customerNotifications` references remain.
+
+### Expected effect
+
+- "Sending..." button on the public lead form completes in ~3–8s instead of 60+s on slow-provider days. Realistic floor is photo-upload time + DB writes + Turnstile.
+- Customer SMS and email confirmation still arrive within seconds of submit (just after the response, not before).
+- Contractor SMS still arrives within seconds of submit; the lead also still appears in the contractor's dashboard via the existing realtime path once AI completes (separate signal).
+- Worst-case `after()` block runtime is 24s per provider with the 8s timeout × 3 retries, well inside the 60s `maxDuration` budget.
+
+### Not done / out of scope
+
+- Did not touch photo upload logic (separate commit Murdoch is planning).
+- Did not touch the AI estimator, schema, or any AI-side code.
+- Did not change Vercel `maxDuration`.
+- Did not run a build or deploy. Code pushed to GitHub; Vercel auto-deploys.

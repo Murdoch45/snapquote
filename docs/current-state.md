@@ -213,6 +213,29 @@ SnapQuote is an AI-powered quoting and lead management SaaS for outdoor service 
 
 ---
 
+## Customer lead submission (public form)
+
+> Updated 2026-05-04 fix #4. Background context: contractor-form's "Sending..." button was stalling for 60+ seconds because three notification calls were awaited synchronously before the response (`notifyContractor` Telnyx SMS, `notifyCustomer` Telnyx SMS, customer confirmation Resend email — none had per-fetch timeouts; a slow provider could hang each retry indefinitely).
+
+**Synchronous (gates the customer's response):**
+1. Turnstile verification (Cloudflare).
+2. Contractor lookup, plan/inactivity check, customer dedup queries.
+3. Customer + lead inserts (`ai_status="processing"`).
+4. Photo uploads to Supabase Storage with retries + `lead_photos` insert. The response includes per-photo success/failure outcomes so the form can surface partial failures.
+5. Build the prepared notification options (objects only — no provider calls yet).
+6. Register the `after()` block.
+7. Return `NextResponse.json({ success, leadId, photoUpload, photoUploadPartialFailure })`.
+
+Realistic floor: ~3–8s, dominated by photo uploads.
+
+**Deferred via `after()` (runs after the response is sent, doesn't gate the customer):**
+- `triggerEstimatorForLead(leadId)` — Supabase edge function handoff that drives the AI estimator on a fresh Vercel invocation. On trigger failure, lead is flipped to `ai_status="failed"` and the rescue cron picks it up.
+- `notifyContractor` Telnyx SMS — "New estimate request: …". Each attempt has an 8s `AbortController` timeout (`PROVIDER_FETCH_TIMEOUT_MS` in `lib/notify.ts`).
+- `notifyCustomer` Telnyx SMS — "We received your request. You will get your estimate shortly." Same 8s timeout.
+- Customer confirmation Resend email (if `customerEmail` provided) — wrapped in `Promise.race` against an 8s timer to bound a hung Resend SDK call.
+
+All three notifications run in parallel via `Promise.allSettled`; a single hung/failing provider doesn't sink the others. Each call's outer promise has a `.catch` so a thrown error inside `Promise.allSettled` doesn't surface as an unhandled rejection.
+
 ## Notifications
 
 **Architecture:** In-app feed (bell icon dropdown, both platforms) + push (mobile only) + email + SMS. All contractor notifications fire together after `ai_status` flips, NOT at lead insert. Single shared `notifications` table backs web and mobile.

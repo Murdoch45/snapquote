@@ -40,6 +40,15 @@ type SendEmailInput = {
 const SMS_MAX_ATTEMPTS = 3;
 const SMS_RETRY_BASE_DELAY_MS = 500;
 
+// Per-attempt timeout for outbound provider calls (Telnyx, Resend). A
+// hung fetch with no signal would keep the calling Vercel function alive
+// past maxDuration — and on the customer-form submit path, this was
+// directly responsible for "Sending..." stalling 60+ seconds before
+// notifications were moved into after(). Even after that move, the
+// timeout is defense-in-depth so a slow provider can't pin the function
+// instance for the rest of its budget.
+const PROVIDER_FETCH_TIMEOUT_MS = 8000;
+
 const telnyxConfigured = Boolean(process.env.TELNYX_API_KEY);
 const resendConfigured = Boolean(process.env.RESEND_API_KEY);
 
@@ -80,6 +89,11 @@ export async function sendSms(to: string, body: string): Promise<boolean> {
 
   for (let attempt = 1; attempt <= SMS_MAX_ATTEMPTS; attempt++) {
     let response: Response;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(
+      () => controller.abort(new Error(`Telnyx sendSms timed out after ${PROVIDER_FETCH_TIMEOUT_MS}ms`)),
+      PROVIDER_FETCH_TIMEOUT_MS
+    );
     try {
       response = await fetch(TELNYX_API_URL, {
         method: "POST",
@@ -91,7 +105,8 @@ export async function sendSms(to: string, body: string): Promise<boolean> {
           from: TELNYX_FROM_NUMBER,
           to: normalizedTo,
           text: compliantBody
-        })
+        }),
+        signal: controller.signal
       });
     } catch (error) {
       console.error(`Telnyx sendSms network error (attempt ${attempt}/${SMS_MAX_ATTEMPTS}):`, error);
@@ -100,6 +115,8 @@ export async function sendSms(to: string, body: string): Promise<boolean> {
         continue;
       }
       return false;
+    } finally {
+      clearTimeout(timeoutId);
     }
 
     if (response.ok) return true;
@@ -148,17 +165,30 @@ export async function sendEmail(input: SendEmailInput): Promise<boolean> {
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
-      const result = await getResendClient().emails.send(
-        {
-          from: fromEmail,
-          to: input.to,
-          subject: input.subject,
-          text: input.text,
-          html: input.html,
-          ...(input.replyTo ? { replyTo: input.replyTo } : {})
-        },
-        input.idempotencyKey ? { idempotencyKey: input.idempotencyKey } : undefined
-      );
+      // The Resend SDK's emails.send() doesn't expose an AbortController
+      // signal directly, so we race it against a timeout promise. The SDK
+      // call keeps running in the background after a timeout reject, but
+      // since we always retry or return false, the orphaned promise's
+      // result is ignored — and after() will be done by then anyway.
+      const result = await Promise.race([
+        getResendClient().emails.send(
+          {
+            from: fromEmail,
+            to: input.to,
+            subject: input.subject,
+            text: input.text,
+            html: input.html,
+            ...(input.replyTo ? { replyTo: input.replyTo } : {})
+          },
+          input.idempotencyKey ? { idempotencyKey: input.idempotencyKey } : undefined
+        ),
+        new Promise<never>((_, reject) =>
+          setTimeout(
+            () => reject(new Error(`Resend sendEmail timed out after ${PROVIDER_FETCH_TIMEOUT_MS}ms`)),
+            PROVIDER_FETCH_TIMEOUT_MS
+          )
+        )
+      ]);
       if (result.error) {
         console.error(`Resend sendEmail API error (attempt ${attempt}/${maxAttempts}):`, result.error);
         if (attempt < maxAttempts) {

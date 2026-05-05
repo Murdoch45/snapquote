@@ -429,17 +429,53 @@ export async function POST(request: Request) {
       }
     }
 
-    // Kick off the estimator on a Supabase Edge Function. The hand-off is
-    // a single HTTP call (~1s) so it's safe inside after() — after() is
-    // only carrying the trigger, not the estimator itself. The edge
-    // function then drives the estimator via /api/internal/run-estimator,
-    // where it runs on a fresh Vercel invocation with a full budget and
-    // can't be reclaimed by the lead-submit instance returning.
+    const leadLink = `${getAppUrl()}/app/leads/${leadId}`;
+    const serviceText = payload.services.join(", ");
+
+    if (!contractor.notification_lead_email && contractor.email) {
+      console.warn("lead-submit contractor email notification disabled.");
+    }
+
+    // Everything that doesn't need to block the customer's response goes
+    // inside this single after() block: estimator trigger, contractor
+    // SMS, customer SMS, customer confirmation email. The form must NOT
+    // wait on Telnyx or Resend — those calls had no per-fetch timeout
+    // and could hang for 60+s on a slow provider, which was the actual
+    // cause of the "Sending..." button stalling. The customer still
+    // gets their confirmation; it just lands a few seconds AFTER the
+    // form thank-you screen instead of gating it.
     //
-    // Contractor email (previously sent here) now fires from
-    // sendNewLeadNotifications inside the estimator's terminal paths, so
+    // Contractor email (previously sent here) still fires from
+    // sendNewLeadNotifications inside the estimator's terminal paths so
     // it reaches the contractor on success, failure, and rescue alike.
+    const customerConfirmationEmail = buildCustomerConfirmationEmail({
+      businessName: contractor.business_name as string,
+      businessPhone: (contractor.phone as string | null) ?? null,
+      businessEmail: (contractor.email as string | null) ?? null
+    });
+    const contractorNotificationOptions = {
+      smsEnabled: contractor.notification_lead_sms as boolean,
+      emailEnabled: false,
+      phone: contractor.phone as string | null,
+      email: null,
+      smsBody: `New estimate request: ${serviceText} at ${payload.addressFull}. Open: ${leadLink}`,
+      emailSubject: "New SnapQuote lead",
+      emailBody: `New estimate request: ${serviceText} at ${payload.addressFull}. Open: ${leadLink}`
+    };
+    const customerNotificationOptions = {
+      phone: payload.customerPhone,
+      email: null as string | null,
+      smsBody: `We received your request. You will get your estimate shortly. - ${contractor.business_name}`,
+      emailSubject: customerConfirmationEmail.subject,
+      emailBody: customerConfirmationEmail.text
+    };
+    const customerEmailRecipient = payload.customerEmail || null;
+    const customerEmailReplyTo = (contractor.email as string | null) ?? null;
+
     after(async () => {
+      // Trigger the estimator first so the AI pipeline starts as early
+      // as possible — the rest of after() is housekeeping that doesn't
+      // gate the contractor's lead arrival.
       const triggerResult = await triggerEstimatorForLead(leadId);
       if (!triggerResult.ok) {
         console.error("lead-submit estimator trigger failed:", triggerResult.error);
@@ -455,52 +491,34 @@ export async function POST(request: Request) {
           );
         }
       }
+
+      // Run all three notification calls in parallel — they hit
+      // independent providers (Telnyx + Resend) and don't depend on each
+      // other. allSettled so a single hung/failing provider doesn't
+      // sink the others. Each underlying call has its own per-attempt
+      // AbortController timeout in lib/notify.ts so this can't run
+      // forever even if all three providers stall.
+      await Promise.allSettled([
+        notifyContractor(contractorNotificationOptions).catch((error) => {
+          console.warn("lead-submit contractor notification failed:", error);
+        }),
+        notifyCustomer(customerNotificationOptions).catch((error) => {
+          console.warn("lead-submit customer notification failed:", error);
+        }),
+        customerEmailRecipient
+          ? sendEmail({
+              to: customerEmailRecipient,
+              subject: customerConfirmationEmail.subject,
+              text: customerConfirmationEmail.text,
+              html: customerConfirmationEmail.html,
+              // Replies route back to the contractor instead of estimates@.
+              replyTo: customerEmailReplyTo
+            }).catch((error) => {
+              console.warn("lead-submit customer email failed:", error);
+            })
+          : Promise.resolve()
+      ]);
     });
-
-    const leadLink = `${getAppUrl()}/app/leads/${leadId}`;
-    const serviceText = payload.services.join(", ");
-
-    if (!contractor.notification_lead_email && contractor.email) {
-      console.warn("lead-submit contractor email notification disabled.");
-    }
-
-    const contractorNotifications = await notifyContractor({
-      smsEnabled: contractor.notification_lead_sms as boolean,
-      emailEnabled: false,
-      phone: contractor.phone as string | null,
-      email: null,
-      smsBody: `New estimate request: ${serviceText} at ${payload.addressFull}. Open: ${leadLink}`,
-      emailSubject: "New SnapQuote lead",
-      emailBody: `New estimate request: ${serviceText} at ${payload.addressFull}. Open: ${leadLink}`
-    });
-
-    const customerConfirmationEmail = buildCustomerConfirmationEmail({
-      businessName: contractor.business_name as string,
-      businessPhone: (contractor.phone as string | null) ?? null,
-      businessEmail: (contractor.email as string | null) ?? null
-    });
-
-    const customerNotifications = await notifyCustomer({
-      phone: payload.customerPhone,
-      email: null,
-      smsBody: `We received your request. You will get your estimate shortly. - ${contractor.business_name}`,
-      emailSubject: customerConfirmationEmail.subject,
-      emailBody: customerConfirmationEmail.text
-    });
-    if (payload.customerEmail) {
-      const customerEmailSent = await sendEmail({
-        to: payload.customerEmail,
-        subject: customerConfirmationEmail.subject,
-        text: customerConfirmationEmail.text,
-        html: customerConfirmationEmail.html,
-        // Replies route back to the contractor instead of estimates@.
-        replyTo: (contractor.email as string | null) ?? null
-      });
-
-      if (customerEmailSent) {
-        customerNotifications.push("email");
-      }
-    }
 
     return NextResponse.json({
       success: true,
