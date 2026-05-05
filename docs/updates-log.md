@@ -2208,4 +2208,36 @@ The signup → post-signup handoff already has a clean "fresh signup, not a logi
 - Updated cosmetic strings in `components/plan/PlanOptionsSection.tsx:64` (`"billed $383.99/yr"` → `"billed $384.99/yr"`) and `app/app/plan/page.tsx:29` (`"$383.99/year"` → `"$384.99/year"` in `getPlanPrice` annual branch). Mobile has zero hardcoded references — verified via grep, mobile reads `pkg.product.priceString` from ASC at runtime.
 - Updated `docs/current-state.md` plans table (`$383.99/yr` → `$384.99/yr`) and re-headed the Apple IAP price section as ASC-canonical with the four current ASC prices ($19.99/$191.99/$39.99/$384.99). Noted the still-stale RC dashboard labels (`$189.99` / `$389.99`) as non-user-facing.
 - ACTION REMAINING: Murdoch to update Vercel production env var `NEXT_PUBLIC_STRIPE_BUSINESS_ANNUAL_PRICE_ID` to the new price ID, then redeploy.
+
+---
+
+### 2026-05-05 — Removed stale subscription gate from `/api/app/quote/send`
+
+**Symptom:** Mobile users saw a red error "Your subscription is inactive. Please update billing to continue." between the Estimate Message box and Delivery Method card on Send Estimate. Web Solo users hit the same 402 but it was masked by `SubscriptionRequiredModal` (`components/QuoteComposer.tsx:292-295`), so the regression went unnoticed on web.
+
+**Root cause:** `app/api/app/quote/send/route.ts:61` called `requireActiveSubscription(auth.orgId)`, which throws `SubscriptionRequiredError` (402, code `SUBSCRIPTION_INACTIVE`) for any org without a `subscriptions` row whose status is `active` or `trialing` (`lib/subscription.ts:181-191`). Solo plan is free with no Stripe product, so every Solo contractor — including demo and test orgs — has zero `subscriptions` rows and tripped the gate. SnapQuote's product model says cancelled/expired subs are downgraded to SOLO by the lifecycle, never left in an "inactive" state, and the only legitimate Solo gate is the 30-day inactivity check on `/api/public/lead-submit`. This send-time gate was wrong by design.
+
+**Precedent:** Commit `3900c24` ("fix: remove subscription check from lead submit, blur locked customer info") removed the same `requireActiveSubscription` call from `app/api/public/lead-submit/route.ts` and replaced it with the 30-day Solo inactivity gate. The matching call in `quote/send/route.ts` was missed.
+
+**Fix:**
+- `app/api/app/quote/send/route.ts:9` — removed `import { SubscriptionRequiredError, requireActiveSubscription } from "@/lib/subscription";`
+- `app/api/app/quote/send/route.ts:61` — removed the `await requireActiveSubscription(auth.orgId)` call.
+- `app/api/app/quote/send/route.ts:413-421` — removed the `if (error instanceof SubscriptionRequiredError) { … }` catch branch.
+- Net: send is now gated only by the existing per-quote credit decrement in `incrementUsageOnQuoteSend` (already imported at `route.ts:14`) and the standard auth/lead checks.
+
+**Untouched on purpose:**
+- `lib/subscription.ts` — `requireActiveSubscription` and `SubscriptionRequiredError` left in place. No active callers remain in the codebase outside the helper file itself; left so future endpoints can adopt them deliberately.
+- `components/QuoteComposer.tsx:292-295` — `if (res.status === 402 || json.code === "SUBSCRIPTION_INACTIVE")` modal trigger left as-is. Effectively dead from this endpoint now, but cheap to keep and useful if any future endpoint emits the same code.
+- Mobile — no changes. The mobile composer was already a faithful messenger; removing the server-side gate is sufficient.
+- `lead-submit` — its 30-day Solo inactivity gate (`app/api/public/lead-submit/route.ts:159-186`) is unchanged.
+
+**Docs updated:**
+- `docs/current-state.md` Solo inactivity gate paragraph clarified that the gate applies only to `/api/public/lead-submit` and that quote send is gated by credits, not subscription status.
+
+**Verification:**
+- Grep confirms zero remaining references to `requireActiveSubscription` or `SubscriptionRequiredError` outside `lib/subscription.ts`.
+- `npx tsc --noEmit` — exit 0, no new errors.
+- `npm run lint` — passes.
+
+**Risk:** None observed. Web Solo users move from "blocked with modal" to "successful send" — net improvement. Cancelled-sub edge case is the responsibility of the lifecycle/webhook layer (which already downgrades to SOLO), not a re-check on every send. The friendly customer-facing 30-day Solo gate at `lead-submit` continues to enforce dormant-Solo backpressure where it belongs.
 - ACTION REMAINING: Murdoch to archive old Stripe price `price_1TLCZcFNX8cpZFmw0HVXNHwm` in Stripe dashboard. Existing Business Annual subscribers are auto-grandfathered on the old price by Stripe's price-immutability behavior; only new checkouts use the new price.

@@ -79,7 +79,7 @@ SnapQuote is an AI-powered quoting and lead management SaaS for outdoor service 
 
 **Credit packs (both platforms):** 10 for $9.99 | 50 for $39.99 | 100 for $69.99
 
-**Solo inactivity gate:** Solo plan orgs that have been inactive for 30+ days stop receiving new leads (402 `SUBSCRIPTION_INACTIVE`). "Active" = opened web or mobile app. Tracked via `organizations.last_active_at` (migration 0051). Team and Business always accept leads regardless of activity.
+**Solo inactivity gate:** Solo plan orgs that have been inactive for 30+ days stop receiving new leads (402 `SUBSCRIPTION_INACTIVE`). "Active" = opened web or mobile app. Tracked via `organizations.last_active_at` (migration 0051). Team and Business always accept leads regardless of activity. **This gate lives only on `/api/public/lead-submit`** (the customer-facing inbound). It does NOT apply to `/api/app/quote/send` — once a lead is in the inbox, the contractor can always send the estimate. Quote send is gated by credits (consumed at unlock time via `incrementUsageOnQuoteSend`), not by subscription status.
 
 ---
 

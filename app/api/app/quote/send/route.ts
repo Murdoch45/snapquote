@@ -6,7 +6,6 @@ import { requireMemberForApi } from "@/lib/auth/requireRole";
 import { sendEmail } from "@/lib/notify";
 import { buildEstimateLink, renderEstimateTemplate } from "@/lib/quote-template";
 import { sendQuoteSchema } from "@/lib/quoteSendSchema";
-import { SubscriptionRequiredError, requireActiveSubscription } from "@/lib/subscription";
 import { invalidateAnalytics } from "@/lib/db";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -57,8 +56,6 @@ export async function POST(request: Request) {
     bodyLeadId = body.leadId;
     const admin = createAdminClient();
     const supabase = await createServerSupabaseClient();
-
-    await requireActiveSubscription(auth.orgId);
 
     const { data: lead, error: leadError } = await admin
       .from("leads")
@@ -408,16 +405,6 @@ export async function POST(request: Request) {
         .eq("id", bodyLeadId)
         .eq("org_id", auth.orgId)
         .eq("status", "QUOTED");
-    }
-
-    if (error instanceof SubscriptionRequiredError) {
-      return NextResponse.json(
-        {
-          code: error.code,
-          error: "Your subscription is inactive. Please update billing to continue."
-        },
-        { status: error.statusCode }
-      );
     }
 
     return NextResponse.json(
