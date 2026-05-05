@@ -35,7 +35,7 @@ SnapQuote is an AI-powered quoting and lead management SaaS for outdoor service 
 - Google Places API (address autocomplete)
 - Vercel (hosting + cron — Hobby plan)
 - Sentry (error monitoring — project: snapquote-web, ID 4511244273123328)
-- Meta Pixel (Facebook ads conversion tracking — pixel ID `1500154638449582`)
+- Meta Pixel (Facebook ads conversion tracking — pixel ID `1500154638449582`). Events: `PageView` (every route change, via `MetaPixelPageView`), `CompleteRegistration` (fires once per fresh signup inside `OnboardingWizard.tsx` when the `snapquote-oauth-signup-success` sessionStorage key is consumed — covers both email/password and OAuth signup; never fires on plain login).
 - Google Analytics 4 (web analytics — measurement ID `G-2QM16SWP9D`)
 
 **Mobile:**

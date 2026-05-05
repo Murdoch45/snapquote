@@ -2153,3 +2153,47 @@ Notifications still fire on every successful submission — they just land secon
 - Did not add the orphan cleanup cron in this commit (filed in Pending Work).
 - Did not add Turnstile to the upload endpoint (would defeat the upload-as-picked UX). Rate limit + content validation + size cap are the protection.
 - Did not run a build or deploy. Code pushed to GitHub; Vercel auto-deploys.
+
+---
+
+## Session — May 5, 2026 (Meta Pixel `CompleteRegistration` event on signup)
+
+### What was done
+
+Wired the Meta Pixel custom event `CompleteRegistration` to fire exactly once per fresh signup. Previously the Pixel was only firing `PageView` on every route change; the May 1 install entry explicitly flagged "No custom event tracking (Lead, CompleteRegistration, Purchase, etc.)" as the natural follow-up — this closes the registration half of that.
+
+### Implementation
+
+- **`components/onboarding/OnboardingWizard.tsx`** (3 lines added inside the existing welcome-toast `useEffect`): after the `toast.success("Account created! Welcome to SnapQuote.")` call, calls `window.fbq("track", "CompleteRegistration")` guarded by `typeof window.fbq === "function"`. The `fbq` global is already declared in `components/MetaPixelPageView.tsx`, so no new ambient typings or imports were needed.
+
+### Why this exact spot
+
+The signup → post-signup handoff already has a clean "fresh signup, not a login" signal: `SignupForm.tsx` sets `sessionStorage["snapquote-oauth-signup-success"] = "1"` immediately before either (a) `router.replace("/onboarding")` on email/password signup, or (b) `signInWithOAuth` redirecting to Google/Apple. After the user lands back on the app, `OnboardingWizard.tsx` reads + removes that key and shows the welcome toast. That same `useEffect` is therefore guaranteed to run exactly once per fresh signup and never on plain login (login pages don't set the key). Piggybacking the Pixel call on the same effect inherits the same guarantees:
+
+- **Fires only on signup, not login** — the sessionStorage key is set only by `SignupForm.tsx` (and `InviteSignupForm.tsx` if it follows the same pattern; not changed in this session — see Out of scope).
+- **Fires once** — the key is removed inside the same effect (`window.sessionStorage.removeItem(OAUTH_SIGNUP_TOAST_KEY)`), so subsequent OnboardingWizard mounts (revisiting `/onboarding`, refreshing the page) do not re-fire it.
+- **Fires at the moment of "successful arrival"** — the user has a session, has cleared the OAuth round-trip if applicable, and is rendering the first authenticated page. Both the email-signup path (lands directly on `/onboarding`) and the OAuth-signup path (lands on `/app` then bounces to `/onboarding` if not yet onboarded) converge here.
+- **Does not break any existing logic** — the `fbq` call is non-throwing (`typeof === "function"` guard handles ad-blockers, the brief window before the Meta Pixel `<Script afterInteractive>` loads, and the `<noscript>` fallback case where `fbq` never exists). If it ever fails for any reason, the welcome toast and the rest of the onboarding flow proceed unchanged.
+
+### Files touched
+
+| Path | Change |
+|---|---|
+| `components/onboarding/OnboardingWizard.tsx` | Added `window.fbq("track", "CompleteRegistration")` inside the existing welcome-toast `useEffect`, guarded by `typeof window.fbq === "function"`. |
+| `docs/current-state.md` | Tech-stack Meta Pixel line expanded to enumerate the events tracked (`PageView` + `CompleteRegistration`) and the `OnboardingWizard` location. |
+| `docs/updates-log.md` | This entry. |
+
+### Verification
+
+- `npx tsc --noEmit` — exit 0. No new TypeScript errors. The `Window.fbq?` global is already declared in `components/MetaPixelPageView.tsx`, so the call type-checks without any new ambient types.
+- Read-back of the patched file confirms the `fbq` call sits inside the same effect that consumes the sessionStorage key, after the toast.
+- No changes to `SignupForm.tsx`, `auth/callback/route.ts`, or any auth/routing code path. The signup + login + OAuth flows are byte-identical apart from the new fbq line.
+
+### Not done / out of scope
+
+- **`InviteSignupForm.tsx`** — not changed in this session. If invite-flow signups don't pass through `OnboardingWizard.tsx` (because invited users skip onboarding and land directly on `/app`), they won't fire `CompleteRegistration` under this implementation. Audit + extension to that path is a separate follow-up.
+- **No `Lead` or `Purchase` events** — only `CompleteRegistration` was in scope this session. Lead-form submissions and Stripe checkout completion remain un-instrumented for Pixel.
+- **No Conversions API** — still browser-only. Server-side CAPI for offline matching is unchanged.
+- **No `eventID` for browser/CAPI dedup** — not needed yet because there is no CAPI counterpart firing the same event server-side. Add when CAPI is wired.
+- **Mobile app unchanged** — Meta Pixel is web-only. Mobile would use the Facebook SDK for React Native (separate scope, not in this session).
+- **No build / deploy run** — code pushed to GitHub; Vercel auto-deploys.
