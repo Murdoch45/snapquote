@@ -26,7 +26,7 @@ function getPlanPrice(
 ): string {
   if (plan === "SOLO") return "Free";
   if (billingInterval === "year") {
-    return plan === "TEAM" ? "$191.99/year" : "$383.99/year";
+    return plan === "TEAM" ? "$191.99/year" : "$384.99/year";
   }
   return plan === "TEAM" ? "$19.99/month" : "$39.99/month";
 }

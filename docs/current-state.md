@@ -67,14 +67,15 @@ SnapQuote is an AI-powered quoting and lead management SaaS for outdoor service 
 |---|---|---|---|
 | Solo | Free | 5 | 1 |
 | Team | $19.99/mo or $15.99/mo (billed $191.99/yr) | 20 | 2 |
-| Business | $39.99/mo or $33.99/mo (billed $383.99/yr) | 100 | **5** |
+| Business | $39.99/mo or $33.99/mo (billed $384.99/yr) | 100 | **5** |
 
 > Source-of-truth for seat + credit allowances: [`lib/plans.ts`](../lib/plans.ts). Mobile hydrates the same values from `/api/plans/config`.
 > BUSINESS plan was raised from 4 → 5 seats on April 30, 2026 to align with App Store Connect's "5 team seats" copy. See `updates-log.md` for the migration record.
 
-**Apple IAP prices (RevenueCat):**
-- Team Monthly: $19.99 | Team Annual: $189.99
-- Business Monthly: $39.99 | Business Annual: $389.99
+**Apple IAP prices (App Store Connect — canonical source of truth as of 2026-05-04):**
+- Team Monthly: $19.99 | Team Annual: $191.99
+- Business Monthly: $39.99 | Business Annual: $384.99
+- Stripe and RevenueCat labels must align to these. Stripe Business Annual was migrated to $384.99 on 2026-05-04 (new price `price_1TTpUuFNX8cpZFmwUMWMg77W`). RC dashboard labels for `team_annual` ("$189.99/yr") and `business_annual` ("$389.99/yr") remain stale — non-user-facing per RC; mobile reads `pkg.product.priceString` from ASC at runtime. See `docs/asc-rc-final-alignment-2026-05-04.md`.
 
 **Credit packs (both platforms):** 10 for $9.99 | 50 for $39.99 | 100 for $69.99
 

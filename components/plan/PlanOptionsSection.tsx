@@ -61,7 +61,7 @@ const PLAN_OPTIONS: PlanOption[] = [
     description: "For high-volume contractors who want the most leverage.",
     monthlyPrice: "$39.99/mo",
     annualMonthlyPrice: "$33.99/mo",
-    annualBillingLine: "billed $383.99/yr",
+    annualBillingLine: "billed $384.99/yr",
     credits: 100,
     seats: 5,
     highlights: ["100 monthly credits", "5 team members", "Best for repeat lead volume"]

@@ -2197,3 +2197,15 @@ The signup → post-signup handoff already has a clean "fresh signup, not a logi
 - **No `eventID` for browser/CAPI dedup** — not needed yet because there is no CAPI counterpart firing the same event server-side. Add when CAPI is wired.
 - **Mobile app unchanged** — Meta Pixel is web-only. Mobile would use the Facebook SDK for React Native (separate scope, not in this session).
 - **No build / deploy run** — code pushed to GitHub; Vercel auto-deploys.
+
+---
+
+### 2026-05-04 — Stripe Business Annual price aligned to ASC ($384.99/yr)
+- New price ID: `price_1TTpUuFNX8cpZFmwUMWMg77W` (created via claude.ai Stripe MCP)
+- Old price ID: `price_1TLCZcFNX8cpZFmw0HVXNHwm` ($383.99/yr — to be archived in Stripe dashboard, not via API)
+- Zero subscriptions on the old price at time of swap
+- Updated `NEXT_PUBLIC_STRIPE_BUSINESS_ANNUAL_PRICE_ID` in `.env.local`
+- Updated cosmetic strings in `components/plan/PlanOptionsSection.tsx:64` (`"billed $383.99/yr"` → `"billed $384.99/yr"`) and `app/app/plan/page.tsx:29` (`"$383.99/year"` → `"$384.99/year"` in `getPlanPrice` annual branch). Mobile has zero hardcoded references — verified via grep, mobile reads `pkg.product.priceString` from ASC at runtime.
+- Updated `docs/current-state.md` plans table (`$383.99/yr` → `$384.99/yr`) and re-headed the Apple IAP price section as ASC-canonical with the four current ASC prices ($19.99/$191.99/$39.99/$384.99). Noted the still-stale RC dashboard labels (`$189.99` / `$389.99`) as non-user-facing.
+- ACTION REMAINING: Murdoch to update Vercel production env var `NEXT_PUBLIC_STRIPE_BUSINESS_ANNUAL_PRICE_ID` to the new price ID, then redeploy.
+- ACTION REMAINING: Murdoch to archive old Stripe price `price_1TLCZcFNX8cpZFmw0HVXNHwm` in Stripe dashboard. Existing Business Annual subscribers are auto-grandfathered on the old price by Stripe's price-immutability behavior; only new checkouts use the new price.
