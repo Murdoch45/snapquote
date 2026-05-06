@@ -2360,3 +2360,68 @@ A one-shot script `scripts/generate-favicons.mjs` was used to produce the three 
 - **No Google Search Console "Request Indexing" hint** — Murdoch can do this manually after Vercel deploys to accelerate the SERP icon refresh; otherwise Google's natural recrawl cadence (typically a few days) takes care of it.
 - **No 32×32 / 96×96 separate `app/icon-*.png` variants** — Next.js generates appropriate `<link>` entries from the single `app/icon.png` and downsizes per the `sizes` attribute. Multiple variants would be relevant only if specific platforms needed sharper non-power-of-two sizes; not the case here.
 - **No regeneration of `AppIcon-1024.png`** — would be a separate task gated on the ASC icon re-render. Source-of-truth alignment between ASC, web favicons, and `BrandLogo.tsx` is tracked in the "Brand mark" paragraph of `docs/current-state.md`.
+
+---
+
+## Session — May 6, 2026 (Favicon regenerated from canonical `BrandLogo.tsx` SVG source)
+
+### What was done
+
+Replaced the three favicon files (`app/favicon.ico`, `app/icon.png`, `app/apple-icon.png`) with versions rasterized directly from the inline SVG in `components/BrandLogo.tsx` instead of the earlier rasterization from `AppIcon-1024.png`. Closes the staleness conflict the prior favicon entry flagged: the ASC PNG predates the 2026-04-20 lightning-bolt refinement, while `BrandLogo.tsx` is the canonical current glyph. Web favicons now carry the refined lightning bolt and match what users see everywhere else on the site (login, dashboard header, marketing pages).
+
+### Source SVG and centering decision
+
+`BrandLogo.tsx`'s SVG has viewBox `0 0 104 92` — non-square (104:92 ≈ 1.13:1, wider than tall). To produce a square favicon canvas I built a wrapper SVG with viewBox `0 0 104 104` and a `<g transform="translate(0 6)">` around the original two paths (bubble + lightning bolt). The translate vertically centers the original 104×92 viewBox within the 104×104 square — half of the extra 12 height units is added as top/bottom padding. **Horizontal positioning is intentionally not re-centered** even though the bubble's bounding box `x ∈ [10, 100]` is asymmetric within the viewBox (10 left padding, 4 right). The asymmetry is by design — the chat-tail at `(24, 78)` extends down-left of the bubble body, shifting the visual center right of the geometric body center. The BrandLogo viewBox encodes the designer's "looks centered" framing, so the wrapper inherits it directly.
+
+### Gradient handling
+
+`BrandLogo.tsx`'s `<linearGradient>` uses raw values `x1="12" y1="12" x2="88" y2="80"` with no `gradientUnits` attribute (defaults to `objectBoundingBox` per spec, but values are far outside the 0–1 range expected for that mode). Browsers render the live logo correctly because the gradient direction-line is preserved regardless of bounding-box overrun, and the 0%/100% stops sit at the far ends of that line. To get **predictable, identical-looking** rasterization out of librsvg/sharp, I added `gradientUnits="userSpaceOnUse"` explicitly to the wrapper SVG. With user-space coords inside `<g transform="translate(0 6)">`, the gradient inherits the same translate as the path it fills (per the SVG spec rule that user-space gradients use the user coord system at the referencing element), so the gradient stays correctly aligned with the translated bubble.
+
+### Generation
+
+One-shot script `scripts/generate-favicons.mjs` (deleted from working tree before commit, per the "do not change anything else" instruction). Conversion logic preserved here for reproducibility:
+
+1. Build the wrapper SVG string with the bubble + lightning paths from `BrandLogo.tsx` and the gradient defined inside `<defs>` with `gradientUnits="userSpaceOnUse"`.
+2. For each target size `S` in `{16, 32, 48, 180, 512}`:
+   - `sharp(svgBuffer, { density: max(72, ceil((S/104) * 72)) })`
+     - density bump scales librsvg's internal rasterization DPI so small-size outputs aren't softened by an under-resolved intermediate raster
+   - `.resize(S, S, { fit: "contain", background: { r:0, g:0, b:0, alpha:0 } })`
+     - `fit: "contain"` preserves the SVG's 1:1 aspect (the wrapper is already square); transparent fill for any letterboxing
+   - `.png({ compressionLevel: 9 }).toBuffer()`
+3. Write `app/icon.png` (S=512) and `app/apple-icon.png` (S=180).
+4. Hand-assemble `app/favicon.ico` from the 16/32/48 PNG buffers using the same ICO encoder as the prior session (6-byte header + 16-byte directory entries with `width=u8` `height=u8` `palette=0` `reserved=0` `planes=u16=1` `bpp=u16=32` `size=u32` `offset=u32`, all LE; PNG-encoded image data concatenated after the directory).
+
+### Output sizes
+
+| Path | Size | Format | Bytes (was → is) |
+|---|---|---|---|
+| `app/favicon.ico` | 16+32+48 multi-size, PNG-encoded ICO | RGBA ICO | 4,541 → 3,339 |
+| `app/icon.png` | 512×512 | RGBA PNG | 15,482 → 15,148 |
+| `app/apple-icon.png` | 180×180 | RGBA PNG | 6,749 → 4,898 |
+
+All three now carry an alpha channel (corners outside the bubble are transparent), where the previous AppIcon-1024-derived versions were RGB no-alpha (corners filled with the gradient's edge color). The transparent corners are correct: the bubble shape is the brand identity and the canvas corners shouldn't render as solid blue. Browser tabs, iOS home-screen pin, and Google SERP all handle alpha-channel favicons correctly.
+
+### Verification
+
+- `file app/favicon.ico` reports `MS Windows icon resource - 3 icons, 16x16 with PNG image data … 32x32 with … PNG image data` (third 48×48 entry per assembly script).
+- `sharp(...).metadata()` confirms `512×512 channels=4 hasAlpha=true` and `180×180 channels=4 hasAlpha=true`.
+- Visual inspection of `app/icon.png` confirms the canonical chat-bubble + refined lightning bolt with transparent corners, vertical-centered on the 512×512 canvas.
+- `git check-ignore -v app/favicon.ico app/icon.png app/apple-icon.png` exits 1 with no output → not gitignored. (`.gitignore` patterns unchanged from the prior session.)
+- `npx tsc --noEmit` exit 0.
+
+### Files touched
+
+| Path | Change |
+|---|---|
+| `app/favicon.ico` | **Replaced.** Now rasterized from `BrandLogo.tsx` SVG (refined glyph). Same multi-size 16+32+48 PNG-encoded ICO format. |
+| `app/icon.png` | **Replaced.** 512×512, transparent corners, refined lightning. |
+| `app/apple-icon.png` | **Replaced.** 180×180, transparent corners, refined lightning. |
+| `docs/current-state.md` | "Brand mark" paragraph updated: web favicons now noted as rasterized from `BrandLogo.tsx` (canonical), staleness inheritance from `AppIcon-1024.png` removed, wrapper-SVG centering decision documented. |
+| `docs/updates-log.md` | This entry. |
+
+### Not done / out of scope
+
+- **No edit to `components/BrandLogo.tsx`** — explicit instruction. The component is the source of truth and was read but not modified.
+- **No edit to `app/layout.tsx`** — `metadata.icons` deliberately untouched; App Router file-based convention is the single source of truth.
+- **No regeneration of `AppIcon-1024.png` or `AppIcon.svg`** — those are ASC / brand-asset artifacts whose update path runs through App Store Connect uploads, not this commit.
+- **No build / deploy run** — code pushed to GitHub; Vercel auto-deploys.
