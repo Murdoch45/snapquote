@@ -2241,3 +2241,122 @@ The signup → post-signup handoff already has a clean "fresh signup, not a logi
 
 **Risk:** None observed. Web Solo users move from "blocked with modal" to "successful send" — net improvement. Cancelled-sub edge case is the responsibility of the lifecycle/webhook layer (which already downgrades to SOLO), not a re-check on every send. The friendly customer-facing 30-day Solo gate at `lead-submit` continues to enforce dormant-Solo backpressure where it belongs.
 - ACTION REMAINING: Murdoch to archive old Stripe price `price_1TLCZcFNX8cpZFmw0HVXNHwm` in Stripe dashboard. Existing Business Annual subscribers are auto-grandfathered on the old price by Stripe's price-immutability behavior; only new checkouts use the new price.
+
+---
+
+## Session — May 5, 2026 (Favicon audit — read-only, no code changes)
+
+### Goal
+
+Audit only. Determine whether snapquote.us has a favicon set up correctly for browser tabs, iOS home-screen pin, and Google Search. No code changes; report findings only.
+
+### Findings
+
+**1. No favicon file exists anywhere in the source tree.**
+
+| Path checked | Status |
+|---|---|
+| `app/favicon.ico` (App Router auto-served) | does not exist |
+| `app/icon.{ico,jpg,jpeg,png,svg}` | does not exist |
+| `app/apple-icon.{jpg,jpeg,png}` | does not exist |
+| `app/icon.tsx` / `app/apple-icon.tsx` (dynamic generators via `ImageResponse`) | do not exist |
+| `public/favicon.ico` | does not exist |
+| `public/apple-touch-icon.png` | does not exist |
+| `public/icon-*.png`, `public/manifest.{json,webmanifest}` | do not exist |
+| Any `app/favicon*`, `app/icon*`, `app/apple*`, `public/favicon*`, `public/icon*`, `public/apple*` ever in `git log` | never committed |
+
+The only branding raster/vector assets in the web repo are at the repo root: `AppIcon-1024.png` (verified `1024×1024`, 8-bit RGB, non-interlaced PNG, no alpha) and `AppIcon.svg` (viewBox `0 0 104 92` — **not square**, aspect ratio ~1.13:1). Both are App Store Connect upload artifacts. Neither is wired to any web favicon route or `<link>` tag.
+
+**2. `metadata.icons` not configured.**
+
+`app/layout.tsx`'s `metadata` export sets `title` and `description` only — no `icons` field. Repo-wide grep across `.ts/.tsx` for `icons:|favicon|apple-touch|appleTouch|rel=["']icon|rel=["']shortcut|manifest` returned a single non-`node_modules` hit: `middleware.ts:66`'s matcher exclusion `(?!api/public|_next/static|_next/image|favicon.ico)`. That exclusion is correct hygiene (defends a future `favicon.ico` from auth processing) but is currently moot because the request just 404s. No nested layout (e.g. `app/app/layout.tsx`) sets `icons` either.
+
+**3. What Google Search currently sees.**
+
+Per Google's documented favicon requirements: a discoverable `<link rel="icon">` element OR a file at `/favicon.ico`, square, **at least 48×48**, ideally a multiple of 48 (48 / 96 / 144 / 192). Snapquote.us currently emits:
+
+- `GET /favicon.ico` → 404 (no static file, no dynamic route)
+- No `<link rel="icon">` in the rendered `<head>` (because nothing in `app/` triggers the App Router auto-injection and `metadata.icons` is unset)
+- No `<link rel="apple-touch-icon">` for iOS home-screen pin
+
+Net effect: Google Search shows a generic globe placeholder next to snapquote.us results; browser tabs render the empty-page glyph; iOS "Add to Home Screen" gets a screenshot fallback.
+
+**4. `metadata.icons` shape correctness.**
+
+The `metadata` export's omission of `icons` is technically valid TypeScript (`Metadata.icons` is optional in `next/types`) and is the correct shape when relying on App Router file-based icon convention (`app/favicon.ico`, `app/icon.png`, `app/apple-icon.png` auto-injected). But since none of those convention files exist, the result is "shape is valid, effect is empty." No icons of any kind reach the rendered `<head>`.
+
+### Recommended fix path (NOT executed in this session)
+
+Two valid completions:
+
+- **File-based (recommended for App Router):** drop `app/favicon.ico` (multi-size 16/32/48), `app/icon.png` (≥48×48 square, ideally 512×512), and `app/apple-icon.png` (180×180 square) into `app/`. Next.js auto-injects `<link rel="icon">` and `<link rel="apple-touch-icon">`. No `metadata.icons` change needed. The existing `AppIcon-1024.png` (1024×1024 square) is suitable raw material — downsize to the target sizes via `sharp` / `ImageMagick` / Squoosh.
+- **Explicit metadata override:** add `icons: { icon: "/favicon.ico", apple: "/apple-touch-icon.png", … }` to the `metadata` export in `app/layout.tsx` and place files in `public/`.
+
+`AppIcon.svg` (104×92) is **not** suitable as-is for a favicon — it would render letterboxed in square containers and Google would reject the non-square aspect for search results. Either a square SVG variant or a square PNG export of the bubble glyph at 1:1 aspect is needed.
+
+### Files touched
+
+| Path | Change |
+|---|---|
+| `docs/current-state.md` | Added "No favicon at all on snapquote.us" line under "Remaining post-launch / non-blockers" with full context (what's missing, what exists, fix path, middleware-matcher non-issue). |
+| `docs/updates-log.md` | This entry. |
+
+### Not done / out of scope
+
+- **No code changes** — explicit user instruction: audit only, do not modify.
+- **No favicon files added.** No `metadata.icons` edit. No `git commit`.
+- **No Google Search Console submission** — even if a favicon were added, recrawl + reindex of the homepage is needed before the search-results icon updates. Out of scope.
+- **PWA manifest (`manifest.webmanifest`)** — not part of the requested favicon audit. SnapQuote is not currently installable as a PWA (no manifest, no service worker); a future PWA-ification would also need 192×192 and 512×512 maskable icons.
+
+---
+
+## Session — May 6, 2026 (Favicon installed via App Router file-based convention)
+
+### What was done
+
+Closed yesterday's audit finding. Generated and committed the three Next.js App Router file-based favicon assets from `AppIcon-1024.png`:
+
+| Path | Size | Format | Bytes |
+|---|---|---|---|
+| `app/favicon.ico` | 16×16 + 32×32 + 48×48 (multi-size, PNG-encoded entries) | MS Windows icon resource | 4,541 |
+| `app/icon.png` | 512×512 | PNG (8-bit RGB, no alpha) | 15,482 |
+| `app/apple-icon.png` | 180×180 | PNG (8-bit RGB, no alpha) | 6,749 |
+
+All three derived from `AppIcon-1024.png` (1024×1024 RGB PNG, no alpha) via `sharp@0.34.5` Lanczos3 downscale. The `.ico` was assembled by hand (PNG-encoded ICO entries) so no new dependency was added — sharp was already a transitive dep of Next.js.
+
+### Why no `metadata.icons` change
+
+Per explicit instruction, did not modify `app/layout.tsx`'s `metadata` export. App Router auto-discovers `app/favicon.ico`, `app/icon.{png,…}`, and `app/apple-icon.{png,…}` and emits the corresponding `<link>` tags into `<head>` without any `metadata.icons` configuration. Adding both file-based icons AND a `metadata.icons` field would risk double-emission, so file-based is the cleaner single-source-of-truth.
+
+### Verification
+
+- `file app/favicon.ico` reports `MS Windows icon resource - 3 icons, 16x16 with PNG image data, … 32x32 with … PNG image data` (output truncated mid-third entry but the third 48×48 is present per the assembly script).
+- `sharp(...).metadata()` confirms 512×512 for `app/icon.png` and 180×180 for `app/apple-icon.png`.
+- `npx tsc --noEmit` exit 0.
+- `git check-ignore -v app/favicon.ico app/icon.png app/apple-icon.png` exits 1 with no output → no `.gitignore` rule excludes them. The repo's `.gitignore` was inspected directly: `node_modules`, `.next`, build artifacts, env files, `metabase.*`, `tsconfig.tsbuildinfo`, `supabase/.temp/`, `.claude/` — none touch `app/*.ico` or `app/*.png`.
+
+### Generation script
+
+A one-shot script `scripts/generate-favicons.mjs` was used to produce the three files. It was **deleted from the working tree before commit** to keep the change minimal per the "do not change anything else" instruction. The conversion logic (sharp Lanczos3 → PNG buffers at 16/32/48/180/512; hand-assembled ICO with PNG-encoded entries — 6-byte header + 16-byte directory entries + concatenated PNG data) is preserved in this log entry for re-creation when the source icon next changes.
+
+### Conflict flag
+
+`docs/current-state.md` "Brand mark" paragraph notes that `AppIcon-1024.png` is "a rasterization of an earlier stylized canvas and does not match the current glyph" — i.e. the source PNG used here is slightly older than the canonical SVG in `components/BrandLogo.tsx` (which had its lightning-bolt path refined on April 20, 2026). The web favicons therefore carry the older glyph just like the ASC upload. Updated the same paragraph in `docs/current-state.md` to call out that web favicons inherit the same staleness and should be regenerated from the new source whenever the ASC icon is next re-rendered.
+
+### Files touched
+
+| Path | Change |
+|---|---|
+| `app/favicon.ico` | New — 16+32+48 multi-size PNG-encoded ICO. |
+| `app/icon.png` | New — 512×512 PNG (auto-injected as `<link rel="icon" sizes="512x512">`). |
+| `app/apple-icon.png` | New — 180×180 PNG (auto-injected as `<link rel="apple-touch-icon" sizes="180x180">`). |
+| `docs/current-state.md` | Struck-through the "No favicon at all" post-launch line and added a closure note. Updated "Brand mark" paragraph to flag favicon staleness inheritance. |
+| `docs/updates-log.md` | This entry. |
+
+### Not done / out of scope
+
+- **No `metadata.icons` edit** — file-based convention covers it.
+- **No PWA manifest, no service worker, no maskable icons** — explicitly out of scope per audit follow-up.
+- **No Google Search Console "Request Indexing" hint** — Murdoch can do this manually after Vercel deploys to accelerate the SERP icon refresh; otherwise Google's natural recrawl cadence (typically a few days) takes care of it.
+- **No 32×32 / 96×96 separate `app/icon-*.png` variants** — Next.js generates appropriate `<link>` entries from the single `app/icon.png` and downsizes per the `sizes` attribute. Multiple variants would be relevant only if specific platforms needed sharper non-power-of-two sizes; not the case here.
+- **No regeneration of `AppIcon-1024.png`** — would be a separate task gated on the ASC icon re-render. Source-of-truth alignment between ASC, web favicons, and `BrandLogo.tsx` is tracked in the "Brand mark" paragraph of `docs/current-state.md`.

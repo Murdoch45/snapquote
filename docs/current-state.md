@@ -470,6 +470,7 @@ Fix: token attached, `parseJsonResponse` won't trigger auth refresh on 401 if no
 - **Google Play Store submission** — not started
 - **No staging environment** — all migrations and pushes go directly to production
 - **Web notifications popover 5s auto-close timer** — can fire while user is reading longer notification bodies; no pause on hover-within or scroll-within.
+- ~~**No favicon at all on snapquote.us**~~ — closed 2026-05-06. App Router file-based icons shipped: `app/favicon.ico` (multi-size 16/32/48 PNG-encoded ICO), `app/icon.png` (512×512), `app/apple-icon.png` (180×180), all generated from `AppIcon-1024.png` via sharp. Next.js auto-injects `<link rel="icon">` and `<link rel="apple-touch-icon">` from these convention paths; `metadata.icons` deliberately left unset (file-based convention is the canonical path). Browser tabs, iOS home-screen pin, and the eventual Google SERP icon are now covered. Google Search will pick up the new icon on its next homepage recrawl + reindex (typically a few days; can be hinted via Search Console "Request Indexing").
 
 ---
 
@@ -499,7 +500,7 @@ The next successful webhook (`handleSubscriptionChanged` / `handleCheckoutComple
 
 **Landing navbar:** `<nav>` in `app/(public)/page.tsx` is static flow (no `fixed`/`sticky`) and sits **inside** the hero `<section>` (above the inner content container). It must stay inside the section so it inherits the radial-gradient background — hoisting it outside exposes the outer `#101320` solid and visibly breaks the top of the page. It scrolls away naturally with the page.
 
-**Brand mark:** Blue chat bubble (`#3FA1F7` → `#174BB7` linear gradient) with a white lightning bolt inscribed, viewBox `0 0 104 92`. Source of truth is the inline SVG in `components/BrandLogo.tsx`; also mirrored as standalone vector at `AppIcon.svg` (repo root). Lightning-bolt path updated April 20, 2026 to a refined glyph (path `M51.49 15.33L39.40 38.73…`); bubble path and gradient unchanged. `AppIcon-1024.png` (the ASC upload) is a rasterization of an earlier stylized canvas and does not match the current glyph — re-render when the ASC icon is next shipped.
+**Brand mark:** Blue chat bubble (`#3FA1F7` → `#174BB7` linear gradient) with a white lightning bolt inscribed, viewBox `0 0 104 92`. Source of truth is the inline SVG in `components/BrandLogo.tsx`; also mirrored as standalone vector at `AppIcon.svg` (repo root). Lightning-bolt path updated April 20, 2026 to a refined glyph (path `M51.49 15.33L39.40 38.73…`); bubble path and gradient unchanged. `AppIcon-1024.png` (the ASC upload) is a rasterization of an earlier stylized canvas and does not match the current glyph — re-render when the ASC icon is next shipped. **Web favicons (`app/favicon.ico`, `app/icon.png`, `app/apple-icon.png`) are sharp-resized from this same `AppIcon-1024.png`** and therefore inherit the same staleness — when ASC re-renders the icon, regenerate the web favicons from the new source in the same step.
 
 ---
 
