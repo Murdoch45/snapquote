@@ -309,6 +309,8 @@ DRAFT → SENT → VIEWED → ACCEPTED | EXPIRED
 - Edit-and-resend: EXPIRED quotes can be reopened in resend mode (amber banner), new `sent_at` written, `public_id` preserved
 - `sent_via` field: "email" | "text" | null — displayed as "Email" / "SMS" / "—" in UI
 
+**Public quote page (`/q/{publicId}`) — contractor self-accept guard (closed 2026-05-06):** The public page and `POST /api/public/quote/[publicId]/accept` stay anonymous-OK so customer email/SMS recipients can accept without signing in. But when the request carries an authenticated session whose user is a member of `quote.org_id`, the accept endpoint returns 403 ("Cannot accept your own estimate.") and the public page renders a "Preview mode" banner in place of the customer Accept button. Detection in both places uses the same shape: `createServerSupabaseClient` → `auth.getUser()` → `organization_members` lookup `eq(user_id).eq(org_id, quote.org_id).maybeSingle()`. Server guard is the load-bearing fix; UI hide is defense-in-depth + UX. Preview mode also skips the `/viewed` POST so the contractor previewing their own quote doesn't false-flip SENT → VIEWED. See `docs/demo-preview-link-diagnostic-2026-05-05.md` and `docs/contractor-self-accept-fix-comparison-2026-05-05.md` for the original bug write-up and option comparison.
+
 ---
 
 ## Settings & RBAC
