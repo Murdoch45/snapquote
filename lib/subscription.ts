@@ -175,7 +175,30 @@ async function resolveBillingSource(
     return null;
   }
 
-  return (iapCount ?? 0) > 0 ? "iap" : null;
+  if ((iapCount ?? 0) > 0) return "iap";
+
+  // No Stripe rows AND no IAP events. Fall back to organizations.plan: any
+  // non-SOLO plan was reached via a past Stripe webhook (SOLO is the only
+  // free plan; the webhook's setOrganizationPlan is the only writer for
+  // paid plans). When clearStaleStripeCustomerId DELETEs a user's row after
+  // a Stripe resource_missing error, organizations.plan stays canonical and
+  // is the only signal that the org was previously on Stripe. Without this
+  // branch, mobile reads `null` as "new signup, show IAP UI" and surfaces
+  // IAP prices to a Stripe-paid user — App Store guideline 3.1.1 violation.
+  const { data: org, error: orgError } = await admin
+    .from("organizations")
+    .select("plan")
+    .eq("id", orgId)
+    .maybeSingle();
+
+  if (orgError) {
+    console.warn("Unable to resolve org plan for billing source fallback:", orgError);
+    return null;
+  }
+
+  if (org?.plan && org.plan !== "SOLO") return "stripe";
+
+  return null;
 }
 
 export async function requireActiveSubscription(

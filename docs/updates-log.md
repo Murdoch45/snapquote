@@ -2431,3 +2431,15 @@ All three now carry an alpha channel (corners outside the bubble are transparent
 ## Session — May 6, 2026 (Preview-mode banner copy tweak)
 
 - `components/PublicQuoteCard.tsx` — simplified the contractor preview-mode banner from "Preview mode: this is the page your customer sees. Customer actions are disabled — you can't accept your own estimate." to "Preview mode — this is what your customer sees." Styling unchanged (amber background, same positioning, same JSX structure). The server-side accept guard from `79bf5b9` still enforces the actual security boundary; the banner is just the UX hint.
+
+---
+
+## Session — May 6, 2026 (Stripe-vs-IAP discriminator fallback)
+
+**Bug:** Stripe-paid users on iOS were seeing IAP prices on the plan + credits screens. Reproduced live against Murdoch's `falconn` org (`8f939f96-7f92-4973-97f8-f08450ccb71f`, BUSINESS): zero rows in `subscriptions` for his `user_id` (`71622212-...`), zero rows in `iap_subscription_events` for the org. `resolveBillingSource` returned `null` → mobile's fail-open default (`null` → "new signup, show IAP UI") surfaced ASC IAP prices. Apple guideline 3.1.1 violation. Affects every Stripe-paid org whose `subscriptions` row got cleared by `clearStaleStripeCustomerId` (most likely trigger: Stripe `resource_missing` on the stored `customer_id` after a test→live swap or the May 4 Business Annual price migration). Diagnostic write-up at `C:\Users\murdo\SnapQuote-mobile\docs\stripe-vs-iap-display-bug-diagnostic-2026-05-06.md`.
+
+**Fix:** `lib/subscription.ts:resolveBillingSource` now consults `organizations.plan` as a third fallback. Precedence stays the same — `subscriptions` rows win, then `iap_subscription_events` rows, then the new branch: if `org.plan && org.plan !== "SOLO"` return `"stripe"`. Reasoning: any non-SOLO plan was reached via a past Stripe webhook (the webhook's `setOrganizationPlan` is the only writer for paid plans), so a non-SOLO org with no live subscription/IAP signals is effectively orphaned-from-Stripe. SOLO orgs still resolve to `null` (genuine new-signup state on mobile so the IAP carousel can render). On lookup error, fail closed to `null` (existing behavior preserved).
+
+**Files affected:** `lib/subscription.ts` only. No mobile change — mobile's UI gate already does the right thing once `billingSource` is correct. No change to `clearStaleStripeCustomerId` — the deletion behavior is orthogonal; this fix handles the consequence.
+
+**Verification:** `npx tsc --noEmit` clean; `npm test` 76/76 pass. Manual trace for `falconn`: stripe rows = 0 → skip; iap events = 0 → skip; new branch reads `organizations.plan = 'BUSINESS'` → returns `"stripe"`. Mobile will now render manage-on-web UI in place of the IAP carousel for that org and any other Stripe-paid org in the same orphaned state.
