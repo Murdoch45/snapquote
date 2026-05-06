@@ -27,7 +27,13 @@ type QuoteData = {
   expiresAt: string;
 };
 
-export function PublicQuoteCard({ quote }: { quote: QuoteData }) {
+export function PublicQuoteCard({
+  quote,
+  viewerIsContractor = false
+}: {
+  quote: QuoteData;
+  viewerIsContractor?: boolean;
+}) {
   const [status, setStatus] = useState(quote.status);
   const [acceptedAt, setAcceptedAt] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -38,11 +44,13 @@ export function PublicQuoteCard({ quote }: { quote: QuoteData }) {
   const isDraft = quote.status === "DRAFT";
 
   // Don't fire the viewed POST for DRAFT quotes — the estimate hasn't been
-  // delivered yet, so recording a view would be misleading.
+  // delivered yet, so recording a view would be misleading. Also skip when
+  // the contractor themselves is previewing — counting a contractor preview
+  // as a customer view would falsely flip SENT → VIEWED.
   useEffect(() => {
-    if (isDraft) return;
+    if (isDraft || viewerIsContractor) return;
     fetch(`/api/public/quote/${quote.publicId}/viewed`, { method: "POST" }).catch(() => undefined);
-  }, [quote.publicId, isDraft]);
+  }, [quote.publicId, isDraft, viewerIsContractor]);
 
   // Seed the client clock from the server status. The server already coerces
   // SENT/VIEWED past the 7-day boundary to EXPIRED at render time via
@@ -162,7 +170,13 @@ export function PublicQuoteCard({ quote }: { quote: QuoteData }) {
             </p>
           </div>
 
-          {isDraft ? (
+          {viewerIsContractor ? (
+            <div className="rounded-[14px] border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-200">
+              <strong className="font-semibold">Preview mode:</strong> this is the
+              page your customer sees. Customer actions are disabled — you can&apos;t
+              accept your own estimate.
+            </div>
+          ) : isDraft ? (
             <div className="rounded-[14px] border border-[#DBEAFE] bg-accent p-4 text-center text-sm text-primary">
               This estimate is being finalized. Check back shortly.
             </div>

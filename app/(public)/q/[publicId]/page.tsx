@@ -3,6 +3,7 @@ import { PublicQuoteCard } from "@/components/PublicQuoteCard";
 import { computeEffectiveQuoteStatus, publicQuoteExpiry } from "@/lib/quoteExpiry";
 import type { QuoteStatus } from "@/lib/quoteStatus";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 type Props = {
   params: Promise<{ publicId: string }>;
@@ -74,6 +75,33 @@ export default async function PublicQuotePage({ params }: Props) {
     console.warn("PublicQuotePage contractor profile missing.");
   }
 
+  // Detect whether the viewer is a member of the quote's own org. Used to
+  // render a contractor-facing preview banner with the customer Accept
+  // button hidden. The accept endpoint enforces the same boundary
+  // server-side; this is UX so the contractor sees an explicit "preview
+  // mode" affordance rather than a button they can't safely click.
+  let viewerIsContractor = false;
+  try {
+    const userClient = await createServerSupabaseClient();
+    const {
+      data: { user }
+    } = await userClient.auth.getUser();
+    if (user) {
+      const { data: ownMembership } = await userClient
+        .from("organization_members")
+        .select("org_id")
+        .eq("user_id", user.id)
+        .eq("org_id", quote.org_id as string)
+        .maybeSingle();
+      viewerIsContractor = Boolean(ownMembership);
+    }
+  } catch (error) {
+    // Membership lookup is best-effort. Failing closed (treating the viewer
+    // as a customer) keeps the customer flow working; the server guard in
+    // /accept handles enforcement regardless.
+    console.warn("PublicQuotePage viewer membership check failed:", error);
+  }
+
   const lead = Array.isArray(quote.lead) ? quote.lead[0] : quote.lead;
   const rawStatus = (quote.status as QuoteStatus | null) ?? "DRAFT";
   const isDraft = rawStatus === "DRAFT";
@@ -111,6 +139,7 @@ export default async function PublicQuotePage({ params }: Props) {
           sentAt: quote.sent_at ?? new Date().toISOString(),
           expiresAt
         }}
+        viewerIsContractor={viewerIsContractor}
       />
     </main>
   );
