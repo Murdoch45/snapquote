@@ -2425,3 +2425,9 @@ All three now carry an alpha channel (corners outside the bubble are transparent
 - **No edit to `app/layout.tsx`** — `metadata.icons` deliberately untouched; App Router file-based convention is the single source of truth.
 - **No regeneration of `AppIcon-1024.png` or `AppIcon.svg`** — those are ASC / brand-asset artifacts whose update path runs through App Store Connect uploads, not this commit.
 - **No build / deploy run** — code pushed to GitHub; Vercel auto-deploys.
+
+---
+
+## Session — May 6, 2026 (Preview-mode banner copy tweak)
+
+- `components/PublicQuoteCard.tsx` — simplified the contractor preview-mode banner from "Preview mode: this is the page your customer sees. Customer actions are disabled — you can't accept your own estimate." to "Preview mode — this is what your customer sees." Styling unchanged (amber background, same positioning, same JSX structure). The server-side accept guard from `79bf5b9` still enforces the actual security boundary; the banner is just the UX hint.

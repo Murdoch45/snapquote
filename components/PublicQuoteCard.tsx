@@ -172,9 +172,8 @@ export function PublicQuoteCard({
 
           {viewerIsContractor ? (
             <div className="rounded-[14px] border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-200">
-              <strong className="font-semibold">Preview mode:</strong> this is the
-              page your customer sees. Customer actions are disabled — you can&apos;t
-              accept your own estimate.
+              <strong className="font-semibold">Preview mode</strong> — this is
+              what your customer sees.
             </div>
           ) : isDraft ? (
             <div className="rounded-[14px] border border-[#DBEAFE] bg-accent p-4 text-center text-sm text-primary">
