@@ -7,6 +7,7 @@ import { sendPushToOrg } from "@/lib/pushNotifications";
 import { computeEffectiveQuoteStatus } from "@/lib/quoteExpiry";
 import { invalidateAnalytics } from "@/lib/db";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getAppUrl } from "@/lib/utils";
 
 type Props = {
@@ -28,6 +29,31 @@ export async function POST(_request: Request, { params }: Props) {
   if (quoteError || !quote) {
     return NextResponse.json({ error: "Estimate not found." }, { status: 404 });
   }
+
+  // Reject self-accept by the contractor's own org members. The endpoint is
+  // intentionally anonymous-OK so customer email/SMS recipients can accept
+  // without signing in. But a contractor following the in-app preview link
+  // (or anyone else logged into the quote's org) must not be able to flip
+  // their own quote. Anonymous requests fall through unchanged.
+  const userClient = await createServerSupabaseClient();
+  const {
+    data: { user }
+  } = await userClient.auth.getUser();
+  if (user) {
+    const { data: ownMembership } = await userClient
+      .from("organization_members")
+      .select("org_id")
+      .eq("user_id", user.id)
+      .eq("org_id", quote.org_id as string)
+      .maybeSingle();
+    if (ownMembership) {
+      return NextResponse.json(
+        { error: "Cannot accept your own estimate." },
+        { status: 403 }
+      );
+    }
+  }
+
   if (quote.status === "ACCEPTED") {
     return NextResponse.json({ accepted: true, acceptedAt: quote.accepted_at });
   }
