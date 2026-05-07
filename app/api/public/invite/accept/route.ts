@@ -5,10 +5,8 @@ import { sendEmail } from "@/lib/notify";
 import { getOwnerEmailForOrg } from "@/lib/organizationOwners";
 import { sendPushToOrg } from "@/lib/pushNotifications";
 import { createAdminClient } from "@/lib/supabase/admin";
-import {
-  createServerSupabaseClient,
-  createSupabaseClientFromToken
-} from "@/lib/supabase/server";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { verifySupabaseJWT } from "@/lib/auth/verifyJWT";
 
 const acceptInviteSchema = z.object({
   token: z.string().min(12)
@@ -24,17 +22,32 @@ function getBearerToken(request: Request): string | null {
 export async function POST(request: Request) {
   try {
     // Accept either a cookie-based session (web) or a Supabase Bearer token
-    // (mobile) so both clients can use the same endpoint.
+    // (mobile) so both clients can use the same endpoint. Bearer path uses
+    // local JWT verification (verifySupabaseJWT) — no GoTrue round-trip,
+    // no replication race. See requireRole.ts and the
+    // `auth-jwt-direct-refactor-plan-2026-05-06.md` audit for context.
     const bearerToken = getBearerToken(request);
-    const supabase = bearerToken
-      ? createSupabaseClientFromToken(bearerToken)
-      : await createServerSupabaseClient();
+    let userId: string | null = null;
+    let userEmail: string | null = null;
 
-    const {
-      data: { user }
-    } = await supabase.auth.getUser();
+    if (bearerToken) {
+      const verified = await verifySupabaseJWT(bearerToken);
+      if (verified) {
+        userId = verified.userId;
+        userEmail = verified.email;
+      }
+    } else {
+      const supabase = await createServerSupabaseClient();
+      const {
+        data: { user }
+      } = await supabase.auth.getUser();
+      if (user) {
+        userId = user.id;
+        userEmail = user.email ?? null;
+      }
+    }
 
-    if (!user) {
+    if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -45,8 +58,8 @@ export async function POST(request: Request) {
       "accept_invite_token",
       {
         p_token: body.token,
-        p_user_id: user.id,
-        p_user_email: user.email ?? null
+        p_user_id: userId,
+        p_user_email: userEmail
       }
     );
 
@@ -92,7 +105,7 @@ export async function POST(request: Request) {
       try {
         const ownerEmail = await getOwnerEmailForOrg(admin, invite.org_id as string);
         if (!ownerEmail) return;
-        const inviteeEmail = user.email ?? "A new teammate";
+        const inviteeEmail = userEmail ?? "A new teammate";
         const email = buildTeamMemberJoinedEmail({ inviteeEmail });
         await sendEmail({
           to: ownerEmail,

@@ -1,9 +1,10 @@
 import "server-only";
 import { NextResponse } from "next/server";
 import {
-  createServerSupabaseClient,
-  createSupabaseClientFromToken
+  createServerSupabaseClient
 } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { verifySupabaseJWT } from "@/lib/auth/verifyJWT";
 
 type ApiAuthFailure = {
   ok: false;
@@ -51,42 +52,89 @@ function getBearerToken(request?: Request): string | null {
   return match?.[1]?.trim() || null;
 }
 
-async function getSupabaseClientForApi(request?: Request) {
-  const accessToken = getBearerToken(request);
+type ResolvedIdentity = {
+  userId: string;
+  userEmail: string | null;
+};
 
-  if (accessToken) {
-    return createSupabaseClientFromToken(accessToken);
+/**
+ * Resolve the request's user identity without round-tripping to GoTrue.
+ *
+ * Bearer path: verify the JWT signature locally via `verifySupabaseJWT`
+ * (tries ES256 via JWKS first, falls back to HS256 with shared secret).
+ * This eliminates the GoTrue replication race that 401-ed mobile builds
+ * 13/14/15 on freshly-issued tokens — see
+ * `docs/auth-jwt-direct-refactor-plan-2026-05-06.md`.
+ *
+ * Cookie path: keep the existing `createServerSupabaseClient` +
+ * `auth.getUser()` flow. Cookie sessions are server-managed (Next.js SSR
+ * pattern) and don't suffer the same race because the access token is
+ * minted by the same Next runtime that's about to validate it.
+ */
+async function resolveIdentity(request?: Request): Promise<ResolvedIdentity | null> {
+  const bearer = getBearerToken(request);
+  if (bearer) {
+    const verified = await verifySupabaseJWT(bearer);
+    if (!verified) return null;
+    return { userId: verified.userId, userEmail: verified.email };
   }
 
-  return createServerSupabaseClient();
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+  return {
+    userId: user.id,
+    userEmail: user.email ?? null
+  };
+}
+
+type Membership = {
+  org_id: string;
+  role: "OWNER" | "MEMBER";
+  created_at: string;
+};
+
+async function loadPrimaryMembership(userId: string): Promise<Membership | null> {
+  // Multi-org users: deterministic ordering so the same user always lands
+  // on the same org across requests. ORDER BY role DESC puts OWNER ahead
+  // of MEMBER (alphabetical 'M' < 'O', so descending = OWNER-first) —
+  // important for owner-only API gates so a user who is OWNER of one org
+  // and MEMBER of another always resolves to the OWNER org first.
+  // created_at ASC is the stable tiebreaker.
+  //
+  // Uses the admin client because the bearer path no longer instantiates
+  // a user-scoped Supabase client. The `.eq("user_id", userId)` filter
+  // restricts results to the verified user's own membership rows; RLS
+  // would have applied the same filter.
+  const admin = createAdminClient();
+  const { data, error } = await admin
+    .from("organization_members")
+    .select("org_id, role, created_at")
+    .eq("user_id", userId)
+    .order("role", { ascending: false })
+    .order("created_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  if (error || !data) return null;
+  return {
+    org_id: data.org_id as string,
+    role: data.role as "OWNER" | "MEMBER",
+    created_at: data.created_at as string
+  };
 }
 
 export async function requireOwnerForApi(
   request?: Request
 ): Promise<ApiAuthFailure | OwnerApiAuthSuccess> {
-  const supabase = await getSupabaseClientForApi(request);
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
-  if (!user) {
+  const identity = await resolveIdentity(request);
+  if (!identity) {
     return { ok: false, response: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) };
   }
 
-  // Multi-org users: deterministic ordering so the same user always lands on
-  // the same org across requests. ORDER BY role DESC puts OWNER ahead of
-  // MEMBER (alphabetical 'M' < 'O', so descending = OWNER-first) — important
-  // for owner-only API gates so a user who is OWNER of one org and MEMBER of
-  // another always resolves to the OWNER org first. created_at ASC is the
-  // stable tiebreaker. See updates-log.md May 1 entry for the audit context.
-  const { data: membership } = await supabase
-    .from("organization_members")
-    .select("org_id, role, created_at")
-    .eq("user_id", user.id)
-    .order("role", { ascending: false })
-    .order("created_at", { ascending: true })
-    .limit(1)
-    .single();
-
+  const membership = await loadPrimaryMembership(identity.userId);
   if (!membership) {
     return {
       ok: false,
@@ -101,7 +149,7 @@ export async function requireOwnerForApi(
     };
   }
 
-  if ((membership.org_id as string) === getDemoOrgId()) {
+  if (membership.org_id === getDemoOrgId()) {
     return {
       ok: false,
       response: NextResponse.json({ error: "Demo org is read-only." }, { status: 403 })
@@ -110,34 +158,21 @@ export async function requireOwnerForApi(
 
   return {
     ok: true as const,
-    userId: user.id,
-    userEmail: user.email ?? null,
-    orgId: membership.org_id as string
+    userId: identity.userId,
+    userEmail: identity.userEmail,
+    orgId: membership.org_id
   };
 }
 
 export async function requireMemberForApi(
   request?: Request
 ): Promise<ApiAuthFailure | MemberApiAuthSuccess> {
-  const supabase = await getSupabaseClientForApi(request);
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
-  if (!user) {
+  const identity = await resolveIdentity(request);
+  if (!identity) {
     return { ok: false, response: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) };
   }
 
-  // Multi-org users: same deterministic ordering as requireOwnerForApi above.
-  // OWNER role wins over MEMBER, oldest membership tiebreaker.
-  const { data: membership } = await supabase
-    .from("organization_members")
-    .select("org_id, role, created_at")
-    .eq("user_id", user.id)
-    .order("role", { ascending: false })
-    .order("created_at", { ascending: true })
-    .limit(1)
-    .single();
-
+  const membership = await loadPrimaryMembership(identity.userId);
   if (!membership) {
     return {
       ok: false,
@@ -145,7 +180,7 @@ export async function requireMemberForApi(
     };
   }
 
-  if ((membership.org_id as string) === getDemoOrgId()) {
+  if (membership.org_id === getDemoOrgId()) {
     return {
       ok: false,
       response: NextResponse.json({ error: "Demo org is read-only." }, { status: 403 })
@@ -154,9 +189,9 @@ export async function requireMemberForApi(
 
   return {
     ok: true as const,
-    userId: user.id,
-    userEmail: user.email ?? null,
-    orgId: membership.org_id as string,
-    role: membership.role as "OWNER" | "MEMBER"
+    userId: identity.userId,
+    userEmail: identity.userEmail,
+    orgId: membership.org_id,
+    role: membership.role
   };
 }

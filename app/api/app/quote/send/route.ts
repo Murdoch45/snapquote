@@ -8,7 +8,6 @@ import { buildEstimateLink, renderEstimateTemplate } from "@/lib/quote-template"
 import { sendQuoteSchema } from "@/lib/quoteSendSchema";
 import { invalidateAnalytics } from "@/lib/db";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { sendQuoteSms } from "@/lib/telnyx";
 import { incrementUsageOnQuoteSend } from "@/lib/usage";
 
@@ -55,7 +54,6 @@ export async function POST(request: Request) {
     const body = sendQuoteSchema.parse(await request.json());
     bodyLeadId = body.leadId;
     const admin = createAdminClient();
-    const supabase = await createServerSupabaseClient();
 
     const { data: lead, error: leadError } = await admin
       .from("leads")
@@ -85,9 +83,9 @@ export async function POST(request: Request) {
     if (profileError || !profile) {
       return NextResponse.json({ error: "Contractor profile not found." }, { status: 404 });
     }
-    const {
-      data: { user }
-    } = await supabase.auth.getUser();
+    // requireMemberForApi already verified the bearer / cookie session and
+    // returned `auth.userEmail` from the JWT/session — no second GoTrue
+    // round-trip needed for the contractor-email fallback below.
 
     // Check for an existing DRAFT quote (created at unlock time).
     // If one exists, UPDATE it to SENT. If not, fall back to INSERT for
@@ -215,7 +213,7 @@ export async function POST(request: Request) {
       estimateLink,
       companyName: (profile?.business_name as string) || "SnapQuote",
       contractorPhone: (profile?.phone as string) || "Not provided",
-      contractorEmail: (profile?.email as string | null) || user?.email || "Not provided"
+      contractorEmail: (profile?.email as string | null) || auth.userEmail || "Not provided"
     });
 
     const { error: messageUpdateError } = await admin
@@ -258,7 +256,7 @@ export async function POST(request: Request) {
 
     if (body.sendEmail) {
       const contractorReplyEmail =
-        (profile?.email as string | null) ?? (user?.email as string | null) ?? null;
+        (profile?.email as string | null) ?? auth.userEmail ?? null;
       const customerEmail = buildEstimateSentEmail({
         businessName: (profile?.business_name as string) || "SnapQuote",
         contractorPhone: (profile?.phone as string | null) ?? null,

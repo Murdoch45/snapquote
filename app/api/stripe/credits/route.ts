@@ -3,7 +3,6 @@ import type Stripe from "stripe";
 import { z } from "zod";
 import { requireOwnerForApi } from "@/lib/auth/requireRole";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
 import {
   clearStaleStripeCustomerId,
   getStripe,
@@ -38,30 +37,23 @@ export async function POST(request: Request) {
     const packConfig = getStripeCreditPackConfig(body.pack as StripeCreditPackKey);
     const creditPackEnv = creditPackEnvSchema.parse(process.env);
     const admin = createAdminClient();
-    const supabase = await createServerSupabaseClient();
     const packPriceIds: Record<StripeCreditPackKey, string> = {
       "10": creditPackEnv.STRIPE_CREDIT_PACK_10_PRICE_ID,
       "50": creditPackEnv.STRIPE_CREDIT_PACK_50_PRICE_ID,
       "100": creditPackEnv.STRIPE_CREDIT_PACK_100_PRICE_ID
     };
 
-    const [
-      {
-        data: { user }
-      },
-      { data: latestSubscription }
-    ] = await Promise.all([
-      supabase.auth.getUser(),
-      admin
-        .from("subscriptions")
-        .select("stripe_customer_id")
-        .eq("user_id", auth.userId)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle()
-    ]);
+    // requireOwnerForApi already returned auth.userEmail from the verified
+    // JWT/cookie session — no second auth.getUser() round-trip needed.
+    const { data: latestSubscription } = await admin
+      .from("subscriptions")
+      .select("stripe_customer_id")
+      .eq("user_id", auth.userId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
-    if (!latestSubscription?.stripe_customer_id && !user?.email) {
+    if (!latestSubscription?.stripe_customer_id && !auth.userEmail) {
       return NextResponse.json({ error: "Authenticated user email is required." }, { status: 400 });
     }
 
@@ -88,7 +80,7 @@ export async function POST(request: Request) {
       cancel_url: `${appUrl}${cancelPath}`,
       client_reference_id: auth.userId,
       customer: customerId ?? undefined,
-      customer_email: customerId ? undefined : user?.email,
+      customer_email: customerId ? undefined : auth.userEmail ?? undefined,
       metadata: {
         userId: auth.userId,
         orgId: auth.orgId,
@@ -105,7 +97,7 @@ export async function POST(request: Request) {
         // Stale customer ID. Clear it from the DB and retry with a fresh
         // customer creation via `customer_email`. Without this recovery, the
         // user would see "No such customer: 'cus_xxx'" with no path forward.
-        if (!user?.email) {
+        if (!auth.userEmail) {
           return NextResponse.json(
             { error: "Authenticated user email is required to create a new billing profile." },
             { status: 400 }

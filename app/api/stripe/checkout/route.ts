@@ -3,7 +3,6 @@ import Stripe from "stripe";
 import { z } from "zod";
 import { requireOwnerForApi } from "@/lib/auth/requireRole";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
 import {
   type StripeBillingInterval,
   clearStaleStripeCustomerId,
@@ -59,18 +58,15 @@ export async function POST(request: Request) {
     const stripe = getStripe();
     const appUrl = getStripeAppUrl();
     const admin = createAdminClient();
-    const supabase = await createServerSupabaseClient();
     const returnUrl = `${appUrl}/app/plan?updated=1`;
 
+    // requireOwnerForApi already returned auth.userEmail from the verified
+    // JWT/cookie session — no second auth.getUser() round-trip needed.
     const [
-      {
-        data: { user }
-      },
       { data: latestSubscription },
       { data: activeSubscriptions },
       { data: organization }
     ] = await Promise.all([
-      supabase.auth.getUser(),
       admin
         .from("subscriptions")
         .select("stripe_customer_id")
@@ -207,7 +203,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ url: returnUrl });
     }
 
-    if (!user?.email) {
+    if (!auth.userEmail) {
       return NextResponse.json({ error: "Authenticated user email is required." }, { status: 400 });
     }
 
@@ -243,7 +239,7 @@ export async function POST(request: Request) {
       cancel_url: `${appUrl}/app/plan`,
       client_reference_id: auth.userId,
       customer: customerId ?? undefined,
-      customer_email: customerId ? undefined : user.email,
+      customer_email: customerId ? undefined : auth.userEmail ?? undefined,
       metadata: {
         userId: auth.userId,
         orgId: auth.orgId,
