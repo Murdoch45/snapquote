@@ -21,6 +21,41 @@ SnapQuote is an AI-powered quoting and lead management SaaS for outdoor service 
 
 ---
 
+## Public landing page (`app/(public)/page.tsx`)
+
+_Redesigned 2026-05-07 from a Claude Design handoff. Direction B (all-light, Linear/Stripe-restraint). One responsive page covers desktop + mobile via Tailwind breakpoints._
+
+**Sections (top → bottom):**
+1. **Sticky nav** — `BrandLogo` + "SnapQuote" wordmark (Manrope) on the left; "Log in" pill (light gray, hairline border) + "Get Started Free" CTA on the right. CTA hidden below `md` (768px). Backdrop-blur-12px on white/85.
+2. **Hero** — asymmetric / left-aligned. Mono eyebrow `• FOR OUTDOOR SERVICE CONTRACTORS`, H1 (Manrope 700, clamp 60→72→96px) "Stop driving to estimates that **waste your time.**" with the tail clause in the brand `#3FA1F7→#174BB7` gradient. Subhead and CTA below. Subtle 64×64 grid background masked with a radial fade.
+3. **Desktop demo** — `<ProductDemo />` (existing interactive component; preserved per "do not break the desktop interactive demo"). Hidden below `lg` per the design spec — mobile users skip straight from hero to How It Works.
+4. **How It Works** — 4 vertical steps, alternating sides on `lg` (text/phone, phone/text, …). Soft `#FAFAFB` background with hairline borders top + bottom. Thin dashed connector line down the center column on `lg+`, fading at top/bottom. Each step has a number in the brand gradient (Manrope, 56px mobile / 88px desktop), title, body, and a phone-shaped media placeholder (256×520 mobile, 280×568 desktop, aspect-ratio locked) — **placeholders are intentionally labeled `SCREEN RECORDING — …` so screen recordings can be dropped in later.**
+5. **Final CTA** — same gradient-tail H2 echoed, single CTA button.
+6. **Footer** — single line: `BrandLogo` + `© 2026 SnapQuote` left, Privacy + Terms right.
+
+**Typography:**
+- Display: **Manrope** (loaded via `next/font/google` with weights 500/600/700/800, exposed as `--font-manrope` and applied via `manrope.className` on display headings).
+- UI body: **Inter** (global, from `app/layout.tsx`).
+- Mono: system stack `ui-monospace, SFMono-Regular, Menlo, monospace` for eyebrows and small captions.
+
+**Components reused:**
+- `components/BrandLogo.tsx` for the actual logo (the design's placeholder SVG was discarded per polish requirements). Used at `size="sm"` with `iconClassName="h-7 w-auto"` (nav) and `h-5 w-auto` (footer).
+- `components/ui/button.tsx` for all CTAs (`asChild` wrapping `<Link>`).
+- `components/landing/ProductDemo.tsx` for the desktop demo section.
+
+**Preserved (not broken):**
+- All CTA routes (`/signup`, `/login`, `/privacy`, `/terms`) unchanged.
+- Meta Pixel + GA4 tracking and `CompleteRegistration` events live in `app/layout.tsx` and `OnboardingWizard.tsx` — landing page redesign does not touch them.
+- Favicon and root `metadata` defined in `app/layout.tsx`. Landing page exports its own `metadata` (title + description) which Next merges over the root.
+- Button-radius standardization (12px) and primary-color standardization (`#2563EB`) shipped earlier on 2026-05-07 are honored; CTAs use `rounded-xl` and `bg-primary`.
+
+**Source design files** (Claude Design handoff, kept locally for reference):
+- `landing-page/project/SnapQuote Landing v2.html` — primary design (responsive desktop + mobile in one file via media queries)
+- `landing-page/project/SnapQuote Landing - Mobile.html` — iPhone-frame preview wrapper that iframes the v2 file (the actual mobile design lives in v2)
+- `landing-page/project/landing-v2.jsx` — React/JSX prototype source
+
+---
+
 ## Brand Kit
 
 _Last standardized 2026-05-07 (color + button radius unification). Sources: `tailwind.config.ts`, `app/globals.css`, `app/layout.tsx`, `app/(public)/page.tsx`, `components/BrandLogo.tsx`, `components/ui/button.tsx`._

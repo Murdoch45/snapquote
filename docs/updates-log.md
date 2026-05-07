@@ -2552,3 +2552,38 @@ Resolves the cross-repo color split + button-radius inconsistencies surfaced in 
 - Brand kit section in `docs/current-state.md` rewritten to reflect the new canonical values (primary `#2563EB`, button radius `rounded-xl`/12px, plus an explicit "intentional exception" callout for the landing footer pill).
 
 **Cross-repo status:** Web and mobile now agree on `#2563EB` as primary. The brand-kit conflict flagged in Notion's Code Patterns & Conventions on May 7 is resolved — web was the side that moved.
+
+---
+
+## Session — May 7, 2026 (Public landing page redesign — Claude Design v2 handoff)
+
+Replaced the visual layer of the public landing page (`/`) with the new design from Claude Design's "SnapQuote Landing v2" handoff. Direction B (all-light, Linear/Stripe-style restraint) per Murdoch's earlier pick. One responsive page covers desktop + mobile via Tailwind breakpoints; the mobile design file in the handoff was a preview wrapper, not a separate design.
+
+**Files changed:**
+- `app/(public)/page.tsx` — full rewrite. New structure: sticky nav (logo + light "Log in" pill + CTA, with CTA hidden below `md`), asymmetric/left-aligned hero with gradient-tail H1 ("Stop driving to estimates that **waste your time.**"), `<ProductDemo />` desktop-only section (kept the existing interactive demo per "do not break"), 4-step "How it works" with alternating sides on `lg`, dashed-vertical connector line on `lg+`, phone-shaped media placeholders at correct aspect ratio (256×520 / 280×568) labeled `SCREEN RECORDING — …` for later drop-in, final CTA section, single-line footer.
+
+**Files NOT changed (deliberate):**
+- `app/layout.tsx` — preserved Meta Pixel, GA4 page-view tracking, viewport meta, root metadata, favicon. The new page exports its own `title` + `description` which Next merges over root.
+- `components/landing/ProductDemo.tsx` — kept the existing interactive desktop demo as-is and embedded it where the design's static dashboard mock would have gone. Hidden below `lg` per the design spec, so mobile users skip straight from hero to How It Works.
+- `components/BrandLogo.tsx` — used as-is in nav and footer (the design handoff included a placeholder SVG that was discarded per the polish requirement to "use the existing components/BrandLogo.tsx").
+- `components/ui/button.tsx` — used as-is via `asChild` for all CTAs (the design's hero CTA had a soft elevated shadow which is reproduced via a className override on `<Button>`, but the base `rounded-xl` 12px from this morning's standardization is preserved).
+
+**Key design decisions translated to Tailwind:**
+- Color tokens from the design (`--sq-ink: #0B0E14`, `--sq-soft: #FAFAFB`, `rgba(11,14,20,0.04/.08/.45/.60)`) are used as Tailwind arbitrary values throughout (e.g., `text-[#0B0E14]/60`, `border-[#0B0E14]/[0.08]`, `bg-[#FAFAFB]`). Not added to `tailwind.config.ts` because they're page-scoped accent values, not design tokens.
+- Manrope loaded via `next/font/google` with weights 500/600/700/800 and exposed as `--font-manrope` (in addition to `manrope.className` for direct application on display headings). Inter remains the global font from `app/layout.tsx`.
+- Headline gradient (`#3FA1F7 → #174BB7`) reused from `BrandLogo.tsx` — applied via `bg-clip-text text-transparent` with an inline `backgroundImage` style. Same gradient applied to the step numbers (01 / 02 / 03 / 04).
+- Phone-frame placeholders use `aspect-[256/520]` lock so the container scales correctly when a real screen recording (typical iOS portrait aspect) is dropped in. The dashed-border `<div>` inside is a swap-out target — it'll be replaced with `<video>` or `<Image>` per step in a follow-up.
+- The asymmetric hero L1 max-width is constrained at `lg+` to `14ch` so "Stop driving to estimates that waste your time." breaks cleanly across two visual lines on the design's intended 1280px artboard.
+- Connector line uses an absolutely-positioned 1px element with a top/bottom-fading linear-gradient, sitting behind the phones via `z-[1]` on the phone frames. Hidden below `lg`.
+
+**Preserved routes / flows:**
+- `/signup` (Get Started Free CTAs ×3)
+- `/login` (nav pill)
+- `/privacy`, `/terms` (footer)
+
+**Verification:**
+- `npx tsc --noEmit` exit 0.
+- Started `npx next dev -p 3050` locally and visually verified hero, hero CTA, ProductDemo render (existing dashboard nav + demo content; the demo data fetch hit a transient Cloudflare 502 from the public Supabase API, which is the existing component's own behavior, not a regression introduced by this change), all 4 steps with correct alternating layout, gradient step numbers, dashed media placeholders at the right aspect ratio, final CTA, and footer.
+- All `<Button>` instances inherit the `rounded-xl` (12px) base from `components/ui/button.tsx`; CTA shadow tints use `rgba(37,99,235,0.4)` (blue-600 family) so they match the standardized `--primary` exactly.
+
+**Reference materials kept in chat / out-of-tree:** `landing-page/README.md` (handoff guide), `landing-page/chats/chat1.md` (design transcript with Murdoch's iteration feedback), `landing-page/project/SnapQuote Landing v2.html` (source HTML), `landing-page/project/landing-v2.jsx` (source JSX prototype). Not committed to repo — these are mockup artifacts, not production code.
