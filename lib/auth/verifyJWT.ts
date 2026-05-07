@@ -1,5 +1,11 @@
 import "server-only";
-import { createRemoteJWKSet, jwtVerify, type JWTPayload } from "jose";
+import * as Sentry from "@sentry/nextjs";
+import {
+  createRemoteJWKSet,
+  decodeProtectedHeader,
+  jwtVerify,
+  type JWTPayload
+} from "jose";
 
 /**
  * Local JWT verification for Supabase access tokens — replaces
@@ -23,8 +29,17 @@ import { createRemoteJWKSet, jwtVerify, type JWTPayload } from "jose";
  * trusts only tokens signed with our shared secret. Tightening to an
  * explicit `iss` check is a follow-up if needed.
  *
+ * Observability: every verification path emits Sentry breadcrumbs
+ * (category `auth.verifyJWT`) with redacted bearer fingerprint, decoded
+ * header, and on-failure jose error code/name. Breadcrumbs alone do NOT
+ * reach Sentry — they're only flushed when an event is captured. The
+ * 401-return point in `requireRole.ts` calls `Sentry.captureMessage` so
+ * the breadcrumb chain is delivered. NEVER log the bearer in full,
+ * NEVER log full payload (PII in user_metadata).
+ *
  * See `docs/auth-jwt-direct-refactor-plan-2026-05-06.md` for context and
- * the original audit.
+ * the original audit. See `docs/breadcrumb-vs-charles-opinion-2026-05-07.md`
+ * for the observability rationale.
  */
 
 type SupabaseJwtClaims = JWTPayload & {
@@ -40,6 +55,39 @@ export type VerifiedJwt = {
 };
 
 const SUPABASE_AUDIENCE = "authenticated";
+
+/**
+ * Redact a bearer to a fingerprint suitable for diagnostic logging.
+ * Format: `${first8}...${last8} (len=N)`. Never logs the middle, never
+ * logs the signature in full. Safe to send to Sentry.
+ */
+export function redactBearer(token: string | null | undefined): string | null {
+  if (!token || typeof token !== "string") return null;
+  const len = token.length;
+  if (len < 24) return `(len=${len}, too short to fingerprint)`;
+  return `${token.slice(0, 8)}...${token.slice(-8)} (len=${len})`;
+}
+
+/**
+ * Decode the JWT protected header without verification. Returns just the
+ * fields useful for diagnostics (`alg`, `kid`, `typ`). Defensive — never
+ * throws.
+ */
+export function safeDecodeHeader(
+  token: string | null | undefined
+): { alg?: string; kid?: string; typ?: string } | null {
+  if (!token || typeof token !== "string") return null;
+  try {
+    const header = decodeProtectedHeader(token);
+    return {
+      alg: typeof header.alg === "string" ? header.alg : undefined,
+      kid: typeof header.kid === "string" ? header.kid : undefined,
+      typ: typeof header.typ === "string" ? header.typ : undefined
+    };
+  } catch {
+    return null;
+  }
+}
 
 let cachedJwks: ReturnType<typeof createRemoteJWKSet> | null = null;
 function getJwks() {
@@ -79,30 +127,118 @@ function extractClaims(payload: SupabaseJwtClaims): VerifiedJwt | null {
 export async function verifySupabaseJWT(token: string): Promise<VerifiedJwt | null> {
   if (!token || typeof token !== "string") return null;
 
+  // Diagnostic: log the verify attempt with bearer fingerprint + decoded
+  // header. Stays in scope until an event is captured (see requireRole.ts).
+  Sentry.addBreadcrumb({
+    category: "auth.verifyJWT",
+    level: "info",
+    message: "verify start",
+    data: {
+      bearer: redactBearer(token),
+      header: safeDecodeHeader(token)
+    }
+  });
+
   // Attempt 1: ES256 via remote JWKS (current/new tokens).
   try {
     const { payload } = await jwtVerify(token, getJwks(), {
       audience: SUPABASE_AUDIENCE
     });
     const claims = extractClaims(payload as SupabaseJwtClaims);
-    if (claims) return claims;
-  } catch {
-    // Fall through to HS256 attempt — algorithm mismatch, expired, etc.
+    if (claims) {
+      Sentry.addBreadcrumb({
+        category: "auth.verifyJWT",
+        level: "info",
+        message: "ES256 verified",
+        data: {
+          // Allowlisted claims only. NEVER log sub (UUID), email,
+          // user_metadata, or app_metadata.
+          aud: payload.aud,
+          iss: typeof payload.iss === "string" ? payload.iss : undefined,
+          exp: payload.exp,
+          iat: payload.iat
+        }
+      });
+      return claims;
+    }
+    // jwtVerify succeeded but extractClaims returned null — token has no
+    // sub claim. Fall through (HS256 won't help; the next breadcrumb
+    // explains the null return).
+    Sentry.addBreadcrumb({
+      category: "auth.verifyJWT",
+      level: "warning",
+      message: "ES256 verified but extractClaims returned null (missing sub)"
+    });
+  } catch (e) {
+    Sentry.addBreadcrumb({
+      category: "auth.verifyJWT",
+      level: "warning",
+      message: "ES256 path failed",
+      data: {
+        error_code: (e as { code?: string })?.code,
+        error_name: (e as { name?: string })?.name,
+        error_message:
+          typeof (e as { message?: string })?.message === "string"
+            ? (e as { message: string }).message.slice(0, 200)
+            : undefined
+      }
+    });
   }
 
   // Attempt 2: HS256 with shared secret (legacy tokens still inside exp window).
   const hs256Key = getHs256Key();
-  if (hs256Key) {
+  if (!hs256Key) {
+    Sentry.addBreadcrumb({
+      category: "auth.verifyJWT",
+      level: "warning",
+      message: "HS256 path skipped (SUPABASE_JWT_SECRET missing)"
+    });
+  } else {
     try {
       const { payload } = await jwtVerify(token, hs256Key, {
         audience: SUPABASE_AUDIENCE
       });
       const claims = extractClaims(payload as SupabaseJwtClaims);
-      if (claims) return claims;
-    } catch {
-      // Both algorithms rejected the token — treat as unauthenticated.
+      if (claims) {
+        Sentry.addBreadcrumb({
+          category: "auth.verifyJWT",
+          level: "info",
+          message: "HS256 verified",
+          data: {
+            aud: payload.aud,
+            iss: typeof payload.iss === "string" ? payload.iss : undefined,
+            exp: payload.exp,
+            iat: payload.iat
+          }
+        });
+        return claims;
+      }
+      Sentry.addBreadcrumb({
+        category: "auth.verifyJWT",
+        level: "warning",
+        message: "HS256 verified but extractClaims returned null (missing sub)"
+      });
+    } catch (e) {
+      Sentry.addBreadcrumb({
+        category: "auth.verifyJWT",
+        level: "warning",
+        message: "HS256 path failed",
+        data: {
+          error_code: (e as { code?: string })?.code,
+          error_name: (e as { name?: string })?.name,
+          error_message:
+            typeof (e as { message?: string })?.message === "string"
+              ? (e as { message: string }).message.slice(0, 200)
+              : undefined
+        }
+      });
     }
   }
 
+  Sentry.addBreadcrumb({
+    category: "auth.verifyJWT",
+    level: "warning",
+    message: "verify returned null — both paths exhausted"
+  });
   return null;
 }

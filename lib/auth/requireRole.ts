@@ -1,10 +1,73 @@
 import "server-only";
+import * as Sentry from "@sentry/nextjs";
 import { NextResponse } from "next/server";
 import {
   createServerSupabaseClient
 } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { verifySupabaseJWT } from "@/lib/auth/verifyJWT";
+import {
+  redactBearer,
+  safeDecodeHeader,
+  verifySupabaseJWT
+} from "@/lib/auth/verifyJWT";
+
+/**
+ * Bucket bearer length for low-cardinality Sentry tagging. Real Supabase
+ * ES256 access tokens are typically ~700-1100 chars. Anything outside
+ * that range is a smell worth flagging.
+ */
+function bucketBearerLength(len: number | undefined | null): string {
+  if (typeof len !== "number") return "none";
+  if (len < 200) return "short";
+  if (len < 600) return "small";
+  if (len < 1200) return "expected";
+  if (len < 2000) return "long";
+  return "huge";
+}
+
+/**
+ * Emit a Sentry message event so that breadcrumbs accumulated during the
+ * verify chain (added in `verifyJWT.ts`) are flushed to Sentry. Without
+ * this, breadcrumbs are dropped when the route handler returns 401 via
+ * `NextResponse.json` (Sentry only delivers breadcrumbs attached to a
+ * captured event). The `await Sentry.flush(2000)` is required in Vercel
+ * serverless because the lambda freezes after the response — without
+ * flush, the event may not transmit before freeze.
+ *
+ * Diagnostic-only: this captureMessage is meant to be removed (or sampled
+ * down aggressively) once we've collected enough data to root-cause the
+ * Build 13/14/15 mobile 401s. See
+ * `docs/breadcrumb-vs-charles-opinion-2026-05-07.md`.
+ */
+async function captureAuth401(
+  source: "requireMember" | "requireOwner",
+  request: Request | undefined,
+  bearer: string | null
+) {
+  const authHeader = request?.headers.get("authorization") ?? null;
+  Sentry.captureMessage(`auth.${source} 401`, {
+    level: "warning",
+    tags: {
+      auth_source: source,
+      has_bearer: bearer ? "yes" : "no",
+      bearer_len_class: bucketBearerLength(bearer?.length)
+    },
+    extra: {
+      bearer_fingerprint: redactBearer(bearer),
+      decoded_header: bearer ? safeDecodeHeader(bearer) : null,
+      authorization_header_length: authHeader?.length ?? null,
+      method: request?.method ?? null,
+      url: request?.url ?? null
+    }
+  });
+  // Vercel serverless: flush before responding so the event transmits
+  // before lambda freeze.
+  try {
+    await Sentry.flush(2000);
+  } catch {
+    // Don't let flush errors block the 401 response.
+  }
+}
 
 type ApiAuthFailure = {
   ok: false;
@@ -131,6 +194,7 @@ export async function requireOwnerForApi(
 ): Promise<ApiAuthFailure | OwnerApiAuthSuccess> {
   const identity = await resolveIdentity(request);
   if (!identity) {
+    await captureAuth401("requireOwner", request, getBearerToken(request));
     return { ok: false, response: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) };
   }
 
@@ -169,6 +233,7 @@ export async function requireMemberForApi(
 ): Promise<ApiAuthFailure | MemberApiAuthSuccess> {
   const identity = await resolveIdentity(request);
   if (!identity) {
+    await captureAuth401("requireMember", request, getBearerToken(request));
     return { ok: false, response: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) };
   }
 
