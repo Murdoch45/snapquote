@@ -315,7 +315,7 @@ export function PlanOptionsSection({ currentPlan, hasUsedTrial }: Props) {
                   <Button
                     type="button"
                     disabled
-                    className="h-11 w-full rounded-[10px] bg-foreground text-sm font-semibold text-background opacity-100 hover:bg-foreground"
+                    className="h-11 w-full rounded-xl bg-foreground text-sm font-semibold text-background opacity-100 hover:bg-foreground"
                   >
                     <Sparkles className="mr-2 h-4 w-4" />
                     Current Plan
@@ -323,7 +323,7 @@ export function PlanOptionsSection({ currentPlan, hasUsedTrial }: Props) {
                 ) : isUpgrade ? (
                   <Button
                     type="button"
-                    className="h-11 w-full rounded-[10px] bg-primary text-sm font-semibold text-white shadow-[0_12px_24px_rgba(37,99,235,0.24)] hover:bg-primary/90"
+                    className="h-11 w-full rounded-xl bg-primary text-sm font-semibold text-white shadow-[0_12px_24px_rgba(37,99,235,0.24)] hover:bg-primary/90"
                     disabled={loadingPlan === option.plan}
                     onClick={() => {
                       if (option.plan !== "SOLO") {
@@ -345,7 +345,7 @@ export function PlanOptionsSection({ currentPlan, hasUsedTrial }: Props) {
                   <Button
                     type="button"
                     variant="outline"
-                    className="h-11 w-full rounded-[10px] border border-primary/40 bg-card text-sm font-semibold text-primary shadow-[0_8px_20px_rgba(37,99,235,0.08)] hover:bg-accent hover:text-primary"
+                    className="h-11 w-full rounded-xl border border-primary/40 bg-card text-sm font-semibold text-primary shadow-[0_8px_20px_rgba(37,99,235,0.08)] hover:bg-accent hover:text-primary"
                     disabled={loadingPortal}
                     onClick={() => setDowngradeTarget(option)}
                   >

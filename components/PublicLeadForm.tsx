@@ -599,7 +599,7 @@ export function PublicLeadForm({ contractorSlug }: Props) {
         ) : null}
 
         <Button
-          className="mt-6 w-full rounded-[10px] py-3 text-base font-bold"
+          className="mt-6 w-full rounded-xl py-3 text-base font-bold"
           disabled={!canSubmit || !turnstileToken || loading}
           aria-disabled={!canSubmit || !turnstileToken || loading}
           aria-live="polite"

@@ -188,7 +188,7 @@ export function PublicQuoteCard({
             <Button
               onClick={onAccept}
               disabled={loading || isExpired}
-              className="h-12 w-full rounded-[10px] bg-primary text-sm font-semibold hover:bg-primary/90"
+              className="h-12 w-full rounded-xl bg-primary text-sm font-semibold hover:bg-primary/90"
             >
               {isExpired
                 ? "Estimate expired"

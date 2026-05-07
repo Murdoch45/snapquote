@@ -384,7 +384,7 @@ export function QuoteComposer({
             type="button"
             onClick={onGenerateMessage}
             disabled={!canSend}
-            className="h-11 w-full rounded-[10px] bg-primary text-sm font-semibold text-white hover:bg-primary/90"
+            className="h-11 w-full rounded-xl bg-primary text-sm font-semibold text-white hover:bg-primary/90"
           >
             {hasGeneratedBefore ? "Regenerate Estimate" : "Generate Estimate"}
           </Button>

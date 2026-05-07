@@ -2514,3 +2514,41 @@ After 6 failed auth fixes this week (Build 11, 12, 13, 14/15 mobile retry, JWT-d
 - Event mechanism verified via Sentry docs before shipping (not assumed)
 
 **Scope of `ee2a76c`:** the auth observability commit only touches `lib/auth/verifyJWT.ts` and `lib/auth/requireRole.ts`. The brand-kit session entry above this one came in via separate concurrent work on the same workstation that was unstaged when this entry was added; both updates-log.md sessions are committed together in this docs commit but reflect distinct work streams.
+
+---
+
+## Session — May 7, 2026 (Brand standardization: primary color → #2563EB, button radius → 12px)
+
+Resolves the cross-repo color split + button-radius inconsistencies surfaced in the May 7 brand kit audit. Web now matches mobile's primary brand color, and all `<Button>` usages share a single radius.
+
+**Files changed (web repo only):**
+
+1. `app/globals.css` — light-mode `--primary`, `--accent-foreground`, `--ring` changed from `217.2 91.2% 59.8%` (blue-500, `#3B82F6`) to `221.2 83.2% 53.3%` (blue-600, `#2563EB`). Dark-mode same trio: `--primary` and `--ring` updated to `221.2 83.2% 53.3%`; `--accent-foreground` updated to `221.2 83.2% 70%` (preserves the +10pt-ish lightness boost the dark mode used for accent text-on-accent-bg contrast). The CTA shadow tint `rgba(37, 99, 235, 0.6)` (already blue-600) now matches `--primary` exactly — this was previously a subtle mismatch where the shadow was darker than the button it shadowed.
+
+2. `components/ui/button.tsx` — base `cva` className changed from `rounded-[8px]` to `rounded-xl` (12px). All variants (default / outline / secondary / ghost / destructive) and sizes (default / sm / lg) inherit this.
+
+3. `app/(public)/page.tsx` — both top-of-hero CTAs (`Get Started Free` / `Log In`) changed from `rounded-2xl` (16px) to `rounded-xl` (12px). The footer-section pill CTA at line 153 (`rounded-full`) was deliberately left alone — pills are explicitly excluded from the radius standardization.
+
+4. `components/QuoteComposer.tsx` — Generate/Regenerate Estimate Button: `rounded-[10px]` → `rounded-xl`.
+
+5. `components/PublicQuoteCard.tsx` — Accept-quote Button (the public-facing customer one): `rounded-[10px]` → `rounded-xl`.
+
+6. `components/PublicLeadForm.tsx` — Lead-form submit Button: `rounded-[10px]` → `rounded-xl`.
+
+7. `components/plan/PlanOptionsSection.tsx` — three Buttons (current-plan disabled / upgrade CTA / downgrade outline): all `rounded-[10px]` → `rounded-xl`.
+
+**Files NOT touched (deliberate):**
+
+- `app/(public)/page.tsx:153` `rounded-full` pill — explicit pill style, per task scope.
+- All `rounded-[8px]` / `rounded-[14px]` / `rounded-2xl` instances on inputs, cards, modals, banners, and nav menus — task scope was buttons only. Inputs in `SettingsForm`, `AddressAutocomplete`, `PublicLeadForm`, `CustomersTable`, `MyLinkPageClient`, `quote-template/QuoteTemplateEditor`, `forms/ServiceQuestion`, `forms/ServiceSelector` all keep their `rounded-[8px]`. Cards/modals in `GetStartedFlow`, `SubscriptionRequiredModal`, `ConfidenceMeter`, `TopBar` (notification panel), `TeamManager`, `PlanOptionsSection` (downgrade modal), `app/app/credits/page.tsx` keep their `rounded-[14px]` / `rounded-2xl`.
+- `components/TopBar.tsx:148-149` `notificationButtonClassName` (`rounded-[10px]`) — this is a native `<button>` element (not the `<Button>` shadcn component) used as a small icon-only notification toggle; visually closer to an icon-button affordance than a CTA, so left untouched. If we want true uniformity later, this is the one remaining non-12px button-shaped element in the app.
+- Auth Buttons (`LoginForm`, `SignupForm`, `ForgotPasswordForm`, `ResetPasswordForm`, `InviteSignupForm`, `InviteAcceptAfterLogin`) already used `rounded-xl` — their explicit overrides are now redundant with the new base, but harmless. Not removed (out of scope, no behavioral change).
+
+**Hardcoded `#3B82F6` references:** the audit found none in code (only in docs from the previous session). Both `docs/current-state.md` and `docs/updates-log.md` references are now the only places that mention the old value, kept for historical accuracy in this entry.
+
+**Verification:**
+- `npx tsc --noEmit` exits 0.
+- `grep` for any `<Button>` className containing `rounded-(2xl|3xl|sm|md|lg|none|\[8px\]|\[10px\]|\[14px\]|\[16px\])` returns nothing — every `<Button>` now uses either `rounded-xl` (the new base, mostly inherited) or the one intentional `rounded-full` pill.
+- Brand kit section in `docs/current-state.md` rewritten to reflect the new canonical values (primary `#2563EB`, button radius `rounded-xl`/12px, plus an explicit "intentional exception" callout for the landing footer pill).
+
+**Cross-repo status:** Web and mobile now agree on `#2563EB` as primary. The brand-kit conflict flagged in Notion's Code Patterns & Conventions on May 7 is resolved — web was the side that moved.

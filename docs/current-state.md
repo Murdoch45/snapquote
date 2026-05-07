@@ -23,19 +23,19 @@ SnapQuote is an AI-powered quoting and lead management SaaS for outdoor service 
 
 ## Brand Kit
 
-_Extracted 2026-05-07 from `tailwind.config.ts`, `app/globals.css`, `app/layout.tsx`, `app/(public)/page.tsx`, `components/BrandLogo.tsx`, `components/ui/button.tsx`._
+_Last standardized 2026-05-07 (color + button radius unification). Sources: `tailwind.config.ts`, `app/globals.css`, `app/layout.tsx`, `app/(public)/page.tsx`, `components/BrandLogo.tsx`, `components/ui/button.tsx`._
 
 **Colors**
-- Primary blue: `#3B82F6` — `hsl(217.2 91.2% 59.8%)` (Tailwind blue-500). Hover = `bg-primary/90`. Same value used for `--ring` (focus rings) and `--accent-foreground`.
-- Logo gradient: `#3FA1F7 → #174BB7` (linear, top-left → bottom-right).
-- CTA shadow base: `rgba(37, 99, 235, 0.6)` (blue-600).
+- Primary blue: **`#2563EB`** — `hsl(221.2 83.2% 53.3%)` (Tailwind blue-600). Hover = `bg-primary/90`. Same value used for `--ring` (focus rings) and `--accent-foreground`. **Matches the mobile app's primary** (`COLORS.primary` in `SnapQuote-mobile/lib/constants.ts`) — web and mobile are now unified on this hue.
+- Logo gradient: `#3FA1F7 → #174BB7` (linear, top-left → bottom-right). Unchanged by the brand-color unification — gradient sits within the same blue family.
+- CTA shadow base: `rgba(37, 99, 235, 0.6)` (blue-600). Now matches `--primary` exactly.
 - Foreground (text): `#0F172A` (slate-900) — `hsl(222.2 47.4% 11.2%)`.
 - Muted bg: `#F1F5F9` (slate-100). Muted text: `#64748B` (slate-500).
 - Accent (light blue tint): `#EFF6FF` (blue-50) — `hsl(214 100% 97%)`.
 - Border / Input: `#E2E8F0` (slate-200).
 - Destructive: `#DC2626` (red-600) — `hsl(0 72.2% 50.6%)`.
 - Landing-only dark hero palette: bg `#101320`, radial top `#1e2a4a`, body text `#c3c6d7`, accent overlay `#b4c5ff` (used at 10% opacity).
-- Dark theme exists (`.dark` class in `globals.css`) but is not user-toggled today; primary stays `#3B82F6` in both modes.
+- Dark theme exists (`.dark` class in `globals.css`) but is not user-toggled today; primary stays `#2563EB` in both modes (dark `--accent-foreground` is the same hue at lightness 70% for contrast on dark accent bg).
 
 **Typography**
 - Primary (UI / app): **Inter** — loaded in `app/layout.tsx` via `next/font/google`, exposed as `--font-inter`, applied as `font-sans` on `<body>`.
@@ -48,15 +48,17 @@ _Extracted 2026-05-07 from `tailwind.config.ts`, `app/globals.css`, `app/layout.
 - Static assets: `AppIcon-1024.png`, `AppIcon.svg` (project root); `app/icon.png`, `app/apple-icon.png`, `app/favicon.ico`.
 
 **Design tokens**
-- Border radius: `sm` 0.375rem · `md` 0.5rem · `lg` 0.75rem. Buttons override to fixed `rounded-[8px]`. Landing CTAs override to `rounded-2xl` (1rem).
+- Border radius (Tailwind scale): `sm` 0.375rem · `md` 0.5rem · `lg` 0.75rem. **Buttons are standardized at `rounded-xl` (12px)** — both the base in `components/ui/button.tsx` and all in-codebase Button overrides (landing hero CTAs, plan/checkout CTAs, public-quote accept button, lead-form submit, quote composer). The only intentional exception is the landing footer CTA, which is a pill (`rounded-full` on `app/(public)/page.tsx:153`).
+- Cards / modals / inputs use their own radii (commonly `rounded-[8px]` for inputs, `rounded-[14px]` and `rounded-2xl` for modals/cards) — these are NOT touched by the button standardization.
 - Spacing: stock Tailwind scale (no custom overrides).
 - Layout widths: `max-w-7xl` (nav), `max-w-6xl` (content sections), `max-w-4xl` (hero copy). Nav height `h-20`. Section padding `py-24`. Horizontal `px-6 sm:px-8 lg:px-10`.
 - Effects: hero glow `blur-[90px–120px]` responsive; landing CTA shadow `shadow-[0_24px_60px_-24px_rgba(37,99,235,0.6)]`; `landing-fade-up` keyframe animation (280ms cubic-bezier(0.22, 1, 0.36, 1)).
 
 **CTA button**
-- Base (`components/ui/button.tsx`, default variant): `bg-primary text-primary-foreground hover:bg-primary/90`, `font-semibold text-sm`, `rounded-[8px]`. Sizes: default `h-10 px-5 py-2.5` · sm `h-8 px-3 text-xs` · lg `h-11 px-8`. Focus = 2px ring on `--ring`.
-- Landing hero override: `h-14 rounded-2xl bg-primary px-7 text-base font-semibold text-white shadow-[0_24px_60px_-24px_rgba(37,99,235,0.6)] hover:bg-primary/90`.
-- Landing secondary CTA (on dark): `h-14 rounded-2xl border-white/20 bg-transparent px-7 text-base font-semibold text-white hover:bg-card/5`.
+- Base (`components/ui/button.tsx`, default variant): `bg-primary text-primary-foreground hover:bg-primary/90`, `font-semibold text-sm`, **`rounded-xl` (12px)**. Sizes: default `h-10 px-5 py-2.5` · sm `h-8 px-3 text-xs` · lg `h-11 px-8`. Focus = 2px ring on `--ring`.
+- Landing hero override: `h-14 rounded-xl bg-primary px-7 text-base font-semibold text-white shadow-[0_24px_60px_-24px_rgba(37,99,235,0.6)] hover:bg-primary/90`.
+- Landing secondary CTA (on dark): `h-14 rounded-xl border-white/20 bg-transparent px-7 text-base font-semibold text-white hover:bg-card/5`.
+- Landing footer pill CTA (intentional exception): `h-auto rounded-full bg-primary px-10 py-5 text-xl font-bold text-white shadow-lg hover:scale-105 hover:bg-primary/90`.
 - Trailing icon: `ArrowRight` from lucide-react (16×16, `gap-2`).
 - Other variants: `outline` (primary border, primary text) · `secondary` (accent bg) · `ghost` (muted text, muted hover) · `destructive` (red).
 

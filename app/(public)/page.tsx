@@ -41,13 +41,13 @@ export default function HomePage() {
               </p>
 
               <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
-                <Button asChild size="lg" className="h-14 rounded-2xl bg-primary px-7 text-base font-semibold text-white shadow-[0_24px_60px_-24px_rgba(37,99,235,0.6)] hover:bg-primary/90">
+                <Button asChild size="lg" className="h-14 rounded-xl bg-primary px-7 text-base font-semibold text-white shadow-[0_24px_60px_-24px_rgba(37,99,235,0.6)] hover:bg-primary/90">
                   <Link href="/signup" className="inline-flex items-center gap-2">
                     Get Started Free
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
-                <Button asChild size="lg" variant="outline" className="h-14 rounded-2xl border-white/20 bg-transparent px-7 text-base font-semibold text-white hover:bg-card/5">
+                <Button asChild size="lg" variant="outline" className="h-14 rounded-xl border-white/20 bg-transparent px-7 text-base font-semibold text-white hover:bg-card/5">
                   <Link href="/login">Log In</Link>
                 </Button>
               </div>
