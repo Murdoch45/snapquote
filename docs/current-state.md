@@ -8,6 +8,20 @@
 
 ---
 
+## Plan-page architecture overhaul (in progress) — 2026-05-07
+
+Three-PR sequence to fix the Plan page rendering contradictory state ("Business" + "No active subscription" + "$39.99/month" + "100 monthly credits / 5 team members" all at once on `falconn`'s page). Full plan: see `SnapQuote-mobile/docs/updates-log.md` 2026-05-07 second-pass entry and Notion Pending Work.
+
+**Product invariant Murdoch is enforcing:** SnapQuote is a free app, Solo is the free tier, "Business + No active subscription" is structurally impossible for any authenticated user.
+
+**PR 1 — UI cleanup — SHIPPED 2026-05-07.** Stops the Plan page from contradicting itself. Files: `app/app/plan/page.tsx`, `lib/subscription.ts`, `app/api/app/subscription-status/route.ts`, `components/QuoteComposer.tsx`, `components/PublicLeadForm.tsx`. Deleted: `components/SubscriptionStatusCard.tsx`, `components/SubscriptionRequiredModal.tsx`. Created: `components/ContractorUnavailableModal.tsx`. Mobile lockstep type sync: `SnapQuote-mobile/lib/api/iap.ts`, `SnapQuote-mobile/lib/hooks/useEntitlementSync.ts`. Plan page now reads only `org.plan` for display; "No active subscription" badge / "Subscription is inactive" surfaces are gone everywhere. `OrganizationSubscriptionStatus` slimmed from 8 fields to 3 (`billingSource`, `hasActiveStripeSub`, `subscriptionEndsAt`). `subscriptionEndsAt` wired to `null` in PR 1 — populated in PR 2.
+
+**PR 2 — lifecycle architecture — PENDING.** Will land: replace DELETE in `lib/stripe.ts:clearStaleStripeCustomerId` with soft-cancel (migration `0067_subscriptions_nullable_customer_id.sql`); fix `app/api/stripe/webhook/route.ts:getOrgIdForUser` to fail loudly on multi-org users without metadata instead of silent `.limit(1)`; backfill `subscription.metadata.userId/orgId` on existing Stripe subs (`scripts/backfill-stripe-metadata.ts`); add daily reconcile cron `app/api/cron/reconcile-subscription-state/route.ts` (dry-run-first per Murdoch's E4 call, IAP entitlement source = `iap_subscription_events` log per E5); add `organizations.subscription_ends_at` column (migration `0068`), wire from Stripe `cancel_at_period_end` and RC CANCELLATION; add `<CancellationScheduledBanner>` component on `/app/plan`. Sentry instrumentation on every reconcile drift correction.
+
+**PR 3 — one-shot data remediation — PENDING.** Will land: SQL `UPDATE organizations SET plan='SOLO', monthly_credits=5` for stale-paid orgs. **Excludes `falconn`** per Murdoch's E6 call — he wants it kept on Business while testing. Demo seeds `Demo` and `Rivera's Pressure Washing` get cleaned up.
+
+---
+
 ## What SnapQuote Is
 
 SnapQuote is an AI-powered quoting and lead management SaaS for outdoor service contractors (landscaping, lawn care, fence, roofing, pressure washing). Contractors share a public link. Customers submit job requests. The AI generates an estimate range. The contractor reviews and sends it. The customer accepts or not.

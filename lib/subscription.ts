@@ -1,7 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { enforceServerOnly } from "@/lib/serverOnlyGuard";
-import { getStripe } from "@/lib/stripe";
-import type { OrgPlan } from "@/lib/types";
 
 enforceServerOnly();
 
@@ -11,28 +9,22 @@ type ActiveSubscriptionStatus = (typeof ACTIVE_SUBSCRIPTION_STATUSES)[number];
 
 export type BillingSource = "stripe" | "iap" | null;
 
+// Slimmed shape: the consumers only need to know (a) which billing surface
+// the user belongs to (Stripe vs IAP, for routing the "Manage" link), (b)
+// whether there is an active Stripe sub right now (for showing "Manage
+// Billing"), and (c) when a scheduled cancellation lands (for the cancellation
+// banner). org.plan is read separately and is the canonical source of truth
+// for what plan the user is on. There is no "inactive subscription" state in
+// the product — see Pending Work 2026-05-07 plan.
+//
+// `subscriptionEndsAt` is wired to null in PR 1 (this commit). PR 2 wires it
+// to the new `organizations.subscription_ends_at` column populated by webhook
+// writes on cancel_at_period_end / RC CANCELLATION.
 export type OrganizationSubscriptionStatus = {
-  status: string | null;
-  plan: OrgPlan | null;
-  active: boolean;
-  stripeSubscriptionId: string | null;
-  trialEndDate: string | null;
-  billingInterval: string | null;
   billingSource: BillingSource;
-  iapCancellationScheduledAt: string | null;
+  hasActiveStripeSub: boolean;
+  subscriptionEndsAt: string | null;
 };
-
-export class SubscriptionRequiredError extends Error {
-  statusCode: number;
-  code: string;
-
-  constructor(message = "Subscription required. Please upgrade to continue.") {
-    super(message);
-    this.name = "SubscriptionRequiredError";
-    this.statusCode = 402;
-    this.code = "SUBSCRIPTION_INACTIVE";
-  }
-}
 
 function isActiveStatus(status: string | null | undefined): status is ActiveSubscriptionStatus {
   return status === "active" || status === "trialing";
@@ -56,25 +48,18 @@ export async function getOrganizationSubscriptionStatus(
     .map((member) => member.user_id as string | null)
     .filter((value): value is string => Boolean(value));
 
-  const iapCancellationScheduledAt = await getIapCancellationScheduledAt(admin, orgId);
-
   if (userIds.length === 0) {
     const billingSource = await resolveBillingSource(admin, orgId, 0);
     return {
-      status: null,
-      plan: null,
-      active: false,
-      stripeSubscriptionId: null,
-      trialEndDate: null,
-      billingInterval: null,
       billingSource,
-      iapCancellationScheduledAt
+      hasActiveStripeSub: false,
+      subscriptionEndsAt: null
     };
   }
 
   const { data: subscriptions, error: subscriptionsError } = await admin
     .from("subscriptions")
-    .select("plan,status,stripe_subscription_id,billing_interval,created_at")
+    .select("status,created_at")
     .in("user_id", userIds)
     .order("created_at", { ascending: false })
     .limit(20);
@@ -84,78 +69,14 @@ export async function getOrganizationSubscriptionStatus(
   }
 
   const rows = subscriptions ?? [];
-  // The May 1 audit found multiple subscription rows can exist per user_id
-  // (Stripe trial → upgrade flows leave the trialing row; manual test rows
-  // get added; etc). The original ".find(isActive)" picked the most-recent
-  // active OR trialing row, which incorrectly returned a stale trialing row
-  // when a subsequent active sub existed. Explicitly prefer 'active' over
-  // 'trialing', then fall back to the most recent of any other status.
-  const current =
-    rows.find((row) => row.status === "active") ??
-    rows.find((row) => row.status === "trialing") ??
-    rows[0] ??
-    null;
-
+  const hasActiveStripeSub = rows.some((row) => isActiveStatus(row.status as string | null));
   const billingSource = await resolveBillingSource(admin, orgId, rows.length);
 
-  if (!current) {
-    return {
-      status: null,
-      plan: null,
-      active: false,
-      stripeSubscriptionId: null,
-      trialEndDate: null,
-      billingInterval: null,
-      billingSource,
-      iapCancellationScheduledAt
-    };
-  }
-
-  const status = (current.status as string | null | undefined) ?? null;
-  const stripeSubscriptionId =
-    (current.stripe_subscription_id as string | null | undefined) ?? null;
-  let trialEndDate: string | null = null;
-
-  if (status === "trialing" && stripeSubscriptionId) {
-    try {
-      const stripe = getStripe();
-      const subscription = await stripe.subscriptions.retrieve(stripeSubscriptionId);
-      trialEndDate = subscription.trial_end
-        ? new Date(subscription.trial_end * 1000).toISOString()
-        : null;
-    } catch (error) {
-      console.warn("Unable to resolve Stripe trial end date:", error);
-    }
-  }
-
   return {
-    status,
-    plan: (current.plan as OrgPlan | null | undefined) ?? null,
-    active: isActiveStatus(status),
-    stripeSubscriptionId,
-    trialEndDate,
-    billingInterval: (current.billing_interval as string | null | undefined) ?? null,
     billingSource,
-    iapCancellationScheduledAt
+    hasActiveStripeSub,
+    subscriptionEndsAt: null
   };
-}
-
-async function getIapCancellationScheduledAt(
-  admin: ReturnType<typeof createAdminClient>,
-  orgId: string
-): Promise<string | null> {
-  const { data, error } = await admin
-    .from("organizations")
-    .select("iap_cancellation_scheduled_at")
-    .eq("id", orgId)
-    .maybeSingle();
-
-  if (error) {
-    console.warn("Unable to read iap_cancellation_scheduled_at:", error);
-    return null;
-  }
-
-  return (data?.iap_cancellation_scheduled_at as string | null | undefined) ?? null;
 }
 
 async function resolveBillingSource(
@@ -199,16 +120,4 @@ async function resolveBillingSource(
   if (org?.plan && org.plan !== "SOLO") return "stripe";
 
   return null;
-}
-
-export async function requireActiveSubscription(
-  orgId: string
-): Promise<OrganizationSubscriptionStatus> {
-  const subscription = await getOrganizationSubscriptionStatus(orgId);
-
-  if (!subscription.active) {
-    throw new SubscriptionRequiredError();
-  }
-
-  return subscription;
 }

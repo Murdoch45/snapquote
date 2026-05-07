@@ -7,6 +7,42 @@ This file is append-only. Every session, every meaningful fix, finding, or decis
 
 ---
 
+## Session — May 7, 2026 — PR 1/3: web Plan page UI cleanup (remove inactive-sub UI surfaces)
+
+First of three PRs in the Plan-page architecture overhaul. Full plan + diagnosis lives in the mobile repo's `docs/updates-log.md` 2026-05-07 second-pass entry (and Notion Pending Work). Product invariant Murdoch is enforcing: SnapQuote is a free app, Solo is the free tier, "Business + No active subscription" is structurally impossible — any code path that can produce that state is a bug.
+
+PR 1 scope: web UI only. Stops the Plan page from contradicting itself. No DB changes, no webhook changes, no cron changes. PR 2 lands lifecycle architecture (soft-cancel in `clearStaleStripeCustomerId`, reconcile cron, `subscription_ends_at` column, Stripe metadata backfill). PR 3 lands the one-shot data remediation (with `falconn` excluded per Murdoch's call — he wants it kept on Business while testing).
+
+**Files changed:**
+- `app/app/plan/page.tsx` — deleted `formatSubscriptionStatus` helper (was at lines 50-55), deleted the `<Badge>` and `subscriptionStatusLabel` (was rendering "No active subscription" pill on the Current Plan card), deleted `trialEndLabel` and the trial-ends paragraph, deleted the "Billing is active" entry from `planHighlights`, simplified `getPlanPrice(plan)` to drop the `billingInterval` parameter (PR 2 will re-introduce a proper billing-info card with renewal/end dates instead of inferring monthly from null). Replaced `subscription.active` gate on the Manage Billing link with `showManageBilling = subscription.hasActiveStripeSub` and added a TODO that PR 2 will OR-in `subscription.subscriptionEndsAt`. Net: card now reads only `org.plan` for display; no UI branch on `subscription.active` anywhere.
+- `lib/subscription.ts` — slimmed `OrganizationSubscriptionStatus` type from 8 fields to 3 (`billingSource`, `hasActiveStripeSub`, `subscriptionEndsAt`). Dropped `status`, `plan`, `active`, `stripeSubscriptionId`, `trialEndDate`, `billingInterval`, `iapCancellationScheduledAt`. `subscriptionEndsAt` is wired to `null` in PR 1; PR 2 reads it from the new `organizations.subscription_ends_at` column. Body of `getOrganizationSubscriptionStatus` simplified — no longer retrieves the per-row Stripe trial_end via `subscriptions.retrieve`, no longer picks a "current" row from rank/order; just computes `hasActiveStripeSub = rows.some(r => isActiveStatus(r.status))` over the org's owners' subscription rows. Deleted `requireActiveSubscription` and `SubscriptionRequiredError` (zero callers; the only consumer — `quote/send/route.ts` — was removed in 2026-05-05 commit `60cc2c5`). Also dropped the inline `getIapCancellationScheduledAt` helper since `iapCancellationScheduledAt` is no longer in the API contract.
+- `app/api/app/subscription-status/route.ts` — return shape narrowed to match the new type. Drops `active`, `plan`, `status`, `trialEndDate`, `iapCancellationScheduledAt` from the JSON. Mobile callers (`SnapQuote-mobile/lib/api/iap.ts`) sync in lockstep.
+- `components/SubscriptionStatusCard.tsx` — DELETED. Confirmed dead code by grep; no imports outside its own file. The whole component was the wrong product framing ("Inactive subscription" red banner with "Upgrade" CTA).
+- `components/SubscriptionRequiredModal.tsx` — DELETED. Replaced by `components/ContractorUnavailableModal.tsx` (new). The contractor-facing variant of the old modal was already unreachable (`quote/send` no longer emits `SUBSCRIPTION_INACTIVE`); removing it for good. Customer-facing variant survives in the new component, used by `PublicLeadForm.tsx` for the public-form 402 case (Solo + 30-day-inactive contractors). Customer copy unchanged: "Not Accepting Requests / This contractor isn't accepting new requests right now / Please reach out to them directly for an estimate." — neutral, no billing-vocabulary leak. Aria id renamed `subscription-required-title` → `contractor-unavailable-title`.
+- `components/ContractorUnavailableModal.tsx` — CREATED. ~30 LOC, customer-only, no `variant` prop.
+- `components/PublicLeadForm.tsx` — import + JSX swap. `variant="customer"` prop removed (variants are gone).
+- `components/QuoteComposer.tsx` — removed the `SubscriptionRequiredModal` import, removed the `code === "SUBSCRIPTION_INACTIVE"` branch + `setShowSubscriptionModal(true)` call in the post-send response handler, removed the `<SubscriptionRequiredModal>` JSX, removed the now-unused `showSubscriptionModal` / `setShowSubscriptionModal` useState. The endpoint no longer emits `SUBSCRIPTION_INACTIVE`, so this branch was dead — cleaning up while the surface is touched.
+- Mobile-side lockstep (separate commit on mobile worktree branch `claude/silly-lamarr-0dfd30`):
+    - `lib/api/iap.ts` — `OrgSubscriptionStatus` type updated to match the slimmed web shape (3 fields).
+    - `lib/hooks/useEntitlementSync.ts` — `stripeStatus.active` → `stripeStatus.hasActiveStripeSub` rename to match the new field name. Catch fallback restructured from `stripeStatus = { active: false }` (which would fail typecheck against the new shape) to a single boolean `hasActiveStripeSub` variable. Behavior preserved.
+    - `app/(tabs)/more/plan.tsx` and `app/(tabs)/more/credits.tsx` — no edits required. Both already read only `.billingSource` from the result. Type narrows correctly through the slimmed shape.
+
+**Verification:**
+- `npx tsc --noEmit` — clean exit.
+- `npm run lint` — clean (one pre-existing `<img>` warning in `app/layout.tsx:49` unrelated to this PR).
+- `npm test` (vitest) — all 76 tests pass across 10 test files.
+- Mobile `npx tsc --noEmit` — only pre-existing `components/navigation/TopBar.tsx:59-60` typed-routes errors (documented in `Code Patterns & Conventions` Notion as out-of-scope). My mobile changes introduce zero new errors.
+- Mental render of three Plan page states (Solo, Active Business, falconn-shape) — all three render consistently, no contradiction surfaces visible to the user. `falconn` still wrongly says "Business" (PR 2 fixes the cause; PR 3 was intentionally skipped for `falconn` per Murdoch), but the screen no longer says "Business" and "No active subscription" simultaneously.
+
+**What this PR does NOT do (deferred to PR 2 / PR 3 per the plan):**
+- No changes to `app/api/stripe/webhook/route.ts`, `lib/stripe.ts:clearStaleStripeCustomerId`, `app/api/cron/trial-expired/route.ts`, or any other lifecycle code. PR 2.
+- No new DB columns, no migrations. PR 2.
+- No SQL UPDATE on `organizations`. PR 3 (which excludes `falconn`).
+- No `<CancellationScheduledBanner>` — depends on `subscription_ends_at` from PR 2's migration.
+- `UpgradeBanner` (over-credit usage gating) is unchanged. Per Murdoch (E1): usage gating is a separate concept from billing state and is not in scope.
+
+---
+
 ## Session — April 18, 2026
 
 ### MD File Restructure

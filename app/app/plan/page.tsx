@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { AlertCircle, Check } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { CreditsAddedToast } from "@/components/plan/CreditsAddedToast";
 import { ManageBillingButton } from "@/components/plan/ManageBillingButton";
 import { PlanOptionsSection } from "@/components/plan/PlanOptionsSection";
@@ -20,14 +19,8 @@ function formatPlanName(plan: "SOLO" | "TEAM" | "BUSINESS"): string {
   return "Business";
 }
 
-function getPlanPrice(
-  plan: "SOLO" | "TEAM" | "BUSINESS",
-  billingInterval: string | null
-): string {
+function getPlanPrice(plan: "SOLO" | "TEAM" | "BUSINESS"): string {
   if (plan === "SOLO") return "Free";
-  if (billingInterval === "year") {
-    return plan === "TEAM" ? "$191.99/year" : "$384.99/year";
-  }
   return plan === "TEAM" ? "$19.99/month" : "$39.99/month";
 }
 
@@ -45,13 +38,6 @@ function UsageBar({ used, limit }: { used: number; limit: number }) {
       />
     </div>
   );
-}
-
-function formatSubscriptionStatus(status: string | null, active: boolean): string {
-  if (status === "trialing") return "Trialing";
-  if (status === "active" && active) return "Active";
-  if (!status) return "No active subscription";
-  return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
 }
 
 type Props = {
@@ -81,7 +67,7 @@ export default async function PlanPage({ searchParams }: Props) {
 
   const orgCreditRow = organization.data as { plan: string; monthly_credits: number; bonus_credits: number; credits_reset_at: string | null };
   const plan = orgCreditRow.plan as "SOLO" | "TEAM" | "BUSINESS";
-  const price = getPlanPrice(plan, subscription.billingInterval);
+  const price = getPlanPrice(plan);
   const monthlyCreditsRemaining = Number(orgCreditRow.monthly_credits ?? 0);
   const bonusCredits = Number(orgCreditRow.bonus_credits ?? 0);
   const totalCredits = monthlyCreditsRemaining + bonusCredits;
@@ -91,26 +77,23 @@ export default async function PlanPage({ searchParams }: Props) {
   const resetAt = orgCreditRow.credits_reset_at
     ? new Date(orgCreditRow.credits_reset_at as string)
     : null;
-  const trialEndLabel =
-    subscription.status === "trialing" && subscription.trialEndDate
-      ? new Intl.DateTimeFormat("en-US", {
-          month: "short",
-          day: "numeric",
-          year: "numeric"
-        }).format(new Date(subscription.trialEndDate))
-      : null;
   const creditsResetLabel = resetAt
     ? new Intl.DateTimeFormat("en-US", {
         month: "long",
         day: "numeric"
       }).format(resetAt)
     : null;
-  const subscriptionStatusLabel = formatSubscriptionStatus(subscription.status, subscription.active);
   const planHighlights = [
     { label: `${monthlyCreditsLimit} monthly credits`, positive: true },
-    { label: `${usersLimit} ${usersLimit === 1 ? "team member" : "team members"}`, positive: true },
-    { label: subscription.active ? "Billing is active" : subscriptionStatusLabel, positive: subscription.active }
+    { label: `${usersLimit} ${usersLimit === 1 ? "team member" : "team members"}`, positive: true }
   ];
+
+  // Manage Billing visibility: gate on whether there's an active Stripe sub.
+  // PR 2 will extend this to also include `subscription.subscriptionEndsAt`
+  // (so users in a cancellation-pending window can still reach the portal to
+  // reactivate). Until then, `subscriptionEndsAt` is always null at the API
+  // layer.
+  const showManageBilling = subscription.hasActiveStripeSub;
 
   const isOverSeatLimit = usersUsed > usersLimit;
 
@@ -149,25 +132,11 @@ export default async function PlanPage({ searchParams }: Props) {
         <CardContent className="space-y-6">
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] lg:items-start">
             <div className="space-y-4">
-              <div className="flex flex-wrap items-center gap-3">
-                <p className="text-3xl font-bold text-foreground">{formatPlanName(plan)}</p>
-                <Badge
-                  className={
-                    subscription.active
-                      ? "border-transparent bg-accent text-primary"
-                      : "border-transparent bg-muted text-muted-foreground"
-                  }
-                >
-                  {subscriptionStatusLabel}
-                </Badge>
-              </div>
+              <p className="text-3xl font-bold text-foreground">{formatPlanName(plan)}</p>
               <p className="text-xl font-semibold text-foreground">{price}</p>
               <p className="text-sm text-muted-foreground">
                 {usersUsed} / {usersLimit} users
               </p>
-              {trialEndLabel ? (
-                <p className="text-sm text-muted-foreground">Trial ends {trialEndLabel}</p>
-              ) : null}
 
               <div className="space-y-3">
                 {planHighlights.map((item) => (
@@ -193,7 +162,7 @@ export default async function PlanPage({ searchParams }: Props) {
         </CardContent>
       </Card>
 
-      {subscription.active ? (
+      {showManageBilling ? (
         <p className="-mt-3 text-sm text-muted-foreground">
           To manage your billing,{" "}
           <ManageBillingButton label="click here" mode="text" />

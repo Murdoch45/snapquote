@@ -9,7 +9,7 @@ import { PhotoUploader, type PhotoEntry } from "@/components/PhotoUploader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { SubscriptionRequiredModal } from "@/components/SubscriptionRequiredModal";
+import { ContractorUnavailableModal } from "@/components/ContractorUnavailableModal";
 import { Textarea } from "@/components/ui/textarea";
 import {
   getRequiredQuestionIssues,
@@ -607,10 +607,9 @@ export function PublicLeadForm({ contractorSlug }: Props) {
           {loading ? "Sending..." : "Get My Estimate"}
         </Button>
       </form>
-      <SubscriptionRequiredModal
+      <ContractorUnavailableModal
         open={showSubscriptionModal}
         onClose={() => setShowSubscriptionModal(false)}
-        variant="customer"
       />
     </>
   );

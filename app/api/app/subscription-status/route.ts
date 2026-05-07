@@ -19,12 +19,9 @@ export async function GET(request: Request) {
   try {
     const status = await getOrganizationSubscriptionStatus(auth.orgId);
     return NextResponse.json({
-      active: status.active,
-      plan: status.plan,
-      status: status.status,
-      trialEndDate: status.trialEndDate,
       billingSource: status.billingSource,
-      iapCancellationScheduledAt: status.iapCancellationScheduledAt
+      hasActiveStripeSub: status.hasActiveStripeSub,
+      subscriptionEndsAt: status.subscriptionEndsAt
     });
   } catch (error) {
     return NextResponse.json(

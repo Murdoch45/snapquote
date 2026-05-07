@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { SubscriptionRequiredModal } from "@/components/SubscriptionRequiredModal";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { PriceSlider } from "@/components/PriceSlider";
@@ -73,7 +72,6 @@ export function QuoteComposer({
   const [messageGenerated, setMessageGenerated] = useState<boolean>(isResend);
   const [hasGeneratedBefore, setHasGeneratedBefore] = useState<boolean>(isResend);
   const [loading, setLoading] = useState(false);
-  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [quoteLink, setQuoteLink] = useState<string | null>(null);
   const [copiedMessage, setCopiedMessage] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
@@ -289,10 +287,6 @@ export function QuoteComposer({
         })
       });
       const json = await res.json();
-      if (res.status === 402 || json.code === "SUBSCRIPTION_INACTIVE") {
-        setShowSubscriptionModal(true);
-        return;
-      }
       if (!res.ok) throw new Error(json.error || "Failed to send estimate.");
       setQuoteLink(json.publicUrl ?? null);
       // Prefer the server-resolved message (tokens replaced with real
@@ -586,10 +580,6 @@ export function QuoteComposer({
           </p>
         )}
       </div>
-      <SubscriptionRequiredModal
-        open={showSubscriptionModal}
-        onClose={() => setShowSubscriptionModal(false)}
-      />
     </>
   );
 }
