@@ -2443,3 +2443,74 @@ All three now carry an alpha channel (corners outside the bubble are transparent
 **Files affected:** `lib/subscription.ts` only. No mobile change — mobile's UI gate already does the right thing once `billingSource` is correct. No change to `clearStaleStripeCustomerId` — the deletion behavior is orthogonal; this fix handles the consequence.
 
 **Verification:** `npx tsc --noEmit` clean; `npm test` 76/76 pass. Manual trace for `falconn`: stripe rows = 0 → skip; iap events = 0 → skip; new branch reads `organizations.plan = 'BUSINESS'` → returns `"stripe"`. Mobile will now render manage-on-web UI in place of the IAP carousel for that org and any other Stripe-paid org in the same orphaned state.
+
+---
+
+## Session — May 7, 2026 (Brand kit extraction for Claude Design landing redesign)
+
+Read-only audit of the web repo to extract a complete brand kit for use as input to Claude Design when redesigning the landing page. No code changes.
+
+**Sources read:** `tailwind.config.ts`, `app/globals.css`, `app/layout.tsx`, `app/(public)/page.tsx`, `components/BrandLogo.tsx`, `components/ui/button.tsx`, `public/` and `public/landing/`, app icon assets.
+
+**Key findings:**
+
+- **Primary brand color** is Tailwind blue-500 — `#3B82F6` / `hsl(217.2 91.2% 59.8%)`. Used as `--primary`, `--ring`, and `--accent-foreground` in light theme; unchanged in `.dark`. Hover convention is `bg-primary/90`.
+- **Logo gradient** in `BrandLogo.tsx` is `#3FA1F7 → #174BB7` (linear). The wordmark is rendered as text in `font-extrabold tracking-tight text-primary`, not as a static image — there is **no separate wordmark SVG file**. Static logo assets are limited to App Store / favicon variants (`AppIcon-1024.png`, `AppIcon.svg`, `app/icon.png`, `app/apple-icon.png`, `app/favicon.ico`).
+- **Two fonts in play:** Inter is the global UI font (`--font-inter` on `<body>` via `next/font/google`); Manrope is loaded **only on `app/(public)/page.tsx`** as a marketing display face. Any redesign of the landing should preserve this split or consciously choose to unify.
+- **Border-radius is inconsistent across the codebase:** Tailwind tokens are `sm: 0.375rem / md: 0.5rem / lg: 0.75rem`, but the shared `Button` component hard-codes `rounded-[8px]` and the landing hero CTA uses `rounded-2xl` (1rem). Worth flagging for the redesign — Claude Design should be told which radius is canonical.
+- **Landing dark palette** (`#101320` hero bg, `#1e2a4a` radial top, `#c3c6d7` body text, `#b4c5ff` overlay) is **landing-only** — the rest of the app is light-themed. The brand kit summary handed to Claude Design distinguishes core brand tokens from these landing-only values so the redesign can either reuse or replace them deliberately.
+- **CTA pattern on landing** uses an override style (`h-14 rounded-2xl bg-primary px-7 ... shadow-[0_24px_60px_-24px_rgba(37,99,235,0.6)]`) rather than the `Button` component's default sizes — the redesign should match this larger-radius, soft-glow CTA treatment.
+
+**Output:** Brand kit summary written into `docs/current-state.md` under a new "Brand Kit" section (placed above "Tech Stack"), formatted as a copy-pasteable reference for Claude Design. This log entry captures the audit context and the inconsistencies/decisions worth flagging before the redesign starts.
+
+**No code touched.** No commit.
+
+---
+
+## Session — May 7, 2026 (Auth observability shipped — diagnostic instrumentation only)
+
+After 6 failed auth fixes this week (Build 11, 12, 13, 14/15 mobile retry, JWT-direct refactor) and a meta-strategy admission that we were debugging by guess, we shipped diagnostic instrumentation to the auth path. **Observability-only — no behavior change.** This is the first auth deploy this week with proper Sentry capture, which we should have had from day one.
+
+**Files touched:** `lib/auth/verifyJWT.ts` (+154 LOC), `lib/auth/requireRole.ts` (+67 LOC). Pure additive across both files. No verify logic changed, no membership lookup changed, no 401 response shape changed.
+
+**What was added:**
+
+- **`redactBearer(token)`** helper — returns `${first8}...${last8} (len=N)`. Never logs the middle, never logs the signature.
+- **`safeDecodeHeader(token)`** helper — defensively decodes the JWT protected header (`alg`, `kid`, `typ`) via `jose.decodeProtectedHeader`. Never throws.
+- **`Sentry.addBreadcrumb` calls** at every step of `verifySupabaseJWT` — verify start (with bearer fingerprint + decoded header), ES256 success/failure (with jose error code/name/message-slice), HS256 success/failure, and final null return. Allowlisted claim logging only on success: `aud`, `iss`, `exp`, `iat`. **Never** logs `sub`, `email`, `user_metadata`, or full payload.
+- **`Sentry.captureMessage("auth.requireMember 401" | "auth.requireOwner 401")`** at both 401 return points in `requireRole.ts`, with `Sentry.flush(2000)` to ensure the event transmits before Vercel's lambda freezes. Tags stay low-cardinality (`auth_source`, `has_bearer`, `bearer_len_class`); high-cardinality data (`bearer_fingerprint`, `decoded_header`, `authorization_header_length`, method, url) goes in `extra`.
+
+**Why this design:** breadcrumbs accumulated during a request are buffered in the request scope and only flush to Sentry when an event is captured — so without `captureMessage` on the 401 path, the rich diagnostic chain would be silently dropped. Verified mechanism via Sentry docs ([Capturing Errors | @sentry/nextjs](https://docs.sentry.io/platforms/javascript/guides/nextjs/capturing-errors/)) before shipping.
+
+**Pre-merge discipline (yesterday's lesson applied):**
+
+1. `npm run typecheck` clean
+2. `git diff` review — confirmed only the 2 files changed, pure additive
+3. Pushed to feature branch `claude/auth-observability-2026-05-07` (NOT main)
+4. Vercel preview built (commit `ee2a76c`, dpl_HZfwQurb5sXK78X6zCmkoM3ZyH2N) — READY at 17:03 UTC
+5. **Preview verification** — multi-test: (a) no-bearer GET /api/app/team/members → 401 + Sentry event with tags+extras (no breadcrumbs because verifyJWT never ran — expected); (b) bogus bearer GET /api/app/team/members → 401 + Sentry event with full breadcrumb chain showing verify start → ES256 fail (`ERR_JWS_INVALID`) → HS256 fail → null; (c) fresh refresh-grant ES256 bearer (new mint per test, 3 iterations) → 200 OK on team/members + 400 on leads/unlock (auth passed, validation error on missing leadId — expected) + 200 on subscription-status. **Both failure capture and success path confirmed working.**
+6. Only after step 5 verified, fast-forward merged to main and pushed
+7. Production deploy `dpl_HnkvXEfxH7hmiy6FkYWHp8n7FREF` READY at 17:11 UTC
+8. **Production verification** — same 3 tests on www.snapquote.us → 401s captured correctly in Sentry as issue `SNAPQUOTE-WEB-9` with `environment=production` tag, breadcrumbs intact, no behavior regression
+
+**Sentry issue:** [`SNAPQUOTE-WEB-9`](https://snapquote.sentry.io/issues/SNAPQUOTE-WEB-9) — "auth.requireMember 401". Each event includes:
+- Tags: `auth_source` (requireMember/requireOwner), `has_bearer` (yes/no), `bearer_len_class` (none/short/small/expected/long/huge), `environment`, `level=warning`
+- Extras: `bearer_fingerprint`, `decoded_header` ({alg, kid, typ}), `authorization_header_length`, `method`, `url`
+- Breadcrumbs: verify start → ES256 path result → HS256 path result → final null (when bearer present)
+
+**Next step (Murdoch's input):** Murdoch triggers the failing action (lead unlock) on Build 15 from his iPhone. We pull the resulting Sentry event within 5 minutes, dump all breadcrumbs + extras, and finally have **DATA on why mobile bearers fail**. From that data we decide: focused fix, revert, or further investigation. **No fix proposed in this round** — observability only.
+
+**Diagnostic budget after capture:** if 90 minutes after Murdoch's reproduction we don't have a confident root cause, revert to commit `933079b` (Option A from the meta-strategy doc) and accept GoTrue race for launch.
+
+**Backing docs:** `docs/breadcrumb-vs-charles-opinion-2026-05-07.md` (rationale for choosing breadcrumbs over Charles Proxy), `docs/auth-bug-meta-strategy-2026-05-07.md` (meta-strategy after 6 failed fixes), `docs/jwt-direct-postdeploy-diagnostic-2026-05-07.md` (yesterday's post-deploy diagnostic), `docs/auth-jwt-direct-refactor-plan-2026-05-06.md` (original JWT-direct plan).
+
+**Self-criticism applied this turn:**
+
+- Capture data first; propose fix only after data
+- Multi-token sustained verify before merging (yesterday's mistake)
+- Branch-then-merge (not direct push to main)
+- Bearer redaction enforced (first/last 8 only)
+- High-cardinality data in `extra`, not `tags`
+- Event mechanism verified via Sentry docs before shipping (not assumed)
+
+**Scope of `ee2a76c`:** the auth observability commit only touches `lib/auth/verifyJWT.ts` and `lib/auth/requireRole.ts`. The brand-kit session entry above this one came in via separate concurrent work on the same workstation that was unstaged when this entry was added; both updates-log.md sessions are committed together in this docs commit but reflect distinct work streams.

@@ -21,6 +21,47 @@ SnapQuote is an AI-powered quoting and lead management SaaS for outdoor service 
 
 ---
 
+## Brand Kit
+
+_Extracted 2026-05-07 from `tailwind.config.ts`, `app/globals.css`, `app/layout.tsx`, `app/(public)/page.tsx`, `components/BrandLogo.tsx`, `components/ui/button.tsx`._
+
+**Colors**
+- Primary blue: `#3B82F6` — `hsl(217.2 91.2% 59.8%)` (Tailwind blue-500). Hover = `bg-primary/90`. Same value used for `--ring` (focus rings) and `--accent-foreground`.
+- Logo gradient: `#3FA1F7 → #174BB7` (linear, top-left → bottom-right).
+- CTA shadow base: `rgba(37, 99, 235, 0.6)` (blue-600).
+- Foreground (text): `#0F172A` (slate-900) — `hsl(222.2 47.4% 11.2%)`.
+- Muted bg: `#F1F5F9` (slate-100). Muted text: `#64748B` (slate-500).
+- Accent (light blue tint): `#EFF6FF` (blue-50) — `hsl(214 100% 97%)`.
+- Border / Input: `#E2E8F0` (slate-200).
+- Destructive: `#DC2626` (red-600) — `hsl(0 72.2% 50.6%)`.
+- Landing-only dark hero palette: bg `#101320`, radial top `#1e2a4a`, body text `#c3c6d7`, accent overlay `#b4c5ff` (used at 10% opacity).
+- Dark theme exists (`.dark` class in `globals.css`) but is not user-toggled today; primary stays `#3B82F6` in both modes.
+
+**Typography**
+- Primary (UI / app): **Inter** — loaded in `app/layout.tsx` via `next/font/google`, exposed as `--font-inter`, applied as `font-sans` on `<body>`.
+- Secondary (marketing display): **Manrope** — loaded only in `app/(public)/page.tsx`. Used on the landing hero / public homepage.
+- Weights in active use: 400, 600 (semibold), 700 (bold), 800 (extrabold).
+- Headline tracking: `tracking-tight` for app, `tracking-[-0.07em]` for marketing hero.
+
+**Logo**
+- Component: `components/BrandLogo.tsx` — inline SVG (speech bubble + lightning bolt) with the gradient above. Wordmark "SnapQuote" rendered alongside in `font-extrabold tracking-tight text-primary`. Sizes `sm` / `md` / `lg`; `showWordmark` prop toggles wordmark.
+- Static assets: `AppIcon-1024.png`, `AppIcon.svg` (project root); `app/icon.png`, `app/apple-icon.png`, `app/favicon.ico`.
+
+**Design tokens**
+- Border radius: `sm` 0.375rem · `md` 0.5rem · `lg` 0.75rem. Buttons override to fixed `rounded-[8px]`. Landing CTAs override to `rounded-2xl` (1rem).
+- Spacing: stock Tailwind scale (no custom overrides).
+- Layout widths: `max-w-7xl` (nav), `max-w-6xl` (content sections), `max-w-4xl` (hero copy). Nav height `h-20`. Section padding `py-24`. Horizontal `px-6 sm:px-8 lg:px-10`.
+- Effects: hero glow `blur-[90px–120px]` responsive; landing CTA shadow `shadow-[0_24px_60px_-24px_rgba(37,99,235,0.6)]`; `landing-fade-up` keyframe animation (280ms cubic-bezier(0.22, 1, 0.36, 1)).
+
+**CTA button**
+- Base (`components/ui/button.tsx`, default variant): `bg-primary text-primary-foreground hover:bg-primary/90`, `font-semibold text-sm`, `rounded-[8px]`. Sizes: default `h-10 px-5 py-2.5` · sm `h-8 px-3 text-xs` · lg `h-11 px-8`. Focus = 2px ring on `--ring`.
+- Landing hero override: `h-14 rounded-2xl bg-primary px-7 text-base font-semibold text-white shadow-[0_24px_60px_-24px_rgba(37,99,235,0.6)] hover:bg-primary/90`.
+- Landing secondary CTA (on dark): `h-14 rounded-2xl border-white/20 bg-transparent px-7 text-base font-semibold text-white hover:bg-card/5`.
+- Trailing icon: `ArrowRight` from lucide-react (16×16, `gap-2`).
+- Other variants: `outline` (primary border, primary text) · `secondary` (accent bg) · `ghost` (muted text, muted hover) · `destructive` (red).
+
+---
+
 ## Tech Stack
 
 **Web:**
@@ -212,6 +253,12 @@ SnapQuote is an AI-powered quoting and lead management SaaS for outdoor service 
 - `lib/utils/authBrowser.ts` appends tokens to URL hash
 - Must route through entry page (e.g. `/credits`, `/plan`) NOT directly to `/app/...`
 - Entry page reads hash, calls `supabase.auth.setSession()`, then redirects to app route
+
+**Auth verification (web, post-2026-05-07):**
+
+- `lib/auth/verifyJWT.ts` performs local JWT verification — no GoTrue round-trip. Tries ES256 against `{NEXT_PUBLIC_SUPABASE_URL}/auth/v1/.well-known/jwks.json` first, falls back to HS256 with `SUPABASE_JWT_SECRET` (legacy tokens still inside their exp window). Returns null on all-paths-failed, never throws.
+- `lib/auth/requireRole.ts` calls `verifySupabaseJWT(bearer)` for the bearer path and `auth.getUser()` for the cookie path.
+- **Observability (added 2026-05-07, observability-only deploy):** Sentry breadcrumbs at every step of the verify chain (verify start, ES256 success/failure, HS256 success/failure, final null) with bearer fingerprint + decoded header. `Sentry.captureMessage("auth.requireMember 401" | "auth.requireOwner 401")` + `Sentry.flush(2000)` at both 401 return points so the breadcrumb chain reaches Sentry. Tags low-cardinality (`auth_source`, `has_bearer`, `bearer_len_class`); high-cardinality data in `extra`. Bearer NEVER logged in full — fingerprint only (`first8...last8 (len=N)`). Sentry issue: [`SNAPQUOTE-WEB-9`](https://snapquote.sentry.io/issues/SNAPQUOTE-WEB-9). Diagnostic-only — meant to be removed/sampled-down once we root-cause the Build 13/14/15 mobile 401s.
 
 ---
 
