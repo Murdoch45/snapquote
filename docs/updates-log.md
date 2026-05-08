@@ -3552,3 +3552,45 @@ Migration 0030 (`ALTER TYPE lead_status ADD VALUE IF NOT EXISTS 'OPENED'`) is re
 - 6 High items from Audit 9 (mutable search_path, FOR UPDATE on `update_org_plan_credits`, `auth_rls_initplan` policies, `subscriptions` FK, missing FK indexes). Listed in Pending Work as PW-A9-6 through PW-A9-9.
 - 8 Medium + 5 Low items.
 - Local files 0001-0055 numeric naming retained; only new work uses timestamp convention going forward.
+
+---
+
+## Session — May 8, 2026 — Audit 9 RPC hardening (H2, H3, L5)
+
+Three function-level hardening fixes from Audit 9 shipped as a single migration `20260508234346_rpc_hardening_search_path_row_lock_revoke_anon`. Each diagnosed live before fixing.
+
+### Diagnosis (live, before fix)
+
+- **H2** — `pg_get_functiondef` for `public.update_org_plan_credits` and `public.reset_org_credits`: both have `LANGUAGE plpgsql SECURITY DEFINER AS $function$` with NO `SET search_path` clause. Supabase advisor `function_search_path_mutable` flagged both. EXECUTE on both is `service_role` only (proacl: `postgres=X/postgres, service_role=X/postgres`) — migration 0063 already revoked from anon/authenticated. Mutable search_path is defense-in-depth.
+- **H3** — `pg_get_functiondef` for `public.update_org_plan_credits`: body is plain `UPDATE organizations SET monthly_credits = p_monthly_credits, credits_reset_at = p_credits_reset_at WHERE id = p_org_id`, no `SELECT ... FOR UPDATE` first. Compare `unlock_lead_with_credits` (`select plan, monthly_credits, … from organizations where id = p_org_id for update`) and `refund_bonus_credits` (`SELECT bonus_credits INTO v_current FROM organizations WHERE id = p_org_id FOR UPDATE`). Caller trace: `app/api/stripe/webhook/route.ts:122`, `app/api/stripe/checkout/route.ts:206`, `app/api/iap/sync/route.ts:172`, `app/api/revenuecat/webhook/route.ts:93` — all use `admin.rpc("update_org_plan_credits", …)` (service_role). Concurrent webhook bursts for the same org could race (e.g. `checkout.session.completed` + `invoice.paid`).
+- **L5** — `pg_proc.proacl` for `public.is_org_member` and `public.is_org_owner`: `=X/postgres, postgres=X/postgres, anon=X/postgres, authenticated=X/postgres, service_role=X/postgres`. Both are SECURITY DEFINER with `SET search_path TO 'public'` and depend on `auth.uid()`. Anon's `auth.uid()` is null so calls always returned false, but the functions were callable via `/rest/v1/rpc/is_org_member` etc. Verified safe-to-revoke via `pg_policies` query — every RLS policy referencing these functions targets `{authenticated}` only (20 policies on 11 tables: contractor_profile, credit_purchases, customers, lead_photos, lead_unlocks, leads, org_usage_monthly, organization_members, organizations, pending_invites, quote_events, quotes — none target anon). Migration 0063 had deliberately left these untouched citing "must stay callable by anon/auth"; that reasoning was overcautious.
+
+### Fix applied
+
+`20260508234346_rpc_hardening_search_path_row_lock_revoke_anon`. Single migration:
+
+1. `CREATE OR REPLACE FUNCTION public.update_org_plan_credits(...) ... SET search_path = public AS $function$ BEGIN PERFORM 1 FROM organizations WHERE id = p_org_id FOR UPDATE; UPDATE organizations SET ... WHERE id = p_org_id; END; $function$`
+2. `CREATE OR REPLACE FUNCTION public.reset_org_credits(...) ... SET search_path = public AS $function$ BEGIN RETURN QUERY UPDATE organizations SET ... WHERE id = p_org_id AND (credits_reset_at <= p_now OR credits_reset_at IS NULL) RETURNING ...; END; $function$`
+3. `REVOKE EXECUTE ON FUNCTION public.is_org_member(uuid) FROM PUBLIC, anon;` and same on `is_org_owner`. CRITICAL: `REVOKE FROM anon` alone would NOT have worked — anon retains effective EXECUTE via PUBLIC unless PUBLIC is also revoked.
+
+### Verification (live, after fix)
+
+- `pg_get_functiondef('public.update_org_plan_credits')` shows `LANGUAGE plpgsql SECURITY DEFINER SET search_path TO 'public' AS $function$ BEGIN PERFORM 1 FROM organizations WHERE id = p_org_id FOR UPDATE; UPDATE organizations SET monthly_credits = p_monthly_credits, credits_reset_at = p_credits_reset_at WHERE id = p_org_id; END; $function$`. ✅
+- `pg_get_functiondef('public.reset_org_credits')` shows `LANGUAGE plpgsql SECURITY DEFINER SET search_path TO 'public' AS $function$ BEGIN RETURN QUERY UPDATE organizations SET ... RETURNING organizations.monthly_credits, organizations.bonus_credits; END; $function$`. ✅
+- `pg_proc.proacl` for `is_org_member` and `is_org_owner`: `postgres=X/postgres, authenticated=X/postgres, service_role=X/postgres` — anon and PUBLIC removed. ✅
+- Supabase security advisor: `function_search_path_mutable` no longer flags `update_org_plan_credits` or `reset_org_credits` (4 still flagged — `plan_monthly_credits`, `prune_org_notifications`, `set_updated_at`, `storage_org_id_from_path` — out of scope for this fix). `anon_security_definer_function_executable` no longer flags `is_org_member`/`is_org_owner`. ✅
+- `npx tsc --noEmit` exit 0. ✅
+- Migration recorded as version `20260508234346` in `supabase_migrations.schema_migrations`. Local file renamed from `20260508234247_…` to `20260508234346_…` to match prod (per the established convention: MCP `apply_migration` server-stamps the version).
+
+### Deadlock analysis
+
+Each of the four callers makes a single `update_org_plan_credits` call per webhook, against one `organizations` row identified by `p_org_id`. The new `FOR UPDATE` lock acquires only that single row. No call site holds a second `organizations` row lock simultaneously, so no deadlock cycle is possible. If two webhooks for the same org fire concurrently, the second waits for the first to commit (Postgres serializes) — exactly the desired behavior.
+
+### Sibling concerns NOT addressed (out of scope)
+
+- `plan_monthly_credits`, `prune_org_notifications`, `set_updated_at`, `storage_org_id_from_path` still have mutable search_path. Will be a future hardening pass.
+- `auth_rls_initplan` advisor warnings on subscriptions/push_tokens/notifications/audit_log RLS policies still present (Audit 9 H4) — not RPC scope.
+- `subscriptions` lacking FK to organizations still present (Audit 9 H5) — schema change, not RPC scope.
+- 5 missing FK indexes still present (Audit 9 H6) — index creation, not RPC scope.
+
+Severity: 2 High + 1 Low fixed. Notion finding entry: see Bugs & Fixes 2026-05-08 RPC hardening entry.
