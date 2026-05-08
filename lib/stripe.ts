@@ -147,16 +147,19 @@ export function isStripeResourceMissingError(err: unknown, param: string): boole
 }
 
 /**
- * Delete stale `subscriptions` rows for a user. Called when Stripe returns
- * `resource_missing` for a customer or subscription so subsequent attempts
- * re-create a fresh customer via `customer_email` and the next webhook
- * (after a real purchase completes) inserts a clean row.
+ * Soft-mark stale `subscriptions` rows for a user. Called when Stripe
+ * returns `resource_missing` for a customer or subscription so subsequent
+ * checkout attempts re-create a fresh customer via `customer_email`.
  *
- * The `stripe_customer_id` column is NOT NULL in the schema, so we can't
- * just null it — DELETE is the cleanest path. The canonical source of
- * effective plan is `organizations.plan` (set by webhook), so removing
- * the subscription row doesn't affect the user's plan display until the
- * webhook fires for the next subscription event.
+ * Previously this hard-deleted the rows, which meant any subsequent
+ * `customer.subscription.deleted` webhook for the now-defunct subscription
+ * couldn't find the row and short-circuited with "Subscription deletion
+ * skipped." Marking instead of deleting keeps the row addressable so the
+ * cancellation handler still resolves it and processes the SOLO downgrade.
+ *
+ * The mark is idempotent — if `stripe_customer_invalid_at` is already set,
+ * we leave the original timestamp intact so we know when the row first
+ * went stale.
  *
  * Accepts an admin Supabase client so the caller controls the transaction
  * surface; we don't import the admin client here to avoid pulling
@@ -166,18 +169,11 @@ export async function clearStaleStripeCustomerId(
   admin: { from: (table: string) => any },
   userId: string
 ): Promise<void> {
-  // Delete every subscriptions row for this user. If any of them references
-  // a stale Stripe customer/subscription, the user is in a broken state
-  // and a fresh checkout is the only recovery path. We don't narrow by
-  // stale-ID here because once one is stale (e.g. test→live swap), all of
-  // them are likely stale (they live in the same Stripe account). After
-  // deletion, the user's next successful Stripe webhook
-  // (handleSubscriptionChanged / handleCheckoutCompleted) will insert a
-  // fresh row with the new IDs.
   const { error } = await admin
     .from("subscriptions")
-    .delete()
-    .eq("user_id", userId);
+    .update({ stripe_customer_invalid_at: new Date().toISOString() })
+    .eq("user_id", userId)
+    .is("stripe_customer_invalid_at", null);
   if (error) throw error;
 }
 

@@ -56,11 +56,18 @@ function getSubscriptionPlan(subscription: Stripe.Subscription): OrgPlan | null 
 }
 
 async function getOrgIdForUser(userId: string): Promise<string | null> {
+  // Fallback path only — every Stripe handler prefers metadata.orgId from the
+  // checkout session / subscription. We hit this when metadata is absent
+  // (legacy rows). Without an order clause PostgREST returns whichever row
+  // it encounters first, which for multi-org owners (e.g. founder accounts
+  // with several orgs) routes the plan change to a non-deterministic org.
+  // Order by created_at so the oldest membership wins consistently.
   const admin = createAdminClient();
   const { data: membership } = await admin
     .from("organization_members")
     .select("org_id")
     .eq("user_id", userId)
+    .order("created_at", { ascending: true })
     .limit(1)
     .maybeSingle();
 
@@ -273,6 +280,10 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   }
 
   await setOrganizationPlan(orgId, plan);
+  // Trial-to-paid (and direct paid) checkout: grant the paid-tier credit
+  // allowance. Without this, orgs land on TEAM/BUSINESS but keep the SOLO
+  // default monthly_credits=5 until the next renewal cycle reset.
+  await resetOrganizationCredits(orgId, plan);
   void sendPlanUpgradedEmail(orgId, plan);
 }
 

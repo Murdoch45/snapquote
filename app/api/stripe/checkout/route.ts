@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { z } from "zod";
 import { requireOwnerForApi } from "@/lib/auth/requireRole";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getPlanMonthlyCredits } from "@/lib/usage";
 import {
   type StripeBillingInterval,
   clearStaleStripeCustomerId,
@@ -71,6 +72,7 @@ export async function POST(request: Request) {
         .from("subscriptions")
         .select("stripe_customer_id")
         .eq("user_id", auth.userId)
+        .is("stripe_customer_invalid_at", null)
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle(),
@@ -78,6 +80,7 @@ export async function POST(request: Request) {
         .from("subscriptions")
         .select("stripe_customer_id,stripe_subscription_id,status,plan,created_at")
         .eq("user_id", auth.userId)
+        .is("stripe_customer_invalid_at", null)
         .not("stripe_subscription_id", "is", null)
         .in("status", ["active", "trialing"])
         .order("created_at", { ascending: false })
@@ -192,6 +195,21 @@ export async function POST(request: Request) {
 
           if (orgUpdateError) {
             throw orgUpdateError;
+          }
+
+          // Grant the new tier's credit allowance immediately. Without this,
+          // upgraders keep their previous tier's monthly_credits until the
+          // next renewal cycle webhook fires (could be ~30 days). Mirrors
+          // the credit-reset call in the Stripe webhook's invoice.paid path.
+          const nextResetAt = new Date();
+          nextResetAt.setMonth(nextResetAt.getMonth() + 1);
+          const { error: creditResetError } = await admin.rpc("update_org_plan_credits", {
+            p_org_id: auth.orgId,
+            p_monthly_credits: getPlanMonthlyCredits(planConfig.orgPlan),
+            p_credits_reset_at: nextResetAt.toISOString()
+          });
+          if (creditResetError) {
+            throw creditResetError;
           }
         }
       }
