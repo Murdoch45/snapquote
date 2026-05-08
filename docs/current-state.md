@@ -8,6 +8,59 @@
 
 ---
 
+## Audit 8 security & privacy — 2026-05-08 (READ-ONLY)
+
+Read-only Audit 8 of 13 against web HEAD `27305ac`, mobile HEAD `f38b2f4`/`d2d992e`, Supabase `upqvbdldoyiqqshxquxa` live. NO code or schema changed.
+
+- **Audit 2 C-7 (RLS plan-write hole) and C-12 (`get_org_credit_row` cross-tenant disclosure) VERIFIED FIXED LIVE.** Migration 0067 (recorded as `20260508204110`) closed both. `information_schema.role_table_grants` confirms `authenticated` has no table-level UPDATE on `organizations`; column-level UPDATE granted only on `name`, `onboarding_completed`, `slug`. `pg_get_functiondef` confirms `get_org_credit_row` body has `if not is_org_member(p_org_id) then raise exception … using errcode = '42501'`.
+- **2 Critical net-new.** (1) **`get_org_analytics` anon bypass exploitable live** — POC: anonymous curl with publishable key returns full analytics for any org_id. Function is SECURITY INVOKER with anon EXECUTE; body guard is `if auth.uid() is not null and not is_org_member(p_org_id)`, which lets anon (auth.uid() IS NULL) skip. (2) **Locked-lead PII reachable via PostgREST.** RLS `leads_member_crud` is FOR ALL with no `lead_unlocks` filter — any authenticated org member can SELECT all PII columns regardless of unlock state; mobile `lib/api/leads.ts:53-54,166-179` projects PII unconditionally and caches to AsyncStorage.
+- **10 High.** HS256 JWT fallback (`lib/auth/verifyJWT.ts:188-235`) — defense-in-depth concern; no leaked secret found in either repo's history. `verifyJWT` doesn't validate `iss`. All 8 cron handlers + `/api/internal/run-estimator` compare bearer with `!==` (timing-unsafe). Zero security headers anywhere. Reset-password page doesn't enforce recovery-only session. Sentry server config has no `beforeSend` redaction. Mobile auth tokens in AsyncStorage not SecureStore. AASA file missing → Universal Links broken; mobile deep-link handler accepts any host. Rate-limit is in-memory `Map` per lambda; many endpoints lack any rate-limit. `customers` RLS same shape as leads (full PII to any member).
+- **12 Medium.** `lead-photos` bucket has no size/MIME enforcement. `is_org_member` + `is_org_owner` callable by anon (advisor 0028, body safe today). 6 SECURITY DEFINER functions have mutable search_path (advisor 0011). `iap_subscription_events` + `webhook_events` RLS-enabled with no policies (advisor 0008). Admin-client SELECTs in `app/app/leads/page.tsx:43-50` and `app/api/app/quote/send/route.ts:56-63` — fragile pattern. `forgot-password` rate-limit keys on email-only. `x-forwarded-for` first-segment used for IP rate-limit. Google Maps key bundle restriction unverified. Mobile deep-link host validation missing. Mobile `.env` tracked in git (only EXPO_PUBLIC_ keys, but a process risk). web `npm audit` 6 high (next, vite, lodash, picomatch, fast-uri, flatted); mobile `npm audit` 1 high (`@xmldom/xmldom`).
+- **Realtime publication** publishes leads, notifications, pending_invites, quotes only — `pending_invites.token` only flows to owners (RLS gates broadcasts).
+- **Storage** — single bucket `lead-photos`, public=false. 4 RLS policies all check `is_org_member(storage_org_id_from_path(name))`. No bucket-level size/MIME enforcement.
+- **Notion stale entries flagged.** Audit 1 re-verification claim that `SUPABASE_JWT_SECRET` is committed in mobile `.env` line 7 is **FALSE**: live `.env` has 6 lines, all `EXPO_PUBLIC_*`. Audit 4 claim that `app/(tabs)/more/my-link.tsx:3` is the bare-apex constant is line 37 live.
+- **Notion:** findings `35a32498-a1cb-814b-a751-c77aa3e64f47`, to-dos `35a32498-a1cb-816b-88ee-fb9298f0d1ef`. Severity tally: 2 Critical, 10 High, 12 Medium, 5 Low.
+
+## Audit 9 fixes — 2026-05-08 migration drift re-deployed (C1, C2, H1)
+
+Three migration-drift fixes shipped from Audit 9. C3 documented as historical no-op (see "Known historical no-ops" below). NO code outside `supabase/migrations/` changed.
+
+- **C1 FIXED** — `20260508233306_redeploy_contractor_profile_update_member_policy` applied via Supabase MCP. Verified live: `pg_policies` for `public.contractor_profile` now shows `contractor_profile_update_member` (qual=`is_org_member(org_id)`, with_check=`is_org_member(org_id)`); `_update_owner` policy gone. Non-owner team members can now save delivery prefs in QuoteComposer.
+- **C2 FIXED** — `20260508233326_redeploy_notifications_new_lead_dedup_index` applied via Supabase MCP. Verified live: `pg_indexes` confirms `notifications_new_lead_dedup_idx` exists as UNIQUE partial index on `(org_id, (screen_params->>'id')) WHERE type='NEW_LEAD'`. Pre-fix dupe count: 3 (org_id, lead_id) pairs with 2 NEW_LEAD notifications each. Post-fix dupe count: 0. Total NEW_LEAD rows: 24 → 21 (3 stale rows removed by the cleanup CTE).
+- **H1 PARTIAL FIX** — file/log parity restored for the two known drift cases:
+  - `20260421021818_fix_get_org_credit_row_permissions.sql` — added local file matching the existing prod migration (no apply needed; already in log). Statement: `GRANT EXECUTE ON FUNCTION get_org_credit_row TO authenticated;`. The in-body `is_org_member` guard added by 0067 makes this grant safe.
+  - `20260508233337_record_lead_photos_lead_id_index_in_log` — applied via MCP as a no-op `CREATE INDEX IF NOT EXISTS` so the migration log has an entry for the index that was already live (originally applied out-of-band via SQL editor).
+- **Other H1 items remain pending:** local files 0001-0068 sequential numbering vs prod's mix of numeric+timestamp scheme is a long-running historical gap; full cleanup is out of scope for this fix. Going forward, all new migrations follow the timestamp convention (see "Migration naming convention" below).
+- **0067 + 0068 still confirmed live** (Audit 2 fixes).
+
+## Migration naming convention (going forward)
+
+All new migrations MUST use UTC timestamp prefix: `YYYYMMDDHHMMSS_<snake_case_name>.sql`. Examples: `20260508204110_lock_owner_organization_updates_and_credit_row_membership.sql`, `20260508233306_redeploy_contractor_profile_update_member_policy.sql`.
+
+Why: Supabase MCP `apply_migration` records the version with a server-generated timestamp at apply time. If you create a local file with a future-or-arbitrary timestamp, the MCP-applied version will not match your file's name. The pattern is to (a) generate a current UTC timestamp via `date -u +"%Y%m%d%H%M%S"`, (b) write the migration body, (c) apply via MCP to get the actual recorded version, then (d) rename the file to match the MCP-recorded version. Files 0001-0055 use a legacy 4-digit sequence — do not extend that pattern; new work is timestamp-only.
+
+`supabase db push` against local files relies on file/version parity. Out-of-band SQL-editor applies are discouraged because they create entries in `supabase_migrations.schema_migrations` that have no corresponding repo file (the case 0058 + 20260421021818 demonstrated). If an emergency SQL-editor change is unavoidable, immediately add a matching file to the repo with `CREATE … IF NOT EXISTS` body.
+
+## Known historical no-ops
+
+Migrations recorded as applied in `supabase_migrations.schema_migrations` but whose effects are not visible in the live schema. Documented for clarity; do NOT re-run.
+
+- **`0030_add_opened_lead_status`** (recorded with statement `ALTER TYPE lead_status ADD VALUE IF NOT EXISTS 'OPENED'`) — `pg_enum` shows `lead_status` has only NEW, QUOTED, ACCEPTED, ARCHIVED. No application code references `OPENED` (verified via grep across web + mobile repos at HEAD on 2026-05-08, hits only in the migration file itself and prior audit docs). The migration is a harmless no-op; no fix needed. Audit 9 C3 (2026-05-08) decided NOT to add OPENED because it would create an enum value with no callers.
+
+## Audit 9 data model & migrations — 2026-05-08 (READ-ONLY snapshot, superseded by fixes above)
+
+Read-only audit of Supabase schema, migrations, RPCs, cron jobs vs repo HEAD. The CRITICAL drift items below were FIXED in the section above on the same day; this section is the original audit snapshot.
+
+- **0067 + 0068 confirmed live** — Audit 2 fixes for C-7 (RLS plan-write hole), C-12 (cross-tenant credit-row read), and C-11 (clearStaleStripeCustomerId hard-delete) are in production. Live `pg_policies`, `information_schema.column_privileges`, `pg_get_functiondef('public.get_org_credit_row')`, and `information_schema.columns` all confirm.
+- ~~**3 critical drift items.**~~ **C1 + C2 FIXED 2026-05-08; C3 documented as historical no-op** (see sections above). Original snapshot: (1) Local migration 0056 (contractor_profile member-update revert) NOT applied. (2) Local migration 0059 (notifications_new_lead_dedup index) NOT applied; live query confirmed 3 (org_id, lead_id) pairs with 2 NEW_LEAD dupes each. (3) `lead_status` enum missing `OPENED` despite migration 0030 being recorded as applied — historical no-op.
+- **Migration numbering scheme drift** — partially resolved (orphan `20260421021818` and 0058 catch-up files added). Long-running historical mix of 4-digit-sequential 0001-0055 + 14 ISO-timestamps remains; new work uses timestamps only.
+- **6 high (still pending).** `update_org_plan_credits`/`reset_org_credits` mutable search_path; `update_org_plan_credits` no FOR UPDATE; 7 RLS policies re-evaluate `auth.<function>()` per row (advisor `auth_rls_initplan` on subscriptions/push_tokens/notifications/audit_log); `subscriptions` no FK to organizations (Audit 2 cross-flag); 5 missing FK indexes (audit_log.actor_user_id, notifications.user_id, pending_invites.invited_by, quote_events.org_id, quote_events.quote_id).
+- **Cron health.** Both `reset-solo-credits` (daily, jobid=3) and `rescue-stuck-leads` (every 3min, jobid=8) green: 24h success/fail = 1/0 and 480/0 respectively.
+- **Orphans.** Zero orphaned rows across all FK relationships. 4 leads with no matching `customers` row (M5, by-design denormalization).
+- **Demo orgs in prod.** `Worcester Test Contractor` (slug `worcester-test-org`) has 184 leads; `Demo` (BUSINESS, 100 credits) has 5; `Verify Test Services` + `QA Test Contracting` are empty.
+- **Realtime publication** publishes leads, notifications, pending_invites, quotes only — sensitive tables (subscriptions, credit_purchases, audit_log, organizations, contractor_profile) correctly NOT published.
+- **Notion:** findings `35a32498-a1cb-81ed-b0ec-db4a1cec68ba`, to-dos `35a32498-a1cb-81f0-8542-f6a38328dfa7`. Detailed report: `docs/updates-log.md` 2026-05-08 Audit 9 entry. Severity: 3 Critical, 6 High, 8 Medium, 5 Low.
+
 ## Audit 2 billing — 2026-05-08 Stripe lifecycle fixes (C-6 / C-8 / H-9 / C-11)
 
 Four Stripe-handling bugs from Audit 2 fixed in a single session. Migration 0068 adds `subscriptions.stripe_customer_invalid_at timestamptz` to support soft-mark of stale rows.
@@ -370,10 +423,10 @@ _Last standardized 2026-05-07 (color + button radius unification). Sources: `tai
 - 0053: RPC service-role bypass (skips is_org_member when `auth.uid() IS NULL`)
 - 0054: `estimated_price_low` / `estimated_price_high` → `numeric(12,2)`
 - 0055: `refund_bonus_credits` RPC with FOR UPDATE row lock
-- 0056: Reverted contractor_profile UPDATE to allow members (for delivery prefs)
-- 0057: Supabase pg_cron rescue-stuck-leads cron (every 3 min)
-- 0058: `idx_lead_photos_lead_id` index (dropped photo join from 148ms to 8.5ms)
-- 0059: `notifications_new_lead_dedup_idx` — partial unique index on (org_id, screen_params->>'id') WHERE type='NEW_LEAD'
+- 0056: Reverted contractor_profile UPDATE to allow members (for delivery prefs) — file content RE-DEPLOYED on 2026-05-08 as `20260508233306_redeploy_contractor_profile_update_member_policy.sql` after Audit 9 C1 found the original 0056 had never reached prod. Live `pg_policies` post-fix confirms `contractor_profile_update_member` is in force.
+- 0057: Supabase pg_cron rescue-stuck-leads cron (every 3 min) — applied to prod as 4 timestamped migrations (`20260419030653_enable_pg_net_for_cron`, `20260419030726_schedule_rescue_stuck_leads_cron`, `20260419030812_fix_rescue_stuck_leads_schema_qualifier`, `20260419031920_rescue_stuck_leads_use_www_host`).
+- 0058: `idx_lead_photos_lead_id` index (dropped photo join from 148ms to 8.5ms) — index was applied out-of-band (via SQL editor) and had no migration log entry. Catch-up file `20260508233337_record_lead_photos_lead_id_index_in_log.sql` (idempotent `CREATE INDEX IF NOT EXISTS`) added on 2026-05-08 to restore file/log parity.
+- 0059: `notifications_new_lead_dedup_idx` — partial unique index on (org_id, screen_params->>'id') WHERE type='NEW_LEAD' — file content RE-DEPLOYED on 2026-05-08 as `20260508233326_redeploy_notifications_new_lead_dedup_index.sql` after Audit 9 C2 found the original 0059 had never reached prod. Live verification post-fix: index exists; 0 dupes (3 stale rows cleaned by the migration's CTE before index creation).
 - 0060: BUSINESS plan seat limit 4 → 5 in `accept_invite_token` and `handle_auth_user_pending_invites` RPCs
 - 0061: E.164 phone backfill on `leads.customer_phone`, `customers.phone`, `contractor_profile.phone` (268+4 historical rows)
 - 0062: `quotes.telnyx_message_id text` for post-hoc SMS lookup via `mcp__Telnyx__get_message`
