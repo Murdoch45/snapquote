@@ -7,6 +7,320 @@ This file is append-only. Every session, every meaningful fix, finding, or decis
 
 ---
 
+## Session — May 8, 2026 — Stripe webhook NOT delivering in production (scenario B confirmed) — PR 2 deprioritized
+
+Murdoch's intuition was right. The cancellation flow we diagnosed yesterday morning isn't the architectural bug we wrote up — the Stripe webhook isn't reaching production at all. The architectural pattern we identified (`clearStaleStripeCustomerId` deleting subs rows that the cancellation webhook needs to resolve user_id) is real but moot, because the cancellation webhook never runs.
+
+**Evidence (live, not Notion):**
+
+1. **`public.webhook_events` table is empty.** Total rows: 0. Earliest: null. Latest: null. The table is the canonical idempotency record for both Stripe and RC webhooks via [`lib/webhookEvents.ts:claimWebhookEvent`](lib/webhookEvents.ts) — every event that passes signature verification gets upserted there. Zero rows = no events have been claimed since the table was added. Verified via Supabase MCP `SELECT COUNT(*) FROM public.webhook_events`.
+
+2. **Vercel production runtime logs for `/api/stripe/webhook`: zero hits in the last 30 days.** Verified via Vercel MCP `get_runtime_logs` with `query="/api/stripe/webhook"`, `query="webhook"`, `query="/api/stripe"`, all on production environment, 30-day windows. Same result for `/api/revenuecat/webhook`. The route handler is never executing. Compare against `/api/cron/rescue-stuck-leads` which fires every 3 minutes and shows up densely in the same query window — Vercel logs are working; the Stripe webhook just isn't being called.
+
+3. **Sentry: zero events** for `url:*stripe/webhook*`, `transaction:*stripe/webhook*`, `message:*webhook*`, `message:*Stripe*` in the last 30/90 days respectively. Project `snapquote/snapquote-web`, region `https://us.sentry.io`. No errors, no issues, no spans tagged with the webhook route.
+
+4. **Migration timeline rules out "table predates webhook":** `supabase/migrations/0037_webhook_idempotency_iap_audit.sql` (which adds `webhook_events`) was committed [`e45dded`](https://github.com/Murdoch45/snapquote/commit/e45dded) on **2026-04-11**. The 3 trialing `subscriptions` rows (`sub_1TD4OaLT0JKiq1dxBrHvhkGJ`, `sub_1TCj6FLT0JKiq1dx9s9u8Y6a`, `sub_1TCii7LT0JKiq1dxvEAbt03v`) were created **2026-03-18 / 03-19 / 03-20** — about three weeks BEFORE the migration. So those rows could have been written by an earlier webhook delivery before idempotency tracking existed. After 2026-04-11, every successful event would leave a `webhook_events` row — there are zero. Combined with the Vercel-logs evidence, this means the webhook stopped firing on or before 2026-04-11.
+
+5. **Code is correct.** Re-read [`app/api/stripe/webhook/route.ts`](app/api/stripe/webhook/route.ts) at HEAD. `handleSubscriptionDeleted` (lines 389-429) correctly calls `setOrganizationPlan(orgId, "SOLO")` + `resetOrganizationCredits(orgId, "SOLO")` + sends `sendPlanEndedEmail`. `shouldDowngradeToSolo` (lines 24-30) is correctly narrowed to `status === "canceled"` only (per Murdoch's prior fix [`c66441c`](https://github.com/Murdoch45/snapquote/commit/c66441c) on 2026-04-15 — the prior cancellation fix Murdoch remembers IS in current code). Webhook signature verification at line 546 returns 400 on mismatch. **None of this matters because the route isn't being called.**
+
+6. **Stripe MCP cannot list webhook endpoints from this session.** `stripe_api_search` for `webhook endpoints` / `events list` returns unrelated coupon/payment-link operations every time. `stripe_api_execute` with `GetWebhookEndpoints` / `ListWebhookEndpoints` / `GetEvents` returns "operation not available." The MCP key in this session has read access to a narrow set of resources (customers, subscriptions, prices, products, invoices, charges) — webhooks and events aren't on the allowlist. Verifying Stripe-side webhook config requires the dashboard.
+
+7. **Vercel MCP doesn't expose env-var read.** Cannot confirm `STRIPE_WEBHOOK_SECRET` is set in production from this session — would require dashboard access or a separate token.
+
+**Conclusion: scenario B confirmed.** The Stripe webhook is not being delivered to production. Possible upstream root causes (in rough probability order, given zero Vercel hits):
+- (a) **Webhook endpoint in Stripe Dashboard points to a stale URL** — likely a Vercel preview URL like `*.vercel.app` from before the `snapquote.us` domain landed. That URL would 404 / redirect, request never reaches production.
+- (b) **No webhook endpoint registered** — never created, or deleted at some point.
+- (c) **Endpoint exists but is disabled** in the Stripe Dashboard (possibly auto-disabled by Stripe after consecutive delivery failures).
+- (d) **Account/mode mismatch** — endpoint registered against Stripe test mode but production uses live mode (or vice versa).
+
+What this rules out: signature-verification mismatch. If `STRIPE_WEBHOOK_SECRET` were stale, the route would still execute and return 400 — Vercel logs would show those 400s. We see zero hits, so the requests aren't reaching Vercel at all. The fix is upstream (Stripe Dashboard config), not in our `STRIPE_WEBHOOK_SECRET` env var.
+
+**PR 2 status:** the architectural fixes from yesterday's plan (soft-cancel `clearStaleStripeCustomerId`, fail-loud `getOrgIdForUser`, reconcile cron, `subscription_ends_at` column) are still good ideas and should still ship — but they're not the fix for the immediate falconn drift. They're hardening for the case where the webhook IS firing but a specific failure mode short-circuits the cancellation handler. Once the webhook is delivering, PR 2 becomes "harden against future failure modes." The reconcile cron in PR 2 is also independently valuable as a safety net for any future webhook downtime — it would catch exactly this kind of drift.
+
+**PR 3 status:** unchanged. Still pending. `falconn` excluded per Murdoch's E6 call.
+
+**Action items for Murdoch (cannot be done from this session — require Stripe + Vercel dashboard access):**
+
+1. **Stripe Dashboard → Developers → Webhooks (LIVE mode):** verify there is an enabled endpoint pointing at `https://snapquote.us/api/stripe/webhook` (or equivalent). If missing, create one. Subscribe it to: `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.payment_succeeded`, `invoice.payment_failed`, `charge.refunded`. (These are the exact events the route's switch statement handles at [`app/api/stripe/webhook/route.ts:566-588`](app/api/stripe/webhook/route.ts).) Copy the endpoint's signing secret.
+2. **Vercel Dashboard → Project `snapquote` → Settings → Environment Variables (Production):** verify `STRIPE_WEBHOOK_SECRET` matches the secret from step 1. Update if needed. Redeploy if the value changed.
+3. **Send a test event from the Stripe Dashboard endpoint** (Send test webhook → `customer.subscription.deleted`). Confirm: Stripe dashboard shows 200 response; Vercel runtime logs show a hit on `/api/stripe/webhook`; `SELECT * FROM public.webhook_events` shows a new row.
+4. **Verify recent delivery history** in the Stripe Dashboard for the endpoint — most likely shows 7+ weeks of failed deliveries (likely all 5xx / 404s / network errors, depending on what URL is wrong). That tells us when the webhook stopped working and what changed at that time.
+5. **Once webhook is delivering**, the falconn cleanup can be re-evaluated. Murdoch wanted it kept on Business per E6, but with the underlying cause fixed, he may want to test a real cancel→Solo flow on a separate org.
+
+**Notion entries flagged as historical-but-superseded** (per ground-truth rule — not editing other-source entries; flagging only):
+- Notion **Bugs & Fixes** 2026-05-07 entry "`falconn` org stuck on BUSINESS plan after canceled Stripe sub" framed `clearStaleStripeCustomerId` as the proximate cause. It's a real architectural issue but it's NOT what produced the falconn state — the actual cause is "webhook never fires." The morning audit's framing is materially wrong. Pre-existing pointer (added by my evening pass yesterday) flagged this as "framing corrected — see Pending Work" — that pointer remains accurate but the *replacement* framing in Pending Work focused on the architectural fix without testing whether the webhook was firing at all. Today's scenario-B finding supersedes both.
+- Notion **Pending Work** 2026-05-07 "Plan page architecture overhaul" entry promised PR 2's lifecycle fixes as the cure for falconn drift. Still useful as hardening but not the cure. Flagged in today's Bugs & Fixes scenario-B entry.
+
+---
+
+## Session — May 8, 2026 — Audit 11 / 13 AI Estimator (READ-ONLY)
+
+Tag `[Source: Claude Code]`. No code changes — read-only audit per scope.
+
+### Scope
+
+OpenAI integration in `lib/ai/estimate.ts` (4,548 lines), trigger flow, prompt construction, output parsing, persistence, ai_status state machine, fallback paths, Supabase data spot-check.
+
+### TL;DR
+
+The estimator is structurally sound — well past the framing in the audit brief. The Notion-flagged "AI generates unrealistic prices" is architecturally moot: the AI never produces dollar amounts anymore (since 2026-05-04). The deterministic engine prices, AI only extracts categorical signals + estimated quantities, and there are layered fallbacks (heuristic → catch-block → last-resort) so a price always lands.
+
+That said, audit found **1 Critical** (prompt instructing AI to use fields the code strips out — silent quality bug), **5 High**, **6 Medium**, **5 Low**. Cost exposure is ~$0.005/estimate, so spam/abuse is not a financial threat at present scale.
+
+### CRITICAL
+
+**C1. Prompt instructs AI to use `_other_text` and `_contractor_note` fields, but code strips them.** `lib/ai/estimate.ts:3338` tells the AI: "Analyze the services, questionnaire answers, **any other-text answer fields**, customer description, …". And at `:3361`: "Only use quantityEvidence='direct' when the customer explicitly provided dimensions, counts, or footage in the questionnaire, **other-text answers**, or main description." But `sanitizeAnswersForModeling` (`:1889`) strips every key ending in `_other_text` or `_contractor_note` before serializing to the prompt at `:3374`. The AI literally cannot see those fields. **Impact:** This is the most likely root cause of the audit-brief framing "ignores customer-provided area sizes" — when a customer types square footage into a free-text "other" field, the AI never sees it. `quantityEvidence='direct'` is consequently rare in practice.
+
+### HIGH
+
+- **H1. Prompt-injection vector in `description` and structured answer values not mitigated.** `description` (max 2000 chars, free text) and questionnaire string answers flow directly into the JSON dump in the user prompt at `:3386`. No sanitization, no fence markers. An attacker can steer `internalConfidence`, `condition`, `multipleAreas`, `estimatedQuantity` — all of which feed pricing. Mitigated partly by Turnstile on `/api/public/lead-submit:59` and contractor's manual price review in `QuoteComposer`.
+- **H2. Photo content moderation absent.** 10 photos × 8 MB each accepted via `PhotoUploader.tsx:9`. No moderation endpoint, no `omni-moderation-latest` call. Photos go directly into Supabase storage AND OpenAI vision.
+- **H3. Heuristic fallback rate is non-trivial (~23% of recent leads).** Supabase: 17/22 May 2026 ready leads used AI signals (77.3%); 5/22 used heuristic fallback (22.7%). April was 100% AI; May regressed. Recent fallbacks are dominated by `timeout (retryable)` despite the photo `detail: "low"` fix.
+- **H4. No sanity guardrails on AI output `estimatedQuantity`.** Per-service caps mitigate (e.g. `pressureSurfaceCap` `:2274`) but coverage uneven. No cross-validation against `propertyData.lotSizeSqft`/`houseSqft`.
+- **H5. Confidence label ("high"/"medium"/"low") shown identically for AI and heuristic-fallback results.** Supabase: 5 May leads with `signal source: fallback` ALL show `ai_confidence: "high"`. Contractor cannot distinguish AI confidence from heuristic confidence. `confidenceLabel` (`:4230`) is purely a function of `confidenceScore` without source-aware adjustment.
+
+### MEDIUM
+
+- **M1.** Single-attempt AI call. 163 failed leads in DB, but only 3 (0.09%) ever made it through retry to "ready" — most failed outside the `FAILED_RETRY_WINDOW_HOURS = 6` window when the cron next ran.
+- **M2.** `ai_status` flow is `processing → ready/failed`. No `pending` writes despite that being the column default — undocumented.
+- **M3.** AI-extraction trace stored in `ai_estimator_notes` (jsonb) instead of a typed `ai_signal_source: "ai" | "heuristic"` column. Notion previously suggested adding this.
+- **M4.** `ai_estimator_notes` shape inconsistent — sometimes string (rescue cron `STUCK_NOTE`), sometimes array (estimator-pipeline notes). Downstream readers can crash on `jsonb_array_elements_text` if they don't type-check first.
+- **M5.** Service name normalization gap visible in production data: "Lawn Care" (3 leads, snap=$900) vs "Lawn Care / Maintenance" (231, snap=$390); "Fence" (5) vs "Fence Installation / Repair" (220); "Landscaping" (19, snap=$8030) vs "Landscaping / Installation" (210). Short-form leads have suspiciously round default prices.
+- **M6.** Two OpenAI calls per estimate (signal + summary polish at `:4348`) doubles latency surface. Polish costs ~$0.0003/estimate.
+
+### LOW
+
+- **L1.** `ai_estimate_low = 0` and `ai_suggested_price = 0` observable (~26 + 18 leads) — out-of-service-area rejections (legitimate). Semantically overloaded with "failure" $0.
+- **L2.** No prompt versioning / output sample logging for A/B regression detection.
+- **L3.** No multi-language handling. gpt-5-mini handles Spanish but `inferSignalsFallback` (`:1180`) is English-keyword-only.
+- **L4.** Schema has 12-18 unread fields (already filed in Pending Work as deferred).
+- **L5.** `OPENAI_API_KEY` config check happens AFTER request validation + cache lookup at `:3698`.
+
+### Prompt documentation
+
+- **Model:** `gpt-5-mini` (`OPENAI_MODEL` override). Reasoning effort `low`.
+- **SDK:** `client.responses.parse(...)` with `zodTextFormat`. Single attempt.
+- **Timeouts:** signal 35s, polish 10s, property-data 8s, Vercel maxDuration 60s backstop.
+- **Retry:** Supabase pg_cron `rescue-stuck-leads` every 3 min, max 2 retries via `leads.ai_retry_count` (migration 0065).
+- **Input:** `businessName, services, address, description≤2000, photoUrls≤10, satelliteImageUrl, lat/lng, serviceQuestionAnswers (sanitized — no `_other_text`/`_contractor_note`)`.
+- **System prompt:** "You are SnapQuote's estimator signal extractor. Follow the user prompt exactly."
+- **User-prompt instructions** (verbatim, abbreviated): "AI interprets. Logic prices. Do not estimate or suggest any dollar amount." / "Questionnaire answers are the primary structured evidence." / "Do not return a confidence tier directly. Instead, return structured clarity judgments only." / "Only use quantityEvidence='direct' when the customer explicitly provided dimensions … in the questionnaire, other-text answers, or main description." / "Do NOT produce a top-level summary. The job summary is assembled deterministically from questionnaire answers by backend code after you return."
+- **Image inputs:** customer photos ≤10 at `detail: "low"` (85 tokens flat each); satellite tile (Google Static Maps 600×400) at `detail: "low"`.
+- **Output schema:** ~40 fields incl. `condition/access/severity/debris`, `estimatedQuantity + quantityUnit + quantityEvidence`, `jobStandardness/scopeClarity/remainingUncertainty`, `surfaceDetections[]/detectedSurfaces/quotedSurfaces` (pressure-washing), boolean signals.
+- **No PII to OpenAI:** prompt deliberately excludes customer name, phone, email.
+- **Polish prompt:** separate gpt-5-mini call with two-sentence rewrite instruction; ~$0.0003/estimate.
+
+### Failure-mode matrix
+
+OpenAI timeout/429/5xx/connection → retryable, fallback path, `inferSignalsFallback` runs, engine prices, `ai_status=ready`. OpenAI 400 image / 4xx other / Zod / parse fail → fallback path. Property-data timeout → degraded property data + NATIONAL_DEFAULT cost model. Polish fail → raw deterministic summary. `generateEstimate` throws → `generateEstimateAsync` catch-block runs `fallbackEstimate` directly with degraded property data, writes `ai_status=ready`. Catch-fallback throws → last-resort `ai_status=failed` write. Vercel reclaims function (>60s) → lead stuck `ai_status=processing` → rescue cron picks up after 5min, gives up at 15min. Edge function fails to invoke → `lead-submit` after-block writes `ai_status=failed`.
+
+### Cost model
+
+| Item | Tokens | Cost |
+|---|---|---|
+| Signal call input (prompt + JSON dump + example + images + schema) | ~8,025 | $0.0020 |
+| Signal call output (structured + reasoning) | ~1,800 | $0.0036 |
+| Polish call total | ~370 | $0.0003 |
+| **Total per estimate** | — | **~$0.0059** |
+
+Monthly projection: ~$18/mo @ 100 leads/day; ~$88/mo @ 500/day; ~$177/mo @ 1k/day; ~$885/mo @ 5k/day. **Runaway risk LOW** — even 10k spam leads in a day costs ~$60. Margin sanity: contractor unlock-credit revenue is dollar-range per Notion, gross margin per paid lead >100x AI cost.
+
+### Accuracy improvement backlog (deferred work)
+
+Filed in Notion **Pending Work** under "AI Estimator deferred work":
+1. Fix `_other_text`/`_contractor_note` strip-vs-prompt mismatch (Critical C1).
+2. Add prompt-injection fence markers around user content.
+3. Add output sanity-check layer (cross-validate `estimatedQuantity` vs lot/house sqft).
+4. Surface signal source to contractor UI (typed `ai_signal_source` column + badge).
+5. Pressure-washing photo-detail A/B (already filed; still pending).
+6. Per-service prompt customization (split mega-prompt).
+7. Add `ai_prompt_version` column for prompt-change A/B + regression detection.
+8. OpenAI `omni-moderation-latest` pre-check on photos.
+9. Multi-language detection + translation, or English-only routing with warning.
+
+### Cross-cutting flags
+
+- **Audit 8 (Privacy):** Customer description, address, photos, lat/lng, businessName all sent to OpenAI. Disclosed in `app/(public)/privacy/page.tsx:55-73`. No customer name, phone, email goes to OpenAI (intentional). Photos stored in Supabase storage indefinitely — retention TTL absent.
+- **Audit 4 (Lead pipeline):** Confirms post-2026-05-04 architecture: `lead-submit` → Supabase Edge Function `run-estimator` → Next.js `/api/internal/run-estimator` → `generateEstimateAsync`. Decoupled from Vercel function lifecycle.
+
+### Anything outside scope
+
+Photo retention/cleanup (no TTL on Supabase storage). Demo mode handling (didn't trace whether demo orgs bypass AI). `pending` ai_status state never written. No Sentry alert tied to `ai_estimator_notes` containing "signal source: fallback" — recommend adding.
+
+### Notion saves
+
+- `Bugs & Fixes` — 2026-05-08 [Source: Claude Code] AI ESTIMATOR AUDIT (11 of 13) summary.
+- `Pending Work` — 2026-05-08 [Source: Claude Code] "AI Estimator deferred work (audit 11/13)" with 9-item backlog.
+- `Architecture & Stack` — 2026-05-08 [Source: Claude Code] additive findings under existing fix-#3 topology.
+
+---
+
+## Session — May 8, 2026 — Audit 3 / 13 Credits & Quota (READ-ONLY)
+
+Full audit at `docs/audit-3-credits-quota-2026-05-08.md`. Tag `[Source: Claude Code]`. No code changes — read-only audit per scope.
+
+**Methodology.** Searched Notion for context (Architecture & Stack, Decisions Log, Bugs & Fixes, Code Patterns, Pending Work). Audited web repo (`C:\Users\murdo\SnapQuote`), mobile worktree (`C:\Users\murdo\SnapQuote-mobile\.claude\worktrees\suspicious-perlman-097904`), and Supabase project `upqvbdldoyiqqshxquxa`. Live data queried via Supabase MCP (RPC source via `pg_proc.prosrc`, table constraints via `pg_constraint`, pg_cron jobs via `cron.job`). 21 files read, 12 SQL queries run.
+
+**Scope correction.** Audit prompt's plan tiers ("Solo 0, Team 200, Business 500") are out-of-date. Actual values in code, DB, and pg_cron all agree on SOLO 5 / TEAM 20 / BUSINESS 100. Three sources of truth (web `lib/plans.ts`, mobile fallback, SQL `plan_monthly_credits()`); column default = 5.
+
+**Headlines (5 critical, 8 high, 6 medium, 4 low):**
+- **C1 Stripe trial credits gap** — `handleCheckoutCompleted` for `mode: subscription` never calls `update_org_plan_credits`. Trial users get plan tag but no credit reset. Live broken: orgs `eabc1e4a` and `f77b0ebb` (TEAM trialing, `monthly_credits=5,bonus_credits=0,credits_reset_at=null`). UI shows "5 / 20 remaining" implying 15 used when 0 ever granted. RC IAP `INITIAL_PURCHASE` does both plan + credit reset regardless of trial status — disparity between billing surfaces. Same fingerprint as Audit 2's TEAM-monthly_credits=5 net-new finding.
+- **C2 IAP credit-pack double-credit (latent).** Mobile `iap/sync` and RC `NON_RENEWING_PURCHASE` use different `purchase_reference` strings (raw Apple `transactionIdentifier` vs `rc_${event.id}`); both INSERTs succeed → `bonus_credits` incremented twice. 0 IAP credit purchases in DB yet.
+- **C3 Subscription refund silently consumes spent credits.** Stripe `customer.subscription.deleted` + RC `REFUND` (subscription) reset `monthly_credits=5`; `bonus_credits` untouched. Already-spent monthly credits = leads in CRM. No clawback.
+- **C4 No credit ledger.** No `credit_transactions` table. `lead_unlocks` lacks `charge_source` (RPC computes `v_charge_source` then discards it). Grants/resets/refunds completely unlogged.
+- **C5 DRAFT-quote-after-unlock failure.** `app/api/app/leads/unlock/route.ts:37-75` swallows `quotes.insert` errors after credit debited. User pays 1 credit for non-functional unlock with no recovery path.
+- **H1 Stripe upgrade gap.** `app/api/stripe/checkout/route.ts:152-197` upgrades plan via Stripe API + DB update but never resets credits. Mirror downgrade leaks 100 BUSINESS credits at TEAM tier until next renewal.
+- **H2 STALE_PAID orgs.** 3 confirmed (`falconn`, `Demo`, `Rivera's Pressure Washing`) — overlaps Audit 2 H1.
+- **H3 `reset_due_solo_monthly_credits()` is dead code.** Migration 0018 schedules it; pg_cron `jobid=3` runs different inline SQL bypassing it. Manual `cron.job` edit not in source.
+- **H4 No paid-plan reset cron.** TEAM/BUSINESS rely on lazy-on-unlock + webhook + manual `iap/sync`. Mobile `getCredits` does NOT lazy-reset.
+- **H5 Mobile `useCredits` cache.** AsyncStorage `cache:credits:${orgId}` violates "real-time, no caching" claim. Refetch on focus/Stripe-return mitigates the stale window to ~ms-scale.
+- **H6 `no_credits` 402 unaudited.**
+- **H7 3 sources of truth, no CI check.**
+- **H8 `record_credit_purchase` lacks $ / provider columns.**
+- **Medium:** sub-refund unlogged + bonus untouched; `addOneMonth` JS Date vs Postgres `interval '1 month'` boundary drift; reset window always rolls forward from event (anniversary-from-event, not anniversary-from-billing-cycle); mobile direct-RPC fallback wastes a permission-denied round-trip after migration 0063; two-meter quota model (`monthly_credits` + `org_usage_monthly.quotes_sent_count`); `refund_bonus_credits` floors at 0 silently.
+- **Race-condition inventory:** `unlock_lead_with_credits` SAFE for concurrent unlocks (FOR UPDATE on org row + double-check `lead_unlocks`). `record_credit_purchase` SAFE per-key, UNSAFE across paths (C2). `refund_bonus_credits` `FOR UPDATE` correct but lacks idempotency across two refund webhooks for same purchase.
+- **Real-time guarantee verification:** Server-side YES (every RPC hits Postgres). Mobile UI has AsyncStorage cache. No edge/CDN caching of balances. Only `/api/plans/config` is CDN-cached (1h s-maxage / 24h SWR), and that's the plan→credits MAP, not balances.
+
+**Notion saves.**
+- Bugs & Fixes — 2026-05-08 entry "Audit 3 of 13: Credits & Quota — 5 critical, 8 high, 6 medium issues". **Note:** First write timed out on the Notion API response side but applied to the page. A retry created a duplicate entry; cleanup retry also timed out (page is ~210k chars, hitting Notion's response size limits). Both entries' content is correct; manual dedup recommended (drop one of the two consecutive "Audit 3 of 13: Credits & Quota" headings).
+- Pending Work — 2026-05-08 entry "Audit 3 (Credits & Quota) pending items" with 12 action items (Critical: C1-C5 fixes; High: H1/H4/H6/H7/H3/H5/H8 follow-ups; Medium/Low list). One earlier duplicate was cleaned up successfully.
+- Architecture & Stack — 2026-05-08 entry "Credit & Quota subsystem map" with the full RPC table, webhook ownership matrix, reset-cadence breakdown, and caching map.
+
+**Files read (web):** `lib/credits.ts`, `lib/plans.ts`, `lib/usage.ts`, `lib/subscription.ts`, `app/api/app/leads/unlock/route.ts`, `app/api/iap/sync/route.ts`, `app/api/stripe/webhook/route.ts`, `app/api/revenuecat/webhook/route.ts`, `app/api/stripe/checkout/route.ts`, `app/api/stripe/credits/route.ts`, `app/api/plans/config/route.ts`, `app/api/app/subscription-status/route.ts`, `app/api/cron/trial-expired/route.ts`, `app/app/credits/page.tsx`, `supabase/migrations/0018_solo_credit_reset_cron.sql`, `supabase/migrations/0063_revoke_anon_auth_security_definer_rpcs.sql`, `vercel.json`.
+**Files read (mobile):** `lib/api/credits.ts`, `lib/api/leads.ts`, `lib/api/iap.ts`, `lib/hooks/useCredits.ts`, `lib/iap/syncQueue.ts`, `lib/plans.ts`, `app/(tabs)/more/credits.tsx`, `app/(tabs)/more/plan.tsx`, `app/(tabs)/leads/[id].tsx`.
+**DB inspected:** RPC source (`get_org_credit_row`, `reset_org_credits`, `update_org_plan_credits`, `unlock_lead_with_credits`, `record_credit_purchase`, `refund_bonus_credits`, `reset_due_solo_monthly_credits`, `plan_monthly_credits`, `is_org_member`, `is_org_owner`); `cron.job` schedule; `pg_constraint` for credit tables; live row state for orgs / lead_unlocks / credit_purchases.
+
+**Out-of-scope flags (reported, not investigated further):** subscriptions table is per-user not per-org (`getUserIdForStripeCustomer .limit(1)` order-dependence — flagged in Audit 4 territory); two-meter quota model (`monthly_credits` + `org_usage_monthly.quotes_sent_count` both gated by same plan limit, ~2× effective quota per plan); `falconn` exclusion from PR 3 remediation per Murdoch's call; `/api/iap/sync` is owner-only.
+
+---
+
+## Session — May 8, 2026 — Audit 1 / 13 Auth & Session Flow (READ-ONLY)
+
+Full audit at `docs/audit-1-auth-session-2026-05-08.md`. Tag `[Source: Claude Code]`. No code changes — read-only audit per scope.
+
+**Scope:** Email/password (web + mobile), Sign in with Apple (web Service ID + iOS native), Sign in with Google (verified `0e65d3f` PKCE handler IS in mobile main), magic link / OTP (absent), session persistence (cookies on web, AsyncStorage on mobile), token refresh (Build 13 architectural deletion verified), deep linking from auth callbacks (`snapquotemobile://`, `/auth/callback`, `/auth/confirm`), logout flow, account deletion (Apple 5.1.1(v) compliance), multi-org / invites, password reset, email verification, Cloudflare Turnstile, redirect URL allowlists (Studio), onboarding flow, rate limiting, brute-force protection, session sharing web ↔ mobile, Stripe-billed web user signing in on mobile (App Store 3.1.1).
+
+**Critical findings (5):**
+
+1. **C1. `.env` is tracked in mobile git** (`git ls-files` returns `.env` in `C:\Users\murdo\SnapQuote-mobile`). Per audit-subagent read, contains `SUPABASE_JWT_SECRET`. Web `lib/auth/verifyJWT.ts:188-236` accepts HS256 tokens signed with that secret — bearer-token forgery for any user.
+2. **C2. SIWA has 0 successful identities in production.** Live `auth.identities` query returns `email=95, google=1, apple=0`. Mobile passes iOS bundle id `com.murdochmarcum.snapquote` audience to Supabase; Studio Authorized Client IDs likely contains only the web Service ID `com.murdochmarcum.snapquote.web`. Hard gate for App Review.
+3. **C3. Mobile SIWA missing `nonce`/`rawNonce`.** `app/(auth)/login.tsx:71-76` and `signup.tsx:77-92` call `AppleAuthentication.signInAsync` and `signInWithIdToken({provider:"apple", token})` without nonce binding.
+4. **C4. `lib/utils/authBrowser.ts:21-25` leaks `access_token`+`refresh_token` in URL fragment of `https://snapquote.us${path}` (apex).** Refresh token in URL is long-lived; apex is subject to NSURLSession redirect-strip class.
+5. **C5. Web has no source-controlled apex→www redirect.** `next.config.ts` no redirects fn; `vercel.json` crons-only. Build 18 fix premise lives at Vercel project domain config — invisible to source control.
+
+**High findings (7):** H1 mobile `getApiBaseUrl` lacks claimed apex→www regex (`lib/api/http.ts:25-33` is env-var-only). H2 27/95 (28%) auth.users have no `organization_members` row — web signup `signUp` before `bootstrap` orphans on failure with no rollback. H3 `Purchases.logOut()` never called on mobile signOut. H4 no app-layer rate limit on login/signup either platform. H5 Notion-claimed mobile `org.plan != 'SOLO' → "stripe"` fallback in `plan.tsx:263-273` NOT in code — App Store 3.1.1 risk on subscription-status double-failure. H6 Supabase leaked-password protection (HIBP) OFF. H7 `is_org_member`/`is_org_owner` SECURITY DEFINER anon-callable.
+
+**Medium (13):** AsyncStorage not SecureStore (M1), no `iss` validation in `verifyJWT.ts` (M2), no `/account-deleted` screen (M3), no email-change flow (M4), no magic-link (M5), no `Sentry.setUser` lifecycle (M6), admin-client `requireMember` lookup `.eq` filter is sole barrier (M7), web reset-password no recovery-session check (M8), `/auth/confirm` no rate limit (M9), no Turnstile on `InviteSignupForm` (M10), `app.json:17` buildNumber=13 vs Notion=18 (M11), 5 mutable-search-path SECURITY DEFINER fns (M12), RLS-no-policies on `iap_subscription_events`+`webhook_events` (M13).
+
+**Apple compliance flags (Audit 5):** ✅ account-delete endpoint comprehensive (Apple-active-sub guard + Stripe cancel + RC delete + cascade). ❌ SIWA broken end-to-end (C2/C3). ❌ no `/account-deleted` confirmation screen (M3). ❌ mobile 3.1.1 fallback gap (H5). ⚠️ Apple Service-ID JWT (Sept 2026) rotation has no automation. ⚠️ tokens in URL fragments via `authBrowser.ts` (C4) is reviewer-visible.
+
+**Notion vs code conflicts:** `getApiBaseUrl` apex→www regex (claimed in Code Patterns Rule 1; absent in code), mobile `org.plan` defense-in-depth fallback (claimed; absent), worktree `claude/crazy-heyrovsky-2e3c05` merge status (RESOLVED — `0e65d3f` Google PKCE + `f40fd1c` push token cleanup ARE in main per `git branch --contains`).
+
+**Live Supabase observations (2026-05-08):** auth.users=95 (95 confirmed, 1 never_signed_in, 0 soft-deleted) / auth.identities email=95+google=1+apple=0 / auth.sessions=34 / auth.refresh_tokens=74 / auth.flow_state=60 / auth.mfa_factors=0 / push_tokens=4 / audit_log=49 / pending_invites=25 / 27 orphan auth.users (28%).
+
+**Cross-cutting:** C2/C3 → Audit 5. C1/M2/H7/H6/M12 → security audit. H5 → Audit 8. 27 orphans + auth-orphan recovery loop → data-integrity audit.
+
+Saved to Notion: Bugs & Fixes (single Audit 1 entry summarizing all findings), Pending Work (App Review gates + High + Medium to-dos), Architecture & Stack (verified auth & session architecture entry).
+
+---
+
+## Session — May 8, 2026 — Audit 2 / 13 Billing & Subscriptions (READ-ONLY)
+
+Full audit at `docs/audit-2-billing-2026-05-08.md`. Tag `[Source: Claude Code]`. No code changes — read-only audit per scope.
+
+**Scope:** Stripe (products / prices / subs / checkout / customer portal / webhooks), RevenueCat / Apple IAP (offerings / packages / entitlements / webhook), Supabase reconciliation (`subscriptions`, `organizations`, `webhook_events`, `iap_subscription_events`, `credit_purchases`, RPCs, RLS, crons), trial gating (`has_used_trial`), state-drift detection across all three systems. Cross-repo (web `SnapQuote` + mobile `SnapQuote-mobile`).
+
+**Critical findings (6):**
+1. **B1. Production `org.plan` ↔ subscription drift in 6 of 69 orgs.** 4× confirmed `BUSINESS-no-sub` (`falconn` Murdoch, `Demo` seed, `Rivera's` seed, `7e7ce05f` poo) plus **net-new** `TEAM-with-monthly_credits=5` fingerprint (`eabc1e4a`, `f77b0ebb`). The TEAM-5 signature is not covered by Pending Work's existing PR-3 remediation.
+2. **B2. Stripe customer-portal cancellation never surfaces scheduled cancellation to UI.** `handleSubscriptionChanged` ignores `cancel_at_period_end` / `current_period_end`. Web has no banner; mobile (RC) has equivalent column write via `iap_cancellation_scheduled_at`.
+3. **B3. `clearStaleStripeCustomerId` DELETE confirmed as falconn root cause** — destroys `user_id ↔ stripe_customer_id` link so `subscription.deleted` lookup returns null and silent-no-ops.
+4. **B4. No reconciliation cron** between Stripe ↔ Supabase ↔ RC. Webhook delivery is the sole authoritative path.
+5. **B12. `/api/iap/sync` lacks server-side Apple receipt validation.** Authenticated owner can POST `{plan:"BUSINESS"}` and become BUSINESS without any RC entitlement check.
+6. **B18. RLS allows org owners to write `organizations.plan` directly.** `organizations_update_owner` policy has no column-level grant. Likely root cause of TEAM-with-5-credits drift fingerprint. Cross-flag Audit 8.
+
+**High findings (12):** RC `display_name` labels still drift from ASC (Team Annual −$2, Business Annual +$5), 6 leftover Stripe CLI test products active, 3 stale `subscriptions` rows referencing dead Stripe customers, `getOrgIdForUser .limit(1)` (also flagged Audit 7 C2), Stripe upgrade path doesn't reset credits (mid-cycle Solo→Team stays at 5 credits up to 30 days), Stripe `trial_will_end` not handled (loses 24h vs cron), Stripe `incomplete_expired` not handled (stays paid ~3 days), RC unknown events claimed-then-ignored, trial bypass via multiple emails, Solo Stripe product has $19.99/mo price (footgun), `/api/iap/sync` no de-dup on subscriptions, `webhook_events` table empty since migration 0037.
+
+**Medium (8):** mobile synthesized transactionId, `refund_bonus_credits` floors at 0, Family Sharing not handled, Apple offer codes not handled, trial-converted email not sent, push-on-trial-expired depends on webhook, customer-portal ownership-transfer edge case, mobile `OrgSubscriptionStatus` type drift.
+
+**Low / nits (6):** webhook handlers use `console.error` not Sentry, `accept_invite_token` hardcoded seat limits, currency hardcoded USD on web, Stripe Tax not enabled, customer-portal config visibility unknown, dashboard pollution.
+
+**Apple compliance flags (for Audit 5):** ✅ disclosure / restore / manage-on-web / discriminator. ⚠️ disclosure missing on credits.tsx, restore hidden during loading window. ❌ Family Sharing / offer codes / server-side receipt validation absent.
+
+**State machine + reconciliation matrix:** in backing report. Saved to Notion Bugs & Fixes (B1–B32) and Pending Work (A2-T1 through A2-T17).
+
+**Production data summary (read via Supabase MCP):** organizations=69, organization_members=69, subscriptions=3 (all stale), webhook_events=0, iap_subscription_events=0, credit_purchases=0. Stripe live: customers=1, subscriptions=0. RC live: 7 products / 2 entitlements / 2 offerings / 1 webhook integration.
+
+---
+
+## Session — May 8, 2026 — Audit 8 / 13 security & privacy (READ-ONLY)
+
+Full audit at `docs/audit-8-security-privacy-2026-05-08.md`. Tag `[Source: Claude Code]`. No code changes, no RLS modifications, no secret rotations — strict read-only.
+
+**Scope per audit charter:** Supabase RLS (every table × every policy), service-role usage boundary, anon-key surface, storage RLS, realtime RLS, RPC function security; auth/session handling (cookie flags, JWT verification, OAuth, account deletion); webhook security (Stripe HMAC, RevenueCat shared-secret, idempotency); PII handling (lock-state, server logs, Sentry, OpenAI input, retention); abuse vectors (rate limits, Turnstile, brute force, lead unlock race); secrets (env vars, .gitignore, git history, EXPO_PUBLIC_* surface); frontend security (CSP, XSS, CORS, headers); mobile-specific (HTTPS, secure storage, deep links, certificate pinning); IDOR per-endpoint sweep.
+
+**2 CRITICAL findings:**
+- **C1 IAP sync billing bypass.** `app/api/iap/sync/route.ts:78-172` accepts `transactionId` from the mobile client and grants plan/credits without verifying with Apple or RevenueCat REST. Verified `record_credit_purchase` Postgres function via MCP `pg_get_functiondef` — uses transactionId only as idempotency unique constraint, no authenticity check. Any authenticated org owner can `POST {"type":"subscription","plan":"BUSINESS","transactionId":"fake_001"}` for free upgrade. This is the same root cause Audit 7 flagged but with the receipt-verification proof now nailed down.
+- **C2 `get_org_credit_row` cross-tenant info leak.** ACL grants `EXECUTE` to `authenticated`; body is bare `SELECT plan, monthly_credits, bonus_credits, credits_reset_at FROM organizations WHERE id = p_org_id` with no `is_org_member` check. Any signed-in user can read any org's plan tier and credit balances. Supabase advisor flags this directly. Confirmed via SQL `SELECT pg_get_functiondef(...)`.
+
+**8 HIGH findings:**
+- **H1 Lock-state PII enforcement is UI-only.** `SnapQuote-mobile/lib/api/leads.ts:53-54,166-179` returns full customer PII (name, phone, email, address, lat/lng, place_id) regardless of `lead_unlocks` state. RLS lets every org member read everything. Contractor can hit PostgREST directly with their bearer and harvest all customer info without spending a credit — bypasses the unlock business model. Cross-tenant boundary intact (RLS still works); HIGH not CRITICAL because no horizontal privilege escalation.
+- **H2 Refresh token in URL hash.** `SnapQuote-mobile/lib/utils/authBrowser.ts:24` puts `refresh_token=...` in the fragment passed to `WebBrowser.openBrowserAsync`. Hash never reaches Vercel but lives in mobile-browser history and copy-paste exposure surface. Refresh tokens are ~30-day session-bearer credentials.
+- **H3 Sentry server config: `captureConsoleIntegration` + no PII scrubbing.** `sentry.server.config.ts:18` sends every `console.error` to Sentry. No `beforeSend` redaction. Multiple `console.warn` callsites in `app/api/**` pass underlying Resend/Telnyx errors that quote the recipient's email/phone in `.message`.
+- **H4 In-memory rate limit on Vercel.** `lib/rateLimit.ts:11` uses module-level `Map`. Per-lambda state — botnet with rotating IPs and lambda fan-out defeats it. (Same root cause as Audit 7's H finding.) Used for `lead-submit` (Turnstile mitigates), `lead-photo-upload`, `forgot-password`, etc.
+- **H5 No security headers on web.** `next.config.ts` no `headers()`, `vercel.json` no headers, `middleware.ts` only OAuth fixup. No CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy.
+- **H6 Mobile session in AsyncStorage plaintext.** Zero `expo-secure-store` references. `sb-<ref>-auth-token` (access + refresh) lives in plaintext in AsyncStorage — readable on jailbroken iOS, rooted Android, unencrypted iCloud/Google Drive backup.
+- **H7 Privacy policy missing subprocessors and GDPR.** `app/(public)/privacy/page.tsx` lists Stripe/Supabase/OpenAI/Telnyx/Resend/Google Maps/Cloudflare. Missing: Vercel, Sentry, RevenueCat, Apple (Sign in with Apple), Meta (Pixel `1500154638449582`), Google Analytics 4 (`G-2QM16SWP9D`), Expo/EAS. No GDPR coverage. No concrete retention period. No disclosure that OpenAI processes customer photos. No SAR workflow beyond `mailto:`.
+- **H8 Dependency CVEs.** Web `npm audit`: 7 vulns (5 high). Notable: `vite 7.0–7.3.1` path-traversal + WebSocket file read + `server.fs.deny` bypass; `picomatch <2.3.2 || 4.0.0–4.0.3` ReDoS; `postcss <8.5.10` XSS via `</style>`. Mobile: 5 vulns including `@xmldom/xmldom <=0.8.12` XML injection (high). `npm audit fix` resolves web with no breaking changes.
+
+**9 MEDIUM findings, plus LOW cluster.** Notable mediums: `webhook_events` and `iap_subscription_events` have RLS enabled with zero policies (default-deny works but implicit); 6 `SECURITY DEFINER` functions with mutable `search_path`; `webhook_events` shows 0 rows in production (verify Stripe webhook delivery before launch); Apple Sign-In missing nonce round-trip; JWT verify omits explicit `iss` check; **`https://www.snapquote.us/.well-known/apple-app-site-association` returns 404** — universal links broken; Supabase HIBP leaked-password protection disabled.
+
+**Verified clean / passing:**
+- Stripe webhook signature verification (`stripe.webhooks.constructEvent` strict, no fallback skip) + `webhook_events` idempotency claim/release.
+- RevenueCat webhook timing-safe shared-secret comparison (`crypto.timingSafeEqual`) + idempotency.
+- Account deletion flow (Apple 5.1.1) — owner deletion tears down: lead photos in Storage, Stripe subscriptions, RC web-billing subs, RC customer, push tokens, organizations cascade (leads, customers, quotes, etc.), auth user. Blocks deletion if active App Store auto-renewal (correct per Apple). Confirmation email sent. Audit log written before cascade.
+- All 18 public tables have RLS enabled (verified via MCP `list_tables`).
+- Storage `lead-photos` bucket has correct member-only policies via `storage_org_id_from_path(name)`.
+- `.gitignore` correctly excludes `.env*.local`, `.env`, `.env.*`, `*.env`, `*.p8`, `*.p12`, `*.key`, `*.mobileprovision` in both repos.
+- Git history regex sweep for `sk_live`, `sk_test`, `service_role`, `OPENAI_API_KEY=`, `STRIPE_WEBHOOK_SECRET=` etc. — nothing flagged.
+- `SUPABASE_SERVICE_ROLE_KEY` only referenced in `lib/supabase/admin.ts` and webhook handlers (server-only confirmed). Zero references in `SnapQuote-mobile/`.
+- All 6 `EXPO_PUBLIC_*` env vars are public-by-design (anon key, URLs, RC iOS public SDK key); no secret accidentally exposed in mobile JS bundle.
+- All 8 `cron/*` routes guard on `Authorization: Bearer ${process.env.CRON_SECRET}`.
+- Internal `run-estimator` route guards on `x-internal-secret` header.
+- JWT verification (`lib/auth/verifyJWT.ts`): ES256 via JWKS first, HS256 fallback during legacy migration, audience pinned to `authenticated`, never logs full bearer or full payload (allowlisted claims only).
+
+**Cross-cutting flags:** C1/H7 overlap with Audit 5 (Apple App Review). C1 overlaps with Audit 2 (billing). M3 overlaps with Audit 2 (webhook idempotency). C1/M8 overlap with Audit 5 (universal links).
+
+**Out-of-scope items reported anyway:** quote/send and team/invite endpoints not directly read in this audit (they follow the same `requireMember/OwnerForApi` pattern but should get a focused pre-launch sweep); front-end React-level CVEs beyond `npm audit` not pursued; mobile certificate pinning + jailbreak detection flagged for completeness only (typical for consumer apps).
+
+**Notion saves verified:** Bugs & Fixes — top entry. Pending Work — top entry. Both tagged `[Source: Claude Code]`.
+
+---
+
+## Session — May 8, 2026 — Audit 7 / 13 web stack & backend (READ-ONLY)
+
+Full audit at `docs/audit-7-web-backend-2026-05-08.md`. Tag `[Source: Claude Code]`. No code changes — read-only audit per scope.
+
+**Scope:** Next.js App Router structure, every API route handler (44 total), middleware, caching, Vercel config (project, deployments, env vars, crons, function settings, domains), env-var presence, integration wiring (Resend/Telnyx/OpenAI/Stripe/RevenueCat/Places/Turnstile/Sentry), error pages, design tokens, build config. Out of scope (cross-flagged where touched): security/RLS deep audit (Audit 8), schema (Audit 9), AI internals (Audit 11), comms (Audit 12), observability/crons (Audit 13).
+
+**Critical findings (5):**
+1. `app/api/iap/sync/route.ts` — client-trusted IAP grants without store receipt validation (C1, cross-flag Audit 8).
+2. `app/api/stripe/webhook/route.ts:58-68` `getOrgIdForUser` — `.limit(1).maybeSingle()` with no `.order(...)`, multi-org users hit arbitrary org. PR-2 plan has it; **still present**. (C2)
+3. `app/api/revenuecat/webhook/route.ts` — static shared-secret auth (`timingSafeEqual` against env var) instead of HMAC `X-RevenueCat-Signature`. Compromise of `REVENUECAT_WEBHOOK_AUTH` = full spoof. (C3)
+4. `REVENUECAT_PROJECT_ID` and `REVENUECAT_SECRET_KEY` MISSING from Vercel env (verified via `vercel env ls production`). `lib/revenuecatServer.ts:48-50` throws → owner account deletion broken in prod. (C4)
+5. No `app/sitemap.ts`, no `app/robots.ts`, no `/api/healthz`. `https://www.snapquote.us/sitemap.xml` and `/robots.txt` both 404. Launch-blocking. (C5)
+
+**High findings (9):** middleware GoTrue waste on every webhook/cron, public quote endpoints lack rate limiting, in-memory rate limiter useless on serverless, zero security headers, apex→www 307 not 308, `invalidateAnalytics()` never called, non-timing-safe secret compares, sidebar "My Link" exits AppShell, no CI workflow.
+
+**Medium (11):** `lib/env.ts` schema misses ~10 vars, hardcoded Telnyx number, swallowed cron DB error, team-members N+1, redundant `force-dynamic`, design-token drift (no 14px Tailwind token), Manrope-vs-Inter on landing, `webhook_events` empty, no Sentry `beforeSend` redaction, weak ESLint config, no edge rate-limit on public form route.
+
+**Low (10):** `verifyJWT.ts` no `iss` check, SSR `requireAuth` silent on auth fail, Zod-failure status code 400 vs 422, raw error in account-delete 500, internal-secret header convention, build-time Sentry vars missing, OPENAI_MODEL/SNAPQUOTE_APP_URL/server GOOGLE_MAPS_API_KEY missing in Vercel, `'orgin'` typo remote (deferred).
+
+**Vercel config snapshot:** Project `prj_9Z7T6lgKutlpfapplWbQo8JmJVbi`, Node 24.x, framework nextjs. Domains: `www.snapquote.us` (primary) + apex `snapquote.us` aliased. Latest prod deploy `dpl_Hij9quTeXgWUYUYArQuXuSHs7m6Z` (READY). 7 daily crons in `vercel.json`. No `headers/redirects/rewrites/functions` blocks. Per-route `maxDuration` via export.
+
+**Notion saves:** Bugs & Fixes page updated with full Critical/High/Medium/Low taxonomy. Pending Work page updated with action items grouped by severity. This `current-state.md` and `updates-log.md` updated. Audit doc at `docs/audit-7-web-backend-2026-05-08.md`.
+
+---
+
 ## Session — May 7, 2026 — PR 1/3: web Plan page UI cleanup (remove inactive-sub UI surfaces)
 
 First of three PRs in the Plan-page architecture overhaul. Full plan + diagnosis lives in the mobile repo's `docs/updates-log.md` 2026-05-07 second-pass entry (and Notion Pending Work). Product invariant Murdoch is enforcing: SnapQuote is a free app, Solo is the free tier, "Business + No active subscription" is structurally impossible — any code path that can produce that state is a bug.
