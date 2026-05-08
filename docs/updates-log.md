@@ -7,6 +7,147 @@ This file is append-only. Every session, every meaningful fix, finding, or decis
 
 ---
 
+## Session — May 8, 2026 — Webhook restoration: MCP scope verification + exact action items for Murdoch (cannot fix from this session)
+
+Follow-up to today's earlier scenario-B diagnostic. Murdoch asked me to attempt the end-to-end fix via MCPs rather than punt to dashboard. Re-attempted aggressively. Confirming the blocks are at the MCP-tool level, not session-permission level — neither MCP exposes the operations we need.
+
+### Stripe MCP scope (verified blocked)
+
+The Stripe MCP in this Claude Code session exposes a curated subset of operations. Verified by enumerating all available tools and re-attempting webhook ops:
+
+- `stripe_api_search` consistently returns the same 4 unrelated operations regardless of query: `GetCoupons`, `GetPaymentLinks`, `GetPricesPrice`, `GetPromotionCodes`. Searches for `"webhook endpoints"`, `"GetWebhookEndpoints"`, `"events list"`, `"subscription"` all returned either the same 4 ops or "No matching operations found." The search index isn't broken — it's curated to a tiny subset.
+- `stripe_api_execute` blocks `GetWebhookEndpoint`, `GetWebhookEndpoints`, `ListWebhookEndpoints`, `PostWebhookEndpoints`, `GetEvent`, `GetEvents` — all return `Operation '...' is not available. Use stripe_api_search to find available operations.`
+- The dedicated Stripe tool list is read-only on most resources: `list_customers`, `list_subscriptions`, `list_invoices`, `list_prices`, `list_products`, `list_payment_intents`, `list_disputes`, `list_coupons`, `retrieve_balance`, `fetch_stripe_resources`, `search_stripe_documentation`, `search_stripe_resources`, plus a few create-write tools for `customer`, `invoice`, `invoice_item`, `price`, `product`, `subscription` (cancel/update only). **No webhook tools at all.**
+
+**Cannot do via MCP:** list webhook endpoints, create endpoint, update endpoint URL/events, enable/disable endpoint, read endpoint signing secret, send test event, read endpoint delivery history, list events, retrieve specific event.
+
+### Vercel MCP scope (verified blocked)
+
+Vercel MCP exposes: `list_projects`, `get_project`, `list_deployments`, `get_deployment`, `get_deployment_build_logs`, `get_runtime_logs`, `deploy_to_vercel` (deploys local code — won't redeploy with a new env var), `get_access_to_vercel_url`, `web_fetch_vercel_url`, `search_vercel_documentation`, `check_domain_availability_and_price`, plus toolbar-thread comment tools. **No env-var read or write. No way to redeploy an existing build.**
+
+**Cannot do via MCP:** read `STRIPE_WEBHOOK_SECRET`, write `STRIPE_WEBHOOK_SECRET`, trigger production redeploy.
+
+### Production project info pulled (for Murdoch's reference)
+
+Live `get_project` (Vercel MCP) on `prj_9Z7T6lgKutlpfapplWbQo8JmJVbi` / team `team_0kIxSIiTWFytVpdXe22QrXl4`:
+- Domains attached to production: `snapquote.us`, `www.snapquote.us`, `snapquote-tau.vercel.app`, `snapquote-murdoch45s-projects.vercel.app`, `snapquote-git-main-murdoch45s-projects.vercel.app`
+- Latest production deployment URL: `snapquote-5muru905y-murdoch45s-projects.vercel.app` (alias of the production target)
+
+**Recommended Stripe webhook URL:** `https://snapquote.us/api/stripe/webhook`. (`www.snapquote.us` would also work since it's an attached production domain. `snapquote-tau.vercel.app` would also currently route to production but is not the canonical URL — if Stripe is hitting it today and it stopped working ~2026-04-11, that suggests `snapquote-tau` was an alias that briefly broke, OR Stripe's endpoint URL is something else entirely that's no longer in the domains list — e.g., a deleted preview URL like `snapquote-mainfoo-murdoch45s-projects.vercel.app`.)
+
+### Exact action items for Murdoch (paste-ready CLI alternatives + dashboard paths)
+
+**Step 1 — Stripe: locate or create the webhook endpoint.**
+
+*Option A — Stripe Dashboard:* https://dashboard.stripe.com/webhooks (LIVE mode toggle in the top-right). If an endpoint already exists, click into it and check: URL, status (enabled?), events. If none exists, click "Add endpoint" with the URL `https://snapquote.us/api/stripe/webhook` and these 7 events:
+```
+checkout.session.completed
+customer.subscription.created
+customer.subscription.updated
+customer.subscription.deleted
+invoice.payment_succeeded
+invoice.payment_failed
+charge.refunded
+```
+
+*Option B — Stripe CLI (faster if Murdoch has it installed and authenticated to live mode):*
+```bash
+# List existing endpoints
+stripe webhook_endpoints list
+
+# Create new endpoint pointing at production
+stripe webhook_endpoints create \
+  --url=https://snapquote.us/api/stripe/webhook \
+  --enabled-events=checkout.session.completed \
+  --enabled-events=customer.subscription.created \
+  --enabled-events=customer.subscription.updated \
+  --enabled-events=customer.subscription.deleted \
+  --enabled-events=invoice.payment_succeeded \
+  --enabled-events=invoice.payment_failed \
+  --enabled-events=charge.refunded
+# Capture the `secret` field from the response — that's the new STRIPE_WEBHOOK_SECRET
+
+# OR if endpoint already exists at wrong URL, update it:
+stripe webhook_endpoints update we_XXX --url=https://snapquote.us/api/stripe/webhook
+# (and use `enabled_events` repeatedly to ensure event subscriptions are right)
+```
+
+(These match the events in [`app/api/stripe/webhook/route.ts:566-588`](app/api/stripe/webhook/route.ts) — the route's `default` case is a no-op, so subscribing to extra events is harmless but pointless. The 7 above are exactly the events the handler does anything with.)
+
+**Step 2 — Capture the signing secret.** From dashboard: click the endpoint → "Signing secret" → "Reveal" → copy `whsec_...`. From CLI: it's the `secret` field on the create response. Note: existing endpoints' signing secrets are stable; creating a new endpoint generates a new one.
+
+**Step 3 — Vercel: update `STRIPE_WEBHOOK_SECRET` in production.**
+
+*Option A — Vercel Dashboard:* https://vercel.com/team_0kIxSIiTWFytVpdXe22QrXl4/snapquote/settings/environment-variables → find `STRIPE_WEBHOOK_SECRET` → Edit → Production → paste the `whsec_...` from step 2 → Save → trigger a redeploy from the Deployments tab (or push a no-op commit).
+
+*Option B — Vercel CLI:*
+```bash
+cd /path/to/SnapQuote
+# Check current value
+vercel env ls production
+
+# Remove the old one (if any) and add new
+vercel env rm STRIPE_WEBHOOK_SECRET production
+vercel env add STRIPE_WEBHOOK_SECRET production
+# (paste whsec_... when prompted)
+
+# Trigger a redeploy so the new env is picked up
+vercel --prod
+```
+
+**Step 4 — Verify end-to-end (BEFORE doing anything to real customer data).**
+
+After redeploy is live, Murdoch sends a TEST event from Stripe (Dashboard → endpoint → "Send test webhook" → pick `customer.subscription.deleted`). Then ping me back. I'll verify in seconds via:
+
+```sql
+-- Should return one new row within seconds of the test
+SELECT provider, event_id, event_type, received_at
+FROM public.webhook_events
+WHERE provider = 'stripe'
+ORDER BY received_at DESC
+LIMIT 5;
+```
+
+```
+[Vercel MCP get_runtime_logs query="/api/stripe/webhook" environment=production since=10m]
+```
+
+If both show a new entry: webhook restored. If Stripe shows 200 but Vercel/Supabase don't: signature secret still wrong. If Stripe shows non-200: the response body tells us what's wrong (signature mismatch text, route 500, etc.).
+
+**Step 5 — Pull historical delivery data (FOR DIAGNOSIS, do not click Resend).**
+
+In the Stripe Dashboard endpoint detail view, scroll to "Recent events" — you'll see every delivery attempt (success and fail) from the last 30 days. The failure pattern there tells us what broke when. Common signatures:
+- All `404`: URL is wrong (probably points at a deleted preview URL).
+- All `400` with "signature mismatch": `STRIPE_WEBHOOK_SECRET` was rotated.
+- All `5xx`: Vercel was down or the route errored. Unlikely to be 100% — would have shown in Vercel logs.
+- "Endpoint disabled by Stripe after N consecutive failures": Stripe auto-disables endpoints with persistent failures. Re-enable in dashboard.
+
+### CRITICAL: do NOT click "Resend" on the backlog
+
+If there's a backlog of failed `customer.subscription.deleted` events from the last 7 weeks (likely there is, because falconn was canceled in that window), DO NOT click "Resend" on them. That would replay real cancellation events through the handler now that it's wired up — and:
+- For falconn specifically: this would re-DELETE Murdoch's `subscriptions` row (already gone) and re-fire `setOrganizationPlan(orgId, "SOLO")` + `resetOrganizationCredits(orgId, "SOLO")` + `sendPlanEndedEmail`. That second-and-third effect are exactly what we WANT to happen — but Murdoch said in E6 yesterday he wanted falconn kept on Business while testing. Replaying would override that.
+- For demo seeds (`Demo`, `Rivera's Pressure Washing`): probably no backlog (those were never paying customers, no cancellation event exists for them).
+- For the 3 trialing `poo` orgs: they're still trialing so no cancel events for them.
+
+So: ignore the backlog. The replay would only re-cancel customers who are already cancelled, which is mostly safe — but the falconn override is the one explicit case where replaying isn't what we want. **Don't replay.** Read the failure history in the dashboard, screenshot it for the Notion record, then move on.
+
+If Murdoch decides later he wants to selectively replay cancellation events (e.g., to test the full lifecycle on a fresh test customer), do it ONE event at a time from the dashboard, not bulk Resend.
+
+### What I CAN do once Murdoch finishes Steps 1-3
+
+Once Murdoch sends the test event from Stripe:
+- I'll pull `get_runtime_logs query="/api/stripe/webhook" since=10m` via Vercel MCP — should show a hit.
+- I'll run `SELECT FROM webhook_events ORDER BY received_at DESC LIMIT 5` via Supabase MCP — should show a row.
+- If both: webhook restored ✅
+- If only Stripe shows 200 but neither MCP shows the event: deeper diag (route is up but signature still wrong somehow, or `claimWebhookEvent` is failing).
+- If Stripe shows non-200: the response body identifies the cause.
+
+### Status
+
+**Webhook still broken because two specific operations are not exposed in this Claude Code MCP session: Stripe webhook-endpoint management and Vercel env-var write. Both require Murdoch to use either the dashboards or CLIs.** Once he does Steps 1-3 above and pings me, I can verify in under a minute via Vercel runtime logs + Supabase `webhook_events` query.
+
+---
+
 ## Session — May 8, 2026 — Stripe webhook NOT delivering in production (scenario B confirmed) — PR 2 deprioritized
 
 Murdoch's intuition was right. The cancellation flow we diagnosed yesterday morning isn't the architectural bug we wrote up — the Stripe webhook isn't reaching production at all. The architectural pattern we identified (`clearStaleStripeCustomerId` deleting subs rows that the cancellation webhook needs to resolve user_id) is real but moot, because the cancellation webhook never runs.

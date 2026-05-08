@@ -108,11 +108,13 @@ Three-PR sequence to fix the Plan page contradiction surfaced by `falconn`. Diag
 
 **PR 3 — one-shot data remediation — PENDING.** SQL `UPDATE organizations SET plan='SOLO', monthly_credits=5` for stale-paid orgs. **Excludes `falconn`** per Murdoch's E6 call. Demo seeds `Demo` and `Rivera's Pressure Washing` get cleaned up. Deferred until Murdoch confirms webhook is restored — otherwise a fresh cancellation in production right now would re-create the same drift.
 
-**Murdoch action items (Stripe + Vercel dashboards — required before PR 2/3 are meaningful):**
+**Murdoch action items (Stripe + Vercel dashboards — required before PR 2/3 are meaningful). Verified 2026-05-08 second-pass: cannot be done from Claude Code MCPs — see updates-log 2026-05-08 second entry for full scope verification. Both Stripe webhook ops AND Vercel env-var write are out of MCP scope. Paste-ready CLI alternatives are also in that entry.**
 1. Stripe Dashboard → Developers → Webhooks (LIVE mode) → verify enabled endpoint at `https://snapquote.us/api/stripe/webhook` subscribed to: `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.payment_succeeded`, `invoice.payment_failed`, `charge.refunded`. Copy signing secret.
-2. Vercel Dashboard → snapquote → Settings → Environment Variables (Production) → confirm `STRIPE_WEBHOOK_SECRET` matches step 1.
-3. Send Stripe test webhook → verify 200 response + Vercel log hit + new `webhook_events` row.
-4. Check Stripe endpoint delivery history — most likely shows 7+ weeks of failed deliveries; that tells us when + why it broke.
+2. Vercel Dashboard → snapquote → Settings → Environment Variables (Production) → confirm `STRIPE_WEBHOOK_SECRET` matches step 1. Redeploy.
+3. Send Stripe test webhook (`customer.subscription.deleted` test event) → ping Claude Code → I'll verify via Vercel runtime logs + `SELECT FROM webhook_events` in seconds.
+4. Check Stripe endpoint delivery history — most likely shows 7+ weeks of failed deliveries; that tells us when + why it broke. **Do NOT click "Resend" on the backlog** — would replay real cancellation events and override Murdoch's E6 falconn allowlist intent.
+
+**Production project info (live, from Vercel MCP `get_project`):** project `prj_9Z7T6lgKutlpfapplWbQo8JmJVbi` / team `team_0kIxSIiTWFytVpdXe22QrXl4`. Domains: `snapquote.us`, `www.snapquote.us`, `snapquote-tau.vercel.app`, `snapquote-murdoch45s-projects.vercel.app`, `snapquote-git-main-murdoch45s-projects.vercel.app`. Recommended webhook URL: `https://snapquote.us/api/stripe/webhook`.
 
 ---
 
