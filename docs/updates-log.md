@@ -3289,3 +3289,76 @@ Applied via Supabase MCP `apply_migration` to project `upqvbdldoyiqqshxquxa` (su
 No client code paths affected: all three `from("organizations").update(...)` sites in the codebase (`app/api/stripe/webhook/route.ts:109`, `app/api/revenuecat/webhook/route.ts:87`, `app/api/app/settings/update/route.ts:61`) use the admin (service_role) client, which has BYPASSRLS. Mobile repo has zero direct `organizations.update` calls.
 
 Audit 2 status updated in `docs/current-state.md` (lines 23-24 + critical findings line): C-7 and C-12 marked FIXED with migration reference. Notion saves: Bugs & Fixes entry added with file + verification cites.
+
+
+## Session — May 8, 2026 (RevenueCat webhook hardening — Audit 2 C-5 / C-9 / C-10)  [Source: Claude Code]
+
+Three audit findings against `app/api/revenuecat/webhook/route.ts` triaged. Two confirmed and fixed in a single commit; one returned NOT-A-BUG.
+
+### F1 / C-5 — webhook bearer-not-HMAC: NOT A BUG
+- HEAD `app/api/revenuecat/webhook/route.ts:222-225` uses `safeEqual(authorization, process.env.REVENUECAT_WEBHOOK_AUTH)` — a static Authorization-header comparison.
+- Verified against RC official docs (`https://www.revenuecat.com/docs/integrations/webhooks`) and an explicit RC community thread ("Is x-revenuecat-signature removed, and where is webhook secret key?"): RC does **not** offer HMAC signature verification, no `X-RevenueCat-Signature` header, no signing secret. The dashboard-configured Authorization header is the only mechanism RC provides.
+- The current implementation matches RC's design. **No code change.** Audit 2 C-5 is downgraded — leaving HEAD as-is is correct.
+
+### F2 / C-9 — `PRODUCT_CHANGE` did not reset credits: FIXED
+- HEAD pre-fix `route.ts:345-359` called `setOrganizationPlan(orgId, plan)` only; comment claimed credits would refresh on next RENEWAL. Mid-cycle upgrade left user under-credited up to a full cycle.
+- Fix: added `await resetOrganizationCredits(orgId, plan)` after `setOrganizationPlan` in the `PRODUCT_CHANGE` branch, matching the RENEWAL / INITIAL_PURCHASE pattern. Per-cycle idempotency is preserved by `claimWebhookEvent` higher up. Comment rewritten.
+
+### F3 / C-10 — credit-pack idempotency key drift: FIXED (latent)
+- HEAD pre-fix `route.ts:147` keyed `record_credit_purchase` with `p_purchase_reference: `'`rc_${eventId}`'` where `eventId = event.id` (RC event id).
+- HEAD `app/api/iap/sync/route.ts:115` keys with `p_purchase_reference: body.transactionId` — Apple `transactionIdentifier`. Different keyspace → both inserts succeed → bonus_credits double-incremented.
+- Live verified `record_credit_purchase` has `on conflict (purchase_reference) do nothing` (Supabase MCP `pg_get_functiondef`).
+- Live verified zero rows in `credit_purchases` (`select count(*) from credit_purchases` → 0). Bug is latent — no live cleanup needed.
+- Fix: `recordCreditPackPurchase` now takes `storeTransactionId` and writes that as the purchase reference. Caller in `NON_RENEWING_PURCHASE` reads `event.transaction_id ?? event.original_transaction_id`; if both are absent it logs a warn and skips (rather than silently keying on a non-Apple value, which would re-introduce the divergence).
+- iap/sync was already Apple-keyed; no change needed there. Both paths now collide on the same `purchase_reference`, so whichever lands first wins and the second is a no-op via the existing ON CONFLICT clause.
+
+### Verification
+- `npx tsc --noEmit` exit 0.
+- Diff reviewed: only `app/api/revenuecat/webhook/route.ts` changed (function signature + comment in `recordCreditPackPurchase`, body added to `PRODUCT_CHANGE`, store-transaction-id resolution in `NON_RENEWING_PURCHASE`). No other files touched in this prompt.
+- Live state at fix time: `credit_purchases` 0 rows, `iap_subscription_events` 0 rows, RC project `proj39ead10c` 0 active subs / 0 transactions in 28d. There is no production traffic that needs reconciliation — the fix lands ahead of any real RC delivery.
+
+### Out of scope, untouched
+- F1 (bearer auth) — no change, RC limitation documented.
+- iap/sync receipt validation (separate prompt).
+- Stripe webhook (separate prompt).
+- RLS / Supabase functions (locked-in by prior task).
+
+File: [app/api/revenuecat/webhook/route.ts](../app/api/revenuecat/webhook/route.ts).
+
+---
+
+## Session — 2026-05-08 — [Source: Claude Code] Stripe lifecycle fixes (Audit 2 C-6 / C-8 / H-9 / C-11)
+
+Web HEAD `ba38278` at start. Four findings from Audit 2 verified live, then fixed in one commit.
+
+**Migration 0068**: `alter table subscriptions add column if not exists stripe_customer_invalid_at timestamptz;` Applied via Supabase MCP `apply_migration` to `upqvbdldoyiqqshxquxa`. File at `supabase/migrations/0068_subscriptions_stripe_customer_invalid_at.sql`.
+
+### C-6 FIXED — multi-org owner non-determinism
+- Verified live: `app/api/stripe/webhook/route.ts:58-68` had `.eq("user_id", userId).limit(1).maybeSingle()` with no `.order()`.
+- Verified live: `app/api/stripe/checkout/route.ts` already passes `orgId` in both `session.metadata` (line 243-247) AND `subscription_data.metadata` (line 213-218); every webhook handler already prefers `metadata.orgId` over the fallback. So metadata propagation was already correct — the only bug was the un-ordered fallback.
+- Fix: `getOrgIdForUser` now adds `.order("created_at", { ascending: true })` so fallback consistently picks the oldest membership.
+
+### C-8 FIXED — trial-to-paid never grants paid-tier credits
+- Verified live: `handleCheckoutCompleted` (lines 229-277) calls `setOrganizationPlan` + `markOrganizationTrialUsed` + `setOrganizationTrialEnd` but never `resetOrganizationCredits`.
+- Verified live victims via Supabase MCP: orgs `eabc1e4a-a479-4e1c-844d-cf28364cc77f` and `f77b0ebb-5536-4580-9e45-87fc7d6e2058`, both TEAM with `monthly_credits=5` and `has_used_trial=true`. Each has exactly one matching `subscriptions` row (`status='trialing'`, `plan='TEAM'`), so they're real C-8 victims (not C-7 RLS).
+- Fix: `handleCheckoutCompleted` now calls `await resetOrganizationCredits(orgId, plan)` after `setOrganizationPlan`. Going forward, trial→paid converts and direct paid signups will receive the correct tier credit allowance.
+
+### H-9 FIXED — Stripe upgrade path doesn't reset credits
+- Verified live: `app/api/stripe/checkout/route.ts:152-197` (upgrade branch) updated Stripe sub, `subscriptions` table, and `organizations.plan` — but did not call `update_org_plan_credits`.
+- Fix: After the `organizations` update, call `admin.rpc("update_org_plan_credits", { p_org_id, p_monthly_credits: getPlanMonthlyCredits(plan), p_credits_reset_at })` with reset 1 month out. Mirrors the webhook's `handleInvoicePaid` cycle pattern.
+
+### C-11 FIXED — clearStaleStripeCustomerId no longer hard-deletes
+- Verified live: `lib/stripe.ts:165-182` did `.delete().eq("user_id", userId)`.
+- Fix: replaced with `.update({ stripe_customer_invalid_at: new Date().toISOString() }).eq("user_id", userId).is("stripe_customer_invalid_at", null)`. Cancellation handler `handleSubscriptionDeleted` (webhook line 391-395) looks up by `stripe_subscription_id`, so soft-marked rows remain addressable. Updated `app/api/stripe/checkout/route.ts` `latestSubscription`/`activeSubscriptions` queries to filter `is("stripe_customer_invalid_at", null)` so soft-marked rows don't re-trigger the same Stripe `resource_missing` flow on the next checkout attempt. (Per Audit 2 self-correction the audit's claim that 3 specific drift orgs were caused by this is unverified — not cited.)
+
+### Verification
+- `tsc --noEmit` exit 0.
+- All four code paths re-read after edits.
+
+### Out of scope (deferred to other prompts)
+- RC webhook (separate prompt)
+- iap/sync (separate prompt)
+- RLS / Supabase functions (separate prompt)
+- Mobile repo
+- Frontend code
+

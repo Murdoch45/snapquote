@@ -8,6 +8,17 @@
 
 ---
 
+## Audit 2 billing — 2026-05-08 Stripe lifecycle fixes (C-6 / C-8 / H-9 / C-11)
+
+Four Stripe-handling bugs from Audit 2 fixed in a single session. Migration 0068 adds `subscriptions.stripe_customer_invalid_at timestamptz` to support soft-mark of stale rows.
+
+- **C-6 FIXED**: `app/api/stripe/webhook/route.ts:58-76 getOrgIdForUser` now orders by `created_at ASC` so the fallback path is deterministic for multi-org owners. Metadata-orgId path was already preferred in every handler (no change there); checkout already passes `orgId` in both `session.metadata` and `subscription_data.metadata` (no change there).
+- **C-8 FIXED**: `handleCheckoutCompleted` now calls `resetOrganizationCredits(orgId, plan)` after `setOrganizationPlan`. Trial→paid (and direct paid) checkouts now grant the paid-tier monthly credits at signup. Live victims at fix time: orgs `eabc1e4a` and `f77b0ebb` (TEAM, monthly_credits=5, has_used_trial=true) — fingerprint matches and both have matching `subscriptions` rows so they're true C-8 (not C-7) victims.
+- **H-9 FIXED**: `app/api/stripe/checkout/route.ts` upgrade branch now calls `update_org_plan_credits` RPC after `organizations.plan` update, mirroring the renewal-cycle pattern in the webhook.
+- **C-11 FIXED**: `lib/stripe.ts clearStaleStripeCustomerId` now soft-marks rows via `stripe_customer_invalid_at = now()` instead of hard-deleting. Cancellation handler can still find the row by `stripe_subscription_id`. Checkout queries filter `is("stripe_customer_invalid_at", null)` so a marked row no longer poisons the customer-id lookup. Migration 0068 added the column.
+
+`tsc --noEmit` clean.
+
 ## Audit 2 billing & subscriptions — 2026-05-08 re-verified at HEAD (READ-ONLY)
 
 Read-only second pass at Audit 2 against live Stripe MCP / RC MCP / Supabase MCP / ASC MCP. Web HEAD same family as morning passes; mobile HEAD `14e2ad7`. No code changed.
@@ -27,7 +38,7 @@ Read-only second pass at Audit 2 against live Stripe MCP / RC MCP / Supabase MCP
 **Net-new findings:**
 
 - **C1 NEW** Stripe Solo product + $19.99/mo price LIVE — invariant violation; `lib/stripe.ts:120-128 getPlanFromPriceId` doesn't include this priceID so a checkout against it would silently leave plan=SOLO after charging.
-- **C2 NEW** RC `PRODUCT_CHANGE` (`app/api/revenuecat/webhook/route.ts:345-359`) updates plan only — never resets credits. Mid-cycle upgrade leaves user under-credited up to 30 days. Mirror of Stripe upgrade gap.
+- ~~**C2 NEW** RC `PRODUCT_CHANGE` (`app/api/revenuecat/webhook/route.ts:345-359`) updates plan only — never resets credits. Mid-cycle upgrade leaves user under-credited up to 30 days. Mirror of Stripe upgrade gap.~~ FIXED 2026-05-08: PRODUCT_CHANGE branch now calls `resetOrganizationCredits(orgId, plan)` after `setOrganizationPlan` (matches RENEWAL/INITIAL_PURCHASE pattern).
 - **H1 NEW** RC `RENEWAL` (`route.ts:302-317`) sends `sendPlanUpgradedEmail` on every renewal — spam.
 - **H2 NEW** RC default branch silently drops `TRANSFER`/`SUBSCRIBER_ALIAS`/`TEMPORARY_ENTITLEMENT_GRANT` after `claimWebhookEvent`.
 - **H3 NEW** RC webhook URL is APEX (`snapquote.us`).
@@ -38,7 +49,7 @@ Read-only second pass at Audit 2 against live Stripe MCP / RC MCP / Supabase MCP
 
 **Critical findings re-confirmed live at HEAD:**
 
-C-3 webhook events table empty (60+ days, Stripe webhook not delivering); C-4 `/api/iap/sync` no Apple receipt validation; C-5 RC webhook static-shared-secret bearer (not HMAC); C-6 Stripe `getOrgIdForUser` arbitrary org (`route.ts:58-68`); ~~C-7 RLS lets owners write `organizations.plan`~~ FIXED 2026-05-08 migration 0067; C-8 Stripe trial→paid never grants paid-tier credits (live: orgs `eabc1e4a`, `f77b0ebb`); C-10 IAP credit-pack double-credit risk (different keys mobile vs RC); C-11 `clearStaleStripeCustomerId` lifecycle (`lib/stripe.ts:165-181` hard-deletes); ~~C-12 `get_org_credit_row` cross-tenant~~ FIXED 2026-05-08 migration 0067; C-13 `REVENUECAT_PROJECT_ID`/`REVENUECAT_SECRET_KEY` missing in Vercel prod (account-deletion broken).
+C-3 webhook events table empty (60+ days, Stripe webhook not delivering); C-4 `/api/iap/sync` no Apple receipt validation; ~~C-5 RC webhook static-shared-secret bearer (not HMAC)~~ NOT-A-BUG 2026-05-08 (RC dashboard does not support HMAC; static Authorization header is the only mechanism RC offers — `https://www.revenuecat.com/docs/integrations/webhooks` confirmed); C-6 Stripe `getOrgIdForUser` arbitrary org (`route.ts:58-68`); ~~C-7 RLS lets owners write `organizations.plan`~~ FIXED 2026-05-08 migration 0067; C-8 Stripe trial→paid never grants paid-tier credits (live: orgs `eabc1e4a`, `f77b0ebb`); ~~C-10 IAP credit-pack double-credit risk (different keys mobile vs RC)~~ FIXED 2026-05-08 (RC `NON_RENEWING_PURCHASE` now keys on `event.transaction_id ?? event.original_transaction_id` — same Apple `transactionIdentifier` mobile sends to iap/sync; latent at fix time, 0 credit_purchases rows); C-11 `clearStaleStripeCustomerId` lifecycle (`lib/stripe.ts:165-181` hard-deletes); ~~C-12 `get_org_credit_row` cross-tenant~~ FIXED 2026-05-08 migration 0067; C-13 `REVENUECAT_PROJECT_ID`/`REVENUECAT_SECRET_KEY` missing in Vercel prod (account-deletion broken).
 
 **Stale Notion flagged:**
 

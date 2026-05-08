@@ -133,7 +133,7 @@ async function getCurrentOrgPlan(orgId: string): Promise<OrgPlan | null> {
 async function recordCreditPackPurchase(
   orgId: string,
   productId: string,
-  eventId: string
+  storeTransactionId: string
 ) {
   const creditAmount = CREDIT_PACK_AMOUNTS[productId];
   if (!creditAmount) {
@@ -141,10 +141,14 @@ async function recordCreditPackPurchase(
     return;
   }
 
+  // Idempotency key is Apple's transactionIdentifier (the same value mobile
+  // sends to /api/iap/sync as body.transactionId). When both paths land for
+  // the same purchase, whichever runs first wins; the second is a no-op via
+  // record_credit_purchase's ON CONFLICT (purchase_reference) DO NOTHING.
   const admin = createAdminClient();
   const { error } = await admin.rpc("record_credit_purchase", {
     p_org_id: orgId,
-    p_purchase_reference: `rc_${eventId}`,
+    p_purchase_reference: storeTransactionId,
     p_credit_amount: creditAmount
   });
   if (error) throw error;
@@ -343,9 +347,13 @@ export async function POST(request: Request) {
       }
 
       case "PRODUCT_CHANGE": {
-        // Update plan only — Apple may not have charged yet, so resetting
-        // credits here can over-grant on a mid-cycle upgrade. Credits will
-        // refresh on the next RENEWAL.
+        // Plan changed mid-cycle (upgrade or downgrade between TEAM/BUSINESS,
+        // monthly/annual). Reset credits to the new plan's monthly allocation
+        // so the user gets the tier they're now paying for; the previous
+        // policy of waiting until next RENEWAL left users under-credited up
+        // to a full cycle on upgrade. Matches the RENEWAL / INITIAL_PURCHASE
+        // pattern. Idempotency at the cycle level is preserved by the row
+        // claim in claimWebhookEvent above.
         const plan = resolvePlanFromEvent(event);
         if (!plan) {
           console.warn("RevenueCat PRODUCT_CHANGE skipped: unable to resolve plan.", {
@@ -355,6 +363,7 @@ export async function POST(request: Request) {
           break;
         }
         await setOrganizationPlan(orgId, plan);
+        await resetOrganizationCredits(orgId, plan);
         break;
       }
 
@@ -363,7 +372,22 @@ export async function POST(request: Request) {
           console.warn("RevenueCat NON_RENEWING_PURCHASE skipped: missing product id.");
           break;
         }
-        await recordCreditPackPurchase(orgId, event.product_id, event.id);
+        // Idempotency key MUST be Apple's transactionIdentifier so this path
+        // and mobile's /api/iap/sync (which keys on body.transactionId — also
+        // Apple's transactionIdentifier) collapse onto the same row via
+        // record_credit_purchase's ON CONFLICT clause. Previously keyed on
+        // `rc_${event.id}` which let both paths insert independently and
+        // double-credit (latent: 0 credit_purchases rows live at fix time).
+        const storeTransactionId =
+          event.transaction_id ?? event.original_transaction_id ?? null;
+        if (!storeTransactionId) {
+          console.warn(
+            "RevenueCat NON_RENEWING_PURCHASE skipped: missing store transaction_id; cannot key idempotently against iap/sync.",
+            { eventId: event.id, productId: event.product_id }
+          );
+          break;
+        }
+        await recordCreditPackPurchase(orgId, event.product_id, storeTransactionId);
         break;
       }
 
