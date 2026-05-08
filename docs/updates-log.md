@@ -3362,3 +3362,51 @@ Web HEAD `ba38278` at start. Four findings from Audit 2 verified live, then fixe
 - Mobile repo
 - Frontend code
 
+
+
+## Session — May 8, 2026 (iap/sync server-side validation via RevenueCat — Audit 2 C-4)  [Source: Claude Code]
+
+### Diagnose (live, pre-fix)
+[`app/api/iap/sync/route.ts`](../app/api/iap/sync/route.ts) at HEAD only zod-validated the body shape (`route.ts:13-26` schema with `plan: z.enum([...])`, `creditAmount: z.number()`, `transactionId: z.string()`) and then directly wrote those values to Supabase:
+
+- Subscription branch `route.ts:86-110`: `update organizations set plan = body.plan` followed by `rpc update_org_plan_credits` with `getPlanMonthlyCredits(body.plan)`. **Plan trusted from request body.**
+- Credits branch `route.ts:112-117`: `rpc record_credit_purchase` with `body.transactionId` + `body.creditAmount`. **Both trusted from request body.**
+
+No call to RevenueCat REST API, no call to Apple `verifyReceipt`, no Apple App Store Server API JWT, no signature on the payload. The only auth gate was `requireOwnerForApi` (correct — proves the caller is the org owner — but says nothing about whether they actually paid).
+
+**Confirmed exploit:** authenticated owner POSTs `{type: \"subscription\", plan: \"BUSINESS\", transactionId: \"x\"}` and becomes BUSINESS for free. `{type: \"credits\", creditAmount: 999999, transactionId: \"x\"}` mints arbitrary bonus credits. No mitigation in any wrapper / middleware / RPC.
+
+### Path chosen: A (RevenueCat v2 server-side)
+Reuses the existing `lib/revenuecatServer.ts` integration (already used for account-deletion cleanup). RC is already the source of truth for IAP — the SDK syncs Apple receipts to RC server-side, and our RC webhook is what actually grants plans/credits in the canonical path. Apple’s legacy `verifyReceipt` is being deprecated in favor of the App Store Server API which requires JWT signing with an ASC private key — heavier integration for a path RC already does for us.
+
+### Implementation
+
+**[lib/revenuecatServer.ts](../lib/revenuecatServer.ts)** — added two helpers + one exported type:
+- `getRevenueCatActivePlanForCustomer(customerId)` — GETs `/v2/projects/{project_id}/customers/{customer_id}/active_entitlements`, paginates, returns `\"BUSINESS\"` if entitlement id `entl4353fa7d61` is active, `\"TEAM\"` if `entlcac5098bbd` is active, else `null`. Entitlement IDs verified live via `list-entitlements` MCP on project `proj39ead10c` and pinned as constants with comment.
+- `listRevenueCatCustomerPurchases(customerId)` — GETs `/v2/projects/{project_id}/customers/{customer_id}/purchases`, paginates, returns a defensively-shaped array including `storeTransactionIdentifier`, `originalStoreTransactionIdentifier`, `storeProductIdentifier`, `refundedAt`.
+
+**[app/api/iap/sync/route.ts](../app/api/iap/sync/route.ts)** — rewrote the route:
+- Body schema reduced to `{type, transactionId}` for both branches. Mobile may still send `plan` / `creditAmount` / `productId`; zod’s default `.strip()` drops them silently. Server NEVER reads any plan or amount claim from the body.
+- Subscription branch: calls `getRevenueCatActivePlanForCustomer(orgId)`. If RC reports neither business nor team → 403 \"RevenueCat reports no active subscription entitlement for this account.\" Else uses RC-resolved plan to write Supabase. Added `alreadySyncedSubscription` idempotency check on `iap_subscription_events.(org_id, store_transaction_id, event_type=MOBILE_IAP_SYNC_SUBSCRIPTION)` so retry-queue replays do not refill `monthly_credits` (the underlying `update_org_plan_credits` RPC is ungated, so without this guard a 30-day cycle could be repeatedly topped up).
+- Credits branch: calls `listRevenueCatCustomerPurchases(orgId)`, finds the purchase whose `store_purchase_identifier` (or `original_store_purchase_identifier`) matches `body.transactionId`. If no match → 403 \"RevenueCat has no record of this transaction for this account.\" If `refundedAt !== null` → 410. Credit amount is read from `purchase.storeProductIdentifier` and the same `CREDIT_PACK_AMOUNTS` map the RC webhook uses (`snapquote_credits_10` →10, `_50` →50, `_100` →100). `record_credit_purchase` keyed on Apple `transactionIdentifier` collides with RC webhook’s post-C-10 key on the same row, ON CONFLICT DO NOTHING.
+- Failure mapping: `Missing REVENUECAT_PROJECT_ID or REVENUECAT_SECRET_KEY` → 503 with explicit hint to add Vercel envs; `RevenueCatApiError` → 502; otherwise 500.
+
+### Threat-model walk-through (post-fix)
+
+- Attacker POSTs `{type: subscription, plan: BUSINESS, transactionId: fake}` → plan field stripped, RC returns no entitlement → **403** ✅
+- Attacker POSTs `{type: credits, creditAmount: 999999, transactionId: fake}` → creditAmount stripped, RC has no matching purchase → **403** ✅
+- Attacker POSTs another customer’s real `transactionId` → RC purchase listing is per-customer, so the txn does not appear in attacker’s purchases → **403** ✅
+- Real BUSINESS purchase by legitimate user → RC reports active business entitlement → plan + credits granted → **200** ✅
+- Race: mobile syncs before RC has processed Apple receipt → RC returns no entitlement yet → **403** → mobile’s persistent retry queue retries until RC catches up ✅
+- Stripe-billed user (legitimate BUSINESS via Stripe, no RC entitlement) somehow hits this route → RC returns no entitlement → 403 refuses to *upgrade* but does not *downgrade* the existing plan ✅
+
+### Verification
+- `npx tsc --noEmit` exit 0.
+- Diff is +138 lines in `lib/revenuecatServer.ts` (additive helpers + types) and +176 / -44 lines in `app/api/iap/sync/route.ts` (full rewrite of the POST body, schema simplified). No other files modified.
+- Live RC project state cross-checked against the entitlement-ID constants: `entl4353fa7d61` (lookup_key `business`, state `active`) and `entlcac5098bbd` (lookup_key `team`, state `active`) verified via MCP `list-entitlements` against project `proj39ead10c` on 2026-05-08.
+
+### Deploy prerequisite — BLOCKING
+
+**[`REVENUECAT_PROJECT_ID`](../.env.example) and [`REVENUECAT_SECRET_KEY`](../.env.example) MUST be present in Vercel Production environment before this commit reaches prod.** Audit 2 (2026-05-08) C-13 reported these missing. Until they are added the route returns 503 \"Server-side IAP verification is not configured\". Mobile’s persistent retry queue backs off and replays once the env is fixed; the RC webhook path (which uses the unrelated `REVENUECAT_WEBHOOK_AUTH` env, already present) keeps granting plans/credits in the meantime, so there is no data-loss window — only a UX delay where mobile’s instant-feedback after-purchase sync fails until envs are added.
+
+Values come from RevenueCat dashboard → Project Settings → API Keys (V2 secret key) and Project ID. Add both to Vercel → Project → Settings → Environment Variables → Production.
