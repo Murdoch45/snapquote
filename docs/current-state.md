@@ -8,6 +8,60 @@
 
 ---
 
+## Audit 2 billing & subscriptions — 2026-05-08 re-verified at HEAD (READ-ONLY)
+
+Read-only second pass at Audit 2 against live Stripe MCP / RC MCP / Supabase MCP / ASC MCP. Web HEAD same family as morning passes; mobile HEAD `14e2ad7`. No code changed.
+
+**Live state (2026-05-08):**
+
+- **Stripe `acct_1T9B7eFNX8cpZFmw` (SnapQuote)**: 0 active subscriptions, 1 customer (`cus_UJw6eTdHqwL8Ym` Murdoch — none of the 3 stale Supabase `subscriptions` rows reference it), 12 products + 15 prices.
+- **Stripe live products:** Team (`prod_UJqGjUmWNMlSPQ` $19.99/mo `price_1TLCZnFNX8cpZFmwZeXOL63t`, $191.99/yr `price_1TLCZmFNX8cpZFmwTFjEf313`), Business (`prod_UJqGzwTrDYV1rs` $39.99/mo `price_1TLCZdFNX8cpZFmwokht9uyb`, $384.99/yr `price_1TTpUuFNX8cpZFmwUMWMg77W` canonical, $383.99/yr `price_1TLCZcFNX8cpZFmw0HVXNHwm` OLD still active), credit packs (`prod_UJqGjbjixP8YLM` $9.99 / `prod_UJqGTtLFlV1W0k` $39.99 / `prod_UJqGlY2pkU4OQM` $69.99), **Solo product `prod_UJqGrSk27Qgc0f` + `price_1TLCZqFNX8cpZFmwfaWXhXKP` $19.99/mo LIVE active=true** (invariant violation — Solo is supposed to be free), 6 "myproduct" CLI test products still active.
+- **RevenueCat `proj39ead10c`**: 0 active subs, 0 active trials, $0 MRR last 28d, 28 new customers, 29 active users, 0 transactions in 28d. **ASC API key NOT configured** (`app_store_connect_api_key_configured: false`). 7 products active (4 sub + 3 consumable). 2 entitlements (`team`, `business`). 2 offerings: `default` (current=true), `credits` (current=false). Webhook `whintgr57d2f05487` URL is APEX `https://snapquote.us/api/revenuecat/webhook` (NOT www-canonical). Display labels for annual still drift from ASC.
+- **Apple App Store Connect `6761979056`**: bundle `com.murdochmarcum.snapquote`, **`subscriptionStatusUrl: null`** (Apple S2S receipt push NOT configured), `streamlinedPurchasingEnabled: true`. Bundle + IAP product IDs match RC. Per Audit 5 all 7 IAPs READY_TO_SUBMIT.
+- **Supabase `upqvbdldoyiqqshxquxa`**: 69 orgs (63 SOLO, 2 TEAM, 4 BUSINESS, 4 has_used_trial=true). 3 stale `subscriptions` rows from 2026-03-19/20 all `status='trialing'` referencing customer IDs `cus_UB{RHOV7QVwyv2n,5GQOLqf90hRq,4rEgJ3Jc9Gvv}` that don't exist in live Stripe. `webhook_events`/`iap_subscription_events`/`credit_purchases` all 0 rows ever. user_ids on the stale rows DO still exist in `auth.users` and `organization_members`.
+- **pg_cron jobs** (live): jobid=3 `reset-solo-credits` (`0 0 * * *`, SOLO-only); jobid=8 `rescue-stuck-leads` (`*/3 * * * *`, healthy 9501 runs all succeeded). NO paid-plan reset cron.
+- **RPC EXECUTE grants** (live): `get_org_credit_row` callable by `authenticated` but now gated by in-body `is_org_member(p_org_id)` raise/permission-denied (migration 0067, 2026-05-08); cross-tenant disclosure CLOSED. `update_org_plan_credits`, `reset_org_credits`, `record_credit_purchase`, `refund_bonus_credits`, `unlock_lead_with_credits`, `reset_due_solo_monthly_credits` all `service_role`-only (REVOKE from auth/anon in migration 0063). `plan_monthly_credits` callable by `anon`+`authenticated` (lookup, low risk).
+- **`organizations` RLS** (live, post-0067 2026-05-08): `organizations_update_owner` policy `qual=is_org_owner(id)`, `with_check=is_org_owner(id)`; whole-table UPDATE REVOKED from `authenticated`; column-level UPDATE granted ONLY on `name`, `slug`, `onboarding_completed`. Owner PATCH on `plan` / `monthly_credits` / `bonus_credits` / `has_used_trial` / trial_* / `credits_reset_at` now returns `42501 permission denied for table organizations`. Service role retains BYPASSRLS, all 3 admin-client write sites unaffected.
+- **Live drift orgs:** `8f939f96` (falconn / Murdoch) BUSINESS 84+15 STALE_PAID; `bce3a561` (Demo) BUSINESS 100+0 STALE_PAID; `36ba5025` (Rivera's) BUSINESS 86+12 STALE_PAID + reset PAST 2026-04-18; `7e7ce05f` (poo) BUSINESS 98+0 STALE_PAID + reset PAST 2026-04-20; `eabc1e4a` + `f77b0ebb` (poo) TEAM monthly_credits=5 (should be 20) — Stripe trial-credit gap fingerprint.
+
+**Net-new findings:**
+
+- **C1 NEW** Stripe Solo product + $19.99/mo price LIVE — invariant violation; `lib/stripe.ts:120-128 getPlanFromPriceId` doesn't include this priceID so a checkout against it would silently leave plan=SOLO after charging.
+- **C2 NEW** RC `PRODUCT_CHANGE` (`app/api/revenuecat/webhook/route.ts:345-359`) updates plan only — never resets credits. Mid-cycle upgrade leaves user under-credited up to 30 days. Mirror of Stripe upgrade gap.
+- **H1 NEW** RC `RENEWAL` (`route.ts:302-317`) sends `sendPlanUpgradedEmail` on every renewal — spam.
+- **H2 NEW** RC default branch silently drops `TRANSFER`/`SUBSCRIBER_ALIAS`/`TEMPORARY_ENTITLEMENT_GRANT` after `claimWebhookEvent`.
+- **H3 NEW** RC webhook URL is APEX (`snapquote.us`).
+- **H4 NEW** ASC `subscriptionStatusUrl: null` — Apple S2S receipt push NOT configured.
+- **H5 NEW** RC ASC API key NOT configured.
+- **M4 NEW** Web `app/app/plan/page.tsx:22-25 getPlanPrice` hardcodes `$19.99/$39.99` — doesn't read live Stripe.
+- **L3 NEW** `iap/sync` logs both itself AND RC webhook in `iap_subscription_events` (intentional double-log per comment).
+
+**Critical findings re-confirmed live at HEAD:**
+
+C-3 webhook events table empty (60+ days, Stripe webhook not delivering); C-4 `/api/iap/sync` no Apple receipt validation; C-5 RC webhook static-shared-secret bearer (not HMAC); C-6 Stripe `getOrgIdForUser` arbitrary org (`route.ts:58-68`); ~~C-7 RLS lets owners write `organizations.plan`~~ FIXED 2026-05-08 migration 0067; C-8 Stripe trial→paid never grants paid-tier credits (live: orgs `eabc1e4a`, `f77b0ebb`); C-10 IAP credit-pack double-credit risk (different keys mobile vs RC); C-11 `clearStaleStripeCustomerId` lifecycle (`lib/stripe.ts:165-181` hard-deletes); ~~C-12 `get_org_credit_row` cross-tenant~~ FIXED 2026-05-08 migration 0067; C-13 `REVENUECAT_PROJECT_ID`/`REVENUECAT_SECRET_KEY` missing in Vercel prod (account-deletion broken).
+
+**Stale Notion flagged:**
+
+- 2026-05-04 hygiene tail "old `price_1TLCZcFNX8cpZFmw0HVXNHwm` ($383.99/yr) still active" re-confirmed live.
+- 2026-05-06 fix `b637a4b` "IAP-vs-Stripe defense-in-depth" — live only on `claude/awesome-shamir-7bf77a`, NOT in mobile main.
+
+Severity summary: 13 Critical (2 NEW + 11 confirmed-still-open), 17 High (5 NEW + 12 confirmed-still-open), 14 Medium, 5 Low.
+
+Notion: findings `35a32498-a1cb-81b9-ba5c-e6de0a4c47fd`, to-dos `35a32498-a1cb-81fd-89a3-e17eeeefa043`. No code changed.
+
+## Audit 4 lead lifecycle — 2026-05-08 re-verified at HEAD (READ-ONLY)
+
+Second pass at Audit 4. Earlier today (17:12 UTC) a comprehensive Audit 4 ran and saved findings to Notion (Bugs & Fixes / Pending Work). This pass re-verifies every prior finding against HEAD code and live Supabase, since the audit-prompt rule is "Notion is event history, not current truth."
+
+- **Web HEAD `8ae7499`, mobile HEAD `14e2ad7`.** Commits since 17:12 UTC are docs/UI/auth only — no lead-pipeline code touched. Mobile worktree on `claude/wonderful-kilby-f2fbbc` matches main.
+- **Live Supabase (project `upqvbdldoyiqqshxquxa`):** `lead_status={NEW,QUOTED,ACCEPTED,ARCHIVED}` (ARCHIVED phantom — 0 rows). `quote_status={DRAFT,SENT,VIEWED,ACCEPTED,EXPIRED}`. `OPENED` not in enum (0030 historical no-op). `ai_status` is `text` (not enum). Realtime publication: `leads, notifications, pending_invites, quotes` (lead_unlocks/lead_photos NOT included). `pg_cron`: only `rescue-stuck-leads (*/3 * * * *)` and `reset-solo-credits` (no auto-archive). Vercel crons: 7 daily (no auto-archive-stale-leads). Storage `lead-photos` bucket has no MIME/size enforcement at bucket level. Production data: leads 3473 (3310 ready / 163 failed; 0 ARCHIVED), quotes 90 (35 DRAFT, 6 SENT, 4 VIEWED, 15 ACCEPTED, 30 EXPIRED), 25/35 DRAFTs >30 days old, lead_unlocks 80 all with quote, 3 overdue-unflipped quotes (lazy-flip working).
+- **All 3 critical, 8 high, 10 medium, 7 low findings from prior pass STAND at HEAD.** C1 (mobile useLeads channel name no random suffix) at `lib/hooks/useLeads.ts:164`. C2 (mobile getLeads filter) at `lib/api/leads.ts:68,74`. C3 (mobile EstimateComposer client-side `?? "preview"` placeholder) at `components/quotes/EstimateComposer.tsx:232`. H5 (DRAFT-mint failure swallowed) at `app/api/app/leads/unlock/route.ts:69-75`. H8 (lead-photos bucket no MIME/size). M4 (realtime publication missing lead_unlocks/lead_photos).
+- **Refined C3 analysis:** the `unlock_lead_with_credits` RPC has only `service_role`+`postgres` EXECUTE grants (verified via `information_schema.routine_privileges`; migration 0063 preamble confirms it was already locked down before that migration). Mobile's RPC fast path in `lib/api/leads.ts:250` is therefore unreachable for authenticated users — it always 42501s and falls back to the API route, which DOES mint a DRAFT. So C3 only fires when the route's DRAFT-mint try/catch silently swallows (i.e., contingent on H5). Narrower than read on first pass.
+- **Fresh observation 1:** mobile `unlockLead` RPC fast path is dead code post-migration-0063 (and effectively was dead before too). Confirms an aside in the prior Audit 3 entry's Medium section. Wastes one round-trip per unlock. Not a bug, but obscures the actual code path.
+- **Fresh observation 2:** `quotes.sent_via` historical-data fidelity gap — 27/30 EXPIRED and 4/15 ACCEPTED rows have empty `sent_via` (vs SENT/VIEWED 100% populated). Pre-column data; not a bug at HEAD; relevant for analytics that filter on `sent_via`.
+- **Conclusion: no regressions, no fixes shipped, prior 28-finding report remains canonical.** Pending Work entries PW-A4-1 through PW-A4-23 from the prior pass remain pending. Cross-cutting flags for Audit 3 (credits), Audit 8 (security), Audit 11 (AI), Audit 12 (notifications) remain valid.
+- **Detailed verification:** `docs/updates-log.md` 2026-05-08 "Audit 4 re-verification at HEAD" entry. Prior canonical findings: Notion Bugs & Fixes page id `35a32498-a1cb-813d-ac59-fdf77b57fc9b` (titled "Audit 4 (lead lifecycle): findings").
+
 ## Audit 11 AI estimator — 2026-05-08 (READ-ONLY)
 
 Read-only audit of `lib/ai/estimate.ts` (4,548 lines), trigger flow, prompt, output parsing, persistence, and Supabase data.
@@ -21,7 +75,19 @@ Read-only audit of `lib/ai/estimate.ts` (4,548 lines), trigger flow, prompt, out
 - **Detailed report:** `docs/updates-log.md` 2026-05-08 entry.
 - **9-item accuracy backlog filed in Pending Work** under "AI Estimator deferred work".
 
-## Audit 3 credits & quota — 2026-05-08 (READ-ONLY)
+## Audit 3 credits & quota — 2026-05-08 RE-VERIFIED at HEAD (READ-ONLY)
+
+Re-run of the credits & quota audit later in the day after the morning pass. Full re-verification against live Supabase + repo HEAD + Stripe MCP + RC MCP. Detailed report at `docs/audit-3-credits-quota-2026-05-08-reverify.md`. Read-only — no fixes shipped.
+
+- **All prior findings (C1–C5, H1–H8, Medium block) STAND at HEAD.** Code unchanged in `app/api/stripe/webhook/route.ts`, `app/api/iap/sync/route.ts`, `app/api/revenuecat/webhook/route.ts`, `app/api/app/leads/unlock/route.ts`, `app/api/stripe/checkout/route.ts`, `lib/credits.ts`, mobile `lib/hooks/useCredits.ts`. RPC source matches prior audit. Live data confirms broken TEAM trial orgs `eabc1e4a` and `f77b0ebb` still at `monthly_credits=5, credits_reset_at=null`. C2 still latent (0 IAP credit purchases). C5 still live (DRAFT-mint try/catch swallows at `app/api/app/leads/unlock/route.ts:69-75`). pg_cron jobid=3 last 5 runs all `succeeded` with daily UPDATE counts {4, 5, 0, 10, 1}.
+- **Promoted from cross-flag to first-class Audit 3 findings:** **H9** `get_org_credit_row` cross-tenant disclosure (live RPC source: SECURITY DEFINER, no `is_org_member` check, `auth_exec=true` for `authenticated`); **M1** lead PII enforcement is UI-only (live RLS: single `leads_member_crud` ALL policy, no column mask, no DRAFT-state gate); **M2** RLS allows org owners to PATCH `organizations.plan/monthly_credits/bonus_credits` directly (live `pg_policy` shows `organizations_update_owner` w/ no column-grant; live `pg_trigger` shows zero guards); **M3** `reset_org_credits` + `update_org_plan_credits` lack `SET search_path` (verified live via `pg_get_functiondef`).
+- **NEW: M7 — `/api/plans/config` CDN-cache enables silent plan→credit drift on mobile.** `Cache-Control: public, s-maxage=3600, stale-while-revalidate=86400` means a values change (e.g. SOLO 5→10) takes up to 25h to reach mobile via the edge AND mobile additionally persists to AsyncStorage indefinitely with no TTL. Was not in the prior pass's findings.
+- **NEW data point: third BUSINESS org (`36ba5025-f2ec-49ff-8877-8598cb968a0d`) has `credits_reset_at=2026-04-18` — 20 days past.** Plus `7e7ce05f` 18 days past, `8f939f96` (falconn) reset future. The "past_reset" cohort is now 2 of 4 BUSINESS orgs. They will only get reset on next unlock or webhook event.
+- **Live verification: Stripe credit packs $9.99 / $39.99 / $69.99 (10 / 50 / 100 credits) — match RC IAP credit packs exactly (no Apple-tax markup absorbed).**
+- **Live verification: RC project `proj39ead10c` has 7 products + 2 offerings (`default` w/ 4 sub packages CURRENT + `credits` w/ 3 consumable packages NOT current but `state=active`).**
+- **Cross-flag Audit 5 H1 still live:** `app/(tabs)/more/credits.tsx:226-247` Stripe-billed iOS users still see "Top up your bonus balance on the web" → `openAuthenticatedBrowser('/credits')` → web Stripe checkout. Apple 3.1.1 violation persists.
+
+### Original Audit 3 entry (2026-05-08 morning pass)
 
 Full audit at `docs/audit-3-credits-quota-2026-05-08.md`. Read-only — no fixes. 5 critical, 8 high, 6 medium, 4 low. Cross-flagged with Audit 2 (the TEAM-`monthly_credits=5` fingerprint = same root cause as Audit 3 C1).
 

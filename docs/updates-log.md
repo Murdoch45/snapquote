@@ -7,6 +7,180 @@ This file is append-only. Every session, every meaningful fix, finding, or decis
 
 ---
 
+## Session — May 8, 2026 — Audit 2 of 13 (Billing & Subscriptions): re-verification at HEAD (read-only, no fixes shipped)
+
+Second pass at Audit 2 against live Stripe MCP / RC MCP / Supabase MCP / ASC MCP and repo HEAD. Web HEAD same family as morning pass; mobile HEAD `14e2ad7` (worktree branch `claude/quirky-payne-d607b9`).
+
+### Live state captured (2026-05-08)
+
+- Stripe `acct_1T9B7eFNX8cpZFmw` SnapQuote: 0 active subs, 1 customer (`cus_UJw6eTdHqwL8Ym` Murdoch), 12 products + 15 prices.
+- RC `proj39ead10c`: 0 active subs, 0 active trials, $0 MRR last 28d, 28 new customers, 0 transactions in 28d. ASC API key NOT configured. 7 products active. 2 entitlements (`team`, `business`). Webhook URL is APEX `snapquote.us` (not www-canonical).
+- ASC `6761979056`: `subscriptionStatusUrl: null` (Apple S2S receipt push not configured).
+- Supabase: 69 orgs (63 SOLO / 2 TEAM / 4 BUSINESS / 4 has_used_trial). 3 stale `subscriptions` rows (Mar 19/20). `webhook_events`/`iap_subscription_events`/`credit_purchases` all 0 rows ever. RC `app_store_connect_api_key_configured: false`.
+
+### Net-new findings (not in earlier Audit 2)
+
+- **C1 NEW**: Stripe Solo product + `price_1TLCZqFNX8cpZFmwfaWXhXKP` $19.99/mo are LIVE active=true. Solo is supposed to be free. `lib/stripe.ts:120-128 getPlanFromPriceId` doesn't include this priceID, so a checkout against it would charge user but never resolve plan. Recommend archive.
+- **C2 NEW**: RC `PRODUCT_CHANGE` (`app/api/revenuecat/webhook/route.ts:345-359`) updates plan only, NEVER resets credits. Mid-cycle upgrade leaves user paying for higher plan at lower-plan credit allocation for up to 30 days. Mirror of the Stripe upgrade-credits gap.
+- **H1 NEW**: RC `RENEWAL` (`route.ts:302-317`) sends `sendPlanUpgradedEmail` on EVERY renewal — spam. Stripe correctly distinguishes via `billing_reason==='subscription_cycle'`; RC handler does not.
+- **H2 NEW**: RC default branch (`route.ts:421-422`) returns 200 ignored AFTER `claimWebhookEvent` for `TRANSFER`/`SUBSCRIBER_ALIAS`/`TEMPORARY_ENTITLEMENT_GRANT`/`TEST` — RC won't redeliver if a handler is added. Family Sharing entitlement spread is silently dropped.
+- **H3 NEW**: RC webhook URL is APEX (`snapquote.us`) not www-canonical — adds 307 latency on every event.
+- **H4 NEW**: ASC `subscriptionStatusUrl: null` — Apple S2S receipt push NOT configured. Combined with no server-side receipt validation in `/api/iap/sync`, server has zero ground-truth source for Apple state.
+- **H5 NEW**: RC ASC API key NOT configured — RC can't pull state from ASC directly. Reduced fault-tolerance vs RC webhook fan-out.
+- **H6 NEW**: `lib/hooks/useEntitlementSync.ts:106-131` builds synthetic transactionId `${productIdentifier}:${originalPurchaseDate}` not Apple's real `transactionIdentifier`. Audit log keys diverge.
+- **H7 NEW**: `lib/auth.tsx:303-340 signOut` does NOT call `Purchases.logOut()`. Brief leak window on shared device sign-in.
+- **M4 NEW**: `app/app/plan/page.tsx:22-25 getPlanPrice` hardcodes `$19.99/$39.99`. Doesn't read live Stripe `unit_amount` like the credit-pack page. ASC drift won't propagate.
+- **L3 NEW**: `iap/sync` logs both itself AND the RC webhook into `iap_subscription_events` (intentional double-log per comment) — analytics double-counts.
+
+### Critical findings re-confirmed live at HEAD (still open)
+
+- C-3 Stripe webhook events table empty (60+ days, 3 stale trialing rows whose customer_ids don't exist in current Stripe).
+- C-4 `/api/iap/sync` no Apple receipt validation.
+- C-5 RC webhook static-shared-secret bearer (NOT HMAC).
+- C-6 Stripe `getOrgIdForUser` `.limit(1).maybeSingle()` no order — multi-org users get arbitrary org.
+- C-7 RLS lets owners write `organizations.plan` directly via PostgREST (live `pg_policies` confirms no column-level guard).
+- C-8 Stripe trial→paid never grants paid-tier credits (live drift: orgs `eabc1e4a`, `f77b0ebb` TEAM with monthly_credits=5).
+- C-10 IAP credit-pack double-credit risk (mobile `iap/sync` uses Apple `transactionIdentifier`; RC webhook uses `rc_${event.id}` — different keys, both INSERTs succeed).
+- C-11 `clearStaleStripeCustomerId` lifecycle bug (3 of 6 STALE_PAID drift orgs match its fingerprint).
+- C-12 `get_org_credit_row` cross-tenant disclosure (live Supabase advisor confirms).
+- C-13 `REVENUECAT_PROJECT_ID`/`REVENUECAT_SECRET_KEY` missing in Vercel prod (account-deletion broken for owners with RC history).
+
+### Stale Notion flagged
+
+- Bugs & Fixes 2026-05-06 "IAP-vs-Stripe defense-in-depth" entry remains accurate that the fallback is on `claude/awesome-shamir-7bf77a` only — main does NOT have it (re-confirmed live).
+- Pending Work 2026-05-04 hygiene tail "old `price_1TLCZcFNX8cpZFmw0HVXNHwm` ($383.99/yr) still active=true" — re-confirmed live at audit time.
+
+### Out of scope
+
+- Stripe Customer Portal config (cancellation policy, proration) — Stripe MCP `stripe_api_search` blocks portal-related ops.
+- Vercel prod env-var state — cannot probe.
+- Live test of Stripe webhook delivery / mobile IAP purchase end-to-end.
+
+Notion: findings page `35a32498-a1cb-81b9-ba5c-e6de0a4c47fd`; to-dos page `35a32498-a1cb-81fd-89a3-e17eeeefa043`. No code changed.
+
+---
+
+## Session — May 8, 2026 — Audit 3 of 13 credits & quota: re-verification at HEAD (read-only, no fixes shipped)
+
+Second pass at Audit 3 (credits & quota) following the morning pass at ~17:30 UTC. Re-verification against live Supabase, repo HEAD, Stripe MCP, RevenueCat MCP. No code changed; goal was to confirm prior findings still live, surface drift, find new issues.
+
+### Web HEAD: same as Audit 4 re-verify (`8ae7499` family). Mobile HEAD: same (`14e2ad7`).
+
+No credits-related code commits since the morning pass. Stripe webhook, RC webhook, IAP sync, lead unlock route, lib/credits.ts all unchanged.
+
+### Live verification (Supabase project `upqvbdldoyiqqshxquxa`)
+
+- **8 credit RPCs all present.** `unlock_lead_with_credits`, `plan_monthly_credits` (now INVOKER+IMMUTABLE — was DEFINER per Audit 1 mutable-search-path list, **superseded — fixed**), `record_credit_purchase` (DEFINER, search_path='public'), `refund_bonus_credits` (DEFINER, search_path='public,pg_temp'), `reset_due_solo_monthly_credits` (DEFINER, search_path='public', dead code), `reset_org_credits` (DEFINER, **NO search_path set — mutable**), `update_org_plan_credits` (DEFINER, **NO search_path set — mutable**), `get_org_credit_row` (DEFINER, search_path='public', **NO is_org_member check inside — cross-tenant leak**).
+- **Live RPC EXECUTE perms:** `unlock_lead_with_credits`/`record_credit_purchase`/`refund_bonus_credits`/`reset_org_credits`/`update_org_plan_credits`/`reset_due_solo_monthly_credits` all `service_role`-only (auth=false). `get_org_credit_row` `auth_exec=true` (still). `plan_monthly_credits` `auth_exec=true, anon_exec=true` (lookup, low risk).
+- **pg_cron:** 2 jobs only. `reset-solo-credits` jobid=3 (`0 0 * * *`, active, last 5 runs all `succeeded`, UPDATE counts {4, 5, 0, 10, 1} per day). `rescue-stuck-leads` jobid=8 (`*/3 * * * *`, active). No paid-plan reset cron.
+- **Tables:** `lead_unlocks` (80 rows; schema `id, org_id, lead_id, unlocked_at` — **no `charge_source` col**), `credit_purchases` (0 rows; schema `id, org_id, purchase_reference, credit_amount, created_at` — **no `payment_provider`/`amount_usd`/`product_id`/`refunded_at` cols**), `audit_log` (49 rows; only `lead.unlocked` (25), `quote.sent`, `settings.updated` — **NO credit-grant/reset/refund/plan-change events**). No `credit_transactions` / `credit_ledger` table.
+- **organizations RLS:** `organizations_select_member` (read, `is_org_member`), `organizations_update_owner` (write, `is_org_owner` with check). **No column-level grant. No trigger guard.** Owner can PATCH `plan/monthly_credits/bonus_credits` directly via PostgREST anon/authed.
+- **leads RLS:** single policy `leads_member_crud` polcmd=`*` `using is_org_member(org_id)`. Lead PII enforcement is UI-only.
+- **Org snapshot by plan:** SOLO=63 (315 monthly credits, 0 bonus, 0 null reset, 0 past reset). TEAM=2 (10 monthly, 0 bonus, **2 null reset**, 0 past reset). BUSINESS=4 (368 monthly, 27 bonus, 0 null reset, **2 past reset**).
+- **Verified victims of C1 (Stripe TEAM trial credit gap):** `eabc1e4a-a479-4e1c-844d-cf28364cc77f` (TEAM, monthly_credits=5, credits_reset_at=null), `f77b0ebb-5536-4580-9e45-87fc7d6e2058` (TEAM, monthly_credits=5, credits_reset_at=null). **Same as morning pass — unfixed.**
+- **Verified STALE_PAID + new past-reset orgs:** `8f939f96` (falconn) BUSINESS, mc=84/bc=15, reset 2026-05-30 (future, decrementing daily). `7e7ce05f` BUSINESS, mc=98/bc=0, reset 2026-04-20 (**18 days past**). `36ba5025` BUSINESS, mc=86/bc=12, reset 2026-04-18 (**20 days past, NOT in prior STALE_PAID set**).
+- **Stripe MCP:** 3 credit-pack products `prod_UJqGjbjixP8YLM/UJqGTtLFlV1W0k/UJqGlY2pkU4OQM` priced at $9.99/$39.99/$69.99 for 10/50/100 credits.
+- **RevenueCat MCP:** project `proj39ead10c`, 7 active products, 2 offerings (`default` current with 4 sub packages, `credits` not-current with 3 consumable packages). RC pricing matches Stripe exactly.
+
+### Findings re-verified (every prior finding traced to file:line)
+
+- **C1 — Stripe trial-org credit gap.** `app/api/stripe/webhook/route.ts:229-277` `handleCheckoutCompleted` calls `setOrganizationPlan` only, never `resetOrganizationCredits`. **STANDS.**
+- **C2 — IAP credit-pack double-credit (latent).** Mobile `app/api/iap/sync/route.ts:113-117` uses raw `body.transactionId`. RC webhook `app/api/revenuecat/webhook/route.ts:147` uses `rc_${event.id}`. Different `purchase_reference` → both INSERTs win. **STANDS.**
+- **C3 — Subscription refund silently consumes spent credits.** `app/api/stripe/webhook/route.ts:389-429` and `app/api/revenuecat/webhook/route.ts:411-417`. **STANDS.**
+- **C4 — No credit ledger.** Confirmed via `audit_log` action enumeration (only `lead.unlocked` rows for credits). No `credit_transactions` table. `lead_unlocks` lacks `charge_source`. **STANDS.**
+- **C5 — DRAFT-quote-after-unlock failure orphans credit.** `app/api/app/leads/unlock/route.ts:69-75` try/catch swallows. **STANDS.**
+- **H1 — Stripe upgrade no immediate credit grant.** `app/api/stripe/checkout/route.ts:152-197` `isUpgrade` branch lacks `update_org_plan_credits` call. **STANDS.**
+- **H2 — STALE_PAID orgs.** `falconn`/`Demo`/`Rivera's` from prior + new past-reset orgs `7e7ce05f`/`36ba5025`. **STANDS, expanded.**
+- **H3 — `reset_due_solo_monthly_credits()` dead code.** Migration 0018 schedules it but cron.job jobid=3 runs different inline SQL. **STANDS.**
+- **H4 — TEAM/BUSINESS no scheduled reset.** Confirmed via `cron.job` query. **STANDS.**
+- **H5 — Mobile `useCredits` AsyncStorage cache.** `lib/hooks/useCredits.ts:72-127`. **STANDS.**
+- **H6 — Unlock no_credits 402 unaudited.** `app/api/app/leads/unlock/route.ts:28-30` returns 402 without `recordAudit`. **STANDS.**
+- **H7 — 3 sources of plan→credits truth.** Web `lib/plans.ts`, mobile `lib/plans.ts`, SQL `plan_monthly_credits()`. **STANDS.**
+- **H8 — `record_credit_purchase` schema gap.** Live schema confirmed. **STANDS.**
+
+### Fresh findings (new this pass — promoted from cross-flag or wholly new)
+
+1. **H9 — `get_org_credit_row` cross-tenant info leak.** Promoted from Audit 8/9 cross-flag to first-class Audit 3 finding because it's a credit-data privacy bug. Live RPC source: `LANGUAGE sql SECURITY DEFINER SET search_path TO 'public' AS $$ select plan, monthly_credits, bonus_credits, credits_reset_at from organizations where id = p_org_id $$`. No `is_org_member` check. `auth_exec=true`. Any signed-in user reads any org's plan + balances by UUID.
+2. **M1 — Lead PII enforced in UI only.** Cross-flag Audit 8. Live `pg_policy` on `leads`: `leads_member_crud` polcmd=`*` `using is_org_member(org_id)` — no DRAFT-state gate. Mobile `lib/api/leads.ts:53-54` projects `customer_phone`, `customer_email`, `customer_name`, `address_full`, `lat/lng/place_id` regardless of unlock state. Contractor with auth token can PostgREST-bypass the credit paywall.
+3. **M2 — RLS allows direct credit-column writes.** Live `pg_policy` on `organizations`: `organizations_update_owner` polcmd=`w` `using is_org_owner(id) with check is_org_owner(id)`. Live `pg_trigger`: zero rows for organizations. Org owner can `PATCH /rest/v1/organizations?id=eq.*` with `monthly_credits=99999`. Plausibly explains the 2 stuck-TEAM orgs (somebody hit the row directly).
+4. **M3 — `reset_org_credits` and `update_org_plan_credits` SECURITY DEFINER + mutable search_path.** Live `pg_get_functiondef` confirms neither has `SET search_path TO 'public'`. Both are SECURITY DEFINER. Lower risk than DEFINER+missing-membership-check but still warrants `SET search_path`.
+5. **M7 — `/api/plans/config` CDN-cache enables silent plan→credit drift.** `Cache-Control: public, s-maxage=3600, stale-while-revalidate=86400`. Mobile reads up to **25h** stale plan allowances from edge. Mobile additionally persists to AsyncStorage indefinitely with no TTL.
+6. **Race-condition inventory verified live.** Same-org concurrent unlock SAFE (RPC uses `FOR UPDATE` + double-check). Same-Apple-transaction across mobile-sync + RC-webhook UNSAFE (C2). Concurrent refunds across paths UNSAFE (no per-purchase dedup; `refund_bonus_credits` floors at 0 silently — combined with C2, net positive credit balance in user's favor possible).
+7. **Plan-config drift surface widened.** Web TS + mobile TS fallback + mobile AsyncStorage hydrated value + Postgres SQL function = 4 sources, not 3. CDN cache adds a 5th edge (`/api/plans/config` response).
+8. **Mobile `unlockLead` direct-RPC fast path is unreachable** (already noted in prior Audit 3 M-section). Migration 0063 + prior revoke. Mobile auth always 42501s, falls through to HTTP route. Wastes a round-trip per unlock; C5 still bites through HTTP path.
+
+### Findings saved to Notion
+
+- Bugs & Fixes: this re-verification entry (insert via `update_content` since `notion-create-pages` heading-collision blocked sub-page creation).
+- Pending Work: prior audit-3 backlog stands; no new action items added (the 5 fresh findings 1–5 above are formal upgrades of existing cross-flagged items, not new tasks).
+- Architecture & Stack: prior `Credit & Quota subsystem map (Audit 3)` and `Supabase data-model snapshot (Audit 9)` entries verified accurate against live; no edits.
+
+### Blast radius if shipped
+
+C1 alone misleads every Stripe-trial TEAM/BUSINESS user about their entitlement (5 vs 20/100). C5 alone causes silent revenue leak to user (paid credit, got nothing). C2 doubles bonus credits on every IAP credit-pack purchase as soon as the first one ships. C3 lets refunded BUSINESS users keep 60+ leads' contact info already in their CRM. C4 eliminates after-the-fact reconciliation entirely. None of these have shipped fixes since 2026-05-08 morning. Prioritize C1 (live victims) and C5 (silent loss) for next code session.
+
+---
+
+## Session — May 8, 2026 — Audit 4 of 13 lead lifecycle: re-verification at HEAD (read-only, no fixes shipped)
+
+Second pass at Audit 4 (lead lifecycle, public form → AI → inbox → unlock → DRAFT → composer → send → expire). Earlier today (17:12 UTC) a comprehensive Audit 4 already ran and saved findings to Notion. This session re-verifies every prior finding against HEAD and live Supabase state, since the audit-prompt rule is "Notion is event history, not current truth."
+
+### Web HEAD: `8ae7499`. Mobile HEAD: `14e2ad7`.
+
+Commits since the prior audit are docs/UI/auth (`8ae7499` webhook docs, `0705f3b` webhook scenario-B docs, `c73f9ae` Plan-page UI, `41d09bb` landing-page redesign, `d6e6262` color/radius standardization). **No lead-pipeline code changed.** Mobile HEAD = main HEAD (worktree on `claude/wonderful-kilby-f2fbbc` with no divergence; `git log main..HEAD` empty).
+
+### Live Supabase state (project `upqvbdldoyiqqshxquxa`, queried 2026-05-08 ~17:30 UTC)
+
+- `lead_status` enum: `{NEW, QUOTED, ACCEPTED, ARCHIVED}` — H1 confirmed (ARCHIVED phantom; live `leads.status='ARCHIVED'` count = 0).
+- `quote_status` enum: `{DRAFT, SENT, VIEWED, ACCEPTED, EXPIRED}` — code-aligned.
+- `OPENED` is NOT in `lead_status` enum despite migration 0030 — H2 confirmed.
+- `ai_status` is `text` (not an enum). Free-text values in production: `ready` (3310), `failed` (163). No `processing`-stuck rows visible at audit time.
+- `supabase_realtime` publication: `leads, notifications, pending_invites, quotes`. `lead_unlocks` and `lead_photos` NOT included — M4 confirmed.
+- `pg_cron`: only `rescue-stuck-leads (*/3 * * * *)` and `reset-solo-credits (0 0 * * *)`. No `auto-archive-stale-leads` job. Migration 0031 historical no-op confirmed (H1).
+- Vercel `vercel.json`: 7 daily crons (estimate-expiry-warning 02:00, auto-expire-stale-quotes 03:00, cleanup-notifications 04:00, unopened-leads-reminder 14:00, trial-ending-soon 15:00, trial-expired 16:00, estimate-nudge-unviewed 17:00). Lead-archive cron absent.
+- Storage bucket `lead-photos`: `public=false`, `allowed_mime_types=null`, `file_size_limit=null` — H8 confirmed (validation only at the route handler).
+- Production data: leads 3473 (NEW=3417, QUOTED=44, ACCEPTED=12, ARCHIVED=0). Quotes 90 (DRAFT=35, SENT=6, VIEWED=4, ACCEPTED=15, EXPIRED=30). lead_unlocks=80 (all have a corresponding quote row; 35 are stuck-DRAFT). lead_photos=3722. customers=3416. orgs=69.
+- Stale-DRAFT verification: 25 of 35 DRAFTs are >30 days old. Oldest DRAFT lead `submitted_at = 2026-03-16 21:36`. H4 confirmed.
+- Overdue-unflipped quotes (SENT/VIEWED past 7d): 3 today (was 2 at 17:12). Oldest unflipped `sent_at = 2026-05-01 15:26`. M9 confirmed; non-corruption (lazy-flip on next read).
+- Advisor (security): unchanged from prior audit. 14 lints (2 RLS-no-policy on `iap_subscription_events` + `webhook_events`, 6 mutable-search-path, 2 anon-callable SECURITY DEFINER (`is_org_member`/`is_org_owner`), 3 authenticated-callable SECURITY DEFINER (`get_org_credit_row`/`is_org_member`/`is_org_owner`), 1 leaked-password protection disabled). All flagged for Audit 8.
+
+### C/H/M/L re-verification at HEAD (every prior finding traced to file:line)
+
+- **C1 — mobile `useLeads` realtime channel name has no per-mount random suffix.** [`lib/hooks/useLeads.ts:164`](lib/hooks/useLeads.ts) at HEAD: `supabase.channel(\`leads:${orgId}:${status ?? "ALL"}\`)`. Compare [`lib/hooks/useQuotes.ts:235-237`](lib/hooks/useQuotes.ts) which has `:${Math.random().toString(36).slice(2,10)}` (Build 12 fix). Same SNAPQUOTE-MOBILE-F race shape. **STANDS.**
+- **C2 — mobile `getLeads` filters `.eq("ai_status","ready")` on count + data.** [`lib/api/leads.ts:68,74`](lib/api/leads.ts) at HEAD. Web [`app/app/leads/page.tsx:33`](app/app/leads/page.tsx): `.in("ai_status", ["ready","failed"])`. Live impact 163/3473 leads (~4.7%) invisible to mobile. **STANDS.**
+- **C3 — mobile `EstimateComposer` renders `{{estimate_link}}` client-side using `existingQuoteDraftPublicId ?? "preview"` placeholder.** [`components/quotes/EstimateComposer.tsx:232`](components/quotes/EstimateComposer.tsx) at HEAD. Server's `renderEstimateTemplate` ([`lib/quote-template.ts:60-71`](lib/quote-template.ts)) is `replaceAll`-only — already-substituted "preview" sticks. **NEW REFINED ANALYSIS:** the `unlock_lead_with_credits` RPC has had `EXECUTE` revoked from `authenticated`/`anon` since the function was created (verified via `information_schema.routine_privileges`: only `service_role`+`postgres` are granted; migration 0063 comment confirms it was already that way). So mobile's direct-RPC fast path in [`lib/api/leads.ts:250`](lib/api/leads.ts) **always** errors with 42501 → falls back to the API route → DRAFT IS minted. The C3 bad-link bug therefore only fires when the route's DRAFT-mint try/catch silently swallows ([`app/api/app/leads/unlock/route.ts:69-75`](app/api/app/leads/unlock/route.ts) — H5), narrower than read on first pass. **STANDS** but contingent on H5.
+- **H1 — migration 0031 historical no-op + ARCHIVED phantom enum.** Verified live (cron.job + lead_status enum_range). **STANDS.**
+- **H2 — migration 0030 `OPENED` historical no-op.** Verified live (`OPENED` not in lead_status enum_range). **STANDS.**
+- **H3 — web `LeadsRealtimeWatcher` channel name fixed.** [`components/LeadsRealtimeWatcher.tsx:15`](components/LeadsRealtimeWatcher.tsx) at HEAD: `supabase.channel(\`leads-org-${orgId}\`)`. Polling fallback at line 38 (`window.setInterval(() => onRefresh(), 10_000)`) masks symptom. **STANDS.**
+- **H4 — stale DRAFT quotes accumulate.** 25/35 over 30 days at HEAD. **STANDS.**
+- **H5 — `/api/app/leads/unlock` swallows DRAFT-creation failures.** [`app/api/app/leads/unlock/route.ts:69-75`](app/api/app/leads/unlock/route.ts) unchanged. **STANDS.**
+- **H6 — web lead-detail-page 48-bit `randomBytes(6)` fallback publicId.** Unchanged at HEAD. **STANDS.**
+- **H7 — mobile `EstimateComposer` parity gaps vs web `QuoteComposer`** (no `isResend`, no inline contact edit, no "Reset to AI estimate", degenerate slider when AI failed). Confirmed at HEAD. **STANDS.**
+- **H8 — `lead-photos` bucket has no MIME or size enforcement at bucket level.** Confirmed live. **STANDS.**
+- **M1 — in-memory rate limiter per-lambda.** [`lib/rateLimit.ts`](lib/rateLimit.ts) unchanged. **STANDS.**
+- **M2 — composer save-prefs effect fires on initial render.** Mobile [`components/quotes/EstimateComposer.tsx:210-220`](components/quotes/EstimateComposer.tsx) confirmed at HEAD with silent `.then(() => {})`. **STANDS.**
+- **M3 — `unopened-leads-reminder` hardcoded threshold of 10.** [`app/api/cron/unopened-leads-reminder/route.ts`](app/api/cron/unopened-leads-reminder/route.ts) unchanged. **STANDS.**
+- **M4 — `supabase_realtime` doesn't include `lead_unlocks` / `lead_photos`.** Verified live. **STANDS.**
+- **M5 — `useSendQuoteLead` only reports `draftPublicId` for status==='DRAFT'.** [`lib/hooks/useSendQuoteLead.ts:160-161`](lib/hooks/useSendQuoteLead.ts) unchanged. Note: lead-detail screen separately uses `existingQuote?.public_id ?? null` regardless of status ([`app/(tabs)/leads/[id].tsx:278`](app/(tabs)/leads/[id].tsx)) — so the M5 narrow path is the modal path only. **STANDS.**
+- **M6 — customer dedup doesn't update existing customer name.** [`app/api/public/lead-submit/route.ts:212-261`](app/api/public/lead-submit/route.ts) unchanged. **STANDS.**
+- **M7 — `quote_events` ACCEPTED insert uses broad try/catch.** [`app/api/public/quote/[publicId]/accept/route.ts:116-124`](app/api/public/quote/[publicId]/accept/route.ts) unchanged. **STANDS.**
+- **M8/M9/M10 — minor.** All confirmed at HEAD.
+- **L1–L7 — minor.** All confirmed at HEAD.
+
+### Fresh observations (not in prior audit)
+
+1. **Mobile `unlockLead` RPC fast path is dead code** (since migration 0063 + before): `lib/api/leads.ts:250` calls `supabase.rpc("unlock_lead_with_credits", ...)` but the function has only `service_role`/`postgres` EXECUTE grants; mobile's authenticated JWT always errors 42501 and falls back to the API route. The `if (!error)` branch (lines 255-271) is unreachable. Wastes one round-trip per unlock and obscures the actual code path. Migration 0063's preamble comment line 23-24 explicitly notes `unlock_lead_with_credits` was already locked down before this migration. → cross-flag with Audit 3 (the prior Audit 3 entry already mentions this in its Medium section as "mobile direct-RPC fallback wastes a permission-denied round-trip after migration 0063"). **No re-write needed; already noted.**
+2. **`quotes.sent_via` historical-data fidelity:** of 30 EXPIRED quotes, 27 have empty `sent_via`; of 15 ACCEPTED quotes, 4 have empty. SENT/VIEWED rows are 100% populated. Pattern consistent with quotes that were sent **before** the `sent_via` column write was added (or before its semantics solidified). Not a bug at HEAD; relevant if anyone runs analytics on `sent_via` for historical data. Minor — flagged as L8.
+3. **Audit advisor delta vs prior audit:** the same warnings stand. The `get_org_credit_row` `authenticated_security_definer_function_executable` lint was already present in the prior audit's M10 list (referenced indirectly).
+
+### Conclusion
+
+The prior Audit 4 (today 17:12 UTC) findings are all valid at HEAD as of 2026-05-08 ~17:30 UTC. No bug-relevant code changed in the intervening commits. The full report — pipeline diagram, lock-state info-leak inventory, web/mobile parity table, realtime channel inventory, cron verification, cross-cutting flags — remains canonical at the prior Notion page (URL in the Bugs & Fixes index entry dated 2026-05-08). This re-verification adds the dead-code mobile RPC observation, the `sent_via` historical-data fidelity note, and confirms live data didn't drift.
+
+Pending Work entries from the prior pass (PW-A4-1 through PW-A4-23) remain pending. No fixes were shipped in this session.
+
+---
+
 ## Session — May 8, 2026 — Webhook restoration: MCP scope verification + exact action items for Murdoch (cannot fix from this session)
 
 Follow-up to today's earlier scenario-B diagnostic. Murdoch asked me to attempt the end-to-end fix via MCPs rather than punt to dashboard. Re-attempted aggressively. Confirming the blocks are at the MCP-tool level, not session-permission level — neither MCP exposes the operations we need.
@@ -3078,3 +3252,40 @@ Replaced the visual layer of the public landing page (`/`) with the new design f
 - All `<Button>` instances inherit the `rounded-xl` (12px) base from `components/ui/button.tsx`; CTA shadow tints use `rgba(37,99,235,0.4)` (blue-600 family) so they match the standardized `--primary` exactly.
 
 **Reference materials kept in chat / out-of-tree:** `landing-page/README.md` (handoff guide), `landing-page/chats/chat1.md` (design transcript with Murdoch's iteration feedback), `landing-page/project/SnapQuote Landing v2.html` (source HTML), `landing-page/project/landing-v2.jsx` (source JSX prototype). Not committed to repo — these are mockup artifacts, not production code.
+
+
+## Session — May 8, 2026 (RLS plan-write hole + RPC membership leak fixed — Audit 2 C-7, C-12)  [Source: Claude Code]
+
+**Context:** Audit 2 (2026-05-08) flagged two open Critical security holes verified live via Supabase MCP at HEAD:
+- **C-7** `pg_policies` showed `organizations_update_owner` cmd=UPDATE, qual=`is_org_owner(id)`, with_check=`is_org_owner(id)`, no column-level grant. Authenticated owners could PATCH `/rest/v1/organizations?id=eq.<their-org>` with `{"plan":"BUSINESS"}` (or arbitrary `monthly_credits` / `bonus_credits` / `has_used_trial` / `trial_ends_at` / `credits_reset_at`) and self-promote without paying.
+- **C-12** `pg_proc` showed `get_org_credit_row(uuid)` SECURITY DEFINER, EXECUTE granted to `authenticated`, body had no `is_org_member(p_org_id)` check. Any signed-in user could RPC any org_id and read its plan + credit balances. (Migration 0028 originally REVOKED authenticated; a later CREATE OR REPLACE re-installed Supabase default grants.)
+
+**Sibling RPC check:** `reset_org_credits` and `update_org_plan_credits` are also SECURITY DEFINER without membership checks, but migration 0063 already revoked EXECUTE from anon/authenticated. They are now `service_role`-only and called from Stripe/RC webhooks + `lib/credits.ts` via the admin client. Adding `is_org_member` to them would BREAK those call sites because `auth.uid()` is null under service_role. Left untouched.
+
+**Fix:** [supabase/migrations/0067_lock_owner_organization_updates_and_credit_row_membership.sql](../supabase/migrations/0067_lock_owner_organization_updates_and_credit_row_membership.sql)
+
+- Drop existing permissive `organizations_update_owner` UPDATE policy.
+- `REVOKE UPDATE ON TABLE organizations FROM authenticated`.
+- `GRANT UPDATE (name, slug, onboarding_completed) ON organizations TO authenticated` — column-level allowlist of safe non-billing columns.
+- Recreate `organizations_update_owner` policy with the same `is_org_owner(id)` USING + WITH CHECK row gate. Now an authenticated owner needs BOTH the column-level grant AND the row policy to write — billing columns get blocked at the table-grant layer regardless of policy.
+- Replace `get_org_credit_row(uuid)` with a plpgsql body that runs `IF NOT is_org_member(p_org_id) THEN RAISE EXCEPTION ... USING errcode = 42501; END IF;` before the SELECT. Re-asserts REVOKE from public/anon and GRANT EXECUTE to authenticated/service_role.
+
+Applied via Supabase MCP `apply_migration` to project `upqvbdldoyiqqshxquxa` (success).
+
+**Verification (live, post-fix):**
+
+1. `pg_policies` — `organizations_update_owner` row gate still `qual=is_org_owner(id) wc=is_org_owner(id)`.
+2. `information_schema.column_privileges` for `authenticated` on `organizations` — UPDATE only on `name`, `slug`, `onboarding_completed`.
+3. `information_schema.table_privileges` for `authenticated` on `organizations` — UPDATE no longer in the privilege list (only DELETE/INSERT/REFERENCES/SELECT/TRIGGER/TRUNCATE remain from Supabase defaults).
+4. `pg_proc` — `get_org_credit_row` body now contains the `is_org_member` raise.
+
+**Behavior tests** (executed via `SET LOCAL role authenticated; set_config('request.jwt.claims', ...)`, real OWNER user `bffcc8d0-...` of org `1c5dd00c-...`):
+
+- Owner `UPDATE organizations SET plan=`'BUSINESS' WHERE id=...` → rejected with `ERROR 42501: permission denied for table organizations` ✅
+- Owner `UPDATE organizations SET name=name WHERE id=...` → succeeded, returned `{id, name=Poo}` ✅
+- Same authenticated user calling `get_org_credit_row(`'d2868f2a-...')` (NOT a member) → rejected with `ERROR 42501: permission denied for organization d2868f2a-...` ✅
+- Same user calling `get_org_credit_row(`'1c5dd00c-...')` (their own org) → returned `{plan: SOLO, monthly_credits: 5, bonus_credits: 0, credits_reset_at: null}` ✅
+
+No client code paths affected: all three `from("organizations").update(...)` sites in the codebase (`app/api/stripe/webhook/route.ts:109`, `app/api/revenuecat/webhook/route.ts:87`, `app/api/app/settings/update/route.ts:61`) use the admin (service_role) client, which has BYPASSRLS. Mobile repo has zero direct `organizations.update` calls.
+
+Audit 2 status updated in `docs/current-state.md` (lines 23-24 + critical findings line): C-7 and C-12 marked FIXED with migration reference. Notion saves: Bugs & Fixes entry added with file + verification cites.
