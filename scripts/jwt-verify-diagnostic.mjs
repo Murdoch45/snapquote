@@ -3,8 +3,9 @@
 //
 // Usage: node scripts/jwt-verify-diagnostic.mjs <token>
 //
-// Reads NEXT_PUBLIC_SUPABASE_URL and SUPABASE_JWT_SECRET from .env.local
-// (same way Vercel injects them in production).
+// Reads NEXT_PUBLIC_SUPABASE_URL from .env.local (same way Vercel
+// injects it in production). Verifies via ES256 + JWKS only; the
+// HS256 fallback was removed in Audit 8 H1.
 
 import { createRemoteJWKSet, jwtVerify, decodeJwt, decodeProtectedHeader } from "jose";
 import { readFileSync } from "fs";
@@ -31,7 +32,6 @@ console.log(JSON.stringify(decodeJwt(token), null, 2));
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim().replace(/\/+$/, "");
 console.log("\n=== ENV ===");
 console.log("NEXT_PUBLIC_SUPABASE_URL:", supabaseUrl);
-console.log("SUPABASE_JWT_SECRET present:", Boolean(process.env.SUPABASE_JWT_SECRET));
 
 const jwksUrl = new URL(`${supabaseUrl}/auth/v1/.well-known/jwks.json`);
 const jwks = createRemoteJWKSet(jwksUrl);
@@ -59,20 +59,17 @@ try {
   console.log("FAIL:", e?.code ?? e?.name, "-", e?.message);
 }
 
-console.log("\n=== ATTEMPT 2: HS256, audience='authenticated' ===");
-const secret = process.env.SUPABASE_JWT_SECRET?.trim();
-if (!secret) {
-  console.log("SKIP: SUPABASE_JWT_SECRET missing");
-} else {
-  const key = new TextEncoder().encode(secret);
-  try {
-    const { payload, protectedHeader } = await jwtVerify(token, key, {
-      audience: "authenticated"
-    });
-    console.log("OK");
-    console.log("alg:", protectedHeader.alg);
-    console.log("sub:", payload.sub);
-  } catch (e) {
-    console.log("FAIL:", e?.code ?? e?.name, "-", e?.message);
-  }
+console.log("\n=== ATTEMPT 2: ES256 via JWKS, audience='authenticated' + iss pinned ===");
+const issuer = `${supabaseUrl}/auth/v1`;
+try {
+  const { payload, protectedHeader } = await jwtVerify(token, jwks, {
+    audience: "authenticated",
+    issuer
+  });
+  console.log("OK");
+  console.log("alg:", protectedHeader.alg);
+  console.log("sub:", payload.sub);
+  console.log("iss:", payload.iss);
+} catch (e) {
+  console.log("FAIL:", e?.code ?? e?.name, "-", e?.message);
 }

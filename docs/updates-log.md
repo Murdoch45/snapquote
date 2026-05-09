@@ -7,6 +7,63 @@ This file is append-only. Every session, every meaningful fix, finding, or decis
 
 ---
 
+## Session — May 9, 2026 — Audit 8 auth hardening closed (H1 + H2 + H3 + H5) [Source: Claude Code]
+
+Four web-side auth hardening fixes from Audit 8 shipped in a single branch off `main` (`ea90027`). Live diagnosis preceded each fix; nothing taken on Notion-only evidence.
+
+### H1 — HS256 JWT fallback removed
+
+- **Symptom (Audit 8 finding):** `lib/auth/verifyJWT.ts:188-235` (prior version) verified Supabase access tokens via HS256 keyed by `SUPABASE_JWT_SECRET` as a fallback when ES256+JWKS verification failed. The mobile `.env` was confirmed not to leak the secret (Audit 8 reverify), but a leaked `SUPABASE_JWT_SECRET` in any future incident would let anyone forge any user's tokens with no key rotation cost.
+- **Live diagnosis:** Fetched `https://upqvbdldoyiqqshxquxa.supabase.co/auth/v1/.well-known/jwks.json` — single ES256 P-256 verifying key (`kid 85542139-701f-4514-a75c-76ec5c74cc4c`). Confirms the project has fully rotated to ES256; HS256 was unreachable for any newly-issued token.
+- **Fix:** Deleted the HS256 verify branch + the cached `Uint8Array` HS256 key + the `SUPABASE_JWT_SECRET` env var read. Verification now goes ES256 → return claims → fall through to null on any failure. Sentry breadcrumbs preserved on success and failure for the existing 401 diagnostic flow in `requireRole.ts`.
+- **Side effects:** Removed the env var documentation block from `.env.example`. Updated `scripts/jwt-verify-diagnostic.mjs` (the diagnostic script kept around from the May-7 mobile-401 investigation) to drop the HS256 attempt and instead test the new audience+issuer pinning. Updated the comment in `lib/auth/requireRole.ts:126-130` referencing the prior fallback.
+
+### H2 — `iss` claim pinned on JWT verification
+
+- **Symptom:** `verifySupabaseJWT` validated audience (`authenticated`) and signature, but no `iss` claim — a token signed by a different Supabase project happening to use `aud=authenticated` would pass verification.
+- **Fix:** Added `getExpectedIssuer()` returning the cached value of `SUPABASE_JWT_ISSUER` (env override, optional) or `${NEXT_PUBLIC_SUPABASE_URL}/auth/v1` (default — `https://upqvbdldoyiqqshxquxa.supabase.co/auth/v1` in prod). Passed via `issuer:` to `jose.jwtVerify`. Added optional env var doc block to `.env.example`.
+
+### H3 — Cron and internal bearer comparisons made constant-time
+
+- **Symptom (Audit 8 finding):** All 8 cron handlers (`app/api/cron/*/route.ts`) and `app/api/internal/run-estimator/route.ts` compared the request bearer/secret with `!==` against `Bearer ${process.env.CRON_SECRET}` (or `INTERNAL_API_SECRET`). Defense-in-depth concern; very low practical risk on Vercel because network jitter dwarfs string-compare timing.
+- **Fix:** New helper `lib/auth/timingSafeBearer.ts`:
+  - `safeEqualSecret(received, expected)` — wraps `crypto.timingSafeEqual` with explicit length-mismatch short-circuit (the underlying primitive throws on length mismatch). Returns false on null/undefined/non-string `received` or empty `expected`.
+  - `isAuthorizedBearer(authHeader, expected)` — parses `Authorization: Bearer <token>` and forwards to `safeEqualSecret`.
+- **Call sites updated (9 total):** all 8 cron handlers and `app/api/internal/run-estimator/route.ts`. External behavior unchanged — same 401 on bad bearer, same body on good bearer. Verified post-edit: `grep -E "authHeader !==|provided !== expected"` across `app/api` returns zero hits.
+
+### H5 — Reset-password page gated to recovery-only sessions
+
+- **Symptom:** `app/(public)/reset-password/page.tsx` rendered `ResetPasswordForm`, which called `supabase.auth.updateUser({ password })` with no check that the active session was created via password recovery. A logged-in user (or session-hijacked attacker) could navigate directly to `/reset-password` and change the account password without entering the current one.
+- **Live diagnosis:** Read the page (4-line component, no checks). Read `ResetPasswordForm.tsx` — calls `updateUser({ password })` directly. Traced the recovery email flow: `/api/public/auth/forgot-password/route.ts:35` builds `${appUrl}/auth/confirm?token_hash=…&type=recovery&next=/reset-password`; `/auth/confirm/route.ts` calls `verifyOtp` and 302s to `/reset-password`. Server-side PKCE flow — no `#type=recovery` hash on the client side, so `onAuthStateChange` `PASSWORD_RECOVERY` event does not fire. Confirmed the bypass: a regular logged-in user navigating to `/reset-password` would have rendered the form.
+- **Fix:**
+  - `lib/auth/recoveryCookie.ts` (new): signs `${userId}.${expiresAtMs}.${hmac}` with HMAC-SHA256 keyed by `SUPABASE_SERVICE_ROLE_KEY` (with `sq-recovery-cookie-v1:` domain separator — avoids requiring a new env var). 10-minute TTL. `verifyRecoveryToken` does length-checked constant-time signature compare.
+  - `app/auth/confirm/route.ts`: when `type=recovery` and `verifyOtp` succeeds, sets cookie `sq-pwr` HttpOnly+Secure (in prod)+SameSite=Lax+Path=/+MaxAge=600 to `signRecoveryToken(data.user.id)` before the 302.
+  - `app/(public)/reset-password/page.tsx`: now an async server component. Reads the `sq-pwr` cookie + the active session, requires `verifyRecoveryToken(value) !== null && session.user.id === verified.userId`. If not authorized, renders a "reset link expired" view with a link back to `/forgot-password`. If authorized, renders the existing `ResetPasswordForm` unchanged.
+- **Trade-offs considered:** rejected client-side `#type=recovery` hash check (PKCE flow doesn't set the hash); rejected one-time DB-stored token (out of scope per task; adds a table); rejected unsigned cookie (browser DevTools could fabricate). Signed-cookie approach piggybacks on the existing service-role key, so deployments don't need a new secret.
+
+### Verification
+
+- `npx tsc --noEmit` clean.
+- Live JWKS at `https://upqvbdldoyiqqshxquxa.supabase.co/auth/v1/.well-known/jwks.json` confirms ES256 only — verification path is reachable.
+- Recovery flow trace: email → `/auth/confirm?token_hash=…&type=recovery&next=/reset-password` → `verifyOtp` succeeds → cookie set → 302 → `/reset-password` reads cookie + session, both match same `userId` → form renders → `auth.updateUser({ password })` → `router.replace("/app")`.
+- Direct-nav trace (logged-in user hits `/reset-password` without going through email): no `sq-pwr` cookie → "reset link expired" view; form never renders.
+- Cron flow trace: `Authorization: Bearer ${CRON_SECRET}` from Vercel → `isAuthorizedBearer` parses + `timingSafeEqual` returns true → handler runs. Wrong secret → false → 401.
+
+### Files changed
+
+- `lib/auth/verifyJWT.ts` — HS256 path removed, issuer pinning added.
+- `lib/auth/requireRole.ts` — comment update only.
+- `lib/auth/timingSafeBearer.ts` — NEW.
+- `lib/auth/recoveryCookie.ts` — NEW.
+- `app/api/cron/auto-expire-stale-quotes/route.ts`, `cleanup-notifications/route.ts`, `estimate-expiry-warning/route.ts`, `estimate-nudge-unviewed/route.ts`, `rescue-stuck-leads/route.ts`, `trial-ending-soon/route.ts`, `trial-expired/route.ts`, `unopened-leads-reminder/route.ts` — bearer compare via helper.
+- `app/api/internal/run-estimator/route.ts` — `x-internal-secret` compare via helper.
+- `app/auth/confirm/route.ts` — sets `sq-pwr` cookie on `type=recovery`.
+- `app/(public)/reset-password/page.tsx` — server-component cookie+session gate.
+- `.env.example` — `SUPABASE_JWT_SECRET` block removed; optional `SUPABASE_JWT_ISSUER` block added.
+- `scripts/jwt-verify-diagnostic.mjs` — HS256 attempt removed; ES256 + audience + issuer attempt added.
+
+---
+
 ## Session — May 8, 2026 — Audit 8 PII leaks closed (C1 + C2 + H10)
 
 Critical/High PII leaks identified by Audit 8 fixed and verified live in production. Two migrations + 6 web SSR pages + 4 mobile files. tsc clean both repos.

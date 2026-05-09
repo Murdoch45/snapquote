@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { generateEstimateAsync } from "@/lib/ai/estimate";
+import { safeEqualSecret } from "@/lib/auth/timingSafeBearer";
 
 export const runtime = "nodejs";
 // The estimator gets the full Vercel function budget on this endpoint. It
@@ -22,7 +23,6 @@ export const maxDuration = 60;
  * so it can't be killed when Vercel reclaims that instance.
  */
 export async function POST(request: Request) {
-  const provided = request.headers.get("x-internal-secret");
   const expected = process.env.INTERNAL_API_SECRET;
 
   if (!expected) {
@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     );
   }
 
-  if (provided !== expected) {
+  if (!safeEqualSecret(request.headers.get("x-internal-secret"), expected)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
