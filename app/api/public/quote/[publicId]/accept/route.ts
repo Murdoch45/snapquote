@@ -7,6 +7,7 @@ import { sendPushToOrg } from "@/lib/pushNotifications";
 import { computeEffectiveQuoteStatus } from "@/lib/quoteExpiry";
 import { invalidateAnalytics } from "@/lib/db";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { requireOrgFilter } from "@/lib/supabase/orgFilter";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getAppUrl } from "@/lib/utils";
 
@@ -127,11 +128,13 @@ export async function POST(_request: Request, { params }: Props) {
     { data: lead, error: leadError },
     { data: profile, error: profileError }
   ] = await Promise.all([
-    admin
-      .from("leads")
-      .select("address_full,services,customer_name")
-      .eq("id", acceptedQuote.lead_id)
-      .single(),
+    requireOrgFilter(
+      admin
+        .from("leads")
+        .select("address_full,services,customer_name")
+        .eq("id", acceptedQuote.lead_id),
+      acceptedQuote.org_id as string
+    ).single(),
     admin
       .from("contractor_profile")
       .select(

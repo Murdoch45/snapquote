@@ -5,6 +5,7 @@ import { buildCustomerConfirmationEmail } from "@/lib/emailTemplates";
 import { haversineMiles } from "@/lib/maps";
 import { notifyContractor, notifyCustomer, sendEmail } from "@/lib/notify";
 import { rateLimit } from "@/lib/rateLimit";
+import { getClientIp } from "@/lib/ip";
 import { normalizeServiceTypes } from "@/lib/services";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAppUrl } from "@/lib/utils";
@@ -43,8 +44,8 @@ const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
  */
 export async function POST(request: Request) {
   try {
-    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-    if (!rateLimit(`lead-submit:${ip}`, 20, ONE_HOUR)) {
+    const ip = getClientIp(request);
+    if (!(await rateLimit(`lead-submit:${ip}`, 20, ONE_HOUR))) {
       return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429 });
     }
 

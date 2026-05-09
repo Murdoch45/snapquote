@@ -1,4 +1,5 @@
 import * as Sentry from "@sentry/nextjs";
+import { scrubSentryEvent } from "@/lib/sentryScrub";
 
 // Initialized once per Node.js serverless worker. Safe to import from
 // everywhere via Sentry.captureException / Sentry.captureMessage after
@@ -23,5 +24,17 @@ Sentry.init({
   // Avoid noise in local dev: only send events when a DSN is present.
   // (The SDK also no-ops without a DSN, but this makes the intent
   // explicit and keeps dev stack traces out of production projects.)
-  enabled: Boolean(process.env.SENTRY_DSN)
+  enabled: Boolean(process.env.SENTRY_DSN),
+
+  // Strip customer PII (name/email/phone/address/lat-lng/etc.) from
+  // event payloads before they leave the process. Stack traces and
+  // non-PII metadata are preserved — see lib/sentryScrub.ts for the
+  // key list. Audit 8 H6.
+  beforeSend(event) {
+    return scrubSentryEvent(event);
+  },
+  beforeBreadcrumb(breadcrumb) {
+    if (breadcrumb.data) breadcrumb.data = scrubSentryEvent({ extra: breadcrumb.data }).extra;
+    return breadcrumb;
+  }
 });

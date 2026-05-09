@@ -30,7 +30,7 @@ export async function POST(request: Request) {
   const auth = await requireOwnerForApi(request);
   if (!auth.ok) return auth.response;
 
-  if (!rateLimit(`verify-email:${auth.orgId}`, 5, ONE_HOUR)) {
+  if (!(await rateLimit(`verify-email:${auth.orgId}`, 5, ONE_HOUR))) {
     return NextResponse.json(
       { error: "Too many requests. Please try again later." },
       { status: 429 }

@@ -7,6 +7,75 @@ This file is append-only. Every session, every meaningful fix, finding, or decis
 
 ---
 
+## Session — May 9, 2026 — Audit 8 web infra hardening (H4 + H6 + H9 + M5 + M6 + M7 + M11 + M12 + L3) [Source: Claude Code]
+
+Nine defense-in-depth fixes shipped on `claude/audit-8-web-hardening` off `main`. Live diagnosis preceded each fix; nothing taken on Notion-only evidence.
+
+### H4 — Security headers + CSP report-only
+
+`next.config.ts` had no `headers()` config; `vercel.json` only declared crons; `middleware.ts` set no security headers. All HTTP responses went out bare.
+
+Added `headers()` returning Strict-Transport-Security (2y + preload), X-Content-Type-Options nosniff, X-Frame-Options DENY, Referrer-Policy strict-origin-when-cross-origin, Permissions-Policy locking down camera/microphone/geolocation/etc. (payment kept enabled for Stripe Elements), and Content-Security-Policy-Report-Only with allowlists for Stripe.js (`js.stripe.com`, `m.stripe.network`, `api.stripe.com`), Cloudflare Turnstile, Google Maps, Supabase REST + Storage + Realtime WSS, RevenueCat, and Sentry tunnel ingest. `img-src https:` permits the public lead form's Supabase Storage thumbnails. CSP deployed report-only first — TODO comment in `next.config.ts` marks the directive list and tells future-us to flip the header name to `Content-Security-Policy` after 1–2 weeks of clean violation reports. Verified live via `curl -sI` against `next start` on port 3789: all six security headers present, CSP directives intact.
+
+### H6 — Sentry PII scrubbing on beforeSend
+
+Server + edge Sentry configs had no `beforeSend` hook; no client config existed at all. Customer email/phone/name/address could leak into Sentry events via `event.extra`, `event.contexts`, breadcrumbs, request bodies.
+
+Added shared `lib/sentryScrub.ts` with a depth-bounded recursive scrubber that redacts any key containing PII fragments (email, phone, address, name, ssn, token, password, lat/lng, etc.) while preserving stack traces and non-PII metadata. Wired `beforeSend` and `beforeBreadcrumb` into `sentry.server.config.ts`, `sentry.edge.config.ts`, and a new `instrumentation-client.ts` (Sentry v10 / Next.js 15 client-side init convention). Cookies scrubbed unconditionally; `event.user.id` preserved for grouping but other user fields redacted.
+
+### H9 — Distributed rate limiter (Upstash) with in-memory fallback
+
+`lib/rateLimit.ts` was a per-instance `Map`. Vercel runs each function on N hot lambdas, so effective rate limit was `limit × instance_count` — defeating the purpose for IP-based limits.
+
+Rewrote to use `@upstash/ratelimit` + `@upstash/redis` (sliding-window) when `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` are present; falls back to the original in-memory `Map` when env vars are absent (local dev, tests). Function signature changed from sync `boolean` to `Promise<boolean>` — all 6 callers updated to `await`: `app/api/public/lead-submit/route.ts`, `app/api/public/lead-photo-upload/route.ts`, `app/api/app/settings/verify-email/route.ts`, `app/api/app/settings/check-slug/route.ts`, `app/api/app/activity/touch/route.ts`, `app/api/public/auth/forgot-password/route.ts`. Limiter caches one Ratelimit instance per (limit, windowMs) tuple. Redis errors degrade to in-memory rather than 5xx the user.
+
+**Provisioning required (flag for Murdoch):** Upstash Redis instance must be created and `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` added to Vercel for Production / Preview / Development before the distributed path takes effect in prod. Until then the in-memory fallback runs — no behavior regression vs. pre-fix.
+
+### M5 — Admin-client tenant-filter helper
+
+The Supabase admin client uses the service-role key, which bypasses RLS. 65 files use the admin client. Missing `.eq('org_id', orgId)` on a tenant-table SELECT could leak cross-tenant data with no enforcement layer to catch it.
+
+Added `lib/supabase/orgFilter.ts` exporting `requireOrgFilter(query, orgId)` — wraps the query in an explicit `.eq('org_id', orgId)` and throws if `orgId` is empty. Generic typed as `<Q>` with cast-through-any to defeat TS2589 from Supabase's deeply-nested PostgrestFilterBuilder generics. Refactored four high-risk admin SELECTs to use the helper: `app/api/app/leads/unlock/route.ts` (lead read + existing-quote read), `app/api/app/quote/send/route.ts` (lead read + existing-quote read), `app/api/public/quote/[publicId]/accept/route.ts` (post-acceptance lead read — added a *new* org_id check that wasn't previously present, since the prior code resolved org_id from the quote token without re-asserting it on the lead lookup). Module docstring documents the convention so reviewers can reject admin-client tenant-table access without a filter.
+
+### M6 — Forgot-password rate-limit composition
+
+`app/api/public/auth/forgot-password/route.ts:16` keyed only on email. An attacker could spray different email addresses to exhaust the Resend send budget while staying under the per-email cap.
+
+Rewrote to require BOTH gates pass independently: `forgot:email:<email>` at 3/hr (existing) + `forgot:ip:<ip>` at 10/hr (new). Both checks run in parallel via `Promise.all` to avoid serialised round-trips on the Upstash limiter. Email-spray attackers now hit the IP cap; legitimate users sharing an IP (NAT, office) still have plenty of headroom.
+
+### M7 — `x-real-ip` instead of `x-forwarded-for`
+
+Four routes read `request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()` — that header is client-controllable, so IP-based rate limits could be bypassed by spoofing it.
+
+Added `lib/ip.ts` exporting `getClientIp(request)` which prefers `x-real-ip` (set by Vercel's edge after stripping client-supplied X-Forwarded-For) and falls back to first-hop X-Forwarded-For for environments without x-real-ip (local dev). All four call sites switched: `app/api/public/lead-submit/route.ts:46`, `app/api/public/lead-photo-upload/route.ts:78`, `app/api/app/leads/unlock/route.ts:101`, `app/api/app/quote/send/route.ts:326`. Also wired into the new forgot-password IP-key from M6. Convention documented in module docstring.
+
+### M11 — Web npm audit
+
+Pre-fix: 8 vulns (6 high, 2 moderate). High vulns in `next`, `picomatch`, `vite`, `fast-uri`, `flatted`, `lodash`. Ran `npm audit fix` — packages bumped, all 6 highs resolved. Two moderate postcss vulns remain — they're transitive *inside* `next@15.5.x`'s bundled compiler; `npm audit fix --force` would downgrade Next to 9.3.3 (a major regression), and the proper fix is Next 16+ which is a major-version migration out of scope for this audit. The bundled postcss isn't reachable from app code (it processes Next's own internal CSS pipeline, not user input). Deferred.
+
+### M12 — Mobile npm audit
+
+`@xmldom/xmldom@0.8.12` (high — uncontrolled recursion DoS, XML injection via DocumentType / processing instruction / comment serialization). Transitive via `expo-sharing` → `@expo/config-plugins` → `xcode` → `simple-plist` → `plist`. Ran `npm audit fix` in mobile repo: bumped to `0.8.13` (advisory range is `<=0.8.12`, so 0.8.13 is patched). High count: 1 → 0. Four moderate postcss vulns remain — same story as web (transitive via Expo, fix would require Expo major downgrade).
+
+### L3 — Explicit CORS stance
+
+No CORS handling anywhere in the web repo. Browser default (block cross-origin reads, reject preflighted credentialed requests) is exactly what we want today: public lead form is server-rendered same-origin on snapquote.us, mobile uses bearer-token auth (not subject to CORS), `/api/app/*` is cookie-auth and intentionally same-origin. Added a documenting comment block at the top of `middleware.ts` explaining the policy and the conditions under which we'd add allowlist-driven CORS (embeddable lead form on contractor sites). Click-jacking protection comes from X-Frame-Options + CSP frame-ancestors set by H4.
+
+### Verification
+
+- TS compile clean both repos (`npx tsc --noEmit`).
+- Web: `next build --no-lint` succeeds; 76/76 vitest tests pass.
+- Headers verified live via `curl -sI http://localhost:3789/` against `next start`: STS, X-Content-Type-Options, X-Frame-Options DENY, Referrer-Policy, Permissions-Policy, Content-Security-Policy-Report-Only all present with the configured values.
+- Web `npm audit`: 8 vulns → 2 moderate (next-bundled postcss; deferred to Next 16 migration).
+- Mobile `npm audit`: 5 vulns → 4 moderate (expo-bundled postcss; same shape).
+
+### Flags for Murdoch
+
+- **Upstash provisioning required.** H9 in-memory fallback ships safely, but the distributed limiter doesn't activate until Upstash is created and `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` are added to Vercel for Production / Preview / Development.
+- **AASA file (deferred from Prompt 3).** Audit 8 H8 (Universal Links) needs server-side delivery from the web repo (`/.well-known/apple-app-site-association`). Out of scope for this hardening pass; tracked separately.
+
+---
+
 ## Session — May 9, 2026 — Audit 8 auth hardening closed (H1 + H2 + H3 + H5) [Source: Claude Code]
 
 Four web-side auth hardening fixes from Audit 8 shipped in a single branch off `main` (`ea90027`). Live diagnosis preceded each fix; nothing taken on Notion-only evidence.

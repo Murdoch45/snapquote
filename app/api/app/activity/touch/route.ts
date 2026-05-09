@@ -22,7 +22,7 @@ export async function POST(request: Request) {
   const auth = await requireMemberForApi(request);
   if (!auth.ok) return auth.response;
 
-  if (!rateLimit(`activity-touch:${auth.orgId}`, 1, FIVE_MINUTES_MS)) {
+  if (!(await rateLimit(`activity-touch:${auth.orgId}`, 1, FIVE_MINUTES_MS))) {
     return NextResponse.json({ ok: true, skipped: true });
   }
 

@@ -2,6 +2,7 @@ import { randomUUID } from "crypto";
 import { NextResponse } from "next/server";
 import * as Sentry from "@sentry/nextjs";
 import { rateLimit } from "@/lib/rateLimit";
+import { getClientIp } from "@/lib/ip";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { leadPhotoUploadSchema } from "@/lib/validations";
 
@@ -74,8 +75,8 @@ function extensionFromMime(mime: string): string {
  */
 export async function POST(request: Request) {
   try {
-    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-    if (!rateLimit(`lead-photo-upload:${ip}`, PHOTO_UPLOAD_RATE_LIMIT, ONE_HOUR_MS)) {
+    const ip = getClientIp(request);
+    if (!(await rateLimit(`lead-photo-upload:${ip}`, PHOTO_UPLOAD_RATE_LIMIT, ONE_HOUR_MS))) {
       return NextResponse.json(
         { error: "Too many uploads. Please try again later." },
         { status: 429 }

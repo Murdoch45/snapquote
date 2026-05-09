@@ -1,6 +1,26 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
+// CORS policy (Audit 8 L3) — *intentionally* no Access-Control-Allow-Origin
+// header is set anywhere in this app. The browser default — block
+// cross-origin reads, allow simple no-credential POSTs but reject
+// preflighted credentialed requests — is exactly what we want today:
+//
+//   - The public lead form (/[contractorSlug]) is rendered server-side
+//     on snapquote.us and POSTs to /api/public/lead-submit on the same
+//     origin. No CORS needed.
+//   - The mobile app uses bearer-token Supabase auth, not browser cookies,
+//     so it's not subject to CORS in the first place.
+//   - /api/app/* is cookie-authenticated and intentionally same-origin
+//     only. Adding CORS would risk credentialed cross-origin requests.
+//
+// If we ever ship an embeddable lead form (e.g. a contractor pasting an
+// <iframe> into their own marketing site), add an allowlist-driven
+// Access-Control-Allow-Origin response header to /api/public/embed/*
+// here — do NOT use a wildcard and do NOT extend it to /api/app/*.
+//
+// Click-jacking is already blocked by the X-Frame-Options: DENY +
+// CSP frame-ancestors 'none' headers configured in next.config.ts.
 export async function middleware(request: NextRequest) {
   // Belt-and-suspenders for OAuth redirect-target misconfigs.
   //
