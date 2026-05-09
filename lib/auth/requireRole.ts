@@ -124,8 +124,8 @@ type ResolvedIdentity = {
  * Resolve the request's user identity without round-tripping to GoTrue.
  *
  * Bearer path: verify the JWT signature locally via `verifySupabaseJWT`
- * (tries ES256 via JWKS first, falls back to HS256 with shared secret).
- * This eliminates the GoTrue replication race that 401-ed mobile builds
+ * (ES256 via the project's JWKS, audience + issuer pinned). This
+ * eliminates the GoTrue replication race that 401-ed mobile builds
  * 13/14/15 on freshly-issued tokens — see
  * `docs/auth-jwt-direct-refactor-plan-2026-05-06.md`.
  *

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { triggerEstimatorForLead } from "@/lib/ai/triggerEstimator";
 import { sendNewLeadNotifications } from "@/lib/ai/estimate";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { isAuthorizedBearer } from "@/lib/auth/timingSafeBearer";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -62,8 +63,7 @@ const STUCK_NOTE =
  * don't double-notify or double-trigger.
  */
 export async function GET(request: Request) {
-  const authHeader = request.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!isAuthorizedBearer(request.headers.get("authorization"), process.env.CRON_SECRET)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

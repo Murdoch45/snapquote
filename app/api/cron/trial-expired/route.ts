@@ -4,6 +4,7 @@ import { sendEmail } from "@/lib/notify";
 import { getOwnerEmailForOrg } from "@/lib/organizationOwners";
 import { sendPushToOrg } from "@/lib/pushNotifications";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { isAuthorizedBearer } from "@/lib/auth/timingSafeBearer";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -23,8 +24,7 @@ export const maxDuration = 60;
  * provider layers.
  */
 export async function GET(request: Request) {
-  const authHeader = request.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!isAuthorizedBearer(request.headers.get("authorization"), process.env.CRON_SECRET)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

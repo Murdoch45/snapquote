@@ -1,5 +1,10 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import {
+  RECOVERY_COOKIE_NAME,
+  RECOVERY_COOKIE_MAX_AGE_SECONDS,
+  signRecoveryToken
+} from "@/lib/auth/recoveryCookie";
 
 function safeNextPath(value: string | null): string {
   if (!value) return "/app";
@@ -51,12 +56,27 @@ export async function GET(request: NextRequest) {
     }
   );
 
-  const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type });
+  const { data, error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type });
 
   if (error) {
     const loginUrl = new URL("/login", url.origin);
     loginUrl.searchParams.set("oauth_error", error.message);
     return NextResponse.redirect(loginUrl);
+  }
+
+  // Audit 8 H5: only mark a session as "in password recovery" when the
+  // user just completed a recovery OTP. The reset-password page rejects
+  // any session lacking this cookie, which closes the bypass where a
+  // logged-in user (or hijacked session) could change the account
+  // password without re-authenticating.
+  if (type === "recovery" && data.user?.id) {
+    response.cookies.set(RECOVERY_COOKIE_NAME, signRecoveryToken(data.user.id), {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: RECOVERY_COOKIE_MAX_AGE_SECONDS
+    });
   }
 
   return response;
