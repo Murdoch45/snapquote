@@ -8,6 +8,10 @@
 
 ---
 
+## AASA file shipped — 2026-05-09 (Audit 8 H8 followup)
+
+`app/.well-known/apple-app-site-association/route.ts` returns the Universal Links JSON (`U58KVR8LTA.com.murdochmarcum.snapquote`, `paths: ["*"]`) with `Content-Type: application/json`. Serves at `/.well-known/apple-app-site-association` on Vercel. Mobile entitlement (`app.json:89-91`) lists both `applinks:snapquote.us` and `applinks:www.snapquote.us`.
+
 ## Audit 8 PII leaks closed — 2026-05-08 (C1, C2, H10)
 
 Three Critical/High PII leaks from Audit 8 fixed and verified live in production. Migrations + supporting client changes shipped together.
