@@ -7,6 +7,12 @@ This file is append-only. Every session, every meaningful fix, finding, or decis
 
 ---
 
+## Session — May 9, 2026 — AASA file shipped (Audit 8 H8 followup) [Source: Claude Code]
+
+Added `app/.well-known/apple-app-site-association/route.ts` returning the Universal Links JSON with `Content-Type: application/json` and `paths: ["*"]` for appID `U58KVR8LTA.com.murdochmarcum.snapquote`. Pre-deploy live state: `https://snapquote.us/...` returned 307 → www; `https://www.snapquote.us/...` returned 404 (text/html, X-Vercel-Cache HIT, X-Next-Error-Status 404). Post-deploy verification curl outputs and Apple CDN validator result captured in commit message + Notion entry.
+
+---
+
 ## Session — May 8, 2026 — Audit 8 PII leaks closed (C1 + C2 + H10)
 
 Critical/High PII leaks identified by Audit 8 fixed and verified live in production. Two migrations + 6 web SSR pages + 4 mobile files. tsc clean both repos.
