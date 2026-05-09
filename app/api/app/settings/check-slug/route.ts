@@ -13,7 +13,7 @@ export async function GET(request: Request) {
   // Cap slug-availability checks to prevent enumeration of taken slugs.
   // Any one org can check up to 30 slugs per minute (typing a slug character
   // by character with debounced requests well under that ceiling).
-  if (!rateLimit(`check-slug:${auth.orgId}`, 30, ONE_MINUTE)) {
+  if (!(await rateLimit(`check-slug:${auth.orgId}`, 30, ONE_MINUTE))) {
     return NextResponse.json(
       { available: false, error: "Too many requests. Please slow down." },
       { status: 429 }
