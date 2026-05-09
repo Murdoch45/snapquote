@@ -3,11 +3,13 @@ import { after, NextResponse } from "next/server";
 import { recordAudit } from "@/lib/auditLog";
 import { buildEstimateSentEmail } from "@/lib/emailTemplates";
 import { requireMemberForApi } from "@/lib/auth/requireRole";
+import { getClientIp } from "@/lib/ip";
 import { sendEmail } from "@/lib/notify";
 import { buildEstimateLink, renderEstimateTemplate } from "@/lib/quote-template";
 import { sendQuoteSchema } from "@/lib/quoteSendSchema";
 import { invalidateAnalytics } from "@/lib/db";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { requireOrgFilter } from "@/lib/supabase/orgFilter";
 import { sendQuoteSms } from "@/lib/telnyx";
 import { incrementUsageOnQuoteSend } from "@/lib/usage";
 
@@ -55,12 +57,15 @@ export async function POST(request: Request) {
     bodyLeadId = body.leadId;
     const admin = createAdminClient();
 
-    const { data: lead, error: leadError } = await admin
-      .from("leads")
-      .select("id,org_id,status,customer_name,customer_phone,customer_email,address_full,services")
-      .eq("id", body.leadId)
-      .eq("org_id", auth.orgId)
-      .single();
+    // Tenant filter via requireOrgFilter (Audit 8 M5) — explicit org_id
+    // gate on admin-client SELECT against tenant-scoped table.
+    const { data: lead, error: leadError } = await requireOrgFilter(
+      admin
+        .from("leads")
+        .select("id,org_id,status,customer_name,customer_phone,customer_email,address_full,services")
+        .eq("id", body.leadId),
+      auth.orgId
+    ).single();
 
     if (leadError || !lead) {
       return NextResponse.json({ error: "Lead not found." }, { status: 404 });
@@ -90,12 +95,13 @@ export async function POST(request: Request) {
     // Check for an existing DRAFT quote (created at unlock time).
     // If one exists, UPDATE it to SENT. If not, fall back to INSERT for
     // backward compatibility with pre-existing unlocked leads.
-    const { data: existingQuote } = await admin
-      .from("quotes")
-      .select("id,public_id,status,estimated_price_low,estimated_price_high,message,sent_via")
-      .eq("lead_id", body.leadId)
-      .eq("org_id", auth.orgId)
-      .maybeSingle();
+    const { data: existingQuote } = await requireOrgFilter(
+      admin
+        .from("quotes")
+        .select("id,public_id,status,estimated_price_low,estimated_price_high,message,sent_via")
+        .eq("lead_id", body.leadId),
+      auth.orgId
+    ).maybeSingle();
 
     // Defense-in-depth pre-check. A concurrent request may race past this
     // and still win the CAS below; the idempotency handling there returns
@@ -322,8 +328,8 @@ export async function POST(request: Request) {
     // skip the idempotent-concurrent-winner path above: that request
     // didn't actually send anything, and the original winner's audit
     // row already represents what happened.
-    const ipAddress =
-      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
+    const clientIp = getClientIp(request);
+    const ipAddress = clientIp === "unknown" ? null : clientIp;
     const auditOrgId = auth.orgId;
     const auditUserId = auth.userId;
     const auditUserEmail = auth.userEmail;

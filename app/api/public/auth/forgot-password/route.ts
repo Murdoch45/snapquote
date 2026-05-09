@@ -3,8 +3,16 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { sendEmail } from "@/lib/notify";
 import { renderEmailShell, renderButton } from "@/lib/emailTemplates";
 import { rateLimit } from "@/lib/rateLimit";
+import { getClientIp } from "@/lib/ip";
 
 const ONE_HOUR = 60 * 60 * 1000;
+
+// Per-IP cap. Lower than the email-keyed cap because a single user
+// shouldn't be triggering many resets across different email accounts
+// from the same machine. An attacker spraying emails to exhaust the
+// Resend send budget will hit this before per-email caps kick in.
+// (Audit 8 M6.)
+const FORGOT_PASSWORD_PER_IP_LIMIT = 10;
 
 export async function POST(request: Request) {
   try {
@@ -12,8 +20,16 @@ export async function POST(request: Request) {
 
     if (typeof email === "string" && email.includes("@")) {
       const normalizedEmail = email.trim().toLowerCase();
+      const ip = getClientIp(request);
 
-      if (!rateLimit(`forgot:${normalizedEmail}`, 3, ONE_HOUR)) {
+      // Both gates must pass — email-keyed (3/hr) protects a known
+      // account from being spammed; IP-keyed (10/hr) protects the
+      // outbound email budget from email-spraying attackers.
+      const [emailAllowed, ipAllowed] = await Promise.all([
+        rateLimit(`forgot:email:${normalizedEmail}`, 3, ONE_HOUR),
+        rateLimit(`forgot:ip:${ip}`, FORGOT_PASSWORD_PER_IP_LIMIT, ONE_HOUR)
+      ]);
+      if (!emailAllowed || !ipAllowed) {
         // Silently return 200 — don't reveal rate limiting to avoid enumeration.
         return NextResponse.json({ ok: true });
       }

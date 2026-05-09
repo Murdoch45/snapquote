@@ -3,9 +3,11 @@ import { after, NextResponse } from "next/server";
 import { z } from "zod";
 import { recordAudit } from "@/lib/auditLog";
 import { requireMemberForApi } from "@/lib/auth/requireRole";
+import { getClientIp } from "@/lib/ip";
 import { unlockLead } from "@/lib/credits";
 import { DEFAULT_ESTIMATE_SMS_TEMPLATE } from "@/lib/quote-template";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { requireOrgFilter } from "@/lib/supabase/orgFilter";
 
 const unlockLeadSchema = z.object({
   leadId: z.string().uuid()
@@ -38,15 +40,19 @@ export async function POST(request: Request) {
       try {
         const admin = createAdminClient();
 
-        // Fetch lead AI estimates for the draft
-        const { data: lead } = await admin
-          .from("leads")
-          .select(
-            "ai_suggested_price,ai_estimate_low,ai_estimate_high"
-          )
-          .eq("id", body.leadId)
-          .eq("org_id", auth.orgId)
-          .single();
+        // Fetch lead AI estimates for the draft. requireOrgFilter applies
+        // .eq("org_id", auth.orgId) — Audit 8 M5 admin-client tenant filter
+        // helper. Service-role bypasses RLS; the helper makes the tenant
+        // gate explicit.
+        const { data: lead } = await requireOrgFilter(
+          admin
+            .from("leads")
+            .select(
+              "ai_suggested_price,ai_estimate_low,ai_estimate_high"
+            )
+            .eq("id", body.leadId),
+          auth.orgId
+        ).single();
 
         const suggestedPrice = Number(lead?.ai_suggested_price ?? 0);
         const estimateLow = Number(lead?.ai_estimate_low ?? suggestedPrice);
@@ -77,12 +83,13 @@ export async function POST(request: Request) {
       // Already unlocked — check if a draft quote exists and return its publicId
       try {
         const admin = createAdminClient();
-        const { data: existingQuote } = await admin
-          .from("quotes")
-          .select("public_id")
-          .eq("lead_id", body.leadId)
-          .eq("org_id", auth.orgId)
-          .maybeSingle();
+        const { data: existingQuote } = await requireOrgFilter(
+          admin
+            .from("quotes")
+            .select("public_id")
+            .eq("lead_id", body.leadId),
+          auth.orgId
+        ).maybeSingle();
 
         publicId = (existingQuote?.public_id as string | null) ?? null;
       } catch {
@@ -96,8 +103,8 @@ export async function POST(request: Request) {
     // the fresh-unlock and already-unlocked paths — an already-unlocked
     // request still represents a contractor (or team member) acting on
     // this lead and is worth the trail.
-    const ipAddress =
-      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
+    const clientIp = getClientIp(request);
+    const ipAddress = clientIp === "unknown" ? null : clientIp;
     const orgId = auth.orgId;
     const userId = auth.userId;
     const actorEmail = auth.userEmail;
