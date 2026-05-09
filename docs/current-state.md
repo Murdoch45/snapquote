@@ -8,6 +8,44 @@
 
 ---
 
+## Audit 11 AI estimator re-audit at HEAD — 2026-05-09 (READ-ONLY)
+
+Read-only re-audit; no code or schema changed. Full report `docs/audit-11-ai-estimator-2026-05-09.md`.
+
+- **Pipeline solid:** Model `gpt-5-mini` confirmed live (`lib/ai/estimate.ts:3762, 4366`); vision via `input_image` at `:3735`; strict JSON schema enforcement via `zodTextFormat(aiSignalsResponseSchema)` at `:422-424` + `:3767`; per-call AI timeout `STRUCTURED_AI_TIMEOUT_MS = 35000` at `:381`; property data 8s, polish 10s; catch-block fallback in `generateEstimateAsync:4768-4865`; `ai_retry_count` retry cap of 2 in rescue cron.
+- **Latency live (Supabase MCP, last 30d, first-attempt successful, n=39):** p50 = 28.05s, p90 = 40.21s, p99 = 88.54s. **Above the 25s revisit threshold.** Polish (second AI call) is on the critical path before `ai_status="ready"` writes.
+- **Failure rate:** 2 / 47 leads in last 30d → `ai_status='failed'`; both with NULL estimates and string-shape `ai_estimator_notes` from the rescue-cron Stage-1 give-up path.
+- **Sentry coverage:** 30-day search for `area:estimator` / `tags[area]:estimator` / `stack.module:lib/ai/estimate` returned 0 events. Catch-fallback recovery is silent. No breadcrumbs around the OpenAI call.
+
+### Critical at HEAD
+- **C1 — `_other_text` and `_contractor_note` answer keys stripped before AI sees them.** `sanitizeAnswersForModeling` at `lib/ai/estimate.ts:1889-1894`; called by both prompt builder (`:3374`) and engine builder (`:1885`). Prompt at `:3338` instructs the model to use "any other-text answer fields" but those fields never reach the prompt. Customer's free-text clarifications on multi-choice questions are invisible to AI and engine.
+- **C2 — Rescue-cron Stage-1 give-up writes no fallback estimate.** `app/api/cron/rescue-stuck-leads/route.ts:82-91` flips `ai_status` past 15 min without computing a price. Live: 2 affected leads in last 30d (`25d8964d`, `718642d6`) — both NULL estimates, contractor sees New Lead notification with no price.
+
+### High at HEAD
+- **H1** Photo order non-deterministic (`lib/ai/estimate.ts:4607-4612`, no `.order()`).
+- **H2** `ai_estimator_notes` shape inconsistency (string from rescue cron, array from estimator) — same issue Audit 4 M1 flagged.
+- **H3** p50 latency above 25s threshold — driven by tandem signal+polish OpenAI calls and large schema.
+- **H4** No `estimatedQuantity` cross-check vs `propertyData.lotSizeSqft` (schema unbounded at `lib/ai/estimate.ts:220`).
+- **H5** `confidenceLabel` (`lib/ai/estimate.ts:4231-4234`) doesn't differentiate AI-source vs fallback-source — contractor UI sees identical labels.
+- **H6** No Sentry breadcrumbs around the OpenAI call; only top-level `captureException` at 3 catch sites.
+
+### Stale entries flagged
+- Bugs & Fixes 2026-05-04 entry says `STRUCTURED_AI_TIMEOUT_MS = 40000`. HEAD value is **35000**. Notion stale.
+
+---
+
+## Audit 4 lead-lifecycle re-verified at HEAD — 2026-05-09 (READ-ONLY)
+
+Read-only Audit 4 against web HEAD `eef6693`. NO code or schema changed. Full report at `docs/audit-4-lead-lifecycle-2026-05-09.md`.
+
+- **Verdict:** Lead lifecycle functional end-to-end. Zero Critical findings at HEAD. Six prior High items still open + one fresh High (8 ready-but-null-range leads from 2026-03-09 in org `8f939f96`).
+- **High items still open:** DRAFT staleness 35 quotes, 25 over 30d (PW-A4-6); ARCHIVED phantom enum (H1); OPENED missing enum (H2); lead-photos bucket missing MIME/size enforcement (H8 / PW-A4-10); unlock route DRAFT-mint silent failure (H5 / PW-A4-7); lead-detail page 48-bit `randomBytes(6)` publicId fallback at `app/app/leads/[id]/page.tsx:174` (H6 / PW-A4-8); 8 leads `ai_status='ready'` with NULL `ai_estimate_low/high` (FRESH H7).
+- **Cron health verified live:** rescue-stuck-leads pg_cron jobid=8 succeeded 20/20 last hour, sub-100ms; reset-solo-credits jobid=3 active; all 7 Vercel daily crons present in `vercel.json` and use timing-safe bearer compare (Audit 8 H3 fix verified).
+- **Notification dedup index:** `notifications_new_lead_dedup_idx` exists with correct shape; 0 historical duplicates; 0 NEW_LEAD inserts since 2026-05-08 deploy (low-traffic period — index correctly shaped but not stress-tested by post-deploy traffic).
+- **State machine integrity:** No leads in inconsistent state (no `lead.status='QUOTED'` without SENT-or-later quote, no `ACCEPTED` without ACCEPTED/EXPIRED quote).
+- **AI pipeline integrity:** 0 leads stuck in `processing` >10min. 3 leads ever retried (max=1, none hit MAX_AI_RETRIES=2 cap). 4.7% failure rate (163/3473). Falcon org 30-most-recent leads complete in 21-96s except 3 outliers from 2026-05-04 that hit retry=1 (rescue cron working).
+- **Cross-flags:** Audit 8 H6 PII scrubber doesn't redact org_id from error message bodies (4 hits in last 14d); custom Sentry tags `area:lead-submit/estimator` not surfacing in events search (possible scrubber-tag-stripping regression). Audit 11/12 to-dos noted in report.
+
 ## AASA file shipped — 2026-05-09 (Audit 8 H8 followup)
 
 `app/.well-known/apple-app-site-association/route.ts` returns the Universal Links JSON (`U58KVR8LTA.com.murdochmarcum.snapquote`, `paths: ["*"]`) with `Content-Type: application/json`. Serves at `/.well-known/apple-app-site-association` on Vercel. Mobile entitlement (`app.json:89-91`) lists both `applinks:snapquote.us` and `applinks:www.snapquote.us`.

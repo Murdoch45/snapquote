@@ -7,6 +7,104 @@ This file is append-only. Every session, every meaningful fix, finding, or decis
 
 ---
 
+## Session — May 9, 2026 — Audit 11 of 13 (AI Estimator) re-audit at HEAD [Source: Claude Code]
+
+Read-only Audit 11 against web HEAD `8ed8eea`, Supabase project `upqvbdldoyiqqshxquxa` live, Sentry org `snapquote`. No code or schema changed. Full report saved to `docs/audit-11-ai-estimator-2026-05-09.md`.
+
+### Verdict
+AI estimator pipeline is structurally solid: model name `gpt-5-mini` confirmed live, vision via `input_image`, strict JSON schema enforcement via `zodTextFormat`, per-call timeouts at every external boundary, catch-block fallback in `generateEstimateAsync`, and zero stuck-leads-now (`processing > 10 min` count = 0). Two real issues land on the contractor's eyes; rest is cleanup and observability.
+
+### Critical (live-verified)
+- **C1 — `_other_text` / `_contractor_note` answer keys stripped before AI sees them.** `lib/ai/estimate.ts:1889-1894` (`sanitizeAnswersForModeling`) filters those keys; called by both `buildServiceRequests:1885` and prompt builder via `sanitizeServiceQuestionBundlesForModeling:3374`. The system prompt at `:3338` still tells the model to "Analyze ... any other-text answer fields" — the field never reaches the model. Customer's free-text clarifications on multi-choice questions are invisible to AI and the deterministic engine. Stands from prior 2026-05-08 audit.
+- **C2 — Rescue-cron Stage-1 give-up writes no fallback estimate.** `app/api/cron/rescue-stuck-leads/route.ts:82-91` flips `ai_status='processing'` → `'failed'` past the 15-minute give-up threshold without computing a fallback price. The 2 failed leads in the last 30 days (`25d8964d`, `718642d6`) both have `ai_estimate_low IS NULL` and `ai_estimate_high IS NULL`. The catch-block fallback in `generateEstimateAsync` only fires when the in-process estimator throws — not when the rescue cron decides to give up. Contractor sees a New Lead notification with no estimate at all.
+
+### High (live-verified)
+- **H1 — Photo order is heap-order (non-deterministic).** `lib/ai/estimate.ts:4607-4612` selects `lead_photos` with no `.order(...)`. Postgres returns heap order. Same lead → different photo order → different AI output → reproducibility issue. Fix is `.order("created_at", { ascending: true })`.
+- **H2 — `ai_estimator_notes` JSONB shape inconsistency.** Same finding as Audit 4 M1 (re-confirmed). `app/api/cron/rescue-stuck-leads/route.ts:34-35,84-87` writes a JSON STRING; every other writer writes a JSON ARRAY. Live: 2 string-shape rows visible. Consumers using `.map`/`.length` without an `Array.isArray` guard will throw.
+- **H3 — Latency p50 at 28.05 s, above the 25 s revisit threshold.** Live Supabase percentile_cont over 39 first-attempt successful leads in last 30 days: p50 = 28.05 s, p90 = 40.21 s, p99 = 88.54 s. Drivers: two sequential OpenAI calls per lead (signal `client.responses.parse:3760` + polish `client.responses.create:4372`), large 40+-field schema. Polish is on the critical path before `ai_status="ready"` writes.
+- **H4 — No `estimatedQuantity` cross-check vs `propertyData.lotSizeSqft`.** Schema accepts unbounded `estimatedQuantity: z.number().min(-1)` (`estimate.ts:220`). No property-relative sanity gate. Stands from prior audit.
+- **H5 — `ai_confidence` label conflates AI vs fallback origin.** Same `confidenceLabel(score)` (`estimate.ts:4231-4234`) for both AI-source and fallback-source rows. Contractor sees "high/medium/low" identically. Cross-flag with Audit 4 lifecycle UI.
+- **H6 — No Sentry breadcrumbs around the OpenAI call.** Only top-level `captureException` in 3 catch sites; zero `addBreadcrumb` in `lib/ai/estimate.ts`. AI timeouts/rate-limits/parse-fails fall back gracefully and silently — no Sentry signal. Confirmed live: 30-day Sentry search for `area:estimator` / `tags[area]:estimator` / `stack.module:lib/ai/estimate` returned 0 events. Cross-flag with Audit 13.
+
+### Medium (live-verified)
+- **M1 — Coarse `service_category` mapping.** Roofing, Tree Service, Outdoor Lighting, Exterior Painting all collapse to `service_category = "other"` along with the literal "Other" service (per per-service estimator files). Filtering by category cannot distinguish them.
+- **M2 — Single-attempt AI request (no in-request retry).** Retry happens externally via rescue cron (`MAX_AI_RETRIES = 2`). A transient rate-limit drops to fallback immediately on the first attempt.
+- **M3 — `ai_status` is `text` with CHECK, not a Postgres enum.** No `pending` state.
+- **M4 — Photo MIME validated from `photo.type` (client-supplied), no server-side magic-byte sniff.** Cross-flag with Audit 8 storage gap.
+- **M5 — Polish AI call doubles per-lead AI cost and adds tail latency.** Both calls block before `ai_status="ready"`.
+
+### Low / observations
+- **L1 — Schema permits `summary` field that prompt forbids.** Strict schema enforcement makes it safe but it's prompt/schema drift.
+- **L2 — `lead-submit` "trigger failed" branch writes `ai_status='failed'` with NULL `ai_estimator_notes`.** Code path exists; 0 such rows in last 30 days.
+- **L3 — API key handling is server-only (verified, non-finding).**
+- **L4 — Per-call cost ≈ $0.005 (Notion estimate; not live-verifiable without token logging).**
+
+### Stale Notion / docs entries flagged
+- 2026-05-04 "AI estimator timeout + failed lead visibility" entry says `STRUCTURED_AI_TIMEOUT_MS = 40000`. HEAD value at `lib/ai/estimate.ts:381` is **35000**. Live wins. Notion is stale.
+- 2026-05-08 prior Audit 11 entry's findings re-verified: C1, H1 (renumbered H4 in this audit), H4 quantity-cross-check, H5 confidence label all still hold. Some M-numbering in the prior audit corresponds to different findings here (scope/focus shifted).
+
+### Live evidence anchors
+- Web HEAD: `git log origin/main..main` empty (in sync). Web tree had pre-existing untracked docs and `tsbuildinfo` from other agents — not touched.
+- Supabase MCP: `upqvbdldoyiqqshxquxa`, `leads.ai_status` distribution last 30d: 45 ready / 2 failed (both string-shape notes, both null estimates). Stuck count = 0.
+- Sentry MCP: zero events with `area:estimator` over 30 days.
+
+### Notion saves
+Critical/High will be appended to **Bugs & Fixes** as a fresh dated entry. To-dos to **Pending Work**. Architecture notes already covered by prior 2026-05-08 entries.
+
+---
+
+## Session — May 9, 2026 — Audit 4 of 13 (Lead Lifecycle) re-verified at HEAD [Source: Claude Code]
+
+Read-only Audit 4 against web HEAD `eef6693`, mobile HEAD `8ed8eea`, Supabase project `upqvbdldoyiqqshxquxa` live. No code or schema changed. Full report saved to `docs/audit-4-lead-lifecycle-2026-05-09.md`.
+
+### Pre-audit housekeeping
+Web repo had 8 unpushed commits on local main (Audit 8 web infra hardening + auth hardening) ahead of origin, with 2 origin-ahead commits (AASA followup). Pulled origin/main with merge, resolved conflicts in `docs/current-state.md` + `docs/updates-log.md` by keeping both entries (newer AASA entry on top, older Audit 8 hardening entry below). Pushed merged main → origin (`b3bf3e4..eef6693`). `git log origin/main..main --oneline` empty.
+
+### Verdict
+Lead lifecycle functional end-to-end. Zero findings rated Critical at HEAD. Six prior High items still open + one fresh High (legacy data inconsistency).
+
+### High findings (live-verified)
+- **H1 — DRAFT-quote staleness, no cleanup mechanism (STANDS).** Live: 35 DRAFTs, 31/35 (89%) older than 7d at `lead.submitted_at`, 25/35 (71%) older than 30d, oldest 2026-03-16. No cron / no UI to discard. Each represents a charged credit.
+- **H2 — `lead_status.ARCHIVED` phantom enum (STANDS).** Live: enum has it, 0 rows write it. Migration 0031 historical no-op confirmed.
+- **H3 — `lead_status.OPENED` missing from live enum despite migration 0030 recorded (STANDS).**
+- **H4 — Storage bucket `lead-photos` no MIME/size enforcement at bucket level (STANDS).** Live: `allowed_mime_types: NULL, file_size_limit: NULL`. Route enforces; bucket doesn't.
+- **H5 — Unlock route DRAFT-mint silent failure (STANDS).** `app/api/app/leads/unlock/route.ts:75-81` catch returns `publicId: null` with `ok: true`, credit already spent, no contractor-visible error.
+- **H6 — Lead-detail page 48-bit publicId fallback (STANDS).** `app/app/leads/[id]/page.tsx:174`: `activePublicId = draftPublicId ?? randomBytes(6).toString("base64url")`. Unlock + send routes use 12 bytes. Fresh-INSERT quote-send accepts `body.publicId ?? makePublicId()`, so the 48-bit value can land on the persisted public_id.
+- **H7 — 8 leads `ai_status='ready'` with NULL `ai_estimate_low/high` (FRESH FINDING).** All in org `8f939f96`, all 2026-03-09, all "Landscaping". Code at HEAD always writes the range; legacy data predates that. QuoteComposer falls back gracefully (zero-spread range), but UX is odd. One-time backfill recommended: `UPDATE leads SET ai_estimate_low=ai_suggested_price, ai_estimate_high=ai_suggested_price WHERE ai_status='ready' AND ai_estimate_low IS NULL`.
+
+### Medium / Low (highlights, full list in report)
+- **M1 — `ai_estimator_notes` shape inconsistency (FRESH).** Rescue cron writes a JSON STRING (`STUCK_NOTE` constant); `lib/ai/estimate.ts` writes a JSONB ARRAY. Both shapes coexist. Any reader iterating as `string[]` will fail on the 2 string-shape rows (`25d8964d`, `718642d6`).
+- **M2 — `/api/public/quote/[publicId]/accept/route.ts:110` lead UPDATE missing org_id filter** (defense-in-depth gap; cross-flag with Audit 8 M5 helper convention).
+- **M3 — quote_events ACCEPTED catch swallows ALL errors (STANDS).** Should narrow to `error.code === '23505'`.
+- **M6 — PII can leak into Sentry via error MESSAGE bodies.** `Error: {"code":"42501","message":"permission denied for organization 8f939f96-..."}` appeared 4× in last 14d. Audit 8 H6 PII scrubber walks key NAMES; doesn't sanitise message bodies. Cross-flag for Audit 8 / 12.
+- **L2 — Custom Sentry tags (`area:lead-submit` etc.) not surfacing in events search.** `area:lead-submit OR area:lead-photo-upload OR area:estimator` returns 0 events over 14d despite multiple `Sentry.captureException(..., { tags: { area: ... } })` call sites. Possible scrubber regression — investigate.
+
+### State machine integrity (live)
+- No `lead.status='QUOTED'` without SENT-or-later quote.
+- No `lead.status='ACCEPTED'` with quote in non-(ACCEPTED, EXPIRED) status.
+- 10 quote_events SENT rows missing for non-DRAFT quotes — ALL are demo seed rows (`public_id LIKE 'demo-%'`). Not a code bug.
+
+### AI pipeline (live, 2026-05-09)
+3473 leads. `ai_status` distribution: ready=3310, failed=163, processing=0. Stuck in processing >10min: 0. `ai_retry_count > 0`: 3 leads (max=1; none hit MAX_AI_RETRIES=2). Falcon org sample: 30 most recent complete in 21-96s except 3 from 2026-05-04 20:06-20:14 UTC that hit retry=1 (rescue cron stage 3 working).
+
+### Cron health (live)
+- pg_cron jobid=8 (rescue-stuck-leads */3min): succeeded on 20/20 most recent runs (last 2026-05-09 18:00:00 UTC), sub-100ms each.
+- pg_cron jobid=3 (reset-solo-credits @daily): active.
+- All 7 Vercel daily crons declared in `vercel.json`. Bearer compare via `isAuthorizedBearer` (Audit 8 H3 fix).
+
+### Notification dedup
+`notifications_new_lead_dedup_idx` exists with correct partial-unique shape: `UNIQUE (org_id, screen_params->>'id') WHERE type='NEW_LEAD' AND screen_params->>'id' IS NOT NULL`. 0 historical duplicates. 0 new NEW_LEAD inserts since the 2026-05-08 deploy (low-traffic period — last NEW_LEAD was 2026-05-06).
+
+### Cross-flags for other audits
+- **Audit 8:** scrubber should redact org_id substrings in message bodies (M6); investigate whether scrubber strips `event.tags` (L2).
+- **Audit 11:** ai_estimator_notes shape normalisation (M1); 8 ready-but-null-range backfill (H7).
+- **Audit 12:** quote_events ACCEPTED catch should narrow to 23505 (M3); DEP0169 url.parse warnings being ingested as errors (L1).
+
+### Confirmed clean at HEAD
+Turnstile server verification, customer dedup by email→phone scoped to org_id, Solo 30-day gate (only SOLO; TEAM/BUSINESS pass through), photo-upload-as-picked, photo unique constraint absorbs dual-writer race, viewed_at CAS, self-accept rejection, two-phase QuoteComposer with delivery prefs persistence, send-path two-path CAS with public_id-preserving rollback, idempotency keys on Telnyx + Resend deterministic on quoteId, Audit 8 H3/M5/M7 fixes verified at every relevant call site.
+
+---
+
 ## Session — May 9, 2026 — AASA file shipped (Audit 8 H8 followup) [Source: Claude Code]
 
 Added `app/.well-known/apple-app-site-association/route.ts` returning the Universal Links JSON with `Content-Type: application/json` and `paths: ["*"]` for appID `U58KVR8LTA.com.murdochmarcum.snapquote`. Pre-deploy live state: `https://snapquote.us/...` returned 307 → www; `https://www.snapquote.us/...` returned 404 (text/html, X-Vercel-Cache HIT, X-Next-Error-Status 404). Post-deploy verification curl outputs and Apple CDN validator result captured in commit message + Notion entry.
