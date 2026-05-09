@@ -23,10 +23,18 @@ export default async function LeadsPage({ searchParams }: Props) {
   const rangeFrom = (currentPage - 1) * LEADS_PER_PAGE;
   const rangeTo = rangeFrom + LEADS_PER_PAGE - 1;
 
+  // Reads through public.leads_safe (Audit 8 C2). The view returns NULL for
+  // PII columns (customer_name, customer_phone, customer_email, address_full,
+  // …) when the lead is not unlocked, and exposes a derived is_unlocked
+  // boolean. Direct SELECT on public.leads from the user-scoped client is
+  // denied at the column-grant level for authenticated; the safe view is
+  // the canonical authenticated read path. Admin-client paths in
+  // lib/credits.ts, lib/demo/server.ts, and app/api/**/route.ts continue
+  // to read public.leads directly because service_role retains full access.
   const { data: leads, count } = await supabase
-    .from("leads")
+    .from("leads_safe")
     .select(
-      "id,address_full,customer_name,customer_phone,customer_email,services,submitted_at,ai_status,ai_suggested_price,ai_estimate_low,ai_estimate_high,ai_job_summary",
+      "id,address_full,customer_name,customer_phone,customer_email,services,submitted_at,ai_status,ai_suggested_price,ai_estimate_low,ai_estimate_high,ai_job_summary,is_unlocked",
       { count: "exact" }
     )
     .eq("org_id", auth.orgId)
@@ -50,20 +58,11 @@ export default async function LeadsPage({ searchParams }: Props) {
     }
   }
 
-  // Scope lead_unlocks to the 25 visible lead IDs rather than fetching
-  // every unlock row for the org. At org sizes we see in production this
-  // is a small win today (61 rows total) but keeps the query constant-
-  // time as orgs accumulate unlocks.
-  const [{ data: unlockedRows }, credits] = await Promise.all([
-    leadIds.length > 0
-      ? supabase
-          .from("lead_unlocks")
-          .select("lead_id")
-          .eq("org_id", auth.orgId)
-          .in("lead_id", leadIds)
-      : Promise.resolve({ data: [] as { lead_id: string }[] }),
-    getOrgCredits(auth.orgId)
-  ]);
+  // Unlock state comes inline on each leads_safe row via is_unlocked. The
+  // separate lead_unlocks fetch this page used to do is no longer needed
+  // and would now fail on a locked-only set anyway because the column
+  // grants for that read path are intact only on the safe view.
+  const credits = await getOrgCredits(auth.orgId);
 
   const relevantPhotos = (photos ?? []).filter((row) => leadIds.includes(row.lead_id as string));
 
@@ -135,15 +134,20 @@ export default async function LeadsPage({ searchParams }: Props) {
       }
     }
   }
-  const unlockedLeadIds = new Set((unlockedRows ?? []).map((row) => row.lead_id as string));
   const totalLeads = count ?? 0;
   const totalPages = Math.max(1, Math.ceil(totalLeads / LEADS_PER_PAGE));
 
   const leadCards = (leads ?? []).map((lead) => {
     const leadId = lead.id as string;
     const services = ((lead.services as string[] | null) ?? []).filter(Boolean);
+    // address_full is NULL when locked under leads_safe; getAddressParts
+    // already returns the "Location unavailable" / "Address hidden" pair
+    // for null. This is the only place that touches the address from the
+    // safe view's column directly.
     const addressParts = getAddressParts((lead.address_full as string | null) ?? null);
-    const isUnlocked = unlockedLeadIds.has(leadId);
+    // is_unlocked is now a column on the leads_safe view (Audit 8 C2)
+    // rather than a derived value from a parallel lead_unlocks fetch.
+    const isUnlocked = Boolean((lead as { is_unlocked?: boolean | null }).is_unlocked);
 
     return {
       id: leadId,

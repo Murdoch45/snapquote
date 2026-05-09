@@ -17,7 +17,7 @@ type UnlockedLeadRow = {
   customer_phone: string | null;
   customer_email: string | null;
   submitted_at: string;
-  lead_unlocks: Array<{ lead_id: string }>;
+  is_unlocked: boolean;
 };
 
 function normalizePhone(phone: string | null): string | null {
@@ -38,13 +38,19 @@ export default async function CustomersPage({ searchParams }: Props) {
   const requestedPage = Number.parseInt(params.page ?? "1", 10);
   const currentPage = Number.isFinite(requestedPage) && requestedPage > 0 ? requestedPage : 1;
 
+  // Reads through public.leads_safe (Audit 8 C2). is_unlocked is a boolean
+  // column on the view, replacing the prior lead_unlocks!inner embed; the
+  // .eq("is_unlocked", true) filter restricts to leads the contractor has
+  // paid to unlock, which is the same set the page used to derive customers
+  // from. PII columns (customer_name, customer_phone, customer_email) are
+  // non-NULL on rows with is_unlocked=true.
   const { data: leads } = await supabase
-    .from("leads")
+    .from("leads_safe")
     .select(
-      "id,customer_name,customer_phone,customer_email,submitted_at,lead_unlocks!inner(lead_id)"
+      "id,customer_name,customer_phone,customer_email,submitted_at,is_unlocked"
     )
     .eq("org_id", auth.orgId)
-    .eq("lead_unlocks.org_id", auth.orgId)
+    .eq("is_unlocked", true)
     .order("submitted_at", { ascending: false });
 
   const groups: Array<{
@@ -56,7 +62,9 @@ export default async function CustomersPage({ searchParams }: Props) {
   }> = [];
 
   for (const lead of ((leads ?? []) as unknown as UnlockedLeadRow[])) {
-    if (!lead.lead_unlocks?.length) continue;
+    // is_unlocked filter above already constrains the result set; defensive
+    // re-check in case PostgREST ever returns a row without it.
+    if (!lead.is_unlocked) continue;
 
     const normalizedPhone = normalizePhone(lead.customer_phone);
     const normalizedEmail = normalizeEmail(lead.customer_email);

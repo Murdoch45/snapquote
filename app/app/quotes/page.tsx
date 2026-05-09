@@ -90,16 +90,22 @@ export default async function QuotesPage({ searchParams }: Props) {
   const cursor = (params.cursor ?? "").trim() || null;
 
   // PostgREST embedded-filter syntax: the `!inner` join on leads + the
-  // `.or(..., { foreignTable: "leads" })` filter restricts both the
+  // `.or(..., { foreignTable: "leads_safe" })` filter restricts both the
   // returned quote rows and their embedded lead to matching names/emails/
   // phones. Without `!inner` we'd still see all quotes and only the
   // nested lead would filter — we want the quote list to shrink too.
   //
   // Note: leaving DRAFT exclusion on the quotes table, not on leads.
+  //
+  // Audit 8 C2: routes through leads_safe so PII is gated by lead_unlocks.
+  // Every quote here corresponds to an unlocked lead in practice (you
+  // can't send a quote without unlocking first), so PII columns will be
+  // populated. Direct embed via leads is no longer permitted at the
+  // column-grant level for authenticated.
   let dataQuery = supabase
     .from("quotes")
     .select(
-      "id,public_id,price,estimated_price_low,estimated_price_high,status,sent_at,accepted_at,sent_via,lead:leads!inner(address_full,services,customer_name,customer_email,customer_phone)"
+      "id,public_id,price,estimated_price_low,estimated_price_high,status,sent_at,accepted_at,sent_via,lead:leads_safe!inner(address_full,services,customer_name,customer_email,customer_phone)"
     )
     .eq("org_id", auth.orgId)
     .neq("status", "DRAFT")
@@ -123,7 +129,7 @@ export default async function QuotesPage({ searchParams }: Props) {
     const escaped = searchTerm.replace(/[%_\\]/g, "\\$&");
     dataQuery = dataQuery.or(
       `customer_name.ilike.%${escaped}%,customer_email.ilike.%${escaped}%,customer_phone.ilike.%${escaped}%`,
-      { foreignTable: "leads" }
+      { foreignTable: "leads_safe" }
     );
   }
 

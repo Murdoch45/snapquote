@@ -60,6 +60,9 @@ export default async function LeadDetailPage({ params }: Props) {
   const auth = await requireAuth();
   const supabase = await createServerSupabaseClient();
 
+  // Lead reads through public.leads_safe (Audit 8 C2). PII columns return
+  // NULL when the lead is not unlocked; the view's is_unlocked boolean
+  // replaces the prior lead_unlocks lookup.
   const [
     {
       data: { user }
@@ -68,13 +71,12 @@ export default async function LeadDetailPage({ params }: Props) {
     { data: photos },
     { data: existingQuote },
     { data: profile },
-    { data: unlockRow },
     credits,
     usage
   ] = await Promise.all([
     supabase.auth.getUser(),
     supabase
-      .from("leads")
+      .from("leads_safe")
       .select("*")
       .eq("id", id)
       .eq("org_id", auth.orgId)
@@ -90,7 +92,6 @@ export default async function LeadDetailPage({ params }: Props) {
       .select("business_name,phone,email,quote_sms_template")
       .eq("org_id", auth.orgId)
       .single(),
-    supabase.from("lead_unlocks").select("id").eq("org_id", auth.orgId).eq("lead_id", id).maybeSingle(),
     getOrgCredits(auth.orgId),
     getMonthlyUsage(auth.orgId)
   ]);
@@ -119,7 +120,7 @@ export default async function LeadDetailPage({ params }: Props) {
     );
   })();
 
-  const isUnlocked = Boolean(unlockRow?.id);
+  const isUnlocked = Boolean((lead as { is_unlocked?: boolean | null }).is_unlocked);
   const isLocked = !isUnlocked;
   const addressParts = getAddressParts((lead.address_full as string | null) ?? null);
 
@@ -146,9 +147,12 @@ export default async function LeadDetailPage({ params }: Props) {
       answers: formatServiceQuestionAnswers(bundle.service, bundle.answers)
     }))
     .filter((bundle) => bundle.answers.length > 0);
+  // address_full is NULL on locked leads (leads_safe view); the hardened
+  // getVisibleAddress returns the existing "Address hidden" placeholder
+  // for null input, preserving the prior locked-state UI text.
   const displayAddress = isLocked
-    ? getVisibleAddress(lead.address_full as string)
-    : (lead.address_full as string);
+    ? getVisibleAddress(lead.address_full as string | null)
+    : ((lead.address_full as string | null) ?? "");
   const draftPublicId = (existingQuote?.public_id as string | null) ?? null;
   const existingQuoteStatus = (existingQuote?.status as string | null) ?? null;
   const isDraftQuote = existingQuoteStatus === "DRAFT";

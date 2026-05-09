@@ -7,6 +7,64 @@ This file is append-only. Every session, every meaningful fix, finding, or decis
 
 ---
 
+## Session — May 8, 2026 — Audit 8 PII leaks closed (C1 + C2 + H10)
+
+Critical/High PII leaks identified by Audit 8 fixed and verified live in production. Two migrations + 6 web SSR pages + 4 mobile files. tsc clean both repos.
+
+### Migration timeline
+
+1. **`20260509000001_audit8_pii_gating_revoke_anon_analytics_and_safe_views`** — local file at `supabase/migrations/`. Initial migration:
+   - REVOKEd EXECUTE on `public.get_org_analytics(uuid, timestamptz, timestamptz, text)` from PUBLIC + anon. (REVOKE FROM PUBLIC required: the prior `=X/postgres` grant on the function kept anon effective even after explicit REVOKE FROM anon.)
+   - CREATE OR REPLACE function with new auth gate: `if v_role <> 'service_role' then if auth.uid() is null or not is_org_member(p_org_id) then raise exception …`. Service-role server callers bypass; authenticated must be a member; anon and missing-auth denied.
+   - Created `public.leads_safe` view (security_invoker=false, runs as postgres with BYPASSRLS) gating 9 PII columns (customer_name, customer_phone, customer_email, address_full, address_place_id, lat, lng, description, parcel_lot_size_sqft) via LEFT JOIN to `lead_unlocks` and CASE-based projection. Tenant filter inside the view: `WHERE is_org_member(l.org_id)`. Convenience boolean column `is_unlocked`.
+   - Created `public.customers_safe` view; LATERAL JOIN matches `lead_unlocks` rows in the same org with either `customer_phone` or `customer_email` matching the customer record, then CASE-gates name/phone/email.
+   - Initial column-level REVOKEs on PII columns of leads/customers were a no-op (PG privilege model: column-level REVOKE alone cannot override table-level GRANT SELECT).
+
+2. **`audit8_pii_correct_table_revoke_and_column_allowlist`** — corrective migration applied via Supabase MCP. Local file 20260509000001 also updated to use the same correct pattern (single source of truth).
+   - REVOKE SELECT on `public.leads` from authenticated (table-level).
+   - GRANT SELECT (37 non-PII columns) on `public.leads` to authenticated.
+   - REVOKE SELECT on `public.customers` from authenticated (table-level).
+   - GRANT SELECT (id, org_id, created_at, updated_at) on `public.customers` to authenticated.
+   - INSERT/UPDATE/DELETE grants preserved so `leads_member_crud` RLS continues to gate write paths.
+
+### Caller changes
+
+- **Mobile (`C:\Users\murdo\SnapQuote-mobile`)**:
+  - `lib/api/leads.ts`: `from("leads")` → `from("leads_safe")` in getLeads (count + data) and getLead. Dropped the `lead_unlocks(...)` PostgREST embed in favor of the view's `is_unlocked` boolean column. `withLockState` reads `row.is_unlocked` instead of computing `unlocks.length > 0`. `LEAD_LIST_COLUMNS` adds `is_unlocked`.
+  - `lib/api/quotes.ts`: embed switched from `lead:leads(...)` to `lead:leads_safe(...)` in both getQuotes and getQuote. Quote-list and quote-detail both rely on PostgREST resolving the view embed via the leads.id ↔ quotes.lead_id FK.
+  - `lib/hooks/useLeads.ts`: cache key prefix bumped `cache:leads:` → `cache:leads:v2:` so any AsyncStorage entries written under the leak (pre-fix unredacted PII for locked leads) are discarded on first launch after the upgrade.
+  - `lib/utils/format.ts`: `getAddressShort` accepts `string | null | undefined`; returns "Location unavailable" for null. Hardens the LeadCard list path against null `address_full` from leads_safe.
+  - `app/(tabs)/leads/[id].tsx`: local `getVisibleAddress` accepts `string | null | undefined`; null path returns existing "Address hidden" placeholder. (Tiny utility-function change; no JSX modified.)
+
+- **Web (`C:\Users\murdo\SnapQuote`)**:
+  - `app/app/leads/page.tsx`: `from("leads")` → `from("leads_safe")` with `is_unlocked` projected; dropped the parallel `lead_unlocks` fetch; `isUnlocked` now from `lead.is_unlocked`.
+  - `app/app/leads/[id]/page.tsx`: `from("leads")` → `from("leads_safe")`; dropped the parallel `unlockRow` fetch; `isUnlocked` from `lead.is_unlocked`. `displayAddress` const handles null `address_full` for locked leads.
+  - `app/app/page.tsx` (dashboard): `from("leads")` → `from("leads_safe")`; dropped the parallel `lead_unlocks` fetch.
+  - `app/app/customers/page.tsx`: `from("leads")` → `from("leads_safe")`; replaced `lead_unlocks!inner(lead_id)` embed with `.eq("is_unlocked", true)` filter and updated UnlockedLeadRow type.
+  - `app/app/quotes/page.tsx`: `lead:leads!inner(...)` embed → `lead:leads_safe!inner(...)`; the search `or` filter's `foreignTable` updated from `"leads"` to `"leads_safe"`.
+  - `lib/leadPresentation.ts`: `getVisibleAddress` accepts `string | null | undefined`; null returns existing "Address hidden" placeholder. Hardens the locked-lead branch in `app/app/leads/[id]/page.tsx`.
+
+### Live verification (post-fix)
+
+- **C1 anon REST POC**: `curl -X POST '<project>.supabase.co/rest/v1/rpc/get_org_analytics' -H 'apikey: sb_publishable_…' -d '{"p_org_id":"<any-uuid>",…}'` → HTTP 401 `{"code":"42501","message":"permission denied for function get_org_analytics"}`. Pre-fix this call returned full analytics JSON; post-fix it errors. ✓
+- **C2 leads_safe behavior** (Murdoch's org `8f939f96-7f92-4973-97f8-f08450ccb71f` as authenticated): SELECT against view returned 64 unlocked rows with PII populated (54 phone / 63 email / 64 name / 64 address present) and 3,194 locked rows with PII counts ALL ZERO (0 phone / 0 email / 0 name / 0 address). ✓
+- **C2 column-grant**: `information_schema.role_column_grants` for authenticated on `public.leads` shows 37 non-PII columns granted, 0 PII columns granted. `has_column_privilege('authenticated','public.leads','customer_phone','SELECT')` returns false. ✓
+- **C2 cross-tenant via leads_safe**: Murdoch authenticated, count of `leads_safe` rows where `org_id <> 8f939f96-…` = 0 (view's `WHERE is_org_member(l.org_id)` filter works correctly). ✓
+- **H10 customers_safe**: same role context, returns 3,214 visible rows with 3,212 marked is_unlocked (those with at least one unlocked lead matching phone/email). ✓
+- **service_role analytics**: `auth.role()='service_role'` bypass works — admin-client RPC call returns full data unchanged. ✓
+- **authenticated non-member analytics**: `get_org_analytics(<other-org>)` raises `42501 permission denied for organization …` ✓
+- **TypeScript**: `npx tsc --noEmit` exit 0 in both repos.
+
+### Stale Notion entries flagged (not edited per lane rule)
+
+None this session — Audit 8 and Audit 9 entries from 2026-05-08 remain in line with the new state because the prior entries were event records (the audit), not assertions about current truth.
+
+### Notion saves
+
+- Bugs & Fixes — Critical PII leaks closed: link in this entry's Notion sibling page (`[2026-05-08] [Source: Claude Code] — Critical PII leaks closed (Audit 8 C1, C2, H10)`).
+
+---
+
 ## Session — May 8, 2026 — Audit 8 of 13 (Security & Privacy): live audit (read-only, no fixes shipped)
 
 Read-only audit. Web HEAD `27305ac`, mobile HEAD `f38b2f4`/`d2d992e`, Supabase `upqvbdldoyiqqshxquxa` live state.
