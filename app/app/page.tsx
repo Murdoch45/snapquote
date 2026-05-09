@@ -98,22 +98,19 @@ const getDashboardLeads = cache(async (orgId: string): Promise<DashboardLead[]> 
   const windowStart = new Date(
     Date.now() - DASHBOARD_LEADS_WINDOW_DAYS * 24 * 60 * 60 * 1000
   ).toISOString();
-  const [{ data: latestLeads }, { data: unlockedRows }] = await Promise.all([
-    supabase
-      .from("leads")
-      .select(
-        "id,customer_name,address_full,job_city,job_state,submitted_at,services,status,ai_status,ai_estimate_low,ai_estimate_high,ai_suggested_price"
-      )
-      .eq("org_id", orgId)
-      .in("ai_status", ["ready", "failed"])
-      .gte("submitted_at", windowStart)
-      .order("submitted_at", { ascending: false })
-      .limit(20),
-    supabase.from("lead_unlocks").select("lead_id").eq("org_id", orgId)
-  ]);
-  const unlockedLeadIds = new Set(
-    (unlockedRows ?? []).map((row) => row.lead_id as string)
-  );
+  // Reads through public.leads_safe (Audit 8 C2) — PII gated to NULL when
+  // locked, with is_unlocked boolean inline so we don't need a separate
+  // lead_unlocks fetch.
+  const { data: latestLeads } = await supabase
+    .from("leads_safe")
+    .select(
+      "id,customer_name,address_full,job_city,job_state,submitted_at,services,status,ai_status,ai_estimate_low,ai_estimate_high,ai_suggested_price,is_unlocked"
+    )
+    .eq("org_id", orgId)
+    .in("ai_status", ["ready", "failed"])
+    .gte("submitted_at", windowStart)
+    .order("submitted_at", { ascending: false })
+    .limit(20);
   return (latestLeads ?? []).map((lead) => ({
     id: lead.id as string,
     customer_name: lead.customer_name as string | null,
@@ -127,7 +124,7 @@ const getDashboardLeads = cache(async (orgId: string): Promise<DashboardLead[]> 
     ai_estimate_low: lead.ai_estimate_low as number | string | null,
     ai_estimate_high: lead.ai_estimate_high as number | string | null,
     ai_suggested_price: lead.ai_suggested_price as number | string | null,
-    isUnlocked: unlockedLeadIds.has(lead.id as string)
+    isUnlocked: Boolean((lead as { is_unlocked?: boolean | null }).is_unlocked)
   }));
 });
 
