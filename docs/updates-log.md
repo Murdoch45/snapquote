@@ -7,6 +7,24 @@ This file is append-only. Every session, every meaningful fix, finding, or decis
 
 ---
 
+## Session — May 9, 2026 — Fixed Vercel build failure (orphan eslint-disable in `lib/supabase/orgFilter.ts`) [Source: Claude Code]
+
+Production deploys for `snapquote-web` had been failing since commit `eef6693` with: `./lib/supabase/orgFilter.ts 28:1 Error: Definition for rule '@typescript-eslint/no-explicit-any' was not found.` Both `dpl_C9kyob6HADXo8s1rj1GzYaqDsuoT` (commit `eef6693`) and `dpl_AHv1TXh4M2AA3BDno1NPiSoxZg1e` (commit `47ac96e`) errored on the lint step despite TypeScript compiling clean (62s `✓ Compiled successfully`). Production stayed up on the prior good deploy `eVFbskHQ8` (commit `b3bf3e4`, AASA fix).
+
+**Root cause.** `lib/supabase/orgFilter.ts:28` opened with `/* eslint-disable @typescript-eslint/no-explicit-any */`, but `.eslintrc.json` only extends `next/core-web-vitals` — the `@typescript-eslint` plugin is not installed (`npm ls @typescript-eslint/eslint-plugin` returned `(empty)`), so ESLint hard-errored on the unknown rule reference. The file was introduced in `3d69a1b` (Audit 8 M5, admin org_id filter helper) on a local branch and didn't reach the deployed tip until the `eef6693` merge.
+
+**Fix.** Single-line deletion — removed only the orphan `/* eslint-disable @typescript-eslint/no-explicit-any */` directive at `lib/supabase/orgFilter.ts:28`. The `(query as any)` cast on line 38 stays untouched: `next/core-web-vitals` alone does not flag bare `any`, and the cast is intentional per the in-file comment about TS2589 deep instantiation on Supabase's `PostgrestFilterBuilder` chain. Verified locally with `npm run build` — full Next build succeeded.
+
+**Merged.** `8fafb717e3f7b46d65274f1e0943705ce58762e4` on `origin/main`, via fix branch `claude/fix-orgfilter-eslint` (deleted post-merge).
+
+**Live verification.** New deploy `dpl_4E7GNcqWqdu973T8MsJqCaFTj7aZ` (commit `8fafb71`) → state `READY`, target `production`, aliased to `snapquote.us` and `www.snapquote.us` (Vercel MCP `get_deployment`). `curl -sIL https://snapquote.us` → 307 → `https://www.snapquote.us/` HTTP 200, `Server: Vercel`, `X-Vercel-Id: sfo1::8kv9f-…`. AASA still serving correctly: `curl -sL https://snapquote.us/.well-known/apple-app-site-association` → `{"applinks":{"apps":[],"details":[{"appID":"U58KVR8LTA.com.murdochmarcum.snapquote","paths":["*"]}]}}`.
+
+**Out of scope (separate cleanup).** Properly wiring `@typescript-eslint/eslint-plugin` + parser into `.eslintrc.json` so the disable directive could legitimately exist. Not done here — the orphan directive was the proximate cause of the build break and removing it is sufficient to unblock deploys.
+
+**Notion save flagged.** Attempted to add this entry to the Bugs & Fixes Notion page (`35432498-a1cb-8132-a2c5-f2f5505b6d90`) but `update_content` returned `validation_error: Multiple matches found` (4 matches) for the most recent header anchor — the page contains duplicated content blocks that prevent unambiguous prepend. Falling back to docs/updates-log.md per task spec.
+
+---
+
 ## Session — May 9, 2026 — Audit 11 of 13 (AI Estimator) re-audit at HEAD [Source: Claude Code]
 
 Read-only Audit 11 against web HEAD `8ed8eea`, Supabase project `upqvbdldoyiqqshxquxa` live, Sentry org `snapquote`. No code or schema changed. Full report saved to `docs/audit-11-ai-estimator-2026-05-09.md`.
