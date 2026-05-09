@@ -7,6 +7,12 @@ This file is append-only. Every session, every meaningful fix, finding, or decis
 
 ---
 
+## Session — May 9, 2026 — AASA file shipped (Audit 8 H8 followup) [Source: Claude Code]
+
+Added `app/.well-known/apple-app-site-association/route.ts` returning the Universal Links JSON with `Content-Type: application/json` and `paths: ["*"]` for appID `U58KVR8LTA.com.murdochmarcum.snapquote`. Pre-deploy live state: `https://snapquote.us/...` returned 307 → www; `https://www.snapquote.us/...` returned 404 (text/html, X-Vercel-Cache HIT, X-Next-Error-Status 404). Post-deploy verification curl outputs and Apple CDN validator result captured in commit message + Notion entry.
+
+---
+
 ## Session — May 9, 2026 — Audit 8 web infra hardening (H4 + H6 + H9 + M5 + M6 + M7 + M11 + M12 + L3) [Source: Claude Code]
 
 Nine defense-in-depth fixes shipped on `claude/audit-8-web-hardening` off `main`. Live diagnosis preceded each fix; nothing taken on Notion-only evidence.

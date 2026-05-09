@@ -8,6 +8,10 @@
 
 ---
 
+## AASA file shipped — 2026-05-09 (Audit 8 H8 followup)
+
+`app/.well-known/apple-app-site-association/route.ts` returns the Universal Links JSON (`U58KVR8LTA.com.murdochmarcum.snapquote`, `paths: ["*"]`) with `Content-Type: application/json`. Serves at `/.well-known/apple-app-site-association` on Vercel. Mobile entitlement (`app.json:89-91`) lists both `applinks:snapquote.us` and `applinks:www.snapquote.us`.
+
 ## Audit 8 web infra hardening — 2026-05-09 (H4, H6, H9, M5, M6, M7, M11, M12, L3)
 
 Nine defense-in-depth fixes shipped in a single branch off `main` (`claude/audit-8-web-hardening`). Live diagnosis preceded each; nothing taken on Notion-only evidence.
