@@ -25,7 +25,6 @@
  *   ).single();
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // Supabase's PostgrestFilterBuilder generic chain is heavily nested — narrowing
 // the generic here produces TS2589 ("Type instantiation excessively deep").
 // Using `any` for the query parameter and `cast-through-unknown` on the result
