@@ -95,7 +95,21 @@ type SentryEventLike = {
   request?: { data?: unknown; cookies?: unknown; headers?: unknown };
   breadcrumbs?: Array<{ data?: unknown; message?: unknown }>;
   tags?: Record<string, unknown>;
+  message?: unknown;
+  exception?: { values?: Array<{ value?: unknown }> };
 };
+
+// Audit 4 M6 — UUIDs leak into Sentry titles/messages when database errors
+// (e.g. "permission denied for organization 8f939f96-...") are thrown.
+// `scrubPii` only walks key NAMES — it can't catch a UUID embedded in a
+// free-form error message string. This regex catches v4-style UUIDs anywhere
+// in a string and replaces them with the literal "[uuid]" so the surrounding
+// error context is preserved for debugging while the tenant identifier is not.
+const UUID_PATTERN = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi;
+function redactUuids(value: unknown): unknown {
+  if (typeof value !== "string") return value;
+  return value.replace(UUID_PATTERN, "[uuid]");
+}
 
 /**
  * Scrub PII from a Sentry event payload before it's sent. Keeps stack
@@ -123,7 +137,21 @@ export function scrubSentryEvent<E extends SentryEventLike>(event: E): E {
   if (Array.isArray(event.breadcrumbs)) {
     event.breadcrumbs = event.breadcrumbs.map((b) => ({
       ...b,
-      data: b.data ? scrubPii(b.data) : b.data
+      data: b.data ? scrubPii(b.data) : b.data,
+      message: redactUuids(b.message)
+    }));
+  }
+
+  // Audit 4 M6 — strip UUIDs from free-form error message strings (the tenant
+  // identifier in "permission denied for organization 8f939f96-..." style
+  // messages is the canonical leak shape).
+  if (event.message !== undefined) {
+    event.message = redactUuids(event.message);
+  }
+  if (event.exception?.values) {
+    event.exception.values = event.exception.values.map((entry) => ({
+      ...entry,
+      value: redactUuids(entry.value)
     }));
   }
 
