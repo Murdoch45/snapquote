@@ -500,8 +500,23 @@ function buildSelectedAnswersValue(service: ServiceType, answers: ServiceQuestio
   return JSON.stringify(Object.fromEntries(orderedEntries));
 }
 
+// Handles both legacy (array of strings) and structured (array of
+// `{phase, ts, message}` objects, post 2026-05-10 Audit 11 F5) shapes.
+// Also handles the rescue-cron pre-fix jsonb-string shape (single string
+// stored as jsonb-string instead of array).
 function parseLeadNotes(value: unknown): string[] {
-  return Array.isArray(value) ? value.filter((note): note is string => typeof note === "string") : [];
+  if (typeof value === "string") return [value];
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((note) => {
+      if (typeof note === "string") return note;
+      if (note && typeof note === "object" && "message" in note) {
+        const msg = (note as { message: unknown }).message;
+        return typeof msg === "string" ? msg : "";
+      }
+      return "";
+    })
+    .filter((s): s is string => s.length > 0);
 }
 
 function extractLeadMetadata(lead: LeadStatusRow): {
