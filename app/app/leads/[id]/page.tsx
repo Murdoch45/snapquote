@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireAuth } from "@/lib/auth/requireAuth";
 import { getOrgCredits } from "@/lib/credits";
-import { getAddressParts, getVisibleAddress } from "@/lib/leadPresentation";
+import { composeLocality } from "@/lib/leadPresentation";
 import {
   DEFAULT_ESTIMATE_SMS_TEMPLATE,
   buildEstimateLink,
@@ -122,7 +122,16 @@ export default async function LeadDetailPage({ params }: Props) {
 
   const isUnlocked = Boolean((lead as { is_unlocked?: boolean | null }).is_unlocked);
   const isLocked = !isUnlocked;
-  const addressParts = getAddressParts((lead.address_full as string | null) ?? null);
+  // Locked leads show city/state/zip ONLY (no street, no house number).
+  // job_city/job_state/job_zip are returned unconditionally by leads_safe;
+  // address_full is NULL when locked. Compose the locality once here and
+  // reuse it for the page title (locked) and the contact-card hint.
+  const lockedLocality = composeLocality({
+    jobCity: (lead.job_city as string | null) ?? null,
+    jobState: (lead.job_state as string | null) ?? null,
+    jobZip: (lead.job_zip as string | null) ?? null,
+    addressFull: (lead.address_full as string | null) ?? null
+  });
 
   const requestedService = ((lead.services as string[] | null) ?? [])[0] ?? "unknown";
   const aiServiceEstimates = Array.isArray(lead.ai_service_estimates)
@@ -147,12 +156,12 @@ export default async function LeadDetailPage({ params }: Props) {
       answers: formatServiceQuestionAnswers(bundle.service, bundle.answers)
     }))
     .filter((bundle) => bundle.answers.length > 0);
-  // address_full is NULL on locked leads (leads_safe view); the hardened
-  // getVisibleAddress returns the existing "Address hidden" placeholder
-  // for null input, preserving the prior locked-state UI text.
+  // Locked leads see "City, State Zip" in the title; unlocked sees the
+  // full street + city/state/zip from address_full. address_full is NULL
+  // for locked leads under leads_safe, so locked must use lockedLocality.
   const displayAddress = isLocked
-    ? getVisibleAddress(lead.address_full as string | null)
-    : ((lead.address_full as string | null) ?? "");
+    ? lockedLocality
+    : ((lead.address_full as string | null) ?? lockedLocality);
   const draftPublicId = (existingQuote?.public_id as string | null) ?? null;
   const existingQuoteStatus = (existingQuote?.status as string | null) ?? null;
   const isDraftQuote = existingQuoteStatus === "DRAFT";
@@ -362,7 +371,7 @@ export default async function LeadDetailPage({ params }: Props) {
                       <p>Email hidden</p>
                       <p>Street address hidden</p>
                     </div>
-                    <p className="mt-3 text-sm text-muted-foreground">{addressParts.locality}</p>
+                    <p className="mt-3 text-sm text-muted-foreground">{lockedLocality}</p>
                   </div>
                   <div className="flex flex-wrap items-center gap-3">
                     <LeadUnlockButton leadId={lead.id as string}>Unlock — 1 Credit</LeadUnlockButton>
