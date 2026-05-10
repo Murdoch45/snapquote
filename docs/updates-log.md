@@ -89,6 +89,43 @@ Production deploys for `snapquote-web` had been failing since commit `eef6693` w
 
 ---
 
+## Session — May 10, 2026 — Audit 11 C2 + H3 focused re-audit (read-only) [Source: Claude Code]
+
+Read-only re-audit of two findings from the 2026-05-09 Audit 11 pass: **C2** (rescue-cron Stage-1 give-up writes no fallback estimate) and **H3** (p50 latency 28.05 s above the 25 s revisit threshold). No code, schema, or data changed. Full report saved to `docs/audit-11-c2-h3-reaudit-2026-05-10.md`.
+
+### Verdict
+- **C2 stands** as documented. Live: 2 affected rows in last 30 days, both with NULL `ai_estimate_low/high` and string-shape `ai_estimator_notes`. The catch-block fallback at `lib/ai/estimate.ts:4768-4865` only fires when the in-process estimator throws; it does not fire when the rescue cron's Stage 1 decides to give up at `app/api/cron/rescue-stuck-leads/route.ts:82-91`. The two code paths evolved independently. Recommended path is to replicate the catch-block fallback pattern inside Stage 1 — feasible inside the cron's 60s budget; would also be a natural moment to fix the H2 string-vs-array shape inconsistency. **Net-new ticket** — not currently in Pending Work.
+- **H3 stands** as documented. Re-verified live (Supabase MCP, 30 d, n=39 first-attempt successful): p50 = 28.05 s, p90 = 40.21 s, p99 = 88.54 s. Photo-detail-low fix from 2026-05-04 already extracted the easiest win (~10 s reduction from prior ~35-45 s). What remains is mostly OpenAI inherent vision-call latency at gpt-5-mini against a complex JSON Schema.
+
+### `ai_estimator_notes` per-phase timing — INSTRUMENTATION GAP
+Sampled 18 leads from last 14 days. All have 9-12 element `ai_estimator_notes` arrays. Markers cover phase **outcomes** (`Property data resolved...`, `Satellite image attached.`, `Summary polish: applied.`) but carry **no timestamps and no elapsed times**. Code-side `grep` for `performance.now|Date.now\(\)|console.time|elapsed|durationMs|t0|tStart` in `lib/ai/estimate.ts` returns 0 matches. The pipeline emits zero timing observations to either DB or Sentry. Cannot decompose the 28s p50 into per-phase contributions from production data alone.
+
+### H3 driver attribution (reconstruction from code paths + token counts; not measured)
+| Driver | Approx share of 28s p50 |
+|---|---|
+| (A) OpenAI signal call inherent latency | ~65-75% (≈18-21s) |
+| (B) Schema oversize (vestigial fields) | ~10-15% (≈3-4s) |
+| (C) Polish call on critical path | ~10% (≈2-3s) |
+| (D) Photo / satellite handling | <5% steady; uncapped tail risk |
+| (E) Sequential Google property-data calls | ~5% (≈1-2s) |
+
+### H3 recommendations (Murdoch to triage)
+1. **Schema reduction (B)** — claude.ai already filed a Pending Work entry for this on 2026-05-04 with a specific deferral trigger of "p50 above ~25s on real customer leads" — that trigger has now fired. Expected savings 10-25% (3-7s). Best effort/savings ratio.
+2. **Add per-phase timing markers BEFORE further optimization.** Without phase timings, every optimization is a guess. ~30 min code change to push `Property data: <ms>ms`, `AI signal call: <ms>ms`, `Polish: <ms>ms` markers into `ai_estimator_notes`.
+3. **Add timeout to satellite fetch.** `fetchImageAsDataUrl` at `lib/ai/estimate.ts:1789-1799` has no `AbortController`. Cheap p99 defense; doesn't move p50.
+4. **Polish-on-critical-path (C) — product question, not engineering.** Today's behavior was an intentional 2026-05-04 decision ("Do NOT move polish to async/after()"). Three options: keep as-is, move async with raw-then-polished pattern (~3s win), or skip entirely (~3s win + cost saving but quality drops). Needs Murdoch's product approval to change.
+
+### Counter-argument for "28s is fine"
+Customer's lead-submit response returns in ~2s (AI deferred via `after()`). Customer never waits. Contractor sees a push notification, opens the app within typically ≥30s — by which time the AI is done. If 90%+ of contractor open-rates lag the push by >30s, the 28s p50 is product-invisible. Optimization should follow a measured complaint, not a numeric threshold. Worth confirming with notification-to-open analytics before investing in latency cuts.
+
+### Stale Notion / docs entries flagged
+- 2026-05-04 "Web lead flow triple-bug investigation" Notion entry says `STRUCTURED_AI_TIMEOUT_MS = 40000`. HEAD value at `lib/ai/estimate.ts:381` is **35000**. Already flagged in 2026-05-09 audit; remains uncorrected.
+
+### Notion writes
+Bugs & Fixes write attempted; if it times out per the documented page-size caveat, full report stays in `docs/` and this entry serves as the canonical record. Murdoch flag at top of audit doc if Notion fails.
+
+---
+
 ## Session — May 9, 2026 — Audit 11 of 13 (AI Estimator) re-audit at HEAD [Source: Claude Code]
 
 Read-only Audit 11 against web HEAD `8ed8eea`, Supabase project `upqvbdldoyiqqshxquxa` live, Sentry org `snapquote`. No code or schema changed. Full report saved to `docs/audit-11-ai-estimator-2026-05-09.md`.
