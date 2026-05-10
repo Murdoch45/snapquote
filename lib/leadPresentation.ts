@@ -42,6 +42,30 @@ export function getAddressParts(address: string | null | undefined): {
   };
 }
 
+// Locked-lead address display: city/state/zip ONLY (no street, no house
+// number). job_city/job_state/job_zip are returned unconditionally by
+// leads_safe (Audit 8 C2 only gates true PII — address_full, customer_*,
+// lat/lng, etc.), so use them as the source of truth for locality. The
+// address_full fallback handles legacy rows from before job_city was
+// backfilled — parsing the comma-separated string yields the same
+// "City, State Zip" shape that the dedicated columns produce.
+export function composeLocality(args: {
+  jobCity?: string | null;
+  jobState?: string | null;
+  jobZip?: string | null;
+  addressFull?: string | null;
+}): string {
+  const city = args.jobCity?.trim() || null;
+  const state = args.jobState?.trim() || null;
+  const zip = args.jobZip?.trim() || null;
+  if (city && state) {
+    return zip ? `${city}, ${state} ${zip}` : `${city}, ${state}`;
+  }
+  if (city) return zip ? `${city} ${zip}` : city;
+  if (state) return zip ? `${state} ${zip}` : state;
+  return getAddressParts(args.addressFull ?? null).locality;
+}
+
 export function getLeadQuestionPreview(serviceQuestionAnswers: unknown, limit = 3): LeadQuestionPreview[] {
   const serviceQuestionBundles = parseServiceQuestionBundles(serviceQuestionAnswers);
   return serviceQuestionBundles

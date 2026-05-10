@@ -1,7 +1,7 @@
 import { LeadsPageClient } from "@/components/LeadsPageClient";
 import { requireAuth } from "@/lib/auth/requireAuth";
 import { getOrgCredits } from "@/lib/credits";
-import { getAddressParts } from "@/lib/leadPresentation";
+import { composeLocality } from "@/lib/leadPresentation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -34,7 +34,7 @@ export default async function LeadsPage({ searchParams }: Props) {
   const { data: leads, count } = await supabase
     .from("leads_safe")
     .select(
-      "id,address_full,customer_name,customer_phone,customer_email,services,submitted_at,ai_status,ai_suggested_price,ai_estimate_low,ai_estimate_high,ai_job_summary,is_unlocked",
+      "id,address_full,customer_name,customer_phone,customer_email,services,submitted_at,ai_status,ai_suggested_price,ai_estimate_low,ai_estimate_high,ai_job_summary,is_unlocked,job_city,job_state,job_zip",
       { count: "exact" }
     )
     .eq("org_id", auth.orgId)
@@ -140,19 +140,25 @@ export default async function LeadsPage({ searchParams }: Props) {
   const leadCards = (leads ?? []).map((lead) => {
     const leadId = lead.id as string;
     const services = ((lead.services as string[] | null) ?? []).filter(Boolean);
-    // address_full is NULL when locked under leads_safe; getAddressParts
-    // already returns the "Location unavailable" / "Address hidden" pair
-    // for null. This is the only place that touches the address from the
-    // safe view's column directly.
-    const addressParts = getAddressParts((lead.address_full as string | null) ?? null);
     // is_unlocked is now a column on the leads_safe view (Audit 8 C2)
     // rather than a derived value from a parallel lead_unlocks fetch.
     const isUnlocked = Boolean((lead as { is_unlocked?: boolean | null }).is_unlocked);
+    // Locality always renders, locked or unlocked. job_city/job_state/job_zip
+    // are returned unconditionally by leads_safe; address_full is NULL when
+    // locked, so the locked branch must compose locality from the dedicated
+    // columns instead of parsing address_full (which used to work pre-C2 when
+    // the view returned the real string for everyone in the org).
+    const locality = composeLocality({
+      jobCity: (lead.job_city as string | null) ?? null,
+      jobState: (lead.job_state as string | null) ?? null,
+      jobZip: (lead.job_zip as string | null) ?? null,
+      addressFull: (lead.address_full as string | null) ?? null
+    });
 
     return {
       id: leadId,
       fullAddress: isUnlocked ? ((lead.address_full as string | null) ?? null) : null,
-      locality: addressParts.locality,
+      locality,
       services,
       submitted_at: lead.submitted_at as string,
       ai_status: (lead.ai_status as string | null) ?? "ready",
