@@ -7,6 +7,70 @@ This file is append-only. Every session, every meaningful fix, finding, or decis
 
 ---
 
+## Session — May 10, 2026 — Audit 4 + 8 cleanup bundle (H2/H3/H4/H6/H7/M2/M6) [Source: Claude Code]
+
+Seven small low-risk fixes against web HEAD `af99cb0` (post Vercel-build orphan-eslint-disable fix). Branch `claude/audit-4-cleanup` from origin/main, fresh worktree at `.claude/worktrees/audit-4-cleanup`. Each finding diagnosed live before applying.
+
+### F1 — H2: ARCHIVED documented as historical no-op
+
+Pre-fix: `pg_enum` for `lead_status` returns `{NEW, QUOTED, ACCEPTED, ARCHIVED}`; grep across web + mobile repos at HEAD finds `'ARCHIVED'` only in `supabase/migrations/0001_init.sql` and `supabase/migrations/0031_auto_archive_stale_leads.sql` (the parser-broken historical no-op for the now-removed auto-archive feature). No application code writes ARCHIVED. Live count of `leads.status='ARCHIVED'` = 0.
+
+Fix: added a second bullet to the "Known historical no-ops" section in `docs/current-state.md` documenting ARCHIVED alongside the existing OPENED bullet. No SQL change, no code change.
+
+### F2 — H3: OPENED already documented (no action)
+
+Pre-fix verification: `docs/current-state.md:135` already contains the OPENED entry from Audit 9 C3 (2026-05-08). No action needed.
+
+### F3 — H4: lead-photos bucket size + MIME limits
+
+Pre-fix: `SELECT id, public, allowed_mime_types, file_size_limit FROM storage.buckets WHERE id='lead-photos'` returned `{public:false, file_size_limit:NULL, allowed_mime_types:NULL}`. All MIME/size enforcement lived in `app/api/public/lead-photo-upload/route.ts:104-119` only.
+
+Fix: applied via Supabase MCP as migration `audit4_lead_photos_bucket_size_and_mime_limits` (local file `supabase/migrations/20260510000001_audit4_lead_photos_bucket_size_and_mime_limits.sql`). Sets `file_size_limit = 52428800` (50 MB) and `allowed_mime_types = ARRAY['image/jpeg','image/jpg','image/png','image/heic','image/heif','image/webp']`. Route still enforces tighter 10 MB; bucket-level cap catches accidental video / RAW from any future writer.
+
+Post-fix: re-queried `storage.buckets` — both fields now non-NULL with the configured values.
+
+### F4 — H6: 96-bit publicId fallback at lead detail page
+
+Pre-fix: `app/app/leads/[id]/page.tsx:174` had `const activePublicId = draftPublicId ?? randomBytes(6).toString("base64url");`. Other call sites (`/api/app/leads/unlock/route.ts:16-20` `makePublicId()` and `/api/app/quote/send/route.ts:18-22` `makePublicId()`) use `randomBytes(12)` (96 bits). The fallback can land on a persisted publicId — `/api/app/quote/send/route.ts:193` accepts `body.publicId ?? makePublicId()`, so a 48-bit value generated for the preview becomes the persisted public_id on first send if the unlock route's DRAFT-mint silently failed.
+
+Fix: changed `randomBytes(6)` → `randomBytes(12)`. One-byte change; no API change. Comment block updated to explain the rationale.
+
+### F5 — H7: deleted 8 legacy null-estimate leads from falconn
+
+Pre-fix: 8 leads with `ai_status='ready' AND (ai_estimate_low IS NULL OR ai_estimate_high IS NULL)`. Live verification: ALL 8 in org `8f939f96-7f92-4973-97f8-f08450ccb71f` (org name `falconn`, the test/dev org). All from 2026-03-09. Each carried `ai_suggested_price` populated but the range columns NULL — legacy data from before the AI estimator code always wrote the range together.
+
+FK pre-check: `lead_photos`, `quotes`, `lead_unlocks` all have `ON DELETE CASCADE` for `lead_id`. Cascade footprint: 1 quote (status EXPIRED, sent 2026-03-09, viewed 2026-03-20, never accepted), 15 lead_photos, 0 lead_unlocks.
+
+Fix: `DELETE FROM leads WHERE id IN (...) AND org_id = '8f939f96-...' AND ai_status='ready' AND ai_estimate_low IS NULL` via Supabase MCP. WHERE clause defensive (re-verified org + ai_status + null shape inside the same statement).
+
+Post-fix: `SELECT COUNT(*) FROM leads WHERE ai_status='ready' AND (ai_estimate_low IS NULL OR ai_estimate_high IS NULL)` returns 0. 8 leads + 1 quote + 15 photos cascade-removed.
+
+### F6 — M2: org_id filter on /accept lead UPDATE
+
+Pre-fix: `app/api/public/quote/[publicId]/accept/route.ts:110` was `await admin.from("leads").update({ status: "ACCEPTED" }).eq("id", acceptedQuote.lead_id);` — no org_id filter. Defense-in-depth gap; the Audit 8 M5 helper convention says admin-client UPDATEs against tenant-scoped tables MUST include an explicit org_id filter.
+
+Fix: added `.eq("org_id", acceptedQuote.org_id as string)`. The org_id was already loaded by the publicId → quote SELECT at line 25-28. Inline chain rather than `requireOrgFilter` helper because the helper's TS signature targets SELECT chains; the M5 convention's "OR include an explicit org_id chain" clause permits the inline form.
+
+### F7 — M6: UUID redaction in Sentry error message bodies
+
+Pre-fix: `lib/sentryScrub.ts` walked key NAMES (`event.extra`, `event.contexts`, `event.tags`, breadcrumb data) but didn't sanitise `event.message` or `event.exception.values[].value`. Sentry events of the shape `Error: {"code":"42501","message":"permission denied for organization 8f939f96-7f92-4973-97f8-f08450ccb71f"}` leaked tenant identifiers — 4 occurrences in last 14d via `level:error` events search.
+
+Fix: extended `lib/sentryScrub.ts` with a `UUID_PATTERN` regex (`/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi`) and `redactUuids(value)` helper. `scrubSentryEvent` now applies `redactUuids` to `event.message`, each `event.exception.values[].value`, and each `event.breadcrumbs[].message`. All three Sentry config files (`sentry.server.config.ts`, `sentry.edge.config.ts`, `instrumentation-client.ts`) already route through `scrubSentryEvent` in `beforeSend` — no per-config change needed.
+
+### Verification
+
+- `npx tsc --noEmit` clean.
+- `npx next build` (with lint) clean — no new errors. Pre-existing warnings (workspace-root inference, Sentry global-error handler suggestion, single `<img>` element) unchanged.
+- All Supabase MCP fixes verified post-fix via re-query.
+
+### Cross-flags still pending
+
+- M1 (`ai_estimator_notes` shape inconsistency) — deferred per Murdoch.
+- H1 (DRAFT cleanup logic) — DRAFTs are intentional load-bearing infrastructure per Murdoch's note in the audit prompt.
+- H5 (unlock route DRAFT-mint silent failure) — deferred per Murdoch.
+
+---
+
 ## Session — May 9, 2026 — Fixed Vercel build failure (orphan eslint-disable in `lib/supabase/orgFilter.ts`) [Source: Claude Code]
 
 Production deploys for `snapquote-web` had been failing since commit `eef6693` with: `./lib/supabase/orgFilter.ts 28:1 Error: Definition for rule '@typescript-eslint/no-explicit-any' was not found.` Both `dpl_C9kyob6HADXo8s1rj1GzYaqDsuoT` (commit `eef6693`) and `dpl_AHv1TXh4M2AA3BDno1NPiSoxZg1e` (commit `47ac96e`) errored on the lint step despite TypeScript compiling clean (62s `✓ Compiled successfully`). Production stayed up on the prior good deploy `eVFbskHQ8` (commit `b3bf3e4`, AASA fix).
