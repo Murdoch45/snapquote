@@ -7,6 +7,49 @@ This file is append-only. Every session, every meaningful fix, finding, or decis
 
 ---
 
+## Session — May 10, 2026 — Audit 11 C2 fixed: rescue cron now lands fallback estimate on give-up [Source: Claude Code]
+
+Branch `claude/audit-11-c2-rescue-cron-fallback`. Two logical commits + merge:
+- `75bdd27` — `refactor(estimator): extract catch-block fallback into runFallbackEstimate (Audit 11 C2 prep)`
+- `331d10c` — `fix(cron): rescue cron Stage 1 give-up now calls runFallbackEstimate (Audit 11 C2)`
+- Merge SHA on `origin/main`: `c1ab37e`.
+
+Branch deleted local + remote. Vercel deploy `dpl_4N6947r1YynvSwHpzB3wzFgymStk` triggered for `c1ab37e`.
+
+### Pre-fix evidence
+- **Rescue cron Stage 1 give-up at HEAD before fix:** [app/api/cron/rescue-stuck-leads/route.ts:94-102](app/api/cron/rescue-stuck-leads/route.ts:94) wrote `ai_status='failed'` with `[{phase: "rescue_give_up", ts, message: STUCK_NOTE}]` only — no `ai_estimate_low/high` columns set. Contractors saw blank price cards.
+- **In-process catch-block fallback at HEAD before fix:** [lib/ai/estimate.ts:5022-5144](lib/ai/estimate.ts:5022) inlined inside `generateEstimateAsync`'s catch. Built degraded propertyData via `buildDegradedPropertyData`, called `fallbackEstimate(...)` with `inferSignalsFallback` signals, wrote `ai_status='ready'` with all 19 AI columns. NO OpenAI calls — pure JS heuristic.
+- **Live state of historical NULL leads:** Supabase MCP query returned ~150 rows with `ai_status='failed' AND ai_estimate_low IS NULL`. All in test orgs (`falconn`, `Worcester Test Contractor`, `poo`). Per task scope: **forward-looking fix only**, leave as-is.
+- **pg_cron baseline:** jobid=8, schedule `*/3 * * * *`, active=true. 10/10 runs in last 30 min `succeeded`, each completing in ~30-90ms.
+
+### Refactor diff (commit 1)
+- New exported function `runFallbackEstimate(admin, params)` at [lib/ai/estimate.ts:4801](lib/ai/estimate.ts:4801) — extracts the inlined catch-block body. Takes `{leadId, orgId, estimateInput, triggerMessage, origin: "catch_fallback" | "rescue_cron"}`. Origin-tags audit markers (e.g. `rescue_cron_fallback_origin` vs `catch_fallback_origin`) and Sentry breadcrumbs so query-time discrimination works. Returns `{ok: true} | {ok: false, error}` — internal try-catch ensures no exception escapes. Calls `invalidateAnalytics` on success.
+- New exported helper `loadEstimateInputForRescue(admin, leadId, orgId)` builds `EstimateInput` from a lead row + contractor + lead_photos. Photos ordered `created_at ASC` per H1. CAS guard returns `null` if `ai_status` is no longer 'processing'.
+- In-process catch block now ~25 lines (was ~120). Calls `runFallbackEstimate`, on `ok:true` captures original error to Sentry tag `catch-fallback-recovered` and fires notifications. On `ok:false` captures with `catch-fallback-threw` and falls through to the unchanged last-resort failure write. **Behavior-identical** — same Sentry tags, same column writes, same dedup-by-message + 24-cap on notes.
+
+### Cron diff (commit 2)
+- Stage 1 changed from a single bulk UPDATE to a per-lead loop (lines 79-200 of [app/api/cron/rescue-stuck-leads/route.ts](app/api/cron/rescue-stuck-leads/route.ts)).
+- For each `processing` lead past `GIVE_UP_MINUTES`: `loadEstimateInputForRescue` → `runFallbackEstimate` (origin: "rescue_cron"). On success: `ai_status='ready'` lands with non-NULL estimates plus origin-tagged markers. Sentry breadcrumb `rescue_cron_fallback_recovered`.
+- **Fallback for the fallback** (per task spec, documented in code comments): if `loadEstimateInputForRescue` returns null OR `runFallbackEstimate` returns `ok:false` OR any throw — fall back to the existing "just flip status to failed and write `[{phase: "rescue_give_up", ts, message: STUCK_NOTE}]`" behavior. The CAS filter `.eq("ai_status", "processing")` on the failure-write protects against double-processing by concurrent cron ticks.
+- Notification chain (`sendNewLeadNotifications`) fires regardless of which branch landed.
+- Response payload now includes `rescuedWithFallback` and `rescuedWithStuckNote` counters.
+
+### Verification
+- `npx tsc --noEmit` exit 0.
+- `npm run build` clean (only pre-existing `<img>` warning + Sentry deprecation notice, unrelated).
+- pg_cron baseline: 10/10 success last 30 min pre-deploy.
+- Live verify per Rule 14 still pending Vercel deploy READY (was BUILDING when this entry was committed; live verify scheduled via wakeup).
+
+### Out of scope
+- Historical ~150 NULL leads in test orgs (`falconn`, `Worcester Test Contractor`, `poo`) NOT retroactively fixed. Per task: forward-looking only.
+- Stages 2 (5-15 min retry) and 3 (failed-retry under cap) unchanged. They re-trigger via `triggerEstimatorForLead → generateEstimateAsync → catch-block fallback` so they already inherit the heuristic guarantee.
+- H3 latency optimization separate (deferred until F5 timing markers gather data).
+
+### Notion save
+Bugs & Fixes write attempted at end of session; if it timed out per the documented ~310k-char caveat, this updates-log entry is the canonical record (per task spec).
+
+---
+
 ## Session — May 10, 2026 — Audit 4 + 8 cleanup bundle (H2/H3/H4/H6/H7/M2/M6) [Source: Claude Code]
 
 Seven small low-risk fixes against web HEAD `af99cb0` (post Vercel-build orphan-eslint-disable fix). Branch `claude/audit-4-cleanup` from origin/main, fresh worktree at `.claude/worktrees/audit-4-cleanup`. Each finding diagnosed live before applying.
