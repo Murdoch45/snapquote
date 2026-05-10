@@ -133,6 +133,7 @@ Why: Supabase MCP `apply_migration` records the version with a server-generated 
 Migrations recorded as applied in `supabase_migrations.schema_migrations` but whose effects are not visible in the live schema. Documented for clarity; do NOT re-run.
 
 - **`0030_add_opened_lead_status`** (recorded with statement `ALTER TYPE lead_status ADD VALUE IF NOT EXISTS 'OPENED'`) — `pg_enum` shows `lead_status` has only NEW, QUOTED, ACCEPTED, ARCHIVED. No application code references `OPENED` (verified via grep across web + mobile repos at HEAD on 2026-05-08, hits only in the migration file itself and prior audit docs). The migration is a harmless no-op; no fix needed. Audit 9 C3 (2026-05-08) decided NOT to add OPENED because it would create an enum value with no callers.
+- **`lead_status.ARCHIVED` enum value never written by application code** (verified via grep across web + mobile repos at HEAD on 2026-05-10, hits only in `supabase/migrations/0001_init.sql` defining the enum and `supabase/migrations/0031_auto_archive_stale_leads.sql` which was itself a parser-broken historical no-op — the auto-archive feature was subsequently removed from the product). Live count of `leads.status='ARCHIVED'` = 0. Same shape as the OPENED case above: enum value defined but no callers. No fix needed; documented for clarity.
 
 ## Audit 9 data model & migrations — 2026-05-08 (READ-ONLY snapshot, superseded by fixes above)
 
