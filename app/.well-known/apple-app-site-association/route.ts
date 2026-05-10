@@ -9,7 +9,15 @@ const AASA = {
     details: [
       {
         appID: "U58KVR8LTA.com.murdochmarcum.snapquote",
-        paths: ["*"],
+        paths: [
+          "/invite/*",
+          "/auth/callback",
+          "/auth/callback?*",
+          "/auth/confirm",
+          "/auth/confirm?*",
+          "/stripe-return",
+          "/stripe-return?*",
+        ],
       },
     ],
   },
