@@ -107,7 +107,15 @@ export async function POST(_request: Request, { params }: Props) {
     return NextResponse.json({ error: "Unable to accept estimate." }, { status: 500 });
   }
 
-  await admin.from("leads").update({ status: "ACCEPTED" }).eq("id", acceptedQuote.lead_id);
+  // Defense-in-depth tenant filter (Audit 4 M2). The publicId → quote → lead_id
+  // chain is already auth-by-token, but the M5 helper convention says admin-
+  // client UPDATEs against tenant-scoped tables MUST include an explicit org_id
+  // filter. acceptedQuote.org_id was just loaded via the same publicId.
+  await admin
+    .from("leads")
+    .update({ status: "ACCEPTED" })
+    .eq("id", acceptedQuote.lead_id)
+    .eq("org_id", acceptedQuote.org_id as string);
 
   invalidateAnalytics(acceptedQuote.org_id as string);
 
