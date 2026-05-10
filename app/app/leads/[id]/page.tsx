@@ -171,7 +171,10 @@ export default async function LeadDetailPage({ params }: Props) {
     DEFAULT_ESTIMATE_SMS_TEMPLATE;
   // For the message preview, use the real permanent publicId if a draft exists,
   // otherwise fall back to a placeholder that will be replaced at send time.
-  const activePublicId = draftPublicId ?? randomBytes(6).toString("base64url");
+  // 96 bits (12 random bytes) matches the canonical `makePublicId` used in
+  // /api/app/leads/unlock and /api/app/quote/send so an accidentally persisted
+  // preview placeholder still meets the same unguessable-token bar.
+  const activePublicId = draftPublicId ?? randomBytes(12).toString("base64url");
   const previewMessage = renderEstimateTemplate(estimateTemplate, {
     customerName: getDisplayCustomerName(lead.customer_name as string | null),
     estimateLink: buildEstimateLink(activePublicId),
