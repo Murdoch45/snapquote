@@ -79,11 +79,23 @@ export async function GET(request: Request) {
   // Stage 1: mark long-stuck leads failed and notify. Done before the
   // other stages so the same lead can't be pulled into both buckets on
   // the same run.
+  //
+  // H2 + F5 fix (2026-05-10): the give-up note used to be written as a
+  // bare JSON string `STUCK_NOTE`, which made `ai_estimator_notes` a
+  // jsonb-string while every other writer landed a jsonb-array. That
+  // shape mismatch broke any reader iterating with `.map`/`.length`
+  // without an `Array.isArray` guard. Now we write a single-element
+  // array of structured `EstimatorNote` objects (`{phase, ts, message}`)
+  // matching the success path's shape (Audit 11 H2 + F5 / Audit 4 M1).
+  const giveUpTs = new Date().toISOString();
+  const giveUpNote = [
+    { phase: "rescue_give_up", ts: giveUpTs, message: STUCK_NOTE }
+  ];
   const { data: giveUpLeads, error: giveUpError } = await admin
     .from("leads")
     .update({
       ai_status: "failed",
-      ai_estimator_notes: STUCK_NOTE
+      ai_estimator_notes: giveUpNote
     })
     .eq("ai_status", "processing")
     .lt("submitted_at", giveUpCutoff)
