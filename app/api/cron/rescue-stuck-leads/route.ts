@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 import { triggerEstimatorForLead } from "@/lib/ai/triggerEstimator";
-import { sendNewLeadNotifications } from "@/lib/ai/estimate";
+import {
+  loadEstimateInputForRescue,
+  runFallbackEstimate,
+  sendNewLeadNotifications
+} from "@/lib/ai/estimate";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isAuthorizedBearer } from "@/lib/auth/timingSafeBearer";
 
@@ -76,48 +81,141 @@ export async function GET(request: Request) {
     Date.now() - FAILED_RETRY_WINDOW_HOURS * 60 * 60 * 1000
   ).toISOString();
 
-  // Stage 1: mark long-stuck leads failed and notify. Done before the
-  // other stages so the same lead can't be pulled into both buckets on
-  // the same run.
+  // Stage 1: long-stuck leads. The previous behavior was a bulk UPDATE
+  // flipping every stuck lead to `ai_status='failed'` with a single
+  // STUCK_NOTE marker, no estimate columns. That left contractors
+  // looking at `ai_estimate_low/high = NULL` cards and broke the
+  // documented "never $0" guarantee for the cron-give-up path
+  // (in-process catch already had the guarantee via the catch-block
+  // fallback at `lib/ai/estimate.ts:generateEstimateAsync`).
   //
-  // H2 + F5 fix (2026-05-10): the give-up note used to be written as a
-  // bare JSON string `STUCK_NOTE`, which made `ai_estimator_notes` a
-  // jsonb-string while every other writer landed a jsonb-array. That
-  // shape mismatch broke any reader iterating with `.map`/`.length`
-  // without an `Array.isArray` guard. Now we write a single-element
-  // array of structured `EstimatorNote` objects (`{phase, ts, message}`)
-  // matching the success path's shape (Audit 11 H2 + F5 / Audit 4 M1).
-  const giveUpTs = new Date().toISOString();
-  const giveUpNote = [
-    { phase: "rescue_give_up", ts: giveUpTs, message: STUCK_NOTE }
-  ];
-  const { data: giveUpLeads, error: giveUpError } = await admin
+  // Audit 11 C2 fix (2026-05-10): per-lead processing. For each
+  // candidate we attempt the same `runFallbackEstimate` shared
+  // function the in-process catch block uses — pure JS heuristic, no
+  // OpenAI / Google calls, ~100-300ms per lead so a worst-case 30-
+  // lead batch fits comfortably in the cron's 60s budget. On success
+  // the row lands `ai_status='ready'` with non-NULL estimates plus an
+  // origin-tagged `rescue_cron_fallback_origin` marker. On any load
+  // failure (lead row missing or no longer 'processing', contractor
+  // profile missing, photos query throws) we fall back to the
+  // existing "just flip status to failed and notify" behavior so the
+  // cron is never structurally stuck — the FALLBACK has its own
+  // fallback. The H2 + F5 shape stays the same: structured
+  // `[{phase, ts, message}]` array, one element when STUCK_NOTE is
+  // written, four-plus elements when the heuristic ran.
+  const { data: giveUpCandidates, error: giveUpSelectError } = await admin
     .from("leads")
-    .update({
-      ai_status: "failed",
-      ai_estimator_notes: giveUpNote
-    })
+    .select("id,org_id,address_full")
     .eq("ai_status", "processing")
-    .lt("submitted_at", giveUpCutoff)
-    .select("id,org_id,address_full");
+    .lt("submitted_at", giveUpCutoff);
 
-  if (giveUpError) {
-    console.error("rescue-stuck-leads give-up update failed:", giveUpError);
+  if (giveUpSelectError) {
+    console.error("rescue-stuck-leads give-up SELECT failed:", giveUpSelectError);
     return NextResponse.json({ error: "Rescue failed" }, { status: 500 });
   }
 
-  const givenUp = giveUpLeads ?? [];
-  for (const lead of givenUp) {
+  const givenUp = giveUpCandidates ?? [];
+  let giveUpFallbackOk = 0;
+  let giveUpFallbackFailed = 0;
+  for (const candidate of givenUp) {
+    const candidateId = candidate.id as string;
+    const candidateOrgId = candidate.org_id as string;
+    let landedFallback = false;
+    let addressFull: string | null = (candidate.address_full as string | null) ?? null;
+
+    try {
+      const loaded = await loadEstimateInputForRescue(admin, candidateId, candidateOrgId);
+      if (loaded) {
+        addressFull = loaded.addressFull ?? addressFull;
+        const fallbackResult = await runFallbackEstimate(admin, {
+          leadId: candidateId,
+          orgId: candidateOrgId,
+          estimateInput: loaded.estimateInput,
+          triggerMessage: STUCK_NOTE,
+          origin: "rescue_cron"
+        });
+        if (fallbackResult.ok) {
+          landedFallback = true;
+          giveUpFallbackOk++;
+          Sentry.addBreadcrumb({
+            category: "estimator",
+            type: "info",
+            level: "info",
+            message: "rescue_cron_fallback_recovered",
+            data: { leadId: candidateId }
+          });
+        } else {
+          giveUpFallbackFailed++;
+          console.warn(
+            "rescue-stuck-leads Stage 1 fallback compute failed:",
+            candidateId,
+            fallbackResult.error
+          );
+          Sentry.captureMessage("rescue-stuck-leads Stage 1 fallback compute failed", {
+            level: "warning",
+            tags: { area: "rescue-cron", stage: "stage1-fallback" },
+            extra: { leadId: candidateId, error: fallbackResult.error }
+          });
+        }
+      }
+    } catch (loadError) {
+      // Any throw inside the fallback prep — lead/contractor/photo
+      // load throws, runFallbackEstimate throws — bails out cleanly.
+      // Cron continues to the STUCK_NOTE write below; cron is never
+      // structurally blocked by a single broken row.
+      giveUpFallbackFailed++;
+      console.warn(
+        "rescue-stuck-leads Stage 1 fallback prep threw:",
+        candidateId,
+        loadError
+      );
+      Sentry.captureException(loadError, {
+        tags: { area: "rescue-cron", stage: "stage1-load-or-throw" },
+        extra: { leadId: candidateId }
+      });
+    }
+
+    // The FALLBACK has its own fallback. If the heuristic compute /
+    // write failed for any reason, fall back to the original "just
+    // flip status to failed and notify" behavior. CAS on
+    // `ai_status='processing'` so concurrent cron ticks can't
+    // double-write. The structured JSONB array shape is preserved.
+    if (!landedFallback) {
+      const giveUpTs = new Date().toISOString();
+      const giveUpNote = [
+        { phase: "rescue_give_up", ts: giveUpTs, message: STUCK_NOTE }
+      ];
+      const { error: failedWriteError } = await admin
+        .from("leads")
+        .update({
+          ai_status: "failed",
+          ai_estimator_notes: giveUpNote
+        })
+        .eq("id", candidateId)
+        .eq("org_id", candidateOrgId)
+        .eq("ai_status", "processing");
+      if (failedWriteError) {
+        console.error(
+          "rescue-stuck-leads STUCK_NOTE write failed:",
+          candidateId,
+          failedWriteError
+        );
+        // Skip notification too — row state is unknown; another tick
+        // will try again.
+        continue;
+      }
+    }
+
     try {
       await sendNewLeadNotifications(admin, {
-        leadId: lead.id as string,
-        orgId: lead.org_id as string,
-        addressFull: (lead.address_full as string | null) ?? null
+        leadId: candidateId,
+        orgId: candidateOrgId,
+        addressFull
       });
     } catch (notifyError) {
       console.error(
         "rescue-stuck-leads notification failed for lead",
-        lead.id,
+        candidateId,
         notifyError
       );
     }
@@ -226,6 +324,8 @@ export async function GET(request: Request) {
 
   return NextResponse.json({
     rescued: givenUp.length,
+    rescuedWithFallback: giveUpFallbackOk,
+    rescuedWithStuckNote: giveUpFallbackFailed,
     retried: retriedCount,
     failedRetried: failedRetriedCount
   });
