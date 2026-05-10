@@ -4798,6 +4798,266 @@ async function runWithAbortTimeout<T>(timeoutMs: number, work: () => Promise<T>)
   }
 }
 
+/**
+ * Origin of a fallback-estimate write. Used for tagging the structured
+ * `ai_estimator_notes` markers and Sentry breadcrumbs so we can tell at
+ * query time WHERE the heuristic estimate came from.
+ *
+ * - `catch_fallback`: in-process catch block in `generateEstimateAsync`
+ *   below — the AI pipeline threw and we landed a heuristic to keep the
+ *   "never $0" guarantee.
+ * - `rescue_cron`: rescue cron's Stage 1 give-up branch — a lead was
+ *   stuck in `processing` past `GIVE_UP_MINUTES` and the cron decided
+ *   to land a heuristic instead of writing `ai_status='failed'` with
+ *   no estimate. Wired in the rescue cron at
+ *   `app/api/cron/rescue-stuck-leads/route.ts`.
+ *
+ * Audit 11 C2 fix (2026-05-10): the catch-block fallback used to be
+ * inlined inside `generateEstimateAsync`'s catch. Extracted into this
+ * shared function so the rescue cron can call the SAME code path and
+ * stuck leads also get a heuristic estimate instead of a NULL row.
+ */
+export type FallbackEstimateOrigin = "catch_fallback" | "rescue_cron";
+
+/**
+ * Compute a heuristic estimate from `estimateInput` (no OpenAI calls,
+ * pure JS) and write the full success-shape UPDATE to the lead row
+ * (`ai_status='ready'` plus all 19 AI columns). Used by both the
+ * in-process catch block in `generateEstimateAsync` and the rescue
+ * cron's Stage 1 give-up branch — same code path so behavior is
+ * uniform.
+ *
+ * Inputs:
+ * - `admin`: Supabase admin client (caller-owned).
+ * - `leadId`/`orgId`: identify the row to update.
+ * - `estimateInput`: the same shape `generateEstimate` consumes.
+ *   Caller is responsible for loading + building this from the DB.
+ * - `triggerMessage`: human-readable reason this fallback fired
+ *   (e.g. the original error message from the catch block, or
+ *   `STUCK_NOTE` from the rescue cron). Embedded in the structured
+ *   audit marker.
+ * - `origin`: see `FallbackEstimateOrigin` above. Marker phase slugs
+ *   include this so downstream queries can tell catch vs cron paths
+ *   apart.
+ *
+ * Returns `{ ok: true }` on successful write, or `{ ok: false, error }`
+ * when EITHER the heuristic engine throws OR the UPDATE fails. The
+ * caller is responsible for:
+ * - Capturing the originating error to Sentry (we don't have the
+ *   error object).
+ * - Sending the new-lead notification chain to the contractor.
+ * - Falling back to a "just write failed and notify" branch when this
+ *   function returns `ok:false` (e.g. last-resort failure write in
+ *   `generateEstimateAsync`, or `STUCK_NOTE`-only write in the cron).
+ *
+ * Does NOT call OpenAI: `inferSignalsFallback` + `fallbackEstimate`
+ * are pure JS, and `buildDegradedPropertyData` returns all-nulls for
+ * lat/lng/lot rather than calling Google Places. Typical wall time is
+ * <300 ms per lead — comfortably inside the cron's 60s budget even for
+ * a 30-lead worst-case batch.
+ */
+export async function runFallbackEstimate(
+  admin: ReturnType<typeof createAdminClient>,
+  params: {
+    leadId: string;
+    orgId: string;
+    estimateInput: EstimateInput;
+    triggerMessage: string;
+    origin: FallbackEstimateOrigin;
+  }
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    const aiModeForFallback = (() => {
+      try {
+        return getEstimatorAiMode();
+      } catch {
+        return "auto" as EstimatorAiMode;
+      }
+    })();
+    const originSlug =
+      params.origin === "catch_fallback" ? "catch_fallback" : "rescue_cron_fallback";
+    const auditMarkers: EstimatorNote[] = [
+      makeEstimatorNote(`${originSlug}_origin`, `Estimator origin: ${originSlug}.`),
+      makeEstimatorNote(
+        `${originSlug}_trigger`,
+        `${
+          params.origin === "catch_fallback" ? "Catch fallback" : "Rescue cron fallback"
+        } triggered by: ${params.triggerMessage}`
+      ),
+      makeEstimatorNote(`polish_skipped_${originSlug}`, `Summary polish: skipped (${originSlug}).`),
+      makeEstimatorNote(
+        `property_data_skipped_${originSlug}`,
+        `Property data: skipped (${originSlug} uses degraded defaults).`
+      )
+    ];
+    Sentry.addBreadcrumb({
+      category: "estimator",
+      type: "info",
+      level: "warning",
+      message: `${originSlug}_origin`,
+      data: { trigger: params.triggerMessage }
+    });
+    const degradedPropertyData = buildDegradedPropertyData({
+      address: params.estimateInput.address,
+      parcelLotSizeSqft: params.estimateInput.parcelLotSizeSqft ?? null,
+      travelDistanceMiles: params.estimateInput.travelDistanceMiles ?? null
+    });
+    const fallbackTrace = buildAiExtractionTrace([], {
+      structuredAiSucceeded: false,
+      fallbackUsed: true,
+      attemptsMade: 0
+    });
+    const fallbackResult = fallbackEstimate(
+      params.estimateInput,
+      degradedPropertyData,
+      attachAiExtractionTrace(
+        inferSignalsFallback(params.estimateInput, degradedPropertyData),
+        fallbackTrace,
+        aiModeForFallback
+      )
+    );
+    // Dedup by message; first occurrence wins (so audit markers shadow
+    // any duplicate engine notes that say the same thing).
+    const seenNotes = new Set<string>();
+    const finalNotes: EstimatorNote[] = [];
+    for (const note of [...auditMarkers, ...(fallbackResult.estimatorNotes ?? [])]) {
+      if (seenNotes.has(note.message)) continue;
+      seenNotes.add(note.message);
+      finalNotes.push(note);
+    }
+    finalNotes.splice(24);
+
+    const { error: writeError } = await admin
+      .from("leads")
+      .update({
+        job_city: fallbackResult.propertyData.city,
+        job_state: fallbackResult.propertyData.state,
+        job_zip: fallbackResult.propertyData.zipCode,
+        pricing_region: fallbackResult.region ?? fallbackResult.pricingRegion,
+        parcel_lot_size_sqft: fallbackResult.propertyData.lotSizeSqft,
+        house_sqft: fallbackResult.propertyData.houseSqft,
+        estimated_backyard_sqft: fallbackResult.propertyData.estimatedBackyardSqft,
+        service_category: fallbackResult.serviceCategory as ServiceCategory,
+        job_type: fallbackResult.jobType,
+        terrain_classification: fallbackResult.terrain ?? null,
+        access_difficulty: fallbackResult.access ?? null,
+        material_tier: fallbackResult.material ?? null,
+        ai_confidence: confidenceLabel(fallbackResult.confidenceScore),
+        ai_confidence_score: fallbackResult.confidenceScore,
+        ai_cost_breakdown: fallbackResult.costBreakdown,
+        ai_service_estimates: fallbackResult.serviceEstimates,
+        ai_pricing_drivers: fallbackResult.pricingDrivers,
+        ai_estimator_notes: finalNotes,
+        ai_job_summary: fallbackResult.summary,
+        ai_estimate_low: fallbackResult.lowEstimate,
+        ai_estimate_high: fallbackResult.highEstimate,
+        ai_suggested_price: fallbackResult.snapQuote,
+        ai_status: "ready",
+        ai_generated_at: new Date().toISOString(),
+        travel_distance_miles: params.estimateInput.travelDistanceMiles ?? null
+      })
+      .eq("id", params.leadId)
+      .eq("org_id", params.orgId);
+
+    if (writeError) {
+      return { ok: false, error: writeError.message };
+    }
+    invalidateAnalytics(params.orgId);
+    return { ok: true };
+  } catch (error) {
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : String(error)
+    };
+  }
+}
+
+/**
+ * Load a lead row + its contractor profile + lead_photos from the DB
+ * and build an `EstimateInput` suitable for `runFallbackEstimate`. Used
+ * by the rescue cron's Stage 1 give-up branch where we don't have an
+ * `EstimateInput` already in scope (the in-process catch block already
+ * has one hoisted from earlier in the pipeline).
+ *
+ * Returns `null` if the lead row is missing or no longer in
+ * `processing` (CAS protection — between the cron's candidate SELECT
+ * and this load, another cron tick or path may have updated the row),
+ * or if the contractor profile load fails. The caller handles that by
+ * falling back to the "just flip status to failed and notify" branch.
+ *
+ * Photos are ordered by `created_at ASC` per Audit 11 H1 — the AI
+ * pipeline does the same in `generateEstimateAsync`, so identical-
+ * input behavior between the two paths.
+ */
+export async function loadEstimateInputForRescue(
+  admin: ReturnType<typeof createAdminClient>,
+  leadId: string,
+  orgId: string
+): Promise<{ estimateInput: EstimateInput; addressFull: string | null } | null> {
+  const { data: lead, error: leadError } = await admin
+    .from("leads")
+    .select(
+      "id,org_id,address_full,address_place_id,lat,lng,parcel_lot_size_sqft,services,service_question_answers,description,travel_distance_miles,ai_status"
+    )
+    .eq("id", leadId)
+    .eq("org_id", orgId)
+    .single();
+
+  if (leadError || !lead) return null;
+  // CAS-style guard: if the row is no longer 'processing', skip.
+  // Another cron tick or the in-process estimator may have already
+  // moved it to a terminal state.
+  if ((lead.ai_status as string | null) !== "processing") return null;
+
+  const [{ data: contractor, error: contractorError }, { data: photos, error: photosError }] =
+    await Promise.all([
+      admin
+        .from("contractor_profile")
+        .select("business_name,business_address_full,business_lat,business_lng")
+        .eq("org_id", orgId)
+        .single(),
+      admin
+        .from("lead_photos")
+        .select("public_url")
+        .eq("lead_id", leadId)
+        .eq("org_id", orgId)
+        .order("created_at", { ascending: true })
+    ]);
+
+  if (contractorError || !contractor) return null;
+  if (photosError) return null;
+
+  const contractorLat =
+    contractor.business_lat != null ? Number(contractor.business_lat) : null;
+  const contractorLng =
+    contractor.business_lng != null ? Number(contractor.business_lng) : null;
+  const leadLat = lead.lat != null ? Number(lead.lat) : null;
+  const leadLng = lead.lng != null ? Number(lead.lng) : null;
+
+  const estimateInput: EstimateInput = {
+    businessName: contractor.business_name as string,
+    services: ((lead.services as string[]) ?? []).map((service) => service),
+    serviceQuestionAnswers: parseServiceQuestionAnswers(lead.service_question_answers),
+    address: lead.address_full as string,
+    addressPlaceId: (lead.address_place_id as string | null) ?? null,
+    lat: leadLat,
+    lng: leadLng,
+    description: lead.description as string | null,
+    photoUrls: (photos ?? []).map((photo) => (photo.public_url as string) || "").filter(Boolean),
+    parcelLotSizeSqft: lead.parcel_lot_size_sqft ? Number(lead.parcel_lot_size_sqft) : null,
+    businessAddress: (contractor.business_address_full as string | null) ?? null,
+    businessLat: contractorLat,
+    businessLng: contractorLng,
+    travelDistanceMiles:
+      lead.travel_distance_miles != null ? Number(lead.travel_distance_miles) : null
+  };
+
+  return {
+    estimateInput,
+    addressFull: (lead.address_full as string | null) ?? null
+  };
+}
+
 export async function generateEstimateAsync(leadId: string) {
   const admin = createAdminClient();
 
@@ -5022,125 +5282,46 @@ export async function generateEstimateAsync(leadId: string) {
     // -------- Catch-block fallback ("never $0") --------
     // If we reached the point of having a built EstimateInput, run the
     // deterministic engine directly with degraded property data so a
-    // real price lands on the row. Polish is intentionally skipped — the
-    // catch path's job is a guaranteed price, not a polished summary.
+    // real price lands on the row. Polish is intentionally skipped —
+    // the catch path's job is a guaranteed price, not a polished
+    // summary.
+    //
+    // Audit 11 C2 fix (2026-05-10): the catch-block body was extracted
+    // into the shared `runFallbackEstimate` function above so the
+    // rescue cron's Stage 1 give-up branch can call the SAME path. The
+    // behavior here is unchanged — we still build the degraded
+    // estimate, write `ai_status='ready'` with all 19 AI columns, and
+    // capture the original error to Sentry on success. Failure paths
+    // (function returns ok:false OR throws) fall through to the
+    // last-resort failure write below, same as before.
     if (estimateInput && leadOrgId) {
-      try {
-        const aiModeForCatch = (() => {
-          try {
-            return getEstimatorAiMode();
-          } catch {
-            return "auto" as EstimatorAiMode;
-          }
-        })();
-        const catchAuditMarkers: EstimatorNote[] = [
-          makeEstimatorNote("catch_fallback_origin", "Estimator origin: catch_fallback."),
-          makeEstimatorNote(
-            "catch_fallback_trigger",
-            `Catch fallback triggered by: ${failureMessage}`
-          ),
-          makeEstimatorNote("polish_skipped_catch", "Summary polish: skipped (catch fallback)."),
-          makeEstimatorNote(
-            "property_data_skipped_catch",
-            "Property data: skipped (catch fallback uses degraded defaults)."
-          )
-        ];
-        Sentry.addBreadcrumb({
-          category: "estimator",
-          type: "info",
-          level: "warning",
-          message: "catch_fallback_origin",
-          data: { trigger: failureMessage }
+      const fallbackResult = await runFallbackEstimate(admin, {
+        leadId,
+        orgId: leadOrgId,
+        estimateInput,
+        triggerMessage: failureMessage,
+        origin: "catch_fallback"
+      });
+      if (fallbackResult.ok) {
+        // Capture the original error to Sentry so we can monitor what
+        // forced the catch fallback even on the recovery path.
+        Sentry.captureException(error, {
+          tags: { area: "estimator", stage: "catch-fallback-recovered" },
+          extra: { leadId, orgId: leadOrgId, failureMessage }
         });
-        const degradedPropertyData = buildDegradedPropertyData({
-          address: estimateInput.address,
-          parcelLotSizeSqft: estimateInput.parcelLotSizeSqft ?? null,
-          travelDistanceMiles: estimateInput.travelDistanceMiles ?? null
+        await sendNewLeadNotifications(admin, {
+          leadId,
+          orgId: leadOrgId,
+          addressFull: leadAddressFull
         });
-        const catchTrace = buildAiExtractionTrace([], {
-          structuredAiSucceeded: false,
-          fallbackUsed: true,
-          attemptsMade: 0
-        });
-        const catchEstimate = fallbackEstimate(
-          estimateInput,
-          degradedPropertyData,
-          attachAiExtractionTrace(
-            inferSignalsFallback(estimateInput, degradedPropertyData),
-            catchTrace,
-            aiModeForCatch
-          )
-        );
-        // Merge the catch markers into the estimator notes so the row
-        // carries an unambiguous "this was the catch fallback" trail.
-        // Dedup by message; first occurrence wins (so catch markers
-        // shadow any duplicate engine notes).
-        const seenCatch = new Set<string>();
-        const catchNotes: EstimatorNote[] = [];
-        for (const note of [...catchAuditMarkers, ...(catchEstimate.estimatorNotes ?? [])]) {
-          if (seenCatch.has(note.message)) continue;
-          seenCatch.add(note.message);
-          catchNotes.push(note);
-        }
-        catchNotes.splice(24);
-
-        const { error: catchWriteError } = await admin
-          .from("leads")
-          .update({
-            job_city: catchEstimate.propertyData.city,
-            job_state: catchEstimate.propertyData.state,
-            job_zip: catchEstimate.propertyData.zipCode,
-            pricing_region: catchEstimate.region ?? catchEstimate.pricingRegion,
-            parcel_lot_size_sqft: catchEstimate.propertyData.lotSizeSqft,
-            house_sqft: catchEstimate.propertyData.houseSqft,
-            estimated_backyard_sqft: catchEstimate.propertyData.estimatedBackyardSqft,
-            service_category: catchEstimate.serviceCategory as ServiceCategory,
-            job_type: catchEstimate.jobType,
-            terrain_classification: catchEstimate.terrain ?? null,
-            access_difficulty: catchEstimate.access ?? null,
-            material_tier: catchEstimate.material ?? null,
-            ai_confidence: confidenceLabel(catchEstimate.confidenceScore),
-            ai_confidence_score: catchEstimate.confidenceScore,
-            ai_cost_breakdown: catchEstimate.costBreakdown,
-            ai_service_estimates: catchEstimate.serviceEstimates,
-            ai_pricing_drivers: catchEstimate.pricingDrivers,
-            ai_estimator_notes: catchNotes,
-            ai_job_summary: catchEstimate.summary,
-            ai_estimate_low: catchEstimate.lowEstimate,
-            ai_estimate_high: catchEstimate.highEstimate,
-            ai_suggested_price: catchEstimate.snapQuote,
-            ai_status: "ready",
-            ai_generated_at: new Date().toISOString(),
-            travel_distance_miles: estimateInput.travelDistanceMiles ?? null
-          })
-          .eq("id", leadId)
-          .eq("org_id", leadOrgId);
-
-        if (catchWriteError) {
-          console.error("Catch fallback write failed:", catchWriteError);
-          // Fall through to the last-resort failure-write below.
-        } else {
-          // Capture the original error to Sentry so we can monitor what
-          // forced the catch fallback even on the recovery path.
-          Sentry.captureException(error, {
-            tags: { area: "estimator", stage: "catch-fallback-recovered" },
-            extra: { leadId, orgId: leadOrgId, failureMessage }
-          });
-          invalidateAnalytics(leadOrgId);
-          await sendNewLeadNotifications(admin, {
-            leadId,
-            orgId: leadOrgId,
-            addressFull: leadAddressFull
-          });
-          return;
-        }
-      } catch (catchFallbackError) {
-        console.error("Catch fallback itself threw:", catchFallbackError);
-        Sentry.captureException(catchFallbackError, {
-          tags: { area: "estimator", stage: "catch-fallback-threw" },
-          extra: { leadId, orgId: leadOrgId, originalError: failureMessage }
-        });
+        return;
       }
+      console.error("Catch fallback failed:", fallbackResult.error);
+      Sentry.captureException(new Error(fallbackResult.error), {
+        tags: { area: "estimator", stage: "catch-fallback-threw" },
+        extra: { leadId, orgId: leadOrgId, originalError: failureMessage }
+      });
+      // Fall through to the last-resort failure-write below.
     }
 
     // -------- Last-resort failure write --------
