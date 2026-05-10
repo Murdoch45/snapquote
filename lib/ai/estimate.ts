@@ -423,6 +423,42 @@ function buildAiSignalsResponseFormat() {
   return zodTextFormat(aiSignalsResponseSchema, "snapquote_estimator_signals");
 }
 
+// Structured estimator note. Pushed onto `ai_estimator_notes` (JSONB array
+// on `leads`). Each entry carries a phase slug + ISO 8601 timestamp so we
+// can compute per-phase pipeline timings from production data via
+// `notes->i->>'ts'` arithmetic without adding any external observability
+// dependency. Legacy rows in the column may still hold plain strings or
+// arrays of plain strings; readers should handle both shapes
+// (`scripts/run-estimator-tests.ts:parseLeadNotes` does).
+export type EstimatorNote = {
+  phase: string;
+  ts: string;
+  message: string;
+  data?: Record<string, unknown>;
+};
+
+function makeEstimatorNote(
+  phase: string,
+  message: string,
+  data?: Record<string, unknown>
+): EstimatorNote {
+  return data === undefined
+    ? { phase, ts: new Date().toISOString(), message }
+    : { phase, ts: new Date().toISOString(), message, data };
+}
+
+// Wrap a legacy string into an `EstimatorNote`. Used at the merge boundary
+// where engine-side string notes are folded into the structured pipeline
+// markers — engine notes don't carry their own timestamp, so they all get
+// the merge-time ts.
+function wrapLegacyNote(
+  message: string,
+  phase = "engine",
+  ts: string = new Date().toISOString()
+): EstimatorNote {
+  return { phase, ts, message };
+}
+
 export type EstimateInput = {
   businessName: string;
   services: string[];
@@ -441,11 +477,18 @@ export type EstimateInput = {
   travelDistanceMiles?: number | null;
 };
 
-export type GeneratedLeadEstimate = EngineEstimate & {
+export type GeneratedLeadEstimate = Omit<EngineEstimate, "estimatorNotes"> & {
   summary: string;
   costBreakdown: Record<string, number>;
   aiExtractionTrace?: AiExtractionTrace | null;
   estimatorAudit?: EstimatorPipelineAudit | null;
+  // Structured notes persisted to `leads.ai_estimator_notes`. Each entry
+  // carries a phase slug + ISO 8601 ts captured at the push site. Engine-
+  // produced notes (which have no natural phase boundary) are wrapped
+  // with `phase: "engine"` and the merge-time ts at `mergeAuditMarkers`.
+  // Legacy rows in the DB may be `string[]` or a JSONB string; readers
+  // should handle both shapes.
+  estimatorNotes: EstimatorNote[];
 };
 
 type AiEstimatorSignalsWithTrace = AiEstimatorSignals & {
@@ -1680,15 +1723,29 @@ function buildEstimatorFailureNotes(params: {
   cacheMode: string;
   cacheStatus: string;
   message: string;
-}): string[] {
+}): EstimatorNote[] {
+  // Each failure note becomes a structured `EstimatorNote` so the row
+  // shape on `leads.ai_estimator_notes` is consistent with the success
+  // path (which writes `EstimatorNote[]` via `mergeAuditMarkers`).
+  // Phase slugs let us query "how many leads hit unsupported_request /
+  // generation_failed" downstream.
+  const ts = new Date().toISOString();
   return [
-    `Estimator AI mode: ${params.mode}.`,
-    `Estimator signal source: ${params.signalSource}.`,
-    `Estimator AI execution: ${params.execution}.`,
-    `Estimator AI live invocation: ${params.liveInvocation}.`,
-    `Estimator AI cache mode: ${params.cacheMode}.`,
-    `Estimator AI cache status: ${params.cacheStatus}.`,
-    `Estimator generation failed: ${params.message}`
+    { phase: "ai_mode", ts, message: `Estimator AI mode: ${params.mode}.` },
+    { phase: "ai_signal_source", ts, message: `Estimator signal source: ${params.signalSource}.` },
+    { phase: "ai_execution", ts, message: `Estimator AI execution: ${params.execution}.` },
+    {
+      phase: "ai_live_invocation",
+      ts,
+      message: `Estimator AI live invocation: ${params.liveInvocation}.`
+    },
+    { phase: "ai_cache_mode", ts, message: `Estimator AI cache mode: ${params.cacheMode}.` },
+    { phase: "ai_cache_status", ts, message: `Estimator AI cache status: ${params.cacheStatus}.` },
+    {
+      phase: "generation_failed",
+      ts,
+      message: `Estimator generation failed: ${params.message}`
+    }
   ];
 }
 
@@ -1800,29 +1857,35 @@ async function fetchImageAsDataUrl(url: string): Promise<string | null> {
 
 async function resolveSatelliteImageUrl(
   input: EstimateInput,
-  auditMarkers?: string[]
+  auditMarkers?: EstimatorNote[]
 ): Promise<string | null> {
   if (input.satelliteImageUrl) {
-    auditMarkers?.push("Satellite image attached.");
+    auditMarkers?.push(makeEstimatorNote("satellite_attached", "Satellite image attached."));
     return input.satelliteImageUrl;
   }
   if (input.lat == null || input.lng == null) {
-    auditMarkers?.push("Satellite image unavailable: no location coordinates.");
+    auditMarkers?.push(
+      makeEstimatorNote("satellite_skipped_no_coords", "Satellite image unavailable: no location coordinates.")
+    );
     return null;
   }
 
   const key = getGoogleMapsApiKey();
   if (!key) {
-    auditMarkers?.push("Satellite image unavailable: no Google Maps API key.");
+    auditMarkers?.push(
+      makeEstimatorNote("satellite_skipped_no_key", "Satellite image unavailable: no Google Maps API key.")
+    );
     return null;
   }
 
   const staticMapUrl = buildSatelliteStaticMapUrl(input.lat, input.lng, key);
   const dataUrl = await fetchImageAsDataUrl(staticMapUrl);
   if (dataUrl) {
-    auditMarkers?.push("Satellite image attached.");
+    auditMarkers?.push(makeEstimatorNote("satellite_attached", "Satellite image attached."));
   } else {
-    auditMarkers?.push("Satellite image unavailable: fetch failed.");
+    auditMarkers?.push(
+      makeEstimatorNote("satellite_fetch_failed", "Satellite image unavailable: fetch failed.")
+    );
   }
   return dataUrl;
 }
@@ -1887,11 +1950,30 @@ function buildServiceRequests(input: EstimateInput): ServiceRequest[] {
 }
 
 function sanitizeAnswersForModeling(answers: ServiceQuestionAnswers): ServiceQuestionAnswers {
-  return Object.fromEntries(
-    Object.entries(answers).filter(
-      ([key]) => !key.endsWith("_contractor_note") && !key.endsWith("_other_text")
-    )
-  );
+  // C1 fix (2026-05-10): previously stripped `_other_text` and
+  // `_contractor_note` keys before they reached either the AI prompt
+  // builder (`sanitizeServiceQuestionBundlesForModeling` above) or the
+  // deterministic engine (`buildServiceRequests`). Customers and
+  // contractors fill these out with critical context — e.g.
+  // "junk_type_other_text: special access needs for junk type 73",
+  // "fence_scope_other_text: site-specific details for fence scope 35",
+  // "roofing_work_type_contractor_note: clean mooo" (live samples,
+  // Supabase MCP 2026-05-10). The prompt's instruction at
+  // `buildSignalPrompt` line ~3380 explicitly tells the model to
+  // "Analyze the services, questionnaire answers, any other-text answer
+  // fields, customer description..." — so those keys SHOULD reach it.
+  // The engine's `requestDirectEvidenceText` at ~line 2065 also has a
+  // dedicated branch matching `/_other_text$|_contractor_note$/i` that
+  // was previously dead because of this stripping.
+  //
+  // Pass-through. The customer-typed `description` field already flows
+  // through `buildSignalPrompt:input.description` without sanitization,
+  // so the prompt-injection surface here is the same as it was before
+  // for `description` — no NEW attack surface; the existing one is
+  // tracked in Pending Work as "prompt-injection fences for
+  // description". Apply that fence to ALL freeform fields together when
+  // it ships.
+  return answers;
 }
 
 function sanitizeServiceQuestionBundlesForModeling(
@@ -3627,7 +3709,7 @@ async function writeStructuredAiTestCacheEntry(
 async function callOpenAI(
   prompt: string,
   input: EstimateInput,
-  auditMarkers?: string[]
+  auditMarkers?: EstimatorNote[]
 ): Promise<StructuredAiCallResult> {
   try {
     validateStructuredAiRequest(input);
@@ -3751,6 +3833,25 @@ async function callOpenAI(
       : [])
   ];
 
+  const aiModel = process.env.OPENAI_MODEL ?? "gpt-5-mini";
+  auditMarkers?.push(
+    makeEstimatorNote("openai_call_start", `OpenAI signal call started (model=${aiModel}).`, {
+      photo_count: input.photoUrls.length,
+      satellite_attached: Boolean(satelliteImage)
+    })
+  );
+  Sentry.addBreadcrumb({
+    category: "estimator",
+    type: "info",
+    level: "info",
+    message: "openai_call_start",
+    data: {
+      model: aiModel,
+      photo_count: input.photoUrls.length,
+      satellite_attached: Boolean(satelliteImage)
+    }
+  });
+
   const attemptResult = await runStructuredAiOperation({
     operation: async () => {
       const controller = new AbortController();
@@ -3759,7 +3860,7 @@ async function callOpenAI(
       try {
         const response = await client.responses.parse(
           {
-            model: process.env.OPENAI_MODEL ?? "gpt-5-mini",
+            model: aiModel,
             reasoning: {
               effort: "low"
             },
@@ -3826,6 +3927,20 @@ async function callOpenAI(
   if (attemptResult.ok) {
     let signals = attemptResult.result;
 
+    auditMarkers?.push(
+      makeEstimatorNote(
+        "openai_call_ok",
+        `OpenAI signal call succeeded on attempt ${attemptResult.trace.attemptsMade}.`
+      )
+    );
+    Sentry.addBreadcrumb({
+      category: "estimator",
+      type: "info",
+      level: "info",
+      message: "openai_call_ok",
+      data: { attempts: attemptResult.trace.attemptsMade }
+    });
+
     if (testCacheMode === "record" || testCacheMode === "record_replay") {
       try {
         const cachePath = await writeStructuredAiTestCacheEntry(prompt, input, signals);
@@ -3845,6 +3960,30 @@ async function callOpenAI(
     };
   }
 
+  auditMarkers?.push(
+    makeEstimatorNote(
+      "openai_call_failed",
+      `OpenAI signal call failed: ${attemptResult.failure.category}${
+        attemptResult.failure.retryable ? " (retryable)" : " (non-retryable)"
+      }.`,
+      {
+        category: attemptResult.failure.category,
+        retryable: attemptResult.failure.retryable,
+        attempts: attemptResult.trace.attemptsMade
+      }
+    )
+  );
+  Sentry.addBreadcrumb({
+    category: "estimator",
+    type: "info",
+    level: "warning",
+    message: "openai_call_failed",
+    data: {
+      category: attemptResult.failure.category,
+      retryable: attemptResult.failure.retryable,
+      attempts: attemptResult.trace.attemptsMade
+    }
+  });
   console.error("Structured AI extraction failed; falling back.", {
     attemptsMade: attemptResult.trace.attemptsMade,
     finalFailureCategory: attemptResult.trace.finalFailureCategory,
@@ -3866,9 +4005,18 @@ function buildGeneratedEstimate(
   summaryOverride?: string
 ): GeneratedLeadEstimate {
   const region = engineEstimate.region ?? signals.region ?? "default";
+  // Engine produces estimatorNotes as plain strings; wrap each into an
+  // EstimatorNote with a single shared merge-time ts. Per-phase markers
+  // pushed by the AI pipeline (auditMarkers in `generateEstimate`) carry
+  // their own push-time ts and override these via mergeAuditMarkers.
+  const mergeTs = new Date().toISOString();
+  const wrappedEngineNotes: EstimatorNote[] = (engineEstimate.estimatorNotes ?? []).map((s) =>
+    wrapLegacyNote(s, "engine", mergeTs)
+  );
 
   return {
     ...engineEstimate,
+    estimatorNotes: wrappedEngineNotes,
     summary: summaryOverride ?? signals.summary ?? engineEstimate.scopeSummary,
     costBreakdown: engineEstimate.lineItems,
     propertyData,
@@ -3999,7 +4147,7 @@ export function fallbackEstimate(
 
 async function polishEstimateSummary(
   estimate: GeneratedLeadEstimate,
-  auditMarkers?: string[]
+  auditMarkers?: EstimatorNote[]
 ): Promise<GeneratedLeadEstimate> {
   const polished = await polishJobSummary(estimate.summary, auditMarkers);
   if (polished === estimate.summary) return estimate;
@@ -4012,8 +4160,17 @@ export async function generateEstimate(input: EstimateInput): Promise<GeneratedL
   // claude.ai can grep `ai_estimator_notes` and answer "what fired?" for
   // a given lead. Threaded down into callOpenAI / resolveSatelliteImageUrl
   // / polishEstimateSummary, then merged into the final estimatorNotes
-  // before return.
-  const auditMarkers: string[] = [];
+  // before return. Each marker is an EstimatorNote object carrying a phase
+  // slug + ISO 8601 ts captured at push time, so per-phase pipeline
+  // timings can be computed via `notes->i->>'ts'` arithmetic.
+  const auditMarkers: EstimatorNote[] = [];
+  Sentry.addBreadcrumb({
+    category: "estimator",
+    type: "info",
+    level: "info",
+    message: "pipeline_start"
+  });
+  auditMarkers.push(makeEstimatorNote("pipeline_start", "Estimator pipeline started."));
 
   let propertyData: PropertyData;
   try {
@@ -4028,11 +4185,35 @@ export async function generateEstimate(input: EstimateInput): Promise<GeneratedL
       })
     );
     auditMarkers.push(
-      `Property data resolved: ${propertyData.city ?? "unknown"}, ${propertyData.state ?? "unknown"} (lot ${propertyData.lotSizeSqft ?? "unknown"} sqft).`
+      makeEstimatorNote(
+        "property_data_ok",
+        `Property data resolved: ${propertyData.city ?? "unknown"}, ${propertyData.state ?? "unknown"} (lot ${propertyData.lotSizeSqft ?? "unknown"} sqft).`
+      )
     );
+    Sentry.addBreadcrumb({
+      category: "estimator",
+      type: "info",
+      level: "info",
+      message: "property_data_ok",
+      data: {
+        locationSource: propertyData.locationSource,
+        lotSizeSource: propertyData.lotSizeSource
+      }
+    });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    auditMarkers.push(`Property data lookup failed: ${message}; using degraded defaults.`);
+    auditMarkers.push(
+      makeEstimatorNote(
+        "property_data_failed",
+        `Property data lookup failed: ${message}; using degraded defaults.`
+      )
+    );
+    Sentry.addBreadcrumb({
+      category: "estimator",
+      type: "error",
+      level: "warning",
+      message: "property_data_failed"
+    });
     propertyData = buildDegradedPropertyData({
       address: input.address,
       parcelLotSizeSqft: input.parcelLotSizeSqft ?? null,
@@ -4050,7 +4231,9 @@ export async function generateEstimate(input: EstimateInput): Promise<GeneratedL
       fallbackUsed: true,
       attemptsMade: 0
     });
-    auditMarkers.push("Satellite image: skipped (estimator mode=off).");
+    auditMarkers.push(
+      makeEstimatorNote("satellite_skipped_mode_off", "Satellite image: skipped (estimator mode=off).")
+    );
 
     const polished = await polishEstimateSummary(
       fallbackEstimate(
@@ -4104,18 +4287,31 @@ export async function generateEstimate(input: EstimateInput): Promise<GeneratedL
 }
 
 // Prepends the collected audit markers onto the estimate's estimatorNotes
-// (deduped, capped) so the notes that reach the lead row include both the
-// per-service trace from the engine AND the pipeline-stage markers. The
-// markers go FIRST so they survive the existing slice-cap at the engine
-// level if the estimator itself produced a long trace.
+// (deduped by message, capped) so the notes that reach the lead row
+// include both the per-service trace from the engine AND the pipeline-
+// stage markers. The markers go FIRST so they survive the existing
+// slice-cap at the engine level if the estimator itself produced a long
+// trace. Engine notes are plain strings (no per-string ts) and get
+// wrapped with `phase: "engine"` + the merge-time ts at this boundary.
 function mergeAuditMarkers(
   estimate: GeneratedLeadEstimate,
-  markers: string[]
+  markers: EstimatorNote[]
 ): GeneratedLeadEstimate {
-  if (markers.length === 0) return estimate;
+  const existing = estimate.estimatorNotes ?? [];
+  if (markers.length === 0 && existing.length === 0) return estimate;
+  const combined: EstimatorNote[] = [...markers, ...existing];
+  // Dedup by message text; first occurrence wins (so audit markers
+  // shadow engine notes that say the same thing).
+  const seen = new Set<string>();
+  const deduped: EstimatorNote[] = [];
+  for (const note of combined) {
+    if (seen.has(note.message)) continue;
+    seen.add(note.message);
+    deduped.push(note);
+  }
   return {
     ...estimate,
-    estimatorNotes: Array.from(new Set([...markers, ...(estimate.estimatorNotes ?? [])])).slice(0, 24)
+    estimatorNotes: deduped.slice(0, 24)
   };
 }
 
@@ -4345,25 +4541,34 @@ export function buildDeterministicJobSummary(input: EstimateInput): string {
 // Polishes the deterministic summary into natural contractor-briefing voice.
 // The AI gets ONE job: rewrite the provided text without adding or removing
 // facts. A failure here is non-fatal — callers keep the raw summary.
-async function polishJobSummary(rawSummary: string, auditMarkers?: string[]): Promise<string> {
+async function polishJobSummary(rawSummary: string, auditMarkers?: EstimatorNote[]): Promise<string> {
   if (!rawSummary.trim()) {
-    auditMarkers?.push("Summary polish: skipped (empty raw summary).");
+    auditMarkers?.push(makeEstimatorNote("polish_skipped_empty", "Summary polish: skipped (empty raw summary)."));
     return rawSummary;
   }
   if (getEstimatorAiMode() === "off") {
-    auditMarkers?.push("Summary polish: skipped (estimator mode=off).");
+    auditMarkers?.push(makeEstimatorNote("polish_skipped_mode_off", "Summary polish: skipped (estimator mode=off)."));
     return rawSummary;
   }
 
   try {
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
-      auditMarkers?.push("Summary polish: skipped (no OPENAI_API_KEY).");
+      auditMarkers?.push(makeEstimatorNote("polish_skipped_no_key", "Summary polish: skipped (no OPENAI_API_KEY)."));
       return rawSummary;
     }
 
     const client = new OpenAI({ apiKey });
     const model = process.env.OPENAI_SUMMARY_POLISH_MODEL ?? process.env.OPENAI_MODEL ?? "gpt-5-mini";
+
+    auditMarkers?.push(makeEstimatorNote("polish_call_start", "Summary polish: call started."));
+    Sentry.addBreadcrumb({
+      category: "estimator",
+      type: "info",
+      level: "info",
+      message: "polish_call_start",
+      data: { model }
+    });
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort("summary polish timed out"), 10000);
@@ -4400,10 +4605,27 @@ async function polishJobSummary(rawSummary: string, auditMarkers?: string[]): Pr
 
       const polished = response.output_text?.trim();
       if (!polished) {
-        auditMarkers?.push("Summary polish: failed (empty response); using raw deterministic summary.");
+        auditMarkers?.push(
+          makeEstimatorNote(
+            "polish_empty_response",
+            "Summary polish: failed (empty response); using raw deterministic summary."
+          )
+        );
+        Sentry.addBreadcrumb({
+          category: "estimator",
+          type: "info",
+          level: "warning",
+          message: "polish_empty_response"
+        });
         return rawSummary;
       }
-      auditMarkers?.push("Summary polish: applied.");
+      auditMarkers?.push(makeEstimatorNote("polish_applied", "Summary polish: applied."));
+      Sentry.addBreadcrumb({
+        category: "estimator",
+        type: "info",
+        level: "info",
+        message: "polish_applied"
+      });
       return polished.slice(0, 600);
     } finally {
       clearTimeout(timeoutId);
@@ -4411,7 +4633,19 @@ async function polishJobSummary(rawSummary: string, auditMarkers?: string[]): Pr
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.warn("Job summary polish failed; using raw deterministic summary.", error);
-    auditMarkers?.push(`Summary polish: failed (${message}); using raw deterministic summary.`);
+    auditMarkers?.push(
+      makeEstimatorNote(
+        "polish_call_failed",
+        `Summary polish: failed (${message}); using raw deterministic summary.`
+      )
+    );
+    Sentry.addBreadcrumb({
+      category: "estimator",
+      type: "info",
+      level: "warning",
+      message: "polish_call_failed",
+      data: { error_type: error instanceof Error ? error.name : "unknown" }
+    });
     return rawSummary;
   }
 }
@@ -4609,6 +4843,12 @@ export async function generateEstimateAsync(leadId: string) {
           .select("public_url")
           .eq("lead_id", leadId)
           .eq("org_id", lead.org_id)
+          // H1 fix (2026-05-10): photos must be passed to OpenAI in a
+          // stable order. lead_photos has no `position` column, so order
+          // by `created_at` (set by `now()` default) for deterministic
+          // ordering across retries. Without this, two runs of the same
+          // lead can yield different AI outputs.
+          .order("created_at", { ascending: true })
       ]);
 
     if (contractorError || !contractor) {
@@ -4749,6 +4989,18 @@ export async function generateEstimateAsync(leadId: string) {
       throw updateError;
     }
 
+    Sentry.addBreadcrumb({
+      category: "estimator",
+      type: "info",
+      level: "info",
+      message: "terminal_ready",
+      data: {
+        ai_estimate_low: estimate.lowEstimate,
+        ai_estimate_high: estimate.highEstimate,
+        signal_source: estimate.aiExtractionTrace?.source ?? "unknown"
+      }
+    });
+
     invalidateAnalytics(lead.org_id as string);
 
     await sendNewLeadNotifications(admin, {
@@ -4759,6 +5011,13 @@ export async function generateEstimateAsync(leadId: string) {
   } catch (error) {
     const failureMessage = error instanceof Error ? error.message : "Unknown estimator failure.";
     console.error("AI estimate failed:", error);
+    Sentry.addBreadcrumb({
+      category: "estimator",
+      type: "error",
+      level: "error",
+      message: "pipeline_threw",
+      data: { error_type: error instanceof Error ? error.name : "unknown" }
+    });
 
     // -------- Catch-block fallback ("never $0") --------
     // If we reached the point of having a built EstimateInput, run the
@@ -4774,12 +5033,25 @@ export async function generateEstimateAsync(leadId: string) {
             return "auto" as EstimatorAiMode;
           }
         })();
-        const catchAuditMarkers = [
-          "Estimator origin: catch_fallback.",
-          `Catch fallback triggered by: ${failureMessage}`,
-          "Summary polish: skipped (catch fallback).",
-          "Property data: skipped (catch fallback uses degraded defaults)."
+        const catchAuditMarkers: EstimatorNote[] = [
+          makeEstimatorNote("catch_fallback_origin", "Estimator origin: catch_fallback."),
+          makeEstimatorNote(
+            "catch_fallback_trigger",
+            `Catch fallback triggered by: ${failureMessage}`
+          ),
+          makeEstimatorNote("polish_skipped_catch", "Summary polish: skipped (catch fallback)."),
+          makeEstimatorNote(
+            "property_data_skipped_catch",
+            "Property data: skipped (catch fallback uses degraded defaults)."
+          )
         ];
+        Sentry.addBreadcrumb({
+          category: "estimator",
+          type: "info",
+          level: "warning",
+          message: "catch_fallback_origin",
+          data: { trigger: failureMessage }
+        });
         const degradedPropertyData = buildDegradedPropertyData({
           address: estimateInput.address,
           parcelLotSizeSqft: estimateInput.parcelLotSizeSqft ?? null,
@@ -4801,9 +5073,16 @@ export async function generateEstimateAsync(leadId: string) {
         );
         // Merge the catch markers into the estimator notes so the row
         // carries an unambiguous "this was the catch fallback" trail.
-        const catchNotes = Array.from(
-          new Set([...catchAuditMarkers, ...(catchEstimate.estimatorNotes ?? [])])
-        ).slice(0, 24);
+        // Dedup by message; first occurrence wins (so catch markers
+        // shadow any duplicate engine notes).
+        const seenCatch = new Set<string>();
+        const catchNotes: EstimatorNote[] = [];
+        for (const note of [...catchAuditMarkers, ...(catchEstimate.estimatorNotes ?? [])]) {
+          if (seenCatch.has(note.message)) continue;
+          seenCatch.add(note.message);
+          catchNotes.push(note);
+        }
+        catchNotes.splice(24);
 
         const { error: catchWriteError } = await admin
           .from("leads")
