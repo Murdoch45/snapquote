@@ -89,6 +89,50 @@ Production deploys for `snapquote-web` had been failing since commit `eef6693` w
 
 ---
 
+## Session — May 10, 2026 — Audit 11 Part A fixes (C1+H1+H2+H4+F5) + Part B C2 deep history dive [Source: Claude Code]
+
+Branch `claude/audit-11-fixes-and-c2-deep-reaudit`. Three commits + merge: code fixes, rescue-cron fix, H2 backfill migration. Plus Part B docs. C2 + H3 + H5 explicitly DEFERRED per Murdoch.
+
+### Part A — five Audit 11 fixes shipped
+
+**C1 — `_other_text` / `_contractor_note` keys no longer stripped.** `lib/ai/estimate.ts:sanitizeAnswersForModeling` was filtering keys ending in those suffixes from BOTH the AI prompt builder (`sanitizeServiceQuestionBundlesForModeling`) and the deterministic engine (`buildServiceRequests`). Live samples (Supabase MCP 2026-05-10) showed real customer/contractor content was being silently dropped — `"junk_type_other_text: special access needs for junk type 73"`, `"fence_scope_other_text: site-specific details for fence scope 35"`, `"roofing_work_type_contractor_note: clean mooo"`. Prompt at `:3380` explicitly tells the model to "Analyze ... any other-text answer fields" — those fields never reached it. Engine's `requestDirectEvidenceText` had a `/_other_text$|_contractor_note$/i` branch that was previously dead code for the same reason. Fix: pass-through. The customer-typed `description` field already flows through unsanitized so this introduces no new prompt-injection surface; the existing one is filed as "prompt-injection fences for description" in Pending Work.
+
+**H1 — `lead_photos` query now `.order("created_at", { ascending: true })`.** Was heap-order. Two runs of the same lead could yield different AI outputs because the model saw photos in different orders.
+
+**H2 — Rescue cron writes `[{phase, ts, message}]` array.** Was writing `STUCK_NOTE` as a bare JS string into a JSONB column → jsonb-string. Every other writer wrote a JSONB array. Live: 7 string-shape rows (all with byte-identical `STUCK_NOTE`). Fix: single-element array of one structured `EstimatorNote`. Migration `audit11_h2_normalize_ai_estimator_notes_string_to_array` applied via Supabase MCP — converted all 7 legacy rows to single-element arrays of `[{phase: "rescue_give_up_legacy", ts: submitted_at, message: <STUCK_NOTE>}]`. Post-fix: 0 string-shape rows; 3 431 array-shape rows; idempotent migration committed to `supabase/migrations/`.
+
+**H4 — Sentry breadcrumbs added at every AI pipeline phase.** 30-day Sentry search returned 0 events for `area:estimator` despite known fallback firings — failures were swallowed silently. Added `Sentry.addBreadcrumb({category: "estimator", ...})` at: `pipeline_start`, `property_data_ok`/`property_data_failed`, `openai_call_start`/`openai_call_ok`/`openai_call_failed`, `polish_call_start`/`polish_applied`/`polish_call_failed`/`polish_empty_response`, `catch_fallback_origin`, `terminal_ready`, `pipeline_threw`. Breadcrumbs carry phase + structured `data` payload; PII auto-scrubbed by existing `beforeBreadcrumb` hook in `sentry.server.config.ts`.
+
+**F5 — `ai_estimator_notes` entries are now structured objects.** Was plain `string[]` with no per-phase ts; production data could only show total `pipeline_seconds = ai_generated_at - submitted_at`, no way to tell which phase was slow. New shape: `EstimatorNote = { phase: string; ts: string; message: string; data?: Record<string, unknown> }`. `ts` captured at PUSH time via `new Date().toISOString()`. Helpers `makeEstimatorNote(phase, msg, data?)` and `wrapLegacyNote(string)` for engine notes that have no natural phase boundary. `auditMarkers: EstimatorNote[]` flows through `generateEstimate` / `callOpenAI` / `polishJobSummary`. Engine notes are wrapped at the merge boundary in `buildGeneratedEstimate` with `phase: "engine"` + merge-time ts. `mergeAuditMarkers` dedups by message text. Reader `scripts/run-estimator-tests.ts:parseLeadNotes` updated to handle three shapes (legacy string, legacy `string[]`, post-fix `EstimatorNote[]`). Future query `(notes->-1->>'ts')::timestamptz - (notes->0->>'ts')::timestamptz AS pipeline_duration` now works.
+
+### Part A — verification
+- `npx tsc --noEmit` exit 0.
+- `npm run build` clean (only pre-existing `<img>` warning + Sentry deprecation notice, neither related to this change).
+- Supabase MCP post-migration: 0 string-shape rows, 3 431 array-shape rows.
+- Live verification per Rule 14 still pending (snapquote.us flow tests + new lead submission + Sentry breadcrumb confirmation) — to run after merge to main and Vercel deploy.
+
+### Part A — out-of-scope (DEFERRED per Murdoch)
+- C2 (rescue-cron Stage-1 give-up writes no fallback estimate) — see Part B below.
+- H3 (28s p50 latency) — deferred until F5 timing markers ship and we have real data.
+- H5 (service category mapping) — tied to unresolved Audit 9 M6 decision.
+
+### Part B — C2 deep history dive (read-only)
+
+Murdoch's instinct: "this might have been investigated/fixed before; the agent may be looking at code that was already reasoned about." Conclusion: **A — Bug exists, never previously fixed.** Full report at `docs/audit-11-c2-deep-history-reaudit-2026-05-10.md`.
+
+Evidence:
+- Five commits ever touched `app/api/cron/rescue-stuck-leads/route.ts`: `d5991c6` (file created with give-up writing only `ai_status='failed'` + `STUCK_NOTE`, no estimate), `db5b158` (added Stage 2 retry; give-up unchanged), `a11fb9c` (cron-scheduler move only — commit message: "The rescue logic itself... is unchanged"), `4346563` (added Stage 3 retry; Stage 1 give-up unchanged), `63afe5c` (auth-only). **Every diff inspected. No commit ever attempted to add fallback-estimate computation to Stage 1.**
+- The catch-block fallback in `lib/ai/estimate.ts:4768-4865` (commit `51f7890`, 2026-05-04) is in-process only. Its commit message implicitly defers the cron-give-up case via Stage 3 retry — but Stage 3 only handles `failed` rows that entered via `generateEstimateAsync`'s normal failure-write path AND are within `FAILED_RETRY_WINDOW_HOURS=6` AND under `MAX_AI_RETRIES=2`. The 7 NULL leads in production (now-array-wrapped post-H2) ALL pre-date 2026-05-04 and the 6-hour window has long since closed.
+- Notion exhaustively searched: Bugs & Fixes, Decisions Log, Architecture & Stack, Pending Work, Code Patterns. No "RESOLVED" entry for rescue-cron fallback. Pending Work has nine deferred AI-estimator items but none address rescue-cron-no-fallback.
+- The 7 NULL leads' `ai_estimator_notes` content is byte-identical to the `STUCK_NOTE` constant. Their `org_id` (most-recent two) is `8f939f96` (Murdoch's falconn test org). They are exactly what the bug predicts.
+
+Recommended fix path (NOT shipped — for Murdoch's triage): replicate the catch-block pattern inside Stage 1. Load lead+contractor+photos, build `EstimateInput`, call `fallbackEstimate(input, buildDegradedPropertyData(...))`, write `ai_status='ready'` with marker note. Feasible in the cron's 60s budget (typical Stage 1 batch is 0-2 leads).
+
+### Notion writes
+Bugs & Fixes write attempted for Part A entries; if it times out per the documented page-size caveat, this updates-log entry is the canonical record. Murdoch flag noted in Part B doc.
+
+---
+
 ## Session — May 10, 2026 — Audit 11 C2 + H3 focused re-audit (read-only) [Source: Claude Code]
 
 Read-only re-audit of two findings from the 2026-05-09 Audit 11 pass: **C2** (rescue-cron Stage-1 give-up writes no fallback estimate) and **H3** (p50 latency 28.05 s above the 25 s revisit threshold). No code, schema, or data changed. Full report saved to `docs/audit-11-c2-h3-reaudit-2026-05-10.md`.
