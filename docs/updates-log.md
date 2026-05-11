@@ -7,6 +7,46 @@ This file is append-only. Every session, every meaningful fix, finding, or decis
 
 ---
 
+## Session — May 11, 2026 — Audit 12 (notifications) fix pass — web [Source: Claude Code]
+
+Web bundle of the Audit 12 fix pass: H1, H2, H3, M2 (web part), M3, H4 web, M1 web, L4. Mobile portion lands separately on mobile origin/main. Read-only audit doc at `docs/audit-12-notifications-2026-05-11.md`.
+
+**Live re-verification before each fix (per task rule):**
+
+- **H1** — `app/api/webhooks/` did NOT exist at HEAD (`ls` returned nothing). `quotes.telnyx_message_id` exists (Supabase MCP `information_schema.columns`); `sms_delivery_status`/`sms_delivered_at`/`sms_failure_reason` did NOT. No `telnyx_message_id` index. Telnyx MCP `list_messaging_profiles` returned one profile `SnapQuote` (id `40019d6e-d8b1-447b-8d8b-bdc03ca9ceab`) with `webhook_url: null`. ✅ matches audit doc.
+- **H2** — `app/api/revenuecat/webhook/route.ts:331` `void sendPlanUpgradedEmail(orgId, plan);` unconditional in RENEWAL case. Compared with Stripe handler at line 393 which correctly gates on `isRenewalCycle`. ✅
+- **H3** — `app/api/public/quote/[publicId]/accept/route.ts:181-185` push body uses `${customerName}`. `app/api/cron/estimate-nudge-unviewed/route.ts:72-75` push body uses `${customerName}`. ✅
+- **M2** — `viewed/route.ts:78-86` in-app row uses `screen: "quotes", screen_params: { id: quote.id }`; push uses `screen: "lead", id: quote.lead_id`. Same divergence in `accept/route.ts:181-195`. ✅
+- **M3** — `app/api/cron/unopened-leads-reminder/route.ts:37` `if (!count || count < 10) continue;`. ✅
+- **H4 web** — `lib/pushNotifications.ts` grep for `Sentry|captureException|addBreadcrumb` returned no matches. ✅
+- **M1 web** — same file: messages array constructed at line 83-90 without a `badge` field. ✅
+- **L4** — `lib/pushNotifications.ts:9` `EXPO_PUSH_URL = "https://exp.host/--/api/v2/push/send"`. ✅
+
+**Changes shipped:**
+
+- **Migration `20260511234500_audit12_h1_quotes_sms_delivery_columns.sql`** — adds `sms_delivery_status` (text + CHECK constraint to `queued|sent|delivered|failed`), `sms_delivered_at` (timestamptz), `sms_failure_reason` (text), and a partial index `quotes_telnyx_message_id_idx ON quotes(telnyx_message_id) WHERE telnyx_message_id IS NOT NULL`. Applied via Supabase MCP `apply_migration` — verified live via `information_schema.columns` (all 3 present, nullable text/timestamptz) and `pg_indexes` (index present). Status enum kept as constrained text rather than a PG enum because the Telnyx event_type set may grow.
+- **`app/api/webhooks/telnyx/route.ts`** — new file. POST handler. Node runtime, `maxDuration = 60` to match existing webhook handlers. Verifies Telnyx v2 Ed25519 signature using `crypto.verify('ed25519', ...)` with the org public key from `TELNYX_PUBLIC_KEY` env var. `buildPublicKey()` accepts either PEM or bare base64-encoded 32-byte raw key (wraps the raw key in a 12-byte Ed25519 SPKI prefix and feeds it as DER). Rejects timestamps outside a 5-minute replay window. Maps `message.sent` / `message.finalized` → `sent`, `message.delivered` → `delivered`, `message.delivery_failed` → `failed`; ignores `message.received` (inbound — would be a future inbox feature). Won't downgrade a terminal status if Telnyx reorders events. On `failed`, also inserts a `QUOTE_DELIVERY_FAILED` notification row (`screen: "lead", screen_params: { id: lead_id }`) so the contractor's in-app feed surfaces the bounce. Sentry breadcrumb on signature-verified entry; `Sentry.captureException` on every catch with `area: "telnyx-webhook"` tag. Always 200 on signature-valid events (even ones we ignore) so Telnyx doesn't retry.
+- **Telnyx MCP `update_messaging_profile`** — set `webhook_url` to `https://snapquote.us/api/webhooks/telnyx` on profile `40019d6e-d8b1-447b-8d8b-bdc03ca9ceab`. Confirmed in the MCP response.
+- **`app/api/revenuecat/webhook/route.ts` RENEWAL case** — reads `organizations.plan` BEFORE writing, compares against the incoming plan from `resolvePlanFromEvent`. If equal, adds a `revenuecat.webhook` breadcrumb with `RC renewal — no plan change, email skipped` and skips `sendPlanUpgradedEmail`. If different (or read failed), preserves the prior behavior of firing the email. Defaults to the safer "skip" path on read failure so a transient DB blip can't reintroduce the spam.
+- **`app/api/public/quote/[publicId]/accept/route.ts:175-205`** — push body changed from `${customerName} accepted your estimate${locationSuffix}.` to `New ${primaryService} estimate accepted${locationSuffix}${priceSuffix}.` (no name). In-app notification row keeps the customer name (auth-gated). Both push payload and in-app row now use `screen: "lead", id: lead_id` (M2).
+- **`app/api/public/quote/[publicId]/viewed/route.ts:94-108`** — in-app row's `screen` changed from `"quotes"` to `"lead"` with `id: lead_id` to align with the push payload (M2). Body text unchanged ("A customer is viewing your estimate." — already PII-free).
+- **`app/api/cron/estimate-nudge-unviewed/route.ts:71-77`** — push body changed from `${customerName} hasn't opened your estimate.` to `A customer hasn't opened your estimate. Tap to follow up.` In-app row unchanged.
+- **`app/api/cron/unopened-leads-reminder/route.ts`** — extracted `getThreshold()` helper that reads `UNOPENED_LEADS_REMINDER_THRESHOLD` env var (parseInt with NaN/sub-1 fallback to 10). Threshold propagated through the gate (line ~37). Response payload now also returns `threshold` for observability.
+- **`lib/pushNotifications.ts`** — full rewrite. Imports `* as Sentry from "@sentry/nextjs"`. `EXPO_PUSH_URL` now `https://api.expo.dev/v2/push/send` (L4). Adds `getUnreadBadgeCount(admin, orgId)` reading `notifications` with `count: "exact", head: true, eq("read", false)` and includes the result in every `ExpoMessage` as `badge: number` (M1). Every catch path now calls `Sentry.captureException` with `area: "push"` + `stage` + `org_id` tags: `token-fetch` (Supabase read failure), `badge-count` (notifications count failure), `expo-http` (Expo returned non-2xx with response body excerpt), `expo-fetch` (network/DNS failure), `dead-token-cleanup` (delete failed). Breadcrumbs on dispatch start (with title + screen, no body) and done (with sent/cleaned counts) (H4).
+
+**Verification:**
+- `npx tsc --noEmit` — exit 0, no errors.
+- Supabase MCP `apply_migration` succeeded; columns + index verified via follow-up `information_schema.columns` and `pg_indexes` queries.
+- Telnyx MCP `update_messaging_profile` succeeded; response confirmed `webhook_url: "https://snapquote.us/api/webhooks/telnyx"`.
+
+**Required env var for production (Murdoch must add via Vercel dashboard before the webhook can verify signatures in prod):**
+- `TELNYX_PUBLIC_KEY` — fetch from Telnyx Mission Control (Account Settings → API → Public Key) or via authenticated `GET https://api.telnyx.com/v2/public_key`. Either PEM (`-----BEGIN PUBLIC KEY-----`) or bare base64 32-byte raw key. The handler `buildPublicKey()` accepts both formats. Without this env var the handler returns 500 and captures a Sentry message — Telnyx will retry but every retry will fail until the key is set.
+- `UNOPENED_LEADS_REMINDER_THRESHOLD` — optional. Defaults to 10. Set to any positive integer to tune the cron.
+
+**Cross-flag:** H4 web is a direct extension of Audit 13 H4 (which covered 8 revenue/auth handlers but not push dispatch).
+
+---
+
 ## Session — May 11, 2026 — Audit 7 (Web Stack & Backend) fix pass [Source: Claude Code]
 
 User-prioritized subset of the read-only Audit 7 (same date, earlier) shipped: H1, H2, H4, M3, M7, L1. M6 dropped because live verification at HEAD showed the audit doc was wrong — the upgrade-email calls in `app/api/stripe/webhook/route.ts` are already at the end of each handler. H3, H5, M1, M2, M4, M5, L2/L3/L4 deferred per user triage (code-consistency, infra, multi-day, or no-action items).

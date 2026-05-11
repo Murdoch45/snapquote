@@ -91,6 +91,11 @@ export async function POST(request: Request, { params }: Props) {
     body: "A customer is viewing your estimate.",
     data: { screen: "lead", id: quote.lead_id as string }
   });
+  // Audit 12 M2 — align the in-app row's screen+id to the push payload
+  // (both target the lead detail screen). Previously this used screen
+  // "quotes" + quote.id while the push used screen "lead" + lead_id, so
+  // tapping the push and tapping the in-app entry landed in different
+  // places.
   void admin
     .from("notifications")
     .insert({
@@ -98,8 +103,8 @@ export async function POST(request: Request, { params }: Props) {
       type: "ESTIMATE_VIEWED",
       title: "Estimate Opened",
       body: "A customer is viewing your estimate.",
-      screen: "quotes",
-      screen_params: { id: quote.id as string }
+      screen: "lead",
+      screen_params: { id: quote.lead_id as string }
     })
     .then(null, (err: unknown) => console.warn("notification insert failed:", err));
 
