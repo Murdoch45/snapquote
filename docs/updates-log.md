@@ -7,6 +7,42 @@ This file is append-only. Every session, every meaningful fix, finding, or decis
 
 ---
 
+## Session — May 10, 2026 — Audit 9 M6 / Audit 11 H5 diagnosis: services display↔slug mismatch is intentional design, not a bug [Source: Claude Code]
+
+Read-only diagnosis. No code, schema, or data changes. Full report at [docs/audit-9-m6-services-canon-diagnosis-2026-05-10.md](docs/audit-9-m6-services-canon-diagnosis-2026-05-10.md).
+
+### Verdict: DEFER canonicalization — intentional design, no functional bug.
+
+### Live evidence
+- **15 distinct values** in `contractor_profile.services` (display-form: "Concrete", "Lawn Care / Maintenance", etc.). **All match `SERVICE_OPTIONS` exactly.** Zero orphans (Supabase MCP anti-join).
+- **8 distinct non-null slugs** in `leads.service_category` (slug-form: "cleaning", "hardscape", etc.) plus 181 NULL rows (legacy). All match `SERVICE_CATEGORIES` CHECK constraint. Zero orphans.
+- **Phantom canon slugs**: `grading` and `irrigation` exist in `SERVICE_CATEGORIES` + live CHECK constraint but zero rows produce them. No estimator hardcodes them.
+- **Zero comparison code** between the two columns. Grep across the entire codebase for `service_category.*contractor` / `services.*includes.*service_category` returned no matches. No filter, no routing decision, no fan-out logic touches both columns. The two vocabularies coexist with zero interaction.
+
+### How they're populated (live trace)
+- `contractor_profile.services` ← onboarding/settings UI picks `SERVICE_OPTIONS.map(...)` from [`components/ServiceMultiSelectField.tsx:25`](components/ServiceMultiSelectField.tsx:25) → POSTs to [`app/api/public/onboard/route.ts:12,63`](app/api/public/onboard/route.ts:12) (Zod `z.array(z.enum(SERVICE_OPTIONS))`).
+- `leads.service_category` ← engine ONLY. Public lead form writes only `leads.services` (display-form) at [`app/api/public/lead-submit/route.ts:284`](app/api/public/lead-submit/route.ts:284). `service_category` is written later by `runFallbackEstimate` ([`lib/ai/estimate.ts:4940`](lib/ai/estimate.ts:4940)) or success path ([`lib/ai/estimate.ts:5226`](lib/ai/estimate.ts:5226)), pulling from `aggregateEngineEstimate`'s output at [`estimators/shared.ts:1361-1362`](estimators/shared.ts:1361). Per-service estimator files hardcode the slug (e.g., `estimators/concreteEstimator.ts:188`: `serviceCategory: "hardscape"`).
+
+### AI prompt
+- Prompt at [`lib/ai/estimate.ts:3455`](lib/ai/estimate.ts:3455) sends `services: input.services` (display strings). **`service_category` is NOT in the prompt.** Slug is purely an OUTPUT of the deterministic engine.
+- Engine routes via `serviceAliases` ([`estimators/estimateEngine.ts:35-58`](estimators/estimateEngine.ts:35)) — unknown display strings fall through to `"Other"` → `estimateOther` → `serviceCategory: "other"`. No throw, no "worse estimate from unknown category" branch.
+- Sample of 10 recent leads confirmed end-to-end mapping is correct in production. Two newest leads (post-Audit-11-F5) have structured `{phase, ts, ...}` notes with `pipeline_start` first phase.
+
+### Worst-case scenario today
+Contractor profile `services=["Concrete"]`, lead `service_category="hardscape"`: contractor sees the lead, AI generates a Concrete estimate, contractor unlocks, quotes. Mapping is internally consistent (Concrete display → estimateConcrete → "hardscape" slug). No code anywhere reads `service_category` to make a contractor-facing decision. **No user-visible impact.**
+
+### Recommendation
+1. **Document the design** in `lib/types.ts` — comment block explaining that `SERVICE_CATEGORIES` (slug, coarse analytical bucket) is intentionally distinct from `SERVICE_OPTIONS` (display, UI-facing label).
+2. **Optional cleanup**: drop phantom-canon `grading` and `irrigation` from `SERVICE_CATEGORIES` + the CHECK constraint if not on the product roadmap. Small migration.
+3. **Separate ticket** (cross-flag Audit 11 M1): Roofing / Tree Service / Exterior Painting / Outdoor Lighting all collapse to `service_category="other"` is a category-EXPANSION question, not a canonicalization question. Decide based on analytics needs.
+
+**Mark Audit 9 M6 and Audit 11 H5 as RESOLVED (intentional design / no bug).** Audit 11 M1 (coarse "other" mapping) stays open as separate.
+
+### Out of scope (this diagnosis)
+No code, no schema, no data changes. Recommendation only.
+
+---
+
 ## Session — May 10, 2026 — Audit 11 C2 fixed: rescue cron now lands fallback estimate on give-up [Source: Claude Code]
 
 Branch `claude/audit-11-c2-rescue-cron-fallback`. Two logical commits + merge:
