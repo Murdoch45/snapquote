@@ -7,6 +7,43 @@ This file is append-only. Every session, every meaningful fix, finding, or decis
 
 ---
 
+## Session — May 11, 2026 — Audit 13: observability, crons & ops reliability (READ-ONLY) [Source: Claude Code]
+
+Read-only audit. NO code, schema, or data changed. Full report at `docs/audit-13-observability-ops-2026-05-11.md`. Worktree branch `claude/flamboyant-elgamal-850556`. HEAD `0024fdb`.
+
+**Verdict:** Zero Critical. Seven High, seven Medium, three Low. Operational core (crons, deploys, web Sentry scrubbing) is healthy. Gaps are in (a) breadcrumb context on revenue paths, (b) mobile Sentry parity with web, (c) client error-boundary capture, (d) disaster-recovery posture, (e) detection-of-down posture.
+
+**Live verifications:**
+- pg_cron (`cron.job` + `cron.job_run_details` via Supabase MCP, 2026-05-11):
+  - `reset-solo-credits` jobid=3 schedule `0 0 * * *` → 7/7 success in last 7d. Last run: 2026-05-11 00:00:00 UTC.
+  - `rescue-stuck-leads` jobid=8 schedule `*/3 * * * *` → 3360/3360 success in last 7d. Last run: 2026-05-11 16:51:00 UTC. Definition via `pg_get_functiondef`: `SELECT net.http_get(url := 'https://www.snapquote.us/api/cron/rescue-stuck-leads', headers := jsonb_build_object('Authorization', 'Bearer ' || v_secret))` with secret from `vault.decrypted_secrets`.
+- Vercel crons (`vercel.json:1-32`): 7 entries, all 1:1 to handlers under `app/api/cron/`. The 8th directory (`rescue-stuck-leads`) is pg_cron-invoked, not zombie.
+- Vercel deploys (Vercel MCP `list_deployments`, 20 most-recent): 18 READY, 1 QUEUED (current production), 1 BUILDING (preview). Zero ERROR/CANCELED in window.
+- Web Sentry events (Sentry MCP `search_events`, project `snapquote-web`, 14d): 92 events. Top issue: `auth.requireMember 401` (47 events / 4 releases). 18 events of Node `DEP0169` deprecation noise.
+- Mobile Sentry events (Sentry MCP `search_events`, project `snapquote-mobile`, 14d): 67 events. Top: `TypeError: Network request failed` (40 events). Confirmed UUID leak in event title: `Error: cannot add postgres_changes callbacks for realtime:quotes:8f939f96-7f92-4973-97f8-f08450ccb71f:ALL`.
+- Supabase org plan (`mcp__supabase__get_organization`): `{"plan":"free"}` — no PITR, daily backups with 7d retention.
+
+**High findings:**
+- **H1** Mobile Sentry init at `app/_layout.tsx:27-48` has no `beforeSend`, no UUID redaction, no `environment`, no `release`, no `tracesSampleRate`. Confirmed live leak: tenant UUID in mobile Sentry event title.
+- **H2** Six client error boundaries call `console.error` only — `app/(public)/login/error.tsx:13-15`, `signup/error.tsx:13-15`, `onboarding/error.tsx:13-15`, `[contractorSlug]/error.tsx:13-15`, `q/error.tsx:13-15`, `app/app/analytics/error.tsx:19-21`. `instrumentation-client.ts:9-23` has no `captureConsoleIntegration` so these never reach Sentry. Only `app/app/error.tsx:19-22` captures.
+- **H3** No `app/global-error.tsx`. Root-layout crashes have no Sentry capture path.
+- **H4** Critical revenue paths have zero explicit Sentry instrumentation (Grep). All 4 Stripe routes, RevenueCat webhook, IAP sync, lead unlock, quote send.
+- **H5** `tracesSampleRate: 0.05` on all 3 web configs, default 0 on mobile. No replay sample rate. Audit-prompt-stated explanation for prior /app/leads outage being recorded as ~4 events.
+- **H6** No PITR — Supabase org `free` plan. RPO 24h, backups 7d retention. Cross-flag Audit 9.
+- **H7** No `/api/health` endpoint, no external uptime monitoring observable in repo.
+
+**Medium findings:** 4 historical UUID-leak events from pre-M6-fix release (cosmetic-only now); 18 `DEP0169` noise events; 47 `auth.requireMember 401` events; 6 Telnyx invalid-phone events at error level; mobile missing `release` tag; `sentry.edge.config.ts` has no `captureConsoleIntegration`; `permission denied` events lack tags/extras.
+
+**Low findings:** Cron handlers `console.error` without `tags.cronName`; mobile network-error swarm not categorized; Sentry alert rules require manual UI verification.
+
+**No Critical findings.** Crons solid. Deploys clean. Web error-path PII scrubbing works as designed.
+
+**Cross-flags:** Audit 2 (billing), Audit 3 (credits), Audit 6 (mobile), Audit 8 (security), Audit 9 (DR), Audit 11 (AI estimator).
+
+NO fixes shipped. Recommendations only.
+
+---
+
 ## Session — May 11, 2026 — Audit 1 re-run: auth & session lifecycle findings (live HEAD verification) [Source: Claude Code]
 
 Read-only audit of the full auth surface across web (`C:\Users\murdo\SnapQuote` @ `40d1e6a`) and mobile (`C:\Users\murdo\SnapQuote-mobile` @ `0024fdb`). Full report at `docs/audit-1-auth-session-2026-05-11.md`.

@@ -8,6 +8,48 @@
 
 ---
 
+## Audit 13 observability + crons + ops re-audit at HEAD — 2026-05-11 (READ-ONLY) [Source: Claude Code]
+
+Read-only audit. No code, schema, or data changed. Full report: `docs/audit-13-observability-ops-2026-05-11.md`.
+
+- **Crons all healthy.** Supabase pg_cron jobs `reset-solo-credits` (jobid=3, daily) and `rescue-stuck-leads` (jobid=8, every 3 min) succeeded 7/7 and 3360/3360 respectively in last 7d (`cron.job_run_details` via Supabase MCP, 2026-05-11). All 7 Vercel daily crons in `vercel.json` map 1:1 to handlers under `app/api/cron/`. The 8th handler (`rescue-stuck-leads`) is invoked by pg_cron, not zombie — verified via `pg_get_functiondef(trigger_rescue_stuck_leads)`. All 8 handlers use timing-safe bearer compare (Audit 8 H3) at top-of-`GET()`.
+- **Vercel deploys clean.** Last 20 deployments via Vercel MCP: 18 READY, 1 QUEUED (current), 1 BUILDING (preview). Zero ERROR or CANCELED in window. Rollback candidates flagged correctly on the 2 most-recent production READYs.
+- **Web Sentry coverage**: PII scrubbing (`lib/sentryScrub.ts`) + UUID redaction (Audit 4 M6) verified live in all three configs (`sentry.server.config.ts:33-39`, `sentry.edge.config.ts:16-22`, `instrumentation-client.ts:16-23`).
+- **Mobile Sentry coverage GAP (H1).** `app/_layout.tsx:27-48` has no `beforeSend`, no UUID redaction, no env tagging, no release tagging, default-zero trace sampling. Confirmed live leak: Sentry mobile event title `Error: cannot add postgres_changes callbacks for realtime:quotes:8f939f96-7f92-4973-97f8-f08450ccb71f:ALL` — UUID is the test org id.
+
+### High findings at HEAD
+- **H1** Mobile Sentry init lacks PII/UUID scrubbing, env, release, sample rate (`app/_layout.tsx:27-48`).
+- **H2** 6 of 7 client error boundaries don't call `Sentry.captureException` and the client Sentry config has no `captureConsoleIntegration` — login, signup, onboarding, contractor public page, public quote page, analytics all invisible. Only `app/app/error.tsx:19-22` is wired.
+- **H3** No `app/global-error.tsx` — root-layout crashes generate no Sentry event.
+- **H4** Stripe webhook + checkout + credits + customer-portal, RevenueCat webhook, IAP sync, lead unlock, quote send — zero explicit Sentry instrumentation. Rely on captureConsoleIntegration only; stack traces with no breadcrumb context.
+- **H5** `tracesSampleRate: 0.05` web (all three configs), default 0 on mobile. No replay sample rate, no `replayIntegration`. 5% explains the prior /app/leads outage surfacing with 4 instead of ~80 events.
+- **H6** Supabase org plan = `free` (verified `mcp__supabase__get_organization`). No PITR. RPO 24h, 7-day backup retention. Cross-flag from Audit 9.
+- **H7** No `/api/health` endpoint, no external uptime monitoring. Site-down detection latency unbounded.
+
+### Medium findings
+- **M1** 4 historical web Sentry events with leaked tenant UUID in title (release `ea90027`, 2026-05-08) — predates the M6 redaction fix (`e15b53b`, 2026-05-10). Verify next post-fix event title is clean; if not, add `event.title` to `scrubSentryEvent`.
+- **M2** 18 events of Node `DEP0169` (url.parse deprecation, from Next.js internals) consume ~20% of 14d error budget. Filter in `beforeSend`.
+- **M3** `auth.requireMember 401` top issue: 47 events / 14d / 4 releases. Either real bug (cross-flag Audit 1) or expected noise from no-bearer traffic that should be filtered.
+- **M4** 6 Sentry-error-level Telnyx invalid-phone (10002/40310) events — user-input errors, should downgrade.
+- **M5** Mobile Sentry has no `release` tag — can't tie regressions to build numbers.
+- **M6** `sentry.edge.config.ts` has no `captureConsoleIntegration` — caught-and-logged edge errors don't reach Sentry.
+- **M7** `permission denied` events have no Sentry tags/extras — wrap calls through `lib/supabase/orgFilter.ts` (Audit 8 M5) in a Sentry scope.
+
+### Low findings
+- **L1** Cron handlers `console.error` without `tags.cronName` — Sentry alert rules can't filter by cron.
+- **L2** Mobile 40-event `TypeError: Network request failed` swarm has no `tags.requestKind` for call-site triage.
+- **L3** Sentry alert rules not verifiable via MCP — Murdoch must inspect Sentry UI to confirm error-rate / ingest-stopped / new-issue alerts are configured.
+
+### Cross-cutting flags
+- Audit 2 (Billing): Stripe + RC webhooks have zero Sentry breadcrumbs (H4).
+- Audit 3 (Credits): Credit purchase + lead unlock have zero Sentry breadcrumbs (H4).
+- Audit 6 (Mobile): Audit 6 covered native stability, not Sentry config; new gaps (H1 + M5) surface here.
+- Audit 8 (Security): Web `beforeSend` scrubber verified; mobile lane uncovered.
+- Audit 9 (DR/PITR): PITR concern confirmed live — org plan = free (H6).
+- Audit 11 (AI estimator): Pipeline breadcrumbs verified intact (13 in `lib/ai/estimate.ts`).
+
+---
+
 ## Audit 11 AI estimator re-audit at HEAD — 2026-05-09 (READ-ONLY)
 
 Read-only re-audit; no code or schema changed. Full report `docs/audit-11-ai-estimator-2026-05-09.md`.
