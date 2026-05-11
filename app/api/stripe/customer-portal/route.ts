@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 import { requireOwnerForApi } from "@/lib/auth/requireRole";
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
@@ -107,6 +108,12 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ url: session.url });
   } catch (error) {
+    // Audit 13 H4 — customer-portal failures are billing-blocking. Tag
+    // by org so support can distinguish "every owner of this org can't
+    // open the portal" from one-off Stripe API hiccups.
+    Sentry.captureException(error, {
+      tags: { area: "stripe-customer-portal", org_id: auth.orgId, user_id: auth.userId }
+    });
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Unable to open billing portal." },
       { status: 400 }

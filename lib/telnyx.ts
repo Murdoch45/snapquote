@@ -1,6 +1,17 @@
 import "server-only";
 
+import * as Sentry from "@sentry/nextjs";
+
 import { toE164UsPhone } from "@/lib/phone";
+
+// Telnyx error codes that mean "the customer-supplied phone number is
+// invalid" rather than an infra failure. Surfaced at warning level so
+// they don't pollute the Sentry error budget — Audit 13 M4.
+const TELNYX_USER_INPUT_ERROR_CODES = ["10002", "40310"];
+
+function isTelnyxUserInputError(detail: string): boolean {
+  return TELNYX_USER_INPUT_ERROR_CODES.some((code) => detail.includes(`"code":"${code}"`));
+}
 
 type SendQuoteSmsInput = {
   to: string;
@@ -76,12 +87,17 @@ export async function sendQuoteSms({ to, body, idempotencyKey }: SendQuoteSmsInp
   // never gets the SMS — the symptom that prompted this fix.
   const normalizedTo = toE164UsPhone(to);
   if (!normalizedTo) {
-    const message = `Telnyx send failed: invalid 'to' address (cannot normalize to E.164): ${to}`;
-    // console.error so Sentry's captureConsoleIntegration picks it up.
-    // sendQuoteSms throws on failure, so without this log the caller's
-    // catch silently swallows the error into a `warning` field — that's
-    // why this class of failure was invisible in Sentry pre-fix.
-    console.error(message);
+    // Audit 13 M4 — customer-supplied phone that can't be normalized to
+    // E.164 is user input, not a system failure. Was `console.error`
+    // which captureConsoleIntegration picked up as an error event;
+    // downgraded to Sentry.captureMessage at "warning" so the caller's
+    // try/catch still gets the throw but the Sentry budget isn't burned
+    // on form-input errors.
+    const message = "Telnyx send failed: invalid 'to' address (cannot normalize to E.164).";
+    Sentry.captureMessage(message, {
+      level: "warning",
+      tags: { area: "telnyx", reason: "invalid_to_format" }
+    });
     throw new Error(message);
   }
 
@@ -144,7 +160,20 @@ export async function sendQuoteSms({ to, body, idempotencyKey }: SendQuoteSmsInp
       // Surface to Sentry. Without this the caller's try/catch in
       // /api/app/quote/send swallows the throw into deliveryErrors[]
       // and the failure is invisible outside the API response.
-      console.error(`sendQuoteSms (attempt ${attempt}/${MAX_ATTEMPTS}): ${message}`);
+      //
+      // Audit 13 M4 — 10002 ("Invalid phone number") and 40310 ("Invalid
+      // 'to' address") are user-input errors and surface as warnings.
+      // Other non-retryable statuses (auth, account suspended, etc.) and
+      // final-attempt retryable failures stay at error level so they
+      // page through captureConsoleIntegration.
+      if (isTelnyxUserInputError(detail)) {
+        Sentry.captureMessage(`sendQuoteSms (attempt ${attempt}/${MAX_ATTEMPTS}): ${message}`, {
+          level: "warning",
+          tags: { area: "telnyx", reason: "invalid_to_address" }
+        });
+      } else {
+        console.error(`sendQuoteSms (attempt ${attempt}/${MAX_ATTEMPTS}): ${message}`);
+      }
       throw lastError;
     }
 

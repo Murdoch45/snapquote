@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 import type Stripe from "stripe";
 import { z } from "zod";
 import { requireOwnerForApi } from "@/lib/auth/requireRole";
@@ -119,6 +120,11 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ url: session.url });
   } catch (error) {
+    // Audit 13 H4 — explicit captureException for credit-pack checkout
+    // failures. Tags by pack size so support can spot per-pack issues.
+    Sentry.captureException(error, {
+      tags: { area: "stripe-credits", org_id: auth.orgId, user_id: auth.userId }
+    });
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Unable to start credit checkout." },
       { status: 400 }

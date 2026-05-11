@@ -1,14 +1,17 @@
 import * as Sentry from "@sentry/nextjs";
-import { scrubSentryEvent } from "@/lib/sentryScrub";
+import { isKnownSentryNoise, scrubSentryEvent } from "@/lib/sentryScrub";
 
 // Initialized once per Node.js serverless worker. Safe to import from
 // everywhere via Sentry.captureException / Sentry.captureMessage after
 // this file runs.
+//
+// Audit 13 fix (2026-05-11): tracesSampleRate bumped 0.05 → 0.2 so perf
+// data exists when triaging incidents. Was 5% which left the /app/leads
+// outage surfacing with only 4 trace events instead of ~80.
 Sentry.init({
   dsn: process.env.SENTRY_DSN,
 
-  // Low trace sample rate — we care about errors, not every request.
-  tracesSampleRate: 0.05,
+  tracesSampleRate: 0.2,
 
   // The estimator failure we debugged in April 2026 was silent because
   // the web app had no server-side error reporting. Keep console.error
@@ -29,8 +32,10 @@ Sentry.init({
   // Strip customer PII (name/email/phone/address/lat-lng/etc.) from
   // event payloads before they leave the process. Stack traces and
   // non-PII metadata are preserved — see lib/sentryScrub.ts for the
-  // key list. Audit 8 H6.
+  // key list. Audit 8 H6 + Audit 13 M2 (DEP0169 noise filter) + Audit
+  // 13 M7 (pg_error_code / org_id tag extraction).
   beforeSend(event) {
+    if (isKnownSentryNoise(event)) return null;
     return scrubSentryEvent(event);
   },
   beforeBreadcrumb(breadcrumb) {

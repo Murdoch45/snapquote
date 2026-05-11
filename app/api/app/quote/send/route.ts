@@ -1,5 +1,6 @@
 import { randomBytes } from "crypto";
 import { after, NextResponse } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 import { recordAudit } from "@/lib/auditLog";
 import { buildEstimateSentEmail } from "@/lib/emailTemplates";
 import { requireMemberForApi } from "@/lib/auth/requireRole";
@@ -372,6 +373,14 @@ export async function POST(request: Request) {
       warning: deliveryErrors.length > 0 ? deliveryErrors.join(" ") : null
     });
   } catch (error) {
+    // Audit 13 H4 — explicit captureException so quote-send failures
+    // (Telnyx infra, Resend infra, DB write failure during DRAFT→SENT
+    // transition, etc.) are searchable in Sentry by org. The rollback
+    // path below runs regardless of capture.
+    Sentry.captureException(error, {
+      tags: { area: "quote-send", org_id: auth.orgId, user_id: auth.userId },
+      extra: { lead_id: bodyLeadId, quote_id: quoteId }
+    });
     // Rollback: if this was a DRAFT→SENT transition, revert to DRAFT.
     // If it was a fresh INSERT, delete the quote entirely.
     if (quoteId && bodyLeadId) {

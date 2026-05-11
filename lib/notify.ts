@@ -1,7 +1,15 @@
+import * as Sentry from "@sentry/nextjs";
 import { Resend } from "resend";
 
 import { toE164UsPhone } from "@/lib/phone";
 import { TELNYX_API_URL, TELNYX_FROM_NUMBER, ensureSmsOptOutFooter } from "@/lib/telnyx";
+
+// Telnyx error codes that signal user-input failure rather than infra
+// failure. Audit 13 M4 — surfaced as warnings, not errors.
+const TELNYX_USER_INPUT_ERROR_CODES = ["10002", "40310"];
+function isTelnyxUserInputError(detail: string): boolean {
+  return TELNYX_USER_INPUT_ERROR_CODES.some((code) => detail.includes(`"code":"${code}"`));
+}
 
 type SenderKey = "transactional" | "noreply";
 
@@ -77,7 +85,14 @@ export async function sendSms(to: string, body: string): Promise<boolean> {
   // would now go through.
   const normalizedTo = toE164UsPhone(to);
   if (!normalizedTo) {
-    console.error(`Telnyx sendSms skipped: cannot normalize 'to' to E.164: ${to}`);
+    // Audit 13 M4 — user-input failure, not infra. Was console.error
+    // (captured by captureConsoleIntegration as error event); now a
+    // warning-level Sentry message so the budget isn't burned on form
+    // input. PII (the raw phone) is omitted from the Sentry message.
+    Sentry.captureMessage("Telnyx sendSms skipped: cannot normalize 'to' to E.164.", {
+      level: "warning",
+      tags: { area: "telnyx", reason: "invalid_to_format" }
+    });
     return false;
   }
 
@@ -128,9 +143,19 @@ export async function sendSms(to: string, body: string): Promise<boolean> {
     } catch {
       detail = await response.text().catch(() => "");
     }
-    console.error(
-      `Telnyx sendSms failed (attempt ${attempt}/${SMS_MAX_ATTEMPTS}, ${response.status} ${response.statusText}): ${detail}`
-    );
+    // Audit 13 M4 — 10002 / 40310 are user-input errors and surface as
+    // warnings. Other non-retryable statuses + final-attempt retryable
+    // failures stay at error level so they page through
+    // captureConsoleIntegration.
+    const failureMessage = `Telnyx sendSms failed (attempt ${attempt}/${SMS_MAX_ATTEMPTS}, ${response.status} ${response.statusText}): ${detail}`;
+    if (isTelnyxUserInputError(detail)) {
+      Sentry.captureMessage(failureMessage, {
+        level: "warning",
+        tags: { area: "telnyx", reason: "invalid_to_address" }
+      });
+    } else {
+      console.error(failureMessage);
+    }
 
     if (!isRetryableSmsStatus(response.status) || attempt === SMS_MAX_ATTEMPTS) {
       return false;

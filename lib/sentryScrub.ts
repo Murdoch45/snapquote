@@ -99,6 +99,56 @@ type SentryEventLike = {
   exception?: { values?: Array<{ value?: unknown }> };
 };
 
+// Audit 13 M2 — Node's `[DEP0169] DeprecationWarning: url.parse()` is
+// emitted from inside Next.js / Vercel runtime internals (no app code in
+// this repo calls `url.parse` directly — verified via grep). The warning
+// surfaces in Sentry via `captureConsoleIntegration` because Node emits
+// it on stderr/console.error. Filter it out at ingest so the Sentry
+// budget isn't drowned in third-party deprecation noise. Exported for
+// `beforeSend` to call before `scrubSentryEvent`.
+const NOISE_PATTERNS = [/\[DEP0169\]/, /DEP0169.*url\.parse/i];
+export function isKnownSentryNoise(event: SentryEventLike): boolean {
+  const candidates: unknown[] = [event.message];
+  if (event.exception?.values) {
+    for (const ev of event.exception.values) {
+      candidates.push(ev.value);
+    }
+  }
+  for (const candidate of candidates) {
+    if (typeof candidate !== "string") continue;
+    if (NOISE_PATTERNS.some((re) => re.test(candidate))) return true;
+  }
+  return false;
+}
+
+// Audit 13 M7 — extract searchable tags from Postgres permission_denied
+// errors (and other PG error codes) before they're scrubbed. Sentry's
+// "title" is server-derived from message + exception value; after UUID
+// redaction the title becomes "permission denied for organization
+// [uuid]" — useful but unsearchable by tenant. Stash the UUID and code
+// as tags so support can filter by `pg_error_code:42501` or `org_id:...`
+// without leaking the UUID into the event title.
+const PG_ERROR_PATTERN = /"code"\s*:\s*"(\d{5})"/;
+const ORG_UUID_PATTERN = /organization\s+([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i;
+
+function extractDiagnosticTags(event: SentryEventLike): Record<string, string> {
+  const sources: string[] = [];
+  if (typeof event.message === "string") sources.push(event.message);
+  if (event.exception?.values) {
+    for (const ev of event.exception.values) {
+      if (typeof ev.value === "string") sources.push(ev.value);
+    }
+  }
+  const out: Record<string, string> = {};
+  for (const src of sources) {
+    const pgMatch = src.match(PG_ERROR_PATTERN);
+    if (pgMatch && !out.pg_error_code) out.pg_error_code = pgMatch[1];
+    const orgMatch = src.match(ORG_UUID_PATTERN);
+    if (orgMatch && !out.org_id) out.org_id = orgMatch[1];
+  }
+  return out;
+}
+
 // Audit 4 M6 — UUIDs leak into Sentry titles/messages when database errors
 // (e.g. "permission denied for organization 8f939f96-...") are thrown.
 // `scrubPii` only walks key NAMES — it can't catch a UUID embedded in a
@@ -113,10 +163,18 @@ function redactUuids(value: unknown): unknown {
 
 /**
  * Scrub PII from a Sentry event payload before it's sent. Keeps stack
- * traces and other debug-relevant fields intact. Returns `null` to drop
- * the event (we never do that here — always return the event).
+ * traces and other debug-relevant fields intact. Always returns the
+ * event (never null) — callers wanting to drop events should call
+ * `isKnownSentryNoise` first in their `beforeSend` hook.
  */
 export function scrubSentryEvent<E extends SentryEventLike>(event: E): E {
+  // Audit 13 M7 — stamp diagnostic tags BEFORE UUID redaction so the
+  // org_id stays searchable even after the message itself is scrubbed.
+  const diagnosticTags = extractDiagnosticTags(event);
+  if (Object.keys(diagnosticTags).length > 0) {
+    event.tags = { ...(event.tags ?? {}), ...diagnosticTags };
+  }
+
   if (event.extra) event.extra = scrubPii(event.extra);
   if (event.contexts) event.contexts = scrubPii(event.contexts);
   if (event.tags) event.tags = scrubPii(event.tags);

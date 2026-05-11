@@ -8,6 +8,14 @@
 
 ---
 
+## Audit 13 observability fixes shipped — 2026-05-11 [Source: Claude Code]
+
+H1, H2, H3, H4, H5, M2, M3, M4, M6, M7 all shipped. Web: `instrumentation-client.ts:18-37` adds `captureConsoleIntegration` + `replayIntegration` (replaysOnErrorSampleRate=1.0, session=0), bumps `tracesSampleRate` to 0.2; `sentry.edge.config.ts:15-19` adds `captureConsoleIntegration`; `sentry.server.config.ts:13` bumps `tracesSampleRate` to 0.2. All three `beforeSend` hooks now call `isKnownSentryNoise` first to drop `[DEP0169]` warnings. `lib/sentryScrub.ts` now stamps `pg_error_code` and `org_id` tags on Postgres error events before UUID scrubbing. New `app/global-error.tsx` catches root-layout crashes with `Sentry.captureException`. `lib/auth/requireRole.ts:42-87` converts no-bearer 401s to an info breadcrumb (kept warning-level captureMessage for bearer-present 401s only). `lib/telnyx.ts` + `lib/notify.ts` Telnyx user-input failure paths now `Sentry.captureMessage` at warning level instead of `console.error`. 8 revenue/auth handlers (`app/api/stripe/{webhook,checkout,credits,customer-portal}/route.ts`, `app/api/revenuecat/webhook/route.ts`, `app/api/iap/sync/route.ts`, `app/api/app/leads/unlock/route.ts`, `app/api/app/quote/send/route.ts`) now `Sentry.captureException` at top-level catch with `tags.area` + tenant identifiers. Mobile: new `lib/sentryScrub.ts` (parity with web) wired into `app/_layout.tsx:27` `Sentry.init` via `beforeSend`/`beforeBreadcrumb`; `environment`, `release` (version+build), `tracesSampleRate: 0.1` added. H6 (PITR upgrade) + H7 (uptime monitor) intentionally deferred per work plan. M5 closed as a subset of H1.
+
+`npx tsc --noEmit` clean on web. `npm run build` clean on web (full route compile). Mobile typecheck: only pre-existing baseline errors (TopBar.tsx tuple index, secureStorage.ts missing module type) — none from these changes.
+
+---
+
 ## Audit 13 observability + crons + ops re-audit at HEAD — 2026-05-11 (READ-ONLY) [Source: Claude Code]
 
 Read-only audit. No code, schema, or data changed. Full report: `docs/audit-13-observability-ops-2026-05-11.md`.
