@@ -7,6 +7,26 @@ This file is append-only. Every session, every meaningful fix, finding, or decis
 
 ---
 
+## Session — May 11, 2026 — Audit 1 re-run: auth & session lifecycle findings (live HEAD verification) [Source: Claude Code]
+
+Read-only audit of the full auth surface across web (`C:\Users\murdo\SnapQuote` @ `40d1e6a`) and mobile (`C:\Users\murdo\SnapQuote-mobile` @ `0024fdb`). Full report at `docs/audit-1-auth-session-2026-05-11.md`.
+
+**Top-line:**
+- 0 Critical. Audit 8's token-verification hardening still holds at HEAD (HS256 fallback removed, ES256-only via JWKS, issuer pinned, web reset-password gated on `sq-pwr` recovery cookie).
+- 5 High:
+  - H1: mobile `lib/supabase.ts:38-45` uses **AsyncStorage**, not SecureStore. Audit 8 H7's claimed SecureStore migration is **NOT in HEAD**. Refresh tokens vulnerable to iCloud backup, jailbreak extraction.
+  - H2: mobile `app/(auth)/reset-password.tsx:33` has no recovery-session gate. Web equivalent is fixed (Audit 8 H5).
+  - H3: mobile `lib/utils/authBrowser.ts:21-25` puts `refresh_token` in URL fragment for stripe-return browser opens.
+  - H4: mobile signOut `lib/auth.tsx:338` silently swallows errors — stale refresh tokens at GoTrue when network hiccups.
+  - H5: mobile Apple sign-in (`app/(auth)/login.tsx:71-85`, `signup.tsx:77-91`) passes no `nonce` — token-replay vulnerability.
+- 7 Medium/Low: leaked-password protection still disabled, inconsistent password mins, no per-IP rate limit on signup bootstrap, advisor warnings on `is_org_member`/`is_org_owner`, mobile recovery deep-link uses substring match not host check, `accept_invite_token` rolls back its expired-invite DELETE, no "sign out everywhere" UI.
+
+**Live data:** 96 users (95 email, 1 apple, 0 google). 39 sessions / 35 users. No user has >3 concurrent sessions. 7 sessions refreshed in last 7 days. No auth-related Sentry issues.
+
+**Stale Notion flagged:** "[2026-05-09] Mobile security hardening (Audit 8 H7, H8, M9, M10)" claims SecureStore + AASA host check shipped — neither in HEAD.
+
+---
+
 ## Session — May 10, 2026 — Audit 9 M6 / Audit 11 H5 diagnosis: services display↔slug mismatch is intentional design, not a bug [Source: Claude Code]
 
 Read-only diagnosis. No code, schema, or data changes. Full report at [docs/audit-9-m6-services-canon-diagnosis-2026-05-10.md](docs/audit-9-m6-services-canon-diagnosis-2026-05-10.md).
