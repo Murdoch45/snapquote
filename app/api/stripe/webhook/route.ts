@@ -509,21 +509,54 @@ async function handleChargeRefunded(charge: Stripe.Charge) {
 
     if (!orgId || !Number.isInteger(creditAmount) || creditAmount <= 0) return;
 
-    // Verify the purchase was actually recorded before we deduct.
+    // Audit 3 H7 — partial-refund double-deduct fix. Stripe fires a
+    // separate `charge.refunded` event per refund. A $50 charge refunded
+    // in two partials ($30 + $20) generates TWO events with distinct
+    // `event.id` values; `claimWebhookEvent` lets both through. Pre-fix
+    // each invocation called `refund_bonus_credits` with the full pack
+    // credit amount → 2x deduction. The RPC's GREATEST(0, …) caps the
+    // worst case for THIS pack but can claw bonus credits accumulated
+    // from OTHER purchases. Live `credit_purchases` had 0 rows at fix
+    // time (latent), so no historical victims.
+    //
+    // Fix: atomically claim the refund slot by setting `refunded_at`
+    // (migration 20260511000002) via UPDATE … WHERE refunded_at IS NULL.
+    // If the UPDATE returns a row we won the claim and proceed with the
+    // RPC. If it returns nothing (column was already set by a prior
+    // event, OR the credit_purchases row doesn't exist), the event is a
+    // clean no-op. Claim happens BEFORE the RPC so a partial RPC
+    // failure doesn't free the slot — worst case is credits aren't
+    // clawed back. Net direction: never over-deducts (the harm we want
+    // to prevent); may under-deduct on rare RPC failures (acceptable).
     const admin = createAdminClient();
-    const { data: purchase } = await admin
+    const { data: claimed, error: claimError } = await admin
       .from("credit_purchases")
-      .select("id")
+      .update({ refunded_at: new Date().toISOString() })
       .eq("purchase_reference", session.id)
-      .maybeSingle();
+      .is("refunded_at", null)
+      .select("id");
 
-    if (!purchase) return;
+    if (claimError) {
+      console.error("Credit refund claim failed:", claimError);
+      return;
+    }
 
-    // Deduct the credits, flooring at zero. We deduct the full credit amount
-    // even on partial monetary refunds because credit packs are all-or-nothing
-    // units — you can't partially use half a 50-credit pack. The RPC locks
-    // the org row with FOR UPDATE so concurrent refunds on the same org
-    // serialize instead of both reading the same pre-deduct value.
+    if (!claimed || claimed.length === 0) {
+      // Either the credit_purchases row doesn't exist (purchase never
+      // recorded — skip cleanly) or another `charge.refunded` event
+      // already claimed it (idempotent no-op).
+      console.log(
+        `Credit refund skipped: ${session.id} not refundable (no row or already refunded).`
+      );
+      return;
+    }
+
+    // Slot claimed — deduct the credits, flooring at zero. We deduct the
+    // full credit amount even on partial monetary refunds because credit
+    // packs are all-or-nothing units — you can't partially use half a
+    // 50-credit pack. The RPC locks the org row with FOR UPDATE so
+    // concurrent refunds on the same org serialize instead of both
+    // reading the same pre-deduct value.
     const { data: newBonusRaw, error: deductError } = await admin.rpc("refund_bonus_credits", {
       p_org_id: orgId,
       p_amount: creditAmount

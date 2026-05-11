@@ -1,0 +1,28 @@
+-- Audit 3 H2 — drop dead reset_due_solo_monthly_credits() function.
+--
+-- The function was created by migration 0018 as the intended SOLO credit
+-- reset implementation. Live cron `reset-solo-credits` (jobid=3) runs
+-- inline SQL instead of invoking the function; the two have diverged:
+--
+--   Function body (live `pg_get_functiondef`):
+--     UPDATE organizations SET monthly_credits = 5, … WHERE plan='SOLO'
+--       AND extract(day from timezone('UTC', created_at))
+--         = extract(day from timezone('UTC', now()))
+--       AND (credits_reset_at IS NULL OR credits_reset_at <= now())
+--
+--   Cron command (live `cron.job` jobid=3):
+--     UPDATE organizations SET monthly_credits = plan_monthly_credits(plan), …
+--     WHERE plan='SOLO' AND (credits_reset_at IS NULL OR credits_reset_at <= now())
+--
+-- The cron's inline SQL uses `plan_monthly_credits(plan)` (correct value
+-- source) and omits the day-of-month filter (which would silently miss
+-- orgs whose `created_at` day doesn't exist in the current month, e.g.
+-- created Jan 31 in February). Zero call sites at HEAD reference the
+-- function (live grep returned 0 matches in *.ts/*.tsx). It is dead code
+-- whose presence is a drift hazard.
+--
+-- Verified live pre-drop (Supabase MCP):
+--   SELECT proname FROM pg_proc WHERE proname='reset_due_solo_monthly_credits';
+--   → 1 row (proname='reset_due_solo_monthly_credits', prosecdef=true)
+
+DROP FUNCTION IF EXISTS public.reset_due_solo_monthly_credits();

@@ -8,6 +8,28 @@
 
 ---
 
+## Audit 3 fixes (Credits & Quota) — 2026-05-11 [Source: Claude Code]
+
+C2 + H7 + H3 (auto-fixes H1) + H4 + H2 shipped. M4 lands separately on mobile.
+
+- **C2 — DRAFT-quote retry on already-unlocked path.** `app/api/app/leads/unlock/route.ts:128-181` (post-fix) — if the already-unlocked branch finds no existing DRAFT quote, attempts a recovery insert with the same shape as the happy-path insert. Wrapped in try/catch — recovery failure tagged `stage: 'draft-creation-retry'` to Sentry and returns publicId:null (worst case = current behavior). Happy-path branch untouched.
+- **H7 — `charge.refunded` partial-refund double-deduct fixed.** Migration `20260511183247_audit3_h7_credit_purchases_refunded_at` adds `credit_purchases.refunded_at timestamptz NULL`. `app/api/stripe/webhook/route.ts:512-540` (post-fix) — `handleChargeRefunded` atomically claims the refund slot via `UPDATE credit_purchases SET refunded_at=now() WHERE purchase_reference=? AND refunded_at IS NULL`; returns no rows ⇒ skip cleanly (already refunded or no row). Then calls `refund_bonus_credits`.
+- **H3 — `reset-paid-credits` cron added.** Migration `20260511183257_audit3_h3_reset_paid_credits_cron` schedules a daily 00:00 UTC job mirroring `reset-solo-credits` but `WHERE plan IN ('TEAM','BUSINESS')`. Live: 4 paid-plan orgs (2 TEAM, 2 BUSINESS) eligible at fix time; next nightly run (2026-05-12 00:00 UTC) catches them.
+- **H4 — `lead.unlock_blocked` audit_log action.** New action type added to `lib/auditLog.ts` `AuditAction` union; `app/api/app/leads/unlock/route.ts:30-58` (post-fix) — 402 cap-hit path now fires `recordAudit({action:'lead.unlock_blocked', metadata:{reason}})` via `after()` before the response.
+- **H2 — dead `reset_due_solo_monthly_credits()` function dropped.** Migration `20260511183236_audit3_h2_drop_dead_reset_function`. Cron jobid=3 was running inline SQL (different body); function was orphaned. Live `pg_proc` rowcount = 0 post-fix.
+
+Live verification (post-migration, Supabase MCP):
+- H2 function exists → 0 rows ✅
+- H7 `credit_purchases.refunded_at` exists → 1 row ✅
+- H3 `reset-solo-credits` active=true; `reset-paid-credits` active=true, schedule `0 0 * * *` ✅
+- H3 stale paid orgs that next cron run will catch: 4 orgs (2 TEAM at mc=5 → 20; 2 BUSINESS at mc=86/98 → 100).
+
+Migration versions applied: `20260511183236`, `20260511183247`, `20260511183257` (live `supabase_migrations.schema_migrations`).
+
+Skipped (per fix-pass scope): C1 (test data only, self-heals via lazy reset), H5 (business decision pending), H6/M9 (multi-day project), L1 (RLS already blocks anon), L2 (cosmetic), other M findings.
+
+---
+
 ## Audit 13 fixes live-verified — 2026-05-11 [Source: Claude Code]
 
 Production deploy `dpl_Br8miWnDt48D1v5Y43BFZufd1gwo` (commit `6a236e63`) READY at 2026-05-11 17:59:40 UTC. `curl -I https://snapquote.us/` returns 307 → `https://www.snapquote.us/` 200 OK with the full security-headers/CSP report-only set. `curl -I https://www.snapquote.us/login` returns 200 OK. Sentry MCP search on `snapquote-web` (project id `4511244273123328`):
