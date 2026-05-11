@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 import Stripe from "stripe";
 import { z } from "zod";
 import { requireOwnerForApi } from "@/lib/auth/requireRole";
@@ -306,6 +307,12 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ url: session.url });
   } catch (error) {
+    // Audit 13 H4 — explicit captureException with org/user-id tags so
+    // checkout failures can be tied to a specific tenant. Pre-fix the
+    // catch returned 400 to the client with no Sentry signal at all.
+    Sentry.captureException(error, {
+      tags: { area: "stripe-checkout", org_id: auth.orgId, user_id: auth.userId }
+    });
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Unable to start checkout." },
       { status: 400 }

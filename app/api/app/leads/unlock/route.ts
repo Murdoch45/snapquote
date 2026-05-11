@@ -1,5 +1,6 @@
 import { randomBytes } from "crypto";
 import { after, NextResponse } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 import { z } from "zod";
 import { recordAudit } from "@/lib/auditLog";
 import { requireMemberForApi } from "@/lib/auth/requireRole";
@@ -76,6 +77,19 @@ export async function POST(request: Request) {
         // Do not fail the unlock if the draft creation fails — the lead is
         // already unlocked and the credit has been charged. The lead detail
         // page will handle the missing draft gracefully.
+        //
+        // Audit 13 H4 — but DO surface to Sentry as captureException, not
+        // just console.error. Credit was charged; missing draft means the
+        // contractor unlocked a lead with no DRAFT quote and has to recreate
+        // it manually. Worth a Sentry event so we can investigate.
+        Sentry.captureException(draftError, {
+          tags: {
+            area: "lead-unlock",
+            stage: "draft-creation",
+            org_id: auth.orgId
+          },
+          extra: { lead_id: body.leadId }
+        });
         console.error("Failed to create DRAFT quote after unlock:", draftError);
         publicId = null;
       }
@@ -134,6 +148,12 @@ export async function POST(request: Request) {
       publicId
     });
   } catch (error) {
+    // Audit 13 H4 — explicit captureException for top-level unlock
+    // failures (credit charge, DB write, etc.). Tagged with org + user
+    // so a tenant-wide unlock breakdown is searchable.
+    Sentry.captureException(error, {
+      tags: { area: "lead-unlock", org_id: auth.orgId, user_id: auth.userId }
+    });
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Unable to unlock lead." },
       { status: 400 }

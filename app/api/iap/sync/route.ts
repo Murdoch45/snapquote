@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 import { z } from "zod";
 import { requireOwnerForApi } from "@/lib/auth/requireRole";
 import { buildCreditPurchaseConfirmationEmail } from "@/lib/emailTemplates";
@@ -289,12 +290,21 @@ export async function POST(request: Request) {
       );
     }
     if (error instanceof RevenueCatApiError) {
+      Sentry.captureException(error, {
+        tags: { area: "iap-sync", reason: "revenuecat_verification", org_id: auth.orgId, sync_type: body.type }
+      });
       console.error("iap/sync RevenueCat verification failed:", error);
       return NextResponse.json(
         { error: "Failed to verify purchase with RevenueCat. Please retry." },
         { status: 502 }
       );
     }
+    // Audit 13 H4 — explicit captureException for any other IAP sync
+    // failure. Tagged with sync type (subscription / credits) so support
+    // can spot per-flow failures.
+    Sentry.captureException(error, {
+      tags: { area: "iap-sync", org_id: auth.orgId, sync_type: body.type }
+    });
     console.error("iap/sync handler failed:", error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Unable to sync purchase." },

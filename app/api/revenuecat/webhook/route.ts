@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 import { timingSafeEqual } from "crypto";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { buildPaymentFailedEmail } from "@/lib/emailTemplates";
@@ -240,10 +241,21 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Missing event id or type." }, { status: 400 });
   }
 
+  Sentry.addBreadcrumb({
+    category: "revenuecat.webhook",
+    level: "info",
+    message: "auth verified",
+    data: { event_type: event.type, event_id: event.id }
+  });
+
   let claimed: boolean;
   try {
     claimed = await claimWebhookEvent("revenuecat", event.id, event.type);
   } catch (error) {
+    Sentry.captureException(error, {
+      tags: { area: "revenuecat-webhook", stage: "claim", event_type: event.type },
+      extra: { event_id: event.id }
+    });
     console.error("Failed to claim RevenueCat webhook event.", error);
     return NextResponse.json({ error: "Failed to record event." }, { status: 500 });
   }
@@ -448,6 +460,12 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ received: true });
   } catch (error) {
+    // Audit 13 H4 — explicit captureException with event-type tag. Same
+    // pattern as the Stripe webhook handler.
+    Sentry.captureException(error, {
+      tags: { area: "revenuecat-webhook", stage: "handler", event_type: event.type },
+      extra: { event_id: event.id }
+    });
     console.error("RevenueCat webhook handler failed.", error);
     await releaseWebhookEvent("revenuecat", event.id).catch((releaseErr) => {
       console.error("Failed to release webhook event after handler error.", releaseErr);

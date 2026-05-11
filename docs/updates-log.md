@@ -7,6 +7,46 @@ This file is append-only. Every session, every meaningful fix, finding, or decis
 
 ---
 
+## Session — May 11, 2026 — Audit 13 fixes shipped (H1, H2, H3, H4, H5, M2, M3, M4, M6, M7) [Source: Claude Code]
+
+Post-audit fix pass. Live-verified each finding at HEAD before fixing — no claim trusted from the prior audit doc alone.
+
+**Web changes (worktree `claude/audit-13-fixes-2026-05-11`):**
+
+- **H2 + H5 + M2 + replays** — [instrumentation-client.ts:18-37](instrumentation-client.ts:18) — `Sentry.captureConsoleIntegration({ levels: ["error"] })` and `Sentry.replayIntegration({ maskAllText: true, blockAllMedia: true })` added to `integrations`. `tracesSampleRate: 0.05 → 0.2`. `replaysSessionSampleRate: 0`, `replaysOnErrorSampleRate: 1.0`. `beforeSend` now calls `isKnownSentryNoise(event)` first; drops to `null` for DEP0169 noise. Confirmed live pre-fix: client config had no `integrations` array.
+- **M6 + H5 + M2** — [sentry.edge.config.ts:13-21](sentry.edge.config.ts:13) — same `captureConsoleIntegration` + noise filter added. `tracesSampleRate: 0.05 → 0.2`. Confirmed live pre-fix: edge config had no `integrations` at all.
+- **H5 + M2** — [sentry.server.config.ts:13](sentry.server.config.ts:13) — `tracesSampleRate: 0.05 → 0.2`. Existing `captureConsoleIntegration` retained. `beforeSend` now calls `isKnownSentryNoise` first.
+- **M2 + M7** — [lib/sentryScrub.ts:96-130](lib/sentryScrub.ts:96) — new `isKnownSentryNoise` exported helper checks for `[DEP0169]` / `DEP0169.*url\.parse` in event message / exception value strings. New `extractDiagnosticTags` extracts `pg_error_code` (matches `"code":"\d{5}"`) and `org_id` (matches `organization <uuid>`) from message/exception strings BEFORE UUID scrubbing, stamps them as searchable Sentry tags. `org_id` is intentionally not in the PII key list so it survives `scrubPii`.
+- **H3** — new [app/global-error.tsx](app/global-error.tsx) — minimal Next.js global error boundary. Calls `Sentry.captureException(error, { tags: { segment: "root", digest: error.digest ?? "none" } })` on mount. Renders bare inline-styled fallback (no Tailwind / providers — they may have crashed).
+- **M3** — [lib/auth/requireRole.ts:23-87](lib/auth/requireRole.ts:23) — no-bearer 401 path now emits only `Sentry.addBreadcrumb` at level "info". Bearer-present-but-rejected 401 keeps `Sentry.captureMessage` at level "warning" + `Sentry.flush(2000)`. Pre-fix: every 401 captured at warning regardless of bearer. Top issue (47 events / 14d / `SNAPQUOTE-WEB-9`) should drop sharply.
+- **M4** — [lib/telnyx.ts:11-21,79-90,143-159](lib/telnyx.ts:11) and [lib/notify.ts:1-13,78-89,131-144](lib/notify.ts:1) — Telnyx user-input error codes 10002 (invalid number) and 40310 (invalid 'to' address) now emit `Sentry.captureMessage` at level "warning" with `tags.area: "telnyx"`. Non-retryable non-user-input failures and final-attempt retryable failures still `console.error` (caught by `captureConsoleIntegration`).
+- **H4** — `Sentry.captureException` + `tags.area` on top-level catch added to all 8 routes:
+  - [app/api/stripe/webhook/route.ts:567-578,602-617](app/api/stripe/webhook/route.ts:567) — claim + handler stages, tagged by `event_type`; `addBreadcrumb` on signature-verified.
+  - [app/api/stripe/checkout/route.ts:308-316](app/api/stripe/checkout/route.ts:308) — tagged by `org_id`, `user_id`.
+  - [app/api/stripe/credits/route.ts:121-129](app/api/stripe/credits/route.ts:121) — tagged by `org_id`, `user_id`.
+  - [app/api/stripe/customer-portal/route.ts:109-119](app/api/stripe/customer-portal/route.ts:109) — tagged by `org_id`, `user_id`.
+  - [app/api/revenuecat/webhook/route.ts:219-475](app/api/revenuecat/webhook/route.ts:219) — claim + handler stages, tagged by `event_type`; `addBreadcrumb` on auth-verified.
+  - [app/api/iap/sync/route.ts:290-309](app/api/iap/sync/route.ts:290) — RC API failure + handler stages, tagged by `org_id` + `sync_type`.
+  - [app/api/app/leads/unlock/route.ts:80-90,140-149](app/api/app/leads/unlock/route.ts:80) — draft-creation stage + top-level catch; credit was charged, so draft-creation failure is worth a Sentry event.
+  - [app/api/app/quote/send/route.ts:374-381](app/api/app/quote/send/route.ts:374) — tagged by `org_id` + `lead_id` + `quote_id`; rollback path unchanged.
+
+**Mobile changes (worktree `claude/audit-13-mobile-fixes-2026-05-11`, off origin/main):**
+
+- **H1 + M5** — new [lib/sentryScrub.ts](lib/sentryScrub.ts) — ported from web (same PII key list, same UUID redaction). [app/_layout.tsx:1-77](app/_layout.tsx:1) — `Sentry.init` now sets `environment: __DEV__ ? "development" : "production"`, `release: com.murdochmarcum.snapquote@<version>+<iosBuildNumber>.<androidVersionCode>`, `tracesSampleRate: 0.1`, `beforeSend` + `beforeBreadcrumb` calling `scrubSentryEvent`. Confirmed live pre-fix via mobile Sentry MCP: tenant UUID `8f939f96-...` leaked into event title `Error: cannot add postgres_changes callbacks for realtime:quotes:8f939f96-7f92-4973-97f8-f08450ccb71f:ALL`. Mobile typecheck: only pre-existing baseline errors (`components/navigation/TopBar.tsx` tuple-index, `lib/secureStorage.ts` missing `expo-secure-store` types) — none from this change.
+
+**Skipped per work plan:**
+- **H6** — Supabase plan upgrade to Pro for PITR is a dashboard/billing action, not a code change. Deferred.
+- **H7** — Health-check endpoint + uptime monitor deferred.
+
+**Build verification:**
+- Web `npx tsc --noEmit` — clean.
+- Web `npm run build` — full Next route compile clean, no errors.
+- Mobile `npx tsc --noEmit` — 3 pre-existing baseline errors (TopBar, secureStorage, RN/lib.dom.d.ts globals conflicts) — confirmed not caused by these changes.
+
+Live verification step pending: load https://snapquote.us, exercise paths, confirm Sentry event volume on affected routes drops.
+
+---
+
 ## Session — May 11, 2026 — Audit 13: observability, crons & ops reliability (READ-ONLY) [Source: Claude Code]
 
 Read-only audit. NO code, schema, or data changed. Full report at `docs/audit-13-observability-ops-2026-05-11.md`. Worktree branch `claude/flamboyant-elgamal-850556`. HEAD `0024fdb`.

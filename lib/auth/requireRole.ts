@@ -26,18 +26,25 @@ function bucketBearerLength(len: number | undefined | null): string {
 }
 
 /**
- * Emit a Sentry message event so that breadcrumbs accumulated during the
- * verify chain (added in `verifyJWT.ts`) are flushed to Sentry. Without
- * this, breadcrumbs are dropped when the route handler returns 401 via
- * `NextResponse.json` (Sentry only delivers breadcrumbs attached to a
- * captured event). The `await Sentry.flush(2000)` is required in Vercel
- * serverless because the lambda freezes after the response — without
- * flush, the event may not transmit before freeze.
+ * Record the 401 path for diagnostic purposes.
  *
- * Diagnostic-only: this captureMessage is meant to be removed (or sampled
- * down aggressively) once we've collected enough data to root-cause the
- * Build 13/14/15 mobile 401s. See
- * `docs/breadcrumb-vs-charles-opinion-2026-05-07.md`.
+ * Audit 13 M3 (2026-05-11): the prior implementation called
+ * `Sentry.captureMessage` + `Sentry.flush` for every 401, generating 47
+ * Sentry events in 14 days — the top issue on the project. 401 is the
+ * auth check working correctly, not a crash. Most events were from
+ * unauthenticated traffic (`has_bearer: "no"`).
+ *
+ * New behavior:
+ * - Always emit a `Sentry.addBreadcrumb` at level "info" so subsequent
+ *   captures in the request lifecycle still see the verify trail.
+ * - When the bearer is present-but-rejected (a real auth-state divergence
+ *   worth investigating), keep `Sentry.captureMessage` at "warning"
+ *   level so it's still searchable. No-bearer 401s never trigger a
+ *   captureMessage — they're just unauthenticated traffic.
+ *
+ * Genuinely unexpected paths (malformed JWT, DB error, identity-resolve
+ * throw) propagate up through `onRequestError` and reach Sentry as
+ * captureException — those are not affected by this change.
  */
 async function captureAuth401(
   source: "requireMember" | "requireOwner",
@@ -45,27 +52,43 @@ async function captureAuth401(
   bearer: string | null
 ) {
   const authHeader = request?.headers.get("authorization") ?? null;
-  Sentry.captureMessage(`auth.${source} 401`, {
-    level: "warning",
-    tags: {
-      auth_source: source,
-      has_bearer: bearer ? "yes" : "no",
-      bearer_len_class: bucketBearerLength(bearer?.length)
-    },
-    extra: {
-      bearer_fingerprint: redactBearer(bearer),
-      decoded_header: bearer ? safeDecodeHeader(bearer) : null,
-      authorization_header_length: authHeader?.length ?? null,
-      method: request?.method ?? null,
-      url: request?.url ?? null
-    }
+  const tags = {
+    auth_source: source,
+    has_bearer: bearer ? "yes" : "no",
+    bearer_len_class: bucketBearerLength(bearer?.length)
+  } as const;
+  const extra = {
+    bearer_fingerprint: redactBearer(bearer),
+    decoded_header: bearer ? safeDecodeHeader(bearer) : null,
+    authorization_header_length: authHeader?.length ?? null,
+    method: request?.method ?? null,
+    url: request?.url ?? null
+  };
+
+  Sentry.addBreadcrumb({
+    category: "auth",
+    level: "info",
+    message: `auth.${source} 401`,
+    data: { ...tags, ...extra }
   });
-  // Vercel serverless: flush before responding so the event transmits
-  // before lambda freeze.
-  try {
-    await Sentry.flush(2000);
-  } catch {
-    // Don't let flush errors block the 401 response.
+
+  // Bearer-present-but-rejected: real auth-state divergence (e.g.,
+  // expired-but-not-yet-refreshed token, JWKS key rotation lag, signer
+  // mismatch). Worth keeping in Sentry at warning level so the team can
+  // see the volume and drill in.
+  if (bearer) {
+    Sentry.captureMessage(`auth.${source} 401 (bearer rejected)`, {
+      level: "warning",
+      tags,
+      extra
+    });
+    // Vercel serverless: flush before responding so the event transmits
+    // before lambda freeze.
+    try {
+      await Sentry.flush(2000);
+    } catch {
+      // Don't let flush errors block the 401 response.
+    }
   }
 }
 
