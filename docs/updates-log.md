@@ -7,6 +7,39 @@ This file is append-only. Every session, every meaningful fix, finding, or decis
 
 ---
 
+## Session — May 11, 2026 — Audit 7 (Web Stack & Backend) READ-ONLY [Source: Claude Code]
+
+Read-only audit at HEAD `1d6e834` (web). Fresh worktree off origin/main to avoid disturbing other agents' uncommitted work in the primary checkout. Findings page + to-dos saved to Notion (Bugs & Fixes + Pending Work). No code, schema, or data changed.
+
+**Headlines (zero Critical, 5 High):**
+- **H1** — `/api/public/quote/[publicId]` GET + POST accept + POST viewed have zero rate limiting. publicId is 96-bit so blind enumeration is impossible, but a leaked link can be scraped indefinitely, and accept/viewed handlers fan out pushes per request.
+- **H2** — `/api/public/auth/mobile-handoff` has no rate limit. A stolen mobile bearer can fan magiclinks to drain Resend budget.
+- **H3** — `/api/public/onboard:42-47` still uses `admin.auth.getUser(accessToken)` GoTrue round-trip. Audit 1's `verifySupabaseJWT` pattern is applied everywhere else (mobile-handoff, invite/accept, requireRole) — this one route was missed.
+- **H4** — Stripe + RevenueCat webhook routes have no `maxDuration` export; `handleCheckoutCompleted` does 5-7 sequential awaits (Stripe retrieve + 5 DB writes + emails). Vercel default 10s/60s can timeout, partial-state risk via Stripe's 72h retry + webhookEvents claim skipping retry handler.
+- **H5** — No `/api/health` + no external uptime monitor (cross-flag Audit 13 H7, re-verified at HEAD).
+
+**Mediums (7):** 21 api/app routes don't set explicit `runtime = "nodejs"`; webhook multi-writes lack Postgres transaction; bootstrap route lacks rate limit; RLS-enabled-no-policy on `iap_subscription_events` + `webhook_events`; SECURITY DEFINER on `customers_safe` + `leads_safe`; Stripe webhook emails fire-and-forget before later writes complete; hardcoded `https://snapquote.us` in `estimate-nudge-unviewed/route.ts:80` should use `getAppUrl()`.
+
+**Lows (4):** tsconfig missing `forceConsistentCasingInFileNames`; next.config has no explicit standalone output; Permissions-Policy payment directive notation cosmetic; web doesn't have xmldom (correct).
+
+**Audit 13 regression check:** All 14 Audit 13 fix points verified intact at HEAD via Grep + file reads. Sentry scrub, captureConsoleIntegration on server/edge/client, `app/global-error.tsx`, Stripe + RC + IAP + lead-unlock + quote-send captureException with tags, tracesSampleRate 0.2 across all 3 configs, replayIntegration with `replaysOnErrorSampleRate: 1.0`, isKnownSentryNoise DEP0169 filter, requireRole 401 breadcrumb-not-captureException — every one of them at the line numbers documented in Audit 13.
+
+**Live verification anchors:**
+- `git log origin/main -1` HEAD = `1d6e834` (Audit 3 fix-pass merge).
+- Vercel MCP `list_deployments`: 20/20 READY, current prod `dpl_G1ygAS9a8UgX7aGuQyMytq4Cuvij` at the audit HEAD.
+- Supabase MCP `cron.job`: 3 pg_cron + (via `vercel.json:1-32`) 7 Vercel = 10 active crons. jobid=9 `reset-paid-credits` confirms Audit 3 H3 fix landed.
+- Supabase MCP `get_advisors(security)`: 2 ERROR (DEFINER views — by design), 7 WARN (mutable search_path + SD function executable + leaked-password), 2 INFO (RLS-no-policy).
+- Live curl on snapquote.us / + /login: all 6 security headers present, CSP-Report-Only intact, /login `Cache-Control: private, no-cache, no-store`.
+- `npm audit`: 0 critical/high, 2 moderate (postcss transitive of next).
+- `npm run typecheck`: 0 errors.
+
+**Files written this session:**
+- `docs/audit-7-web-backend-2026-05-11.md` (~26 KB findings report)
+- `docs/current-state.md` (prepended 1-line headline)
+- `docs/updates-log.md` (this entry)
+
+---
+
 ## Session — May 11, 2026 — Audit 3 (Credits & Quota) fix pass: C2 + H7 + H3 (auto-fixes H1) + H4 + H2 [Source: Claude Code]
 
 Read-only audit-3 from earlier today (mobile docs lane) surfaced 2 Critical + 7 High + 9 Medium + 2 Low credit-system findings against live HEAD. This fix pass takes the user-prioritized subset: C2 (Option A — recovery-only, no refund path), H7, H3 (which auto-fixes H1), H4, H2. Skipped per triage: C1 (test-org cleanup), H5 (pending business decision), H6/M9 (multi-day project), L1 (RLS already protects), L2 (cosmetic).
