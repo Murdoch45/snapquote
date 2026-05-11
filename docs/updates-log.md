@@ -7,6 +7,64 @@ This file is append-only. Every session, every meaningful fix, finding, or decis
 
 ---
 
+## Session — May 11, 2026 — Audit 12 (notifications) — read-only diagnostic [Source: Claude Code]
+
+Read-only audit of every notification surface in SnapQuote: mobile push (expo-notifications), email (Resend), SMS (Telnyx), and in-app realtime (`notifications` table + Supabase realtime). Both repos at HEAD (web `35e4da2`, mobile worktree parity). Full report at [docs/audit-12-notifications-2026-05-11.md](audit-12-notifications-2026-05-11.md). Findings + to-dos posted to Notion Bugs & Fixes and Pending Work.
+
+**What I verified live (citation summary):**
+- **Resend domain auth** — MCP `list-domains` shows `snapquote.us` verified, sending enabled, us-east-1, created 2026-03-25.
+- **Notifications table schema + indexes** — Supabase MCP `list_tables` + `pg_indexes`. Columns `id, org_id, user_id, type, title, body, screen, screen_params, read, created_at`. Indexes: `notifications_pkey`, `notifications_new_lead_dedup_idx` (partial unique on (org_id, screen_params->>'id') WHERE type='NEW_LEAD'), `notifications_org_created_idx`, `notifications_org_unread_idx`, `notifications_user_id_idx`.
+- **RLS policies** — `pg_policy` query. `notifications`: members of org can read + update; no INSERT/DELETE policy (admin-only via service role). `push_tokens`: own-user-only on all CRUD.
+- **50-per-org cap** — trigger `trg_prune_org_notifications` AFTER INSERT, function `prune_org_notifications()` deletes anything past offset 50 ordered by created_at DESC. Function body inspected via `pg_get_functiondef`.
+- **7-day TTL** — daily cron `/api/cron/cleanup-notifications` at 04:00 UTC. Deletes rows with `created_at < now() - 7 days`.
+- **pg_cron jobs** — `cron.job` query: `rescue-stuck-leads` `*/3 * * * *`, `reset-solo-credits` and `reset-paid-credits` `0 0 * * *`. Vercel crons (vercel.json): 7 daily nudges + cleanup.
+- **Notification type distribution live** — 35 rows total; types NEW_LEAD (20), ESTIMATE_VIEWED (4), ESTIMATE_NOT_VIEWED (4), ESTIMATE_ACCEPTED (3), ESTIMATE_EXPIRED (2), ESTIMATE_EXPIRING_SOON (2). No TRIAL_EXPIRED or INVITE_ACCEPTED rows in window — types exist in code but no real events in audit period.
+- **push_tokens live** — 5 rows across 3 distinct orgs; last update `2026-05-11 19:13`.
+- **Telnyx user-input-error classification (Audit 13 M4)** — confirmed in place at `lib/notify.ts:88-96, 146-158` and `lib/telnyx.ts:88-101, 164-176`. Codes 10002 and 40310 surface as warning-level Sentry, not error. No regression.
+
+**Notification taxonomy at HEAD (event → channels):**
+- NEW_LEAD: push + in-app (NEW_LEAD type) + email + SMS-to-contractor + SMS-to-customer-confirmation. `sendNewLeadNotifications` (`lib/ai/estimate.ts:4663-4713`) reached from 4 call sites; partial unique index dedupes.
+- Estimate sent (to customer): email + SMS (idempotency-keyed on quote id). No in-app, no push.
+- Estimate viewed: push + in-app (ESTIMATE_VIEWED). CAS-protected.
+- Estimate accepted: push + in-app + email (if `notification_accept_email`) + SMS (if `notification_accept_sms`).
+- Estimate-not-viewed nudge (day 2-3 cron): push + in-app (ESTIMATE_NOT_VIEWED) + email.
+- Estimate-expiring-soon (day 6 cron): push + in-app (ESTIMATE_EXPIRING_SOON) + email.
+- Estimate-expired (day 7+ cron): push + in-app (ESTIMATE_EXPIRED) + email.
+- Unopened-leads-reminder cron: push only — **no in-app row** (M4 finding).
+- Trial-ending-soon (T-48h cron): email only — **no push, no in-app** (M5 finding).
+- Trial-expired cron: push + in-app (TRIAL_EXPIRED) + email; `trial_ended_notified_at` marker set via CAS (refutes stale doc L2).
+- Team invite accepted: push + in-app (INVITE_ACCEPTED) + email.
+- Account deletion, email verification, forgot-password, welcome, plan-upgraded, plan-ended, payment-failed, credit-purchase: email only.
+
+**Findings (full text in audit doc):**
+- 0 critical.
+- **H1** — Telnyx DLR webhook missing. `quotes.telnyx_message_id` is captured but no `app/api/webhooks/telnyx/route.ts` exists. Carrier-level delivery failure invisible. Confirms Audit 4 PW-A4-21 — still open.
+- **H2** — RC RENEWAL fires "🎉 You're on the {plan} plan" email every cycle (`app/api/revenuecat/webhook/route.ts:331`). Stripe correctly gates on `isRenewalCycle` (`stripe/webhook/route.ts:393`); RC handler does not.
+- **H3** — Customer name in push body visible on lock-screen previews for ESTIMATE_ACCEPTED and ESTIMATE_NOT_VIEWED nudge. NEW_LEAD push correctly omits PII — the right pattern exists, just not consistently applied.
+- **H4** — Push dispatch (`lib/pushNotifications.ts`) and mobile push registration (`SnapQuote-mobile/lib/notifications.ts`) have **zero Sentry imports**. All failures rely on `captureConsoleIntegration` — no `org_id`/`event_type`/Postgres-error-code tags. Documented RLS-denial registration failure (mobile build-10) only surfaces as untagged warning.
+- **M1** — Push payload omits `badge` field; mobile never resets badge count. No `setBadgeCountAsync` anywhere.
+- **M2** — Push tap target ≠ in-app feed tap target for ESTIMATE_VIEWED and ESTIMATE_ACCEPTED.
+- **M3** — `unopened-leads-reminder` threshold hardcoded at 10. Confirms Audit 4 PW-A4-16 — still open.
+- **M4** — `unopened-leads-reminder` writes no in-app feed row.
+- **M5** — trial-ending-soon (T-48h) is email-only.
+- **M6** — Realtime channel name not per-mount unique on mobile (web mitigates via singleton).
+- **M7** — Two SMS dispatch paths (`sendSms` in `lib/notify.ts` vs `sendQuoteSms` in `lib/telnyx.ts`) with duplicate retry/error-classification logic.
+- **M8** — Push send doesn't chunk for Expo's 100-per-batch limit (only 5 push_tokens today, forward-looking).
+- **M9** — Mobile push registration has no Sentry capture (subset of H4).
+- **L1** — `TopBar.handleNotificationClick` no-op for unknown screen values.
+- **L2** — STALE DOC: `trial_ended_notified_at` is now wired at HEAD (was flagged unused). `updates-log.md:1429` (older sections) is historical-but-superseded.
+- **L3** — STALE DOC: `TopBar.handleNotificationClick` handles `settings` at HEAD. `updates-log.md:1428` (older sections) is historical-but-superseded.
+- **L4** — Expo push URL is legacy `exp.host` (canonical is `api.expo.dev`).
+- **L5** — Every push uses `priority: "high"` + `sound: "default"` regardless of urgency.
+
+**Verified-clean items** (not findings, listed so future audits don't re-investigate): Resend domain auth, from-address envelope policy, plain-text fallback on every email, email + Telnyx idempotency keys on quote send and crons, 50-per-org cap, 7-day TTL, NEW_LEAD dedup index, CAS protection on quote view + accept, push token composite PK, mobile signOut device-scoped delete, push token rotation on foreground, RLS gating, realtime channel filters, webhook event idempotency, Stripe renewal gating, welcome email on bootstrap, lead-submit `after()` decoupling. Full list (22 items) in audit doc Section 3.
+
+**Cross-flag to Audit 13:** H4 is a natural extension of Audit 13's Sentry instrumentation pass (which covered 8 revenue/auth handlers but not push dispatch). M9 is a subset of H4.
+
+**No code changes.** Read-only audit; docs only.
+
+---
+
 ## Session — May 11, 2026 — Audit 3 (Credits & Quota) fix pass: C2 + H7 + H3 (auto-fixes H1) + H4 + H2 [Source: Claude Code]
 
 Read-only audit-3 from earlier today (mobile docs lane) surfaced 2 Critical + 7 High + 9 Medium + 2 Low credit-system findings against live HEAD. This fix pass takes the user-prioritized subset: C2 (Option A — recovery-only, no refund path), H7, H3 (which auto-fixes H1), H4, H2. Skipped per triage: C1 (test-org cleanup), H5 (pending business decision), H6/M9 (multi-day project), L1 (RLS already protects), L2 (cosmetic).
