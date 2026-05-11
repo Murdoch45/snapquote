@@ -14,6 +14,12 @@ Read-only audit at HEAD `1d6e834`. Zero Critical; 5 High + 7 Medium + 4 Low. All
 
 ---
 
+## Audit 12 (notifications) diagnosed — 2026-05-11 [Source: Claude Code]
+
+Full report: [docs/audit-12-notifications-2026-05-11.md](audit-12-notifications-2026-05-11.md). Read-only diagnostic of push (Expo), email (Resend — `snapquote.us` verified, sending enabled), SMS (Telnyx), and in-app realtime (`notifications` table, RLS-gated, 50/org trigger + 7-day TTL cron). 0 critical, 4 high (Telnyx DLR webhook still missing per Audit 4 PW-A4-21; RC RENEWAL fires "plan upgraded" email every cycle; customer name in lock-screen push body; push dispatch + mobile registration have no Sentry capture), 9 medium, 5 low. Findings + to-dos also in Notion.
+
+---
+
 ## Audit 3 fixes (Credits & Quota) — 2026-05-11 [Source: Claude Code]
 
 C2 + H7 + H3 (auto-fixes H1) + H4 + H2 shipped. M4 lands separately on mobile.
