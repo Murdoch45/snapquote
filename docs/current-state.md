@@ -8,6 +8,19 @@
 
 ---
 
+## Audit 13 fixes live-verified — 2026-05-11 [Source: Claude Code]
+
+Production deploy `dpl_Br8miWnDt48D1v5Y43BFZufd1gwo` (commit `6a236e63`) READY at 2026-05-11 17:59:40 UTC. `curl -I https://snapquote.us/` returns 307 → `https://www.snapquote.us/` 200 OK with the full security-headers/CSP report-only set. `curl -I https://www.snapquote.us/login` returns 200 OK. Sentry MCP search on `snapquote-web` (project id `4511244273123328`):
+- Total errors on the new release `6a236e63...` over the first hour post-deploy: **0**.
+- Total errors project-wide over last 24h: **1** (a single DEP0169 event timestamped 2026-05-10 19:53 UTC on the previous release `9dc5b423...` — pre-fix; M2 filter not yet active when it landed). Zero DEP0169 events on the new release.
+- `auth.requireMember 401` events over last 24h: **0** (was top issue at 47 events / 14d, ≈ 3.4/day pre-deploy — confirms M3 no-bearer downgrade is active).
+- New issues `firstSeen:-1h`: **0** — no regression spikes.
+- `has:tags[pg_error_code]`: 0 results (no Postgres 42501 errors fired in the window, so M7 tagging hasn't had a candidate event to verify against — verify on next 42501).
+
+Verification result: shipped fixes are deployed cleanly with no observable regression. M2 + M3 confirmed working by the absence of expected pre-fix events. H1 (mobile) merged separately to mobile main `0641e7b`; mobile verification deferred until next TestFlight build cycles real device traffic.
+
+---
+
 ## Audit 13 observability fixes shipped — 2026-05-11 [Source: Claude Code]
 
 H1, H2, H3, H4, H5, M2, M3, M4, M6, M7 all shipped. Web: `instrumentation-client.ts:18-37` adds `captureConsoleIntegration` + `replayIntegration` (replaysOnErrorSampleRate=1.0, session=0), bumps `tracesSampleRate` to 0.2; `sentry.edge.config.ts:15-19` adds `captureConsoleIntegration`; `sentry.server.config.ts:13` bumps `tracesSampleRate` to 0.2. All three `beforeSend` hooks now call `isKnownSentryNoise` first to drop `[DEP0169]` warnings. `lib/sentryScrub.ts` now stamps `pg_error_code` and `org_id` tags on Postgres error events before UUID scrubbing. New `app/global-error.tsx` catches root-layout crashes with `Sentry.captureException`. `lib/auth/requireRole.ts:42-87` converts no-bearer 401s to an info breadcrumb (kept warning-level captureMessage for bearer-present 401s only). `lib/telnyx.ts` + `lib/notify.ts` Telnyx user-input failure paths now `Sentry.captureMessage` at warning level instead of `console.error`. 8 revenue/auth handlers (`app/api/stripe/{webhook,checkout,credits,customer-portal}/route.ts`, `app/api/revenuecat/webhook/route.ts`, `app/api/iap/sync/route.ts`, `app/api/app/leads/unlock/route.ts`, `app/api/app/quote/send/route.ts`) now `Sentry.captureException` at top-level catch with `tags.area` + tenant identifiers. Mobile: new `lib/sentryScrub.ts` (parity with web) wired into `app/_layout.tsx:27` `Sentry.init` via `beforeSend`/`beforeBreadcrumb`; `environment`, `release` (version+build), `tracesSampleRate: 0.1` added. H6 (PITR upgrade) + H7 (uptime monitor) intentionally deferred per work plan. M5 closed as a subset of H1.

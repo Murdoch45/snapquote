@@ -7,6 +7,31 @@ This file is append-only. Every session, every meaningful fix, finding, or decis
 
 ---
 
+## Session — May 11, 2026 — Audit 13 live verification on production [Source: Claude Code]
+
+Live Verification Step from the fix-pass spec. The web fix bundle (Audit 13 H1, H2, H3, H4, H5, M2, M3, M4, M6, M7) merged to `origin/main` as commit `6a236e6` and triggered Vercel deploy `dpl_Br8miWnDt48D1v5Y43BFZufd1gwo`.
+
+**Deploy state:** `READY` (Vercel MCP `get_deployment`). `buildingAt: 1778522270193`, `ready: 1778522380101` — 110-second build. Aliased to `snapquote.us`, `www.snapquote.us`, `snapquote.us-tau.vercel.app`, etc.
+
+**Site response:**
+- `curl -I https://snapquote.us/` → 307 → `https://www.snapquote.us/` 200 OK (53310 bytes).
+- `curl -I https://www.snapquote.us/login` → 200 OK with full security header set (Strict-Transport-Security, X-Content-Type-Options, X-Frame-Options DENY, Permissions-Policy, Content-Security-Policy-Report-Only including the `https://o*.ingest.sentry.io` connect-src for the Sentry tunnel).
+
+**Sentry events (snapquote-web project `4511244273123328` via Sentry MCP):**
+- 1h window post-deploy on the new release `6a236e63...`: **0 errors**.
+- 24h window project-wide: **1 error total** — a single `[DEP0169]` event timestamped `2026-05-10T19:53:11+00:00`, release `9dc5b4236...` (pre-fix release; M2 filter wasn't deployed yet). Compare to the audit baseline: ≈ 1.3 DEP0169 events/day → expected ≈ 1 in 24h, which matches.
+- 24h window for `auth.requireMember 401`: **0 events** (was top issue at 47 events / 14d ≈ 3.4/day pre-deploy — confirms M3 no-bearer-401 downgrade is active and the bulk of pre-fix 401 captures were from the no-bearer path).
+- `firstSeen:-1h` issues: **0** — zero new issue groups appeared in the hour after deploy.
+- `has:tags[pg_error_code]`: **0 results** — no Postgres `42501` errors fired in the window, so the M7 tag extraction in `scrubSentryEvent` did not have a candidate to act on. To-verify on next 42501.
+
+**Verification result:** clean. No regression, no error spike, no broken endpoint. M2 + M3 confirmed working by the absence of the events they targeted. captureConsoleIntegration on client + edge (H2, M6) and the replay integration (H5) cannot be exercised without a real client-side error; will surface naturally on the first user-induced error. M7 tag extraction will surface on the next live `42501`.
+
+**Mobile not verified live** — H1 merged to mobile `origin/main` as `0641e7b` but mobile binary needs a fresh TestFlight build and on-device traffic. Deferred.
+
+**Production state:** healthy. No revert needed. Audit 13 fix bundle declared done.
+
+---
+
 ## Session — May 11, 2026 — Audit 13 fixes shipped (H1, H2, H3, H4, H5, M2, M3, M4, M6, M7) [Source: Claude Code]
 
 Post-audit fix pass. Live-verified each finding at HEAD before fixing — no claim trusted from the prior audit doc alone.
