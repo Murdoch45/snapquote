@@ -7,6 +7,47 @@ This file is append-only. Every session, every meaningful fix, finding, or decis
 
 ---
 
+## Session — May 11, 2026 — Audit 3 (Credits & Quota) fix pass: C2 + H7 + H3 (auto-fixes H1) + H4 + H2 [Source: Claude Code]
+
+Read-only audit-3 from earlier today (mobile docs lane) surfaced 2 Critical + 7 High + 9 Medium + 2 Low credit-system findings against live HEAD. This fix pass takes the user-prioritized subset: C2 (Option A — recovery-only, no refund path), H7, H3 (which auto-fixes H1), H4, H2. Skipped per triage: C1 (test-org cleanup), H5 (pending business decision), H6/M9 (multi-day project), L1 (RLS already protects), L2 (cosmetic).
+
+**Live re-verification before every fix (per task rule):**
+- C2 — `app/api/app/leads/unlock/route.ts:96-112` already-unlocked branch reads `quotes.public_id` and returns `publicId:null` if no draft. ✅ matches audit-3 description.
+- H7 — `app/api/stripe/webhook/route.ts:483-543` `handleChargeRefunded` calls `refund_bonus_credits(orgId, creditAmount)` unconditionally per event. `information_schema.columns` for `credit_purchases` confirmed: no `refunded_at` column. ✅
+- H3 — `cron.job` returned only `reset-solo-credits` (jobid=3, `WHERE plan='SOLO'`) and `rescue-stuck-leads` (jobid=8, unrelated). No paid-plan reset cron. 4 paid-plan orgs found stale (`organizations` WHERE `plan IN ('TEAM','BUSINESS') AND credits_reset_at <= now() OR NULL`): `eabc1e4a…` TEAM mc=5/null, `f77b0ebb…` TEAM mc=5/null, `36ba5025…` BUSINESS mc=86/2026-04-18, `7e7ce05f…` BUSINESS mc=98/2026-04-20. ✅
+- H4 — `app/api/app/leads/unlock/route.ts:31-33` returns 402 before reaching the `after()`/recordAudit block at line 127-142. ✅
+- H2 — `pg_proc` returned 1 row for `reset_due_solo_monthly_credits`; grep at HEAD found zero call sites in `*.{ts,tsx,sql,js}` outside historical migrations (0018, 0063). ✅
+- M4 (mobile, deferred to mobile commit) — `SnapQuote-mobile/lib/api/leads.ts:268-307` tries direct RPC, then falls through to HTTP. ✅
+
+**Web changes:**
+
+1. **C2 — DRAFT-quote retry on already-unlocked path.** [app/api/app/leads/unlock/route.ts](app/api/app/leads/unlock/route.ts) — already-unlocked branch now attempts a recovery DRAFT-quote insert if no existing quote is found. Same insert shape as happy-path (price calc + `randomBytes(12).toString('base64url')` publicId + `status:'DRAFT'` + sent_at:null + DEFAULT_ESTIMATE_SMS_TEMPLATE). Wrapped in try/catch — recovery failure logs to Sentry with `stage: 'draft-creation-retry'` tag and returns `publicId:null` (current behavior, no regression). Happy-path branch NOT modified per task scope.
+
+2. **H7 — Stripe `charge.refunded` partial-refund double-deduct fixed.** Migration `20260511183247_audit3_h7_credit_purchases_refunded_at` adds `credit_purchases.refunded_at timestamptz NULL`. [app/api/stripe/webhook/route.ts](app/api/stripe/webhook/route.ts) `handleChargeRefunded` (post-fix) atomically claims the refund slot via `UPDATE credit_purchases SET refunded_at=now() WHERE purchase_reference=? AND refunded_at IS NULL`. If `claimed.length === 0` (already-refunded OR row doesn't exist), skip cleanly. Then call `refund_bonus_credits`. Claim happens BEFORE the RPC so a partial RPC failure doesn't free the slot — worst case is credits aren't clawed back. Net direction: never over-deducts.
+
+3. **H3 — `reset-paid-credits` pg_cron added.** Migration `20260511183257_audit3_h3_reset_paid_credits_cron` schedules a daily 00:00 UTC job mirroring `reset-solo-credits` but `WHERE plan IN ('TEAM','BUSINESS')`. Same `credits_reset_at IS NULL OR credits_reset_at <= now()` WHERE shape (idempotent). H1's 4 stale paid orgs will reset on tomorrow's run (verified via dry-run SELECT against the WHERE clause).
+
+4. **H4 — `lead.unlock_blocked` audit_log action.** [lib/auditLog.ts](lib/auditLog.ts) extends `AuditAction` union with `"lead.unlock_blocked"`. [app/api/app/leads/unlock/route.ts](app/api/app/leads/unlock/route.ts) 402 path now fires `recordAudit({action:'lead.unlock_blocked', metadata:{reason}})` via `after()` before returning 402. Async, non-blocking, swallows internal errors.
+
+5. **H2 — dead `reset_due_solo_monthly_credits()` function dropped.** Migration `20260511183236_audit3_h2_drop_dead_reset_function` runs `DROP FUNCTION IF EXISTS public.reset_due_solo_monthly_credits();`. Pre-drop verified: function existed in pg_proc but was uncalled (cron uses inline SQL with different body; no source-code references). Post-drop verified: `pg_proc` returns 0 rows.
+
+**Live verification (Supabase MCP, post-migration):**
+- H2 function: `SELECT COUNT(*) FROM pg_proc WHERE proname='reset_due_solo_monthly_credits'` → 0 ✅
+- H7 column: `SELECT COUNT(*) FROM information_schema.columns WHERE table_schema='public' AND table_name='credit_purchases' AND column_name='refunded_at'` → 1 ✅
+- H3 paid cron: `SELECT jobname, schedule, active FROM cron.job WHERE jobname='reset-paid-credits'` → `('reset-paid-credits','0 0 * * *', true)` ✅
+- H3 solo cron preserved: `SELECT active FROM cron.job WHERE jobname='reset-solo-credits'` → `true` ✅
+- H3 paid-cron WHERE dry-run: 4 rows match (2 TEAM at mc=5→would-be-reset-to=20, 2 BUSINESS at mc=86/98→would-be-reset-to=100). bonus_credits untouched.
+
+**Migration versions applied (live `supabase_migrations.schema_migrations`):** `20260511183236`, `20260511183247`, `20260511183257`. Local migration files renamed to match.
+
+**TypeScript:** `npx tsc --noEmit` → exit 0.
+
+**Cross-flag:** none new. C1's 2 legacy TEAM victims will self-heal via tomorrow's H3 cron run (TEAM monthly_credits 5 → 20). H5 (subscription-refund retention) and H6 (no credit ledger) still pending per triage.
+
+Mobile M4 lands in a separate commit on `Murdoch45/SnapQuote-mobile`.
+
+---
+
 ## Session — May 11, 2026 — Audit 13 live verification on production [Source: Claude Code]
 
 Live Verification Step from the fix-pass spec. The web fix bundle (Audit 13 H1, H2, H3, H4, H5, M2, M3, M4, M6, M7) merged to `origin/main` as commit `6a236e6` and triggered Vercel deploy `dpl_Br8miWnDt48D1v5Y43BFZufd1gwo`.

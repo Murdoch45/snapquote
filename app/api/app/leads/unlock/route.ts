@@ -29,6 +29,31 @@ export async function POST(request: Request) {
     const result = await unlockLead(auth.orgId, body.leadId);
 
     if (!result.ok) {
+      // Audit 3 H4 — failed unlock because the org is out of credits.
+      // Logging cap-hits makes upsell triggers and "why isn't unlock
+      // working" support tickets answerable from the audit_log table
+      // without scraping Sentry. Deferred via `after()` so the user
+      // never waits on the write; recordAudit swallows internal errors.
+      const blockedClientIp = getClientIp(request);
+      const blockedIpAddress = blockedClientIp === "unknown" ? null : blockedClientIp;
+      const blockedOrgId = auth.orgId;
+      const blockedUserId = auth.userId;
+      const blockedActorEmail = auth.userEmail;
+      const blockedLeadId = body.leadId;
+      const blockedReason = result.error;
+      after(async () => {
+        const admin = createAdminClient();
+        await recordAudit(admin, {
+          orgId: blockedOrgId,
+          action: "lead.unlock_blocked",
+          actorUserId: blockedUserId,
+          actorEmail: blockedActorEmail,
+          targetType: "lead",
+          targetId: blockedLeadId,
+          metadata: { reason: blockedReason },
+          ipAddress: blockedIpAddress
+        });
+      });
       return NextResponse.json({ error: result.error }, { status: 402 });
     }
 
@@ -94,7 +119,7 @@ export async function POST(request: Request) {
         publicId = null;
       }
     } else {
-      // Already unlocked — check if a draft quote exists and return its publicId
+      // Already unlocked — check if a draft quote exists and return its publicId.
       try {
         const admin = createAdminClient();
         const { data: existingQuote } = await requireOrgFilter(
@@ -106,6 +131,67 @@ export async function POST(request: Request) {
         ).maybeSingle();
 
         publicId = (existingQuote?.public_id as string | null) ?? null;
+
+        // Audit 3 C2 — DRAFT-quote recovery path. If the unlock succeeded
+        // earlier but the DRAFT insert above failed (transient DB blip,
+        // network glitch), the original response returned publicId:null
+        // and the credit was already charged. The next click hits this
+        // branch with `alreadyUnlocked=true`. Without a recovery, the
+        // orphan is permanent. With it, the retry silently fixes it.
+        //
+        // Same shape as the happy-path insert above (lines 65-75) — do
+        // NOT refactor that branch; the task explicitly scopes it out.
+        // Worst case here = current behavior (publicId stays null).
+        if (!publicId) {
+          try {
+            const { data: lead } = await requireOrgFilter(
+              admin
+                .from("leads")
+                .select("ai_suggested_price,ai_estimate_low,ai_estimate_high")
+                .eq("id", body.leadId),
+              auth.orgId
+            ).single();
+
+            const suggestedPrice = Number(lead?.ai_suggested_price ?? 0);
+            const estimateLow = Number(lead?.ai_estimate_low ?? suggestedPrice);
+            const estimateHigh = Number(lead?.ai_estimate_high ?? suggestedPrice);
+            const price = Math.round(((estimateLow + estimateHigh) / 2) / 5) * 5 || suggestedPrice;
+
+            const recoveryPublicId = makePublicId();
+
+            await admin.from("quotes").insert({
+              org_id: auth.orgId,
+              lead_id: body.leadId,
+              public_id: recoveryPublicId,
+              price: price || 0,
+              estimated_price_low: estimateLow || null,
+              estimated_price_high: estimateHigh || null,
+              message: DEFAULT_ESTIMATE_SMS_TEMPLATE,
+              status: "DRAFT",
+              sent_at: null
+            });
+
+            publicId = recoveryPublicId;
+          } catch (recoveryError) {
+            // Recovery failed. Tagged 'draft-creation-retry' so this is
+            // distinguishable from the happy-path failure event. Do NOT
+            // throw — publicId stays null and the response shape is
+            // unchanged from pre-fix behavior.
+            Sentry.captureException(recoveryError, {
+              tags: {
+                area: "lead-unlock",
+                stage: "draft-creation-retry",
+                org_id: auth.orgId
+              },
+              extra: { lead_id: body.leadId }
+            });
+            console.error(
+              "Failed to recover DRAFT quote for already-unlocked lead:",
+              recoveryError
+            );
+            publicId = null;
+          }
+        }
       } catch {
         // Non-critical — continue without publicId
       }

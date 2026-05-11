@@ -20,6 +20,10 @@ export type AuditAction =
   // kinds of actions a contractor might later dispute or need to audit
   // team activity against.
   | "lead.unlocked"
+  // Audit 3 H4 — failed unlock because the org is out of credits.
+  // Logging the cap-hit makes upsell triggers and "why isn't unlock
+  // working" support tickets answerable without scraping Sentry.
+  | "lead.unlock_blocked"
   | "quote.sent";
 
 type RecordAuditInput = {
