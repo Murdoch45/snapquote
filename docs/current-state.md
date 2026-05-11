@@ -8,6 +8,12 @@
 
 ---
 
+## Audit 7 fixes (Web Stack & Backend) — 2026-05-11 [Source: Claude Code]
+
+User-prioritized subset shipped: H1 (rate limit 3 public quote endpoints — GET 60/hr, accept 5/hr, viewed 60/hr, keyed on ip+publicId), H2 (rate limit /api/public/auth/mobile-handoff — `handoff:user:` 6/hr + `handoff:ip:` 15/hr Promise.all, mirrors forgot-password pattern), H4 (`maxDuration = 60` on Stripe + RC webhooks — both had `runtime = "nodejs"` but no timeout export, cron handlers already set this), M3 (rate limit /api/public/auth/bootstrap — `bootstrap:user:` 5/hr post-auth), M7 (`getAppUrl()` replaces hardcoded `https://snapquote.us/app/quotes` in estimate-nudge cron fallback), L1 (tsconfig `forceConsistentCasingInFileNames: true`). M6 SKIPPED — live verification at HEAD showed the 4 `void sendPlanUpgradedEmail`/`sendPlanEndedEmail` calls in stripe/webhook/route.ts ARE already at the end of their containing handlers (handleCheckoutCompleted line 288 is the last line; handleSubscriptionChanged line 336 last in conditional; handleInvoicePaid line 394 last in try; handleSubscriptionDeleted line 439 last in conditional). The audit doc's M6 description was wrong about the live state. H3/H5/M1/M2/M4/M5/L2/L3/L4 deferred per user triage. `npm run typecheck`: 0 errors.
+
+---
+
 ## Audit 7 (Web Stack & Backend) — 2026-05-11 [Source: Claude Code]
 
 Read-only audit at HEAD `1d6e834`. Zero Critical; 5 High + 7 Medium + 4 Low. All Audit 8 + Audit 13 fixes verified intact at HEAD. Headlines: 3 public routes lack rate limiting (quote/publicId GET/accept/viewed, mobile-handoff, bootstrap); Stripe + RC webhooks have no maxDuration export with 5-7 sequential writes; `/api/public/onboard` still uses GoTrue `admin.auth.getUser(accessToken)` (the race that motivated `verifySupabaseJWT` everywhere else); no `/api/health` + no external uptime monitor (cross-flag Audit 13 H7). 20/20 most-recent Vercel deploys READY, current prod is the audit HEAD. tsc clean. npm audit: 0 critical/high, 2 moderate (next-bundled postcss, deferred to Next 16). Supabase advisors: 2 ERROR (SECURITY DEFINER views — intentional design), 2 INFO (RLS-enabled-no-policy on service-role-only tables). 14 Audit 13 fix points all verified intact. Full report at `docs/audit-7-web-backend-2026-05-11.md`.

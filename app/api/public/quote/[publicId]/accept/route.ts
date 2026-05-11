@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import { buildEstimateAcceptedEmail } from "@/lib/emailTemplates";
+import { getClientIp } from "@/lib/ip";
 import { notifyContractor } from "@/lib/notify";
 import { sendEmail } from "@/lib/notify";
 import { getOwnerEmailForOrg } from "@/lib/organizationOwners";
 import { sendPushToOrg } from "@/lib/pushNotifications";
 import { computeEffectiveQuoteStatus } from "@/lib/quoteExpiry";
 import { invalidateAnalytics } from "@/lib/db";
+import { rateLimit } from "@/lib/rateLimit";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireOrgFilter } from "@/lib/supabase/orgFilter";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -17,8 +19,23 @@ type Props = {
 
 export const runtime = "nodejs";
 
-export async function POST(_request: Request, { params }: Props) {
+// Audit 7 H1 — tighter cap on accept than on read. A legitimate customer
+// accepts a quote once; the only reason to retry is a click-fast race
+// (already CAS-protected at the row level) or a malicious replay.
+const ONE_HOUR_MS = 60 * 60 * 1000;
+const QUOTE_ACCEPT_RATE_LIMIT = 5;
+
+export async function POST(request: Request, { params }: Props) {
   const { publicId } = await params;
+
+  const ip = getClientIp(request);
+  if (!(await rateLimit(`public-quote-accept:${ip}:${publicId}`, QUOTE_ACCEPT_RATE_LIMIT, ONE_HOUR_MS))) {
+    return NextResponse.json(
+      { error: "Too many requests. Please try again later." },
+      { status: 429 }
+    );
+  }
+
   const admin = createAdminClient();
 
   const { data: quote, error: quoteError } = await admin

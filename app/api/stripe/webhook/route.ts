@@ -16,6 +16,12 @@ import { sendPlanUpgradedEmail, sendPlanEndedEmail } from "@/lib/planChangeEmail
 import type { OrgPlan } from "@/lib/types";
 
 export const runtime = "nodejs";
+// Audit 7 H4 — handleCheckoutCompleted runs 5+ awaited round-trips
+// (Stripe retrieve, saveSubscriptionRecord, trial writes, setOrganizationPlan,
+// resetOrganizationCredits). Default Vercel function timeout (10s Hobby /
+// 60s Pro) can kill the handler mid-write, leaving the org in a partial
+// state that the webhookEvents claim prevents a retry from fixing.
+export const maxDuration = 60;
 
 function normalizePlan(value: string | null | undefined): OrgPlan | null {
   if (value === "SOLO" || value === "TEAM" || value === "BUSINESS") return value;

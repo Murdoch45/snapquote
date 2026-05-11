@@ -1,6 +1,15 @@
 import { NextResponse } from "next/server";
 import { ensureOrganizationMembershipForUser } from "@/lib/onboarding";
+import { rateLimit } from "@/lib/rateLimit";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+
+// Audit 7 M3 — per-user cap. The route is gated by Turnstile + a cookie
+// session, but a signed-up user with a valid signup cookie can replay
+// indefinitely; ensureOrganizationMembershipForUser is meant to be
+// idempotent but is the kind of code path you don't want to stress-test
+// from the public surface.
+const ONE_HOUR_MS = 60 * 60 * 1000;
+const BOOTSTRAP_RATE_LIMIT = 5;
 
 async function verifyTurnstileToken(token: string): Promise<boolean> {
   const secret = process.env.TURNSTILE_SECRET_KEY;
@@ -44,6 +53,13 @@ export async function POST(request: Request) {
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (!(await rateLimit(`bootstrap:user:${user.id}`, BOOTSTRAP_RATE_LIMIT, ONE_HOUR_MS))) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again later." },
+        { status: 429 }
+      );
     }
 
     const result = await ensureOrganizationMembershipForUser({

@@ -1,13 +1,30 @@
 import { NextResponse } from "next/server";
+import { getClientIp } from "@/lib/ip";
 import { sendPushToOrg } from "@/lib/pushNotifications";
+import { rateLimit } from "@/lib/rateLimit";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 type Props = {
   params: Promise<{ publicId: string }>;
 };
 
-export async function POST(_request: Request, { params }: Props) {
+// Audit 7 H1 — match the read cap. The handler fans out a push to every
+// device in the org on the CAS-winner path; rate-limiting here keeps a
+// bot tap from flooding contractor notifications.
+const ONE_HOUR_MS = 60 * 60 * 1000;
+const QUOTE_VIEWED_RATE_LIMIT = 60;
+
+export async function POST(request: Request, { params }: Props) {
   const { publicId } = await params;
+
+  const ip = getClientIp(request);
+  if (!(await rateLimit(`public-quote-viewed:${ip}:${publicId}`, QUOTE_VIEWED_RATE_LIMIT, ONE_HOUR_MS))) {
+    return NextResponse.json(
+      { error: "Too many requests. Please try again later." },
+      { status: 429 }
+    );
+  }
+
   const admin = createAdminClient();
 
   const { data: quote } = await admin

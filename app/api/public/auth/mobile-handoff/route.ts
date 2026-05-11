@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { verifySupabaseJWT } from "@/lib/auth/verifyJWT";
+import { getClientIp } from "@/lib/ip";
+import { rateLimit } from "@/lib/rateLimit";
 
 /**
  * Audit 1 H3: mobile → web authenticated handoff without leaking the mobile
@@ -75,6 +77,25 @@ export async function POST(request: Request) {
     // email synced into auth.users hit this branch; surface a 400 so
     // mobile can fall back gracefully.
     return NextResponse.json({ error: "Account is missing an email on file." }, { status: 400 });
+  }
+
+  // Audit 7 H2 — both gates must pass. User-keyed cap defends against a
+  // stolen mobile bearer being spammed to drain the Resend budget (each
+  // generateLink call below results in a sent email when the user clicks
+  // through); IP-keyed cap covers the same attacker across multiple
+  // refreshed bearers. Keyed on the verified userId so token refresh
+  // doesn't reset the counter. Pattern: forgot-password (Audit 8 M6).
+  const ONE_HOUR_MS = 60 * 60 * 1000;
+  const ip = getClientIp(request);
+  const [userAllowed, ipAllowed] = await Promise.all([
+    rateLimit(`handoff:user:${verified.userId}`, 6, ONE_HOUR_MS),
+    rateLimit(`handoff:ip:${ip}`, 15, ONE_HOUR_MS)
+  ]);
+  if (!userAllowed || !ipAllowed) {
+    return NextResponse.json(
+      { error: "Too many requests. Please try again later." },
+      { status: 429 }
+    );
   }
 
   let body: unknown;
