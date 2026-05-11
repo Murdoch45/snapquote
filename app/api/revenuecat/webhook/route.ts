@@ -330,11 +330,52 @@ export async function POST(request: Request) {
           });
           break;
         }
+
+        // Audit 12 H2 — read the org's current plan BEFORE writing so we
+        // can tell a routine renewal apart from a renewal-with-tier-change.
+        // Stripe handler gates the upgrade email on `isRenewalCycle` (see
+        // stripe/webhook/route.ts handleInvoicePaid). RC doesn't expose
+        // that signal, so we approximate: only send "🎉 You're on the X
+        // plan" when the plan field actually changed. A no-op renewal
+        // (same plan as before) skips the email — previously this fired
+        // every billing cycle and read as spam to the contractor.
+        let priorPlan: OrgPlan | null = null;
+        try {
+          const admin = createAdminClient();
+          const { data: orgRow } = await admin
+            .from("organizations")
+            .select("plan")
+            .eq("id", orgId)
+            .maybeSingle();
+          priorPlan = (orgRow?.plan as OrgPlan | undefined) ?? null;
+        } catch (priorPlanError) {
+          // Read failed — fall back to the safer pre-fix behavior (skip
+          // the email). A failed lookup shouldn't open us back up to
+          // renewal-cycle spam.
+          Sentry.captureException(priorPlanError, {
+            tags: {
+              area: "revenuecat-webhook",
+              stage: "renewal-prior-plan-lookup",
+              org_id: orgId
+            }
+          });
+        }
+
         await setOrganizationPlan(orgId, plan);
         await resetOrganizationCredits(orgId, plan);
         // Successful renewal clears any prior cancellation-scheduled state.
         await setIapCancellationScheduled(orgId, null);
-        void sendPlanUpgradedEmail(orgId, plan);
+
+        if (priorPlan && priorPlan === plan) {
+          Sentry.addBreadcrumb({
+            category: "revenuecat.webhook",
+            level: "info",
+            message: "RC renewal — no plan change, email skipped",
+            data: { org_id: orgId, plan }
+          });
+        } else {
+          void sendPlanUpgradedEmail(orgId, plan);
+        }
         break;
       }
 

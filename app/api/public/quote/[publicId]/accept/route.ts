@@ -194,10 +194,22 @@ export async function POST(request: Request, { params }: Props) {
   const primaryService = ((lead?.services ?? []) as string[])[0] ?? "estimate";
   const addressParts = ((lead?.address_full as string) ?? "").split(",").map((p: string) => p.trim());
   const city = addressParts.length >= 2 ? addressParts[addressParts.length - 2] : "";
-  const locationSuffix = city ? ` for ${primaryService} in ${city}` : ` for ${primaryService}`;
+  // Audit 12 H3 — push body must not contain the customer's name. iOS /
+  // Android lock-screen previews surface this text to anyone who picks
+  // up the phone. Replace name with city + service + dollar amount so the
+  // contractor still gets actionable context without leaking PII. The
+  // in-app feed row keeps the customer-name text (auth-gated, only
+  // visible inside the app). Audit 12 M2 — align the in-app row's screen
+  // to "lead" (same as the push payload) so both tap targets land on the
+  // lead detail screen.
+  const acceptedPrice = acceptedQuote.price != null ? Number(acceptedQuote.price) : null;
+  const priceSuffix = acceptedPrice != null ? ` — $${acceptedPrice.toLocaleString()}` : "";
+  const locationSuffix = city ? ` in ${city}` : "";
+  const pushBody = `New ${primaryService} estimate accepted${locationSuffix}${priceSuffix}.`;
+  const inAppBody = `${customerName} accepted your estimate${locationSuffix}${priceSuffix}.`;
   void sendPushToOrg(acceptedQuote.org_id as string, {
     title: "Estimate Accepted",
-    body: `${customerName} accepted your estimate${locationSuffix}.`,
+    body: pushBody,
     data: { screen: "lead", id: acceptedQuote.lead_id as string }
   });
   void admin
@@ -206,9 +218,9 @@ export async function POST(request: Request, { params }: Props) {
       org_id: acceptedQuote.org_id,
       type: "ESTIMATE_ACCEPTED",
       title: "Estimate Accepted",
-      body: `${customerName} accepted your estimate${locationSuffix}.`,
-      screen: "quotes",
-      screen_params: { id: acceptedQuote.id as string }
+      body: inAppBody,
+      screen: "lead",
+      screen_params: { id: acceptedQuote.lead_id as string }
     })
     .then(null, (err: unknown) => console.warn("notification insert failed:", err));
 

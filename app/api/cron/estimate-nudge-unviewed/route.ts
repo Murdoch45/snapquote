@@ -69,10 +69,13 @@ export async function GET(request: Request) {
 
       const quoteUrl = publicId ? buildQuoteLink(publicId) : `${getAppUrl()}/app/quotes`;
 
-      // Push notification (no preference flag — this is a soft nudge).
+      // Audit 12 H3 — push body must not contain the customer's name.
+      // Lock-screen previews surface this text to anyone holding the
+      // phone. Generic body for the push; the contractor-facing in-app
+      // feed entry keeps the customer name because it's auth-gated.
       void sendPushToOrg(orgId, {
         title: "Estimate not opened yet",
-        body: `${customerName} hasn't opened your estimate. A quick follow-up usually does the trick.`,
+        body: "A customer hasn't opened your estimate. Tap to follow up.",
         data: { screen: "quotes" }
       });
 
