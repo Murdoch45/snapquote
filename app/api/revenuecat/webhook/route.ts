@@ -12,6 +12,12 @@ import { claimWebhookEvent, releaseWebhookEvent } from "@/lib/webhookEvents";
 import type { OrgPlan } from "@/lib/types";
 
 export const runtime = "nodejs";
+// Audit 7 H4 — INITIAL_PURCHASE / RENEWAL / PRODUCT_CHANGE each run
+// setOrganizationPlan + resetOrganizationCredits + (conditional trial
+// writes) + iap_subscription_events insert + email sends. Default
+// timeout (10s Hobby / 60s Pro) can kill the handler mid-write; the
+// webhook_events claim then prevents a retry from completing the writes.
+export const maxDuration = 60;
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 

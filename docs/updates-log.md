@@ -7,6 +7,42 @@ This file is append-only. Every session, every meaningful fix, finding, or decis
 
 ---
 
+## Session — May 11, 2026 — Audit 7 (Web Stack & Backend) fix pass [Source: Claude Code]
+
+User-prioritized subset of the read-only Audit 7 (same date, earlier) shipped: H1, H2, H4, M3, M7, L1. M6 dropped because live verification at HEAD showed the audit doc was wrong — the upgrade-email calls in `app/api/stripe/webhook/route.ts` are already at the end of each handler. H3, H5, M1, M2, M4, M5, L2/L3/L4 deferred per user triage (code-consistency, infra, multi-day, or no-action items).
+
+**Live re-verification before each fix:**
+- H1 — `app/api/public/quote/[publicId]/route.ts:1-7`, `accept/route.ts:1-12`, `viewed/route.ts:1-3` confirmed no `rateLimit` import. `_request` parameter renamed to `request` for IP read. ✅
+- H2 — `app/api/public/auth/mobile-handoff/route.ts:1-4` confirmed no `rateLimit` import. `verified.userId` available post-`verifySupabaseJWT(bearer)`. ✅
+- H4 — `app/api/stripe/webhook/route.ts:18` and `revenuecat/webhook/route.ts:14` confirmed `runtime = "nodejs"` + no `maxDuration` export. ✅
+- M3 — `app/api/public/auth/bootstrap/route.ts:1-3` confirmed no `rateLimit` import; Turnstile + cookie-session-only gating. ✅
+- M6 — `app/api/stripe/webhook/route.ts:288` (handleCheckoutCompleted), `:336` (handleSubscriptionChanged), `:394` (handleInvoicePaid), `:439` (handleSubscriptionDeleted) — all 4 `void sendPlan*Email(...)` calls verified to be the LAST statement in their containing handler/conditional, AFTER every DB write. Audit doc claimed "fires before later writes complete"; live state contradicts. SKIP. ❌
+- M7 — `app/api/cron/estimate-nudge-unviewed/route.ts:69` — confirmed literal `"https://snapquote.us/app/quotes"` (not line 80 per audit doc; line position drifted; literal still there). `lib/utils.ts:9-11` confirms `getAppUrl()` exports `(process.env.NEXT_PUBLIC_APP_URL ?? "https://snapquote.us").replace(/\/$/, "")`. ✅
+- L1 — `tsconfig.json:1-28` confirmed no `forceConsistentCasingInFileNames`. ✅
+
+**Fixes applied:**
+- H1 — Added `getClientIp` + `rateLimit` import to all 3 quote routes; rate-limit check at top of each handler, before any DB call. Keys + caps:
+  - GET `public-quote-read:${ip}:${publicId}` 60/hr
+  - POST accept `public-quote-accept:${ip}:${publicId}` 5/hr
+  - POST viewed `public-quote-viewed:${ip}:${publicId}` 60/hr
+  - 429 with "Too many requests. Please try again later." Match the `lead-submit/route.ts:48` pattern.
+- H2 — Added rate limit AFTER `verifySupabaseJWT(bearer)` so `verified.userId` is the bucket key (token refresh can't reset the counter):
+  - `Promise.all([rateLimit('handoff:user:${userId}', 6, ONE_HOUR_MS), rateLimit('handoff:ip:${ip}', 15, ONE_HOUR_MS)])` — both gates must pass. Matches `forgot-password/route.ts:28-31`.
+- H4 — Added `export const maxDuration = 60;` directly under `export const runtime = "nodejs";` in both webhook files. Comment block explains the multi-write timeout risk.
+- M3 — Added `rateLimit('bootstrap:user:${user.id}', 5, ONE_HOUR_MS)` AFTER Turnstile + `auth.getUser()` in `bootstrap/route.ts:45-52`, before the `ensureOrganizationMembershipForUser` call.
+- M7 — Replaced the literal `"https://snapquote.us/app/quotes"` with `${getAppUrl()}/app/quotes` and added the `import { getAppUrl } from "@/lib/utils"`.
+- L1 — Added `"forceConsistentCasingInFileNames": true` under `compilerOptions` in `tsconfig.json` adjacent to `"strict": true`.
+
+**Verification:**
+- `npm run typecheck`: 0 errors. The L1 tsconfig change did NOT surface any pre-existing case-mismatched imports (which the audit doc had warned was possible).
+- `git diff --stat` reports 9 source files + tsconfig.json + tsconfig.tsbuildinfo touched, 108 insertions / 5 deletions.
+
+**Stale audit doc entries flagged (historical-but-superseded, NOT edited per lane rule):**
+- `docs/audit-7-web-backend-2026-05-11.md` M6 section described `sendPlanUpgradedEmail` calls firing before later writes complete. Live state at HEAD: emails already correctly positioned. Audit doc dated 2026-05-11 18:09 PT (commit `71a62fe`); not re-verified at the very latest HEAD before claiming "fires before". Tagged for future-me: read every handler end-to-end before flagging email-ordering issues.
+- Notion to-do PW-A7-M7 said the literal was at line 80 — actual line is 69. Cosmetic drift; doc not edited.
+
+---
+
 ## Session — May 11, 2026 — Audit 7 (Web Stack & Backend) READ-ONLY [Source: Claude Code]
 
 Read-only audit at HEAD `1d6e834` (web). Fresh worktree off origin/main to avoid disturbing other agents' uncommitted work in the primary checkout. Findings page + to-dos saved to Notion (Bugs & Fixes + Pending Work). No code, schema, or data changed.

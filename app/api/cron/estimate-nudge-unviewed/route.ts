@@ -6,6 +6,7 @@ import { sendPushToOrg } from "@/lib/pushNotifications";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { buildQuoteLink } from "@/lib/quote-template";
 import { isAuthorizedBearer } from "@/lib/auth/timingSafeBearer";
+import { getAppUrl } from "@/lib/utils";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -66,7 +67,7 @@ export async function GET(request: Request) {
         }
       }
 
-      const quoteUrl = publicId ? buildQuoteLink(publicId) : "https://snapquote.us/app/quotes";
+      const quoteUrl = publicId ? buildQuoteLink(publicId) : `${getAppUrl()}/app/quotes`;
 
       // Push notification (no preference flag — this is a soft nudge).
       void sendPushToOrg(orgId, {

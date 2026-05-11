@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { computeEffectiveQuoteStatus } from "@/lib/quoteExpiry";
 import type { QuoteStatus } from "@/lib/quoteStatus";
 import { invalidateAnalytics } from "@/lib/db";
+import { getClientIp } from "@/lib/ip";
+import { rateLimit } from "@/lib/rateLimit";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { publicQuoteExpiry } from "@/lib/quoteExpiry";
 
@@ -9,8 +11,24 @@ type Props = {
   params: Promise<{ publicId: string }>;
 };
 
-export async function GET(_request: Request, { params }: Props) {
+// Audit 7 H1 — per-IP cap on public quote reads. A leaked link otherwise
+// allows unlimited scraping of pricing + customer-name + address-full.
+// Keyed on (ip, publicId) so a contractor sharing a link from an office
+// IP doesn't get blocked by an unrelated visitor.
+const ONE_HOUR_MS = 60 * 60 * 1000;
+const QUOTE_READ_RATE_LIMIT = 60;
+
+export async function GET(request: Request, { params }: Props) {
   const { publicId } = await params;
+
+  const ip = getClientIp(request);
+  if (!(await rateLimit(`public-quote-read:${ip}:${publicId}`, QUOTE_READ_RATE_LIMIT, ONE_HOUR_MS))) {
+    return NextResponse.json(
+      { error: "Too many requests. Please try again later." },
+      { status: 429 }
+    );
+  }
+
   const admin = createAdminClient();
 
   const { data: quote, error: quoteError } = await admin
