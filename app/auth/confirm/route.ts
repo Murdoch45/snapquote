@@ -16,10 +16,15 @@ function safeNextPath(value: string | null): string {
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const tokenHash = url.searchParams.get("token_hash");
+  // "magiclink" is used by the mobile-handoff flow (Audit 1 H3) — the
+  // /api/public/auth/mobile-handoff endpoint mints a magiclink token and
+  // routes mobile→web traffic through this handler to set session cookies
+  // without ever putting a refresh token in a URL fragment.
   const type = url.searchParams.get("type") as
     | "recovery"
     | "signup"
     | "email"
+    | "magiclink"
     | null;
   const next = safeNextPath(url.searchParams.get("next"));
 
