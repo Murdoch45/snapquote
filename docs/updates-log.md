@@ -3,6 +3,24 @@
 > ⚠️ **FOR REFERENCE ONLY — DO NOT TREAT AS GROUND TRUTH.**
 > Always verify against the actual codebase before acting on anything here.
 
+### 2026-05-12 [Source: Claude Code] — AASA: remove /auth/confirm so password reset stays in Safari
+
+Murdoch tested the Build 20 password-reset flow on TestFlight today and the bug from PW-B19-6 was still present: tapping the reset link in email on an iPhone with SnapQuote installed routed into the app, the app failed to land on the reset-password screen, and the user ended up wherever they were (home tab if signed-in, login if signed-out). No Sentry events captured. The Build 20 fix — adding a real Expo Router route at `mobile app/auth/confirm.tsx` (Option B per the audit) — did not solve the underlying problem. Web-only reset path (tested by deleting the app and using Safari) works correctly.
+
+Per Murdoch's call: stop routing password reset through the mobile app entirely. Adopt the Slack / Notion / Linear / Discord pattern — let the email link open in Safari, web handles the OTP, user returns to the app and signs in with the new password.
+
+**Change shipped:** [`app/.well-known/apple-app-site-association/route.ts:12-28`](../app/.well-known/apple-app-site-association/route.ts) — removed `/auth/confirm` and `/auth/confirm?*` from the AASA paths array. AASA now declares only `/invite/*`, `/stripe-return`, and `/stripe-return?*`. iOS Universal Links no longer claim the password-reset URL on devices with the app installed.
+
+**Not changed:**
+- `mobile app/auth/confirm.tsx` (the Expo Router route added in Build 20) intentionally left on disk. It won't be reached because iOS no longer hands the URL to the app. Cleanup deferred.
+- `mobile app/_layout.tsx` deep-link handler unchanged — it no longer mentions `/auth/confirm` after the Build 20 fix.
+- Web forgot-password email body at `app/api/public/auth/forgot-password/route.ts:51` unchanged — URL still points at `https://snapquote.us/auth/confirm?token_hash=…`. The web reset page at `app/(public)/reset-password/page.tsx` already handles the recovery token via the `sq-pwr` HttpOnly cookie pattern.
+- `/invite/*` and `/stripe-return` AASA entries retained — those flows DO need to route through the app and are not affected by this change.
+
+**No mobile rebuild required.** This is a web-only change that takes effect the moment Vercel deploys; Build 20 already installed on Murdoch's TestFlight device picks up the new AASA on next AASA-cache refresh (24h max — see the `Cache-Control: public, max-age=3600` header at the AASA route handler — or sooner via "Reinstall app" / "Toggle app's universal links in iOS Settings" if Murdoch wants to test immediately).
+
+
+
 ### 2026-05-11 [Source: Claude Code] — Build 20 fix pass: PW-B19-1, B19-5, B19-7 (web)
 
 Shipped the web side of the Build 20 fix pass against the 7 findings surfaced from Build 19 TestFlight testing (full audit at [`docs/audit-build-19-findings-2026-05-11.md`](audit-build-19-findings-2026-05-11.md)).
