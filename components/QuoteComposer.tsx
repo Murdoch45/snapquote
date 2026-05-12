@@ -257,17 +257,23 @@ export function QuoteComposer({
     }
   };
 
+  // Build 20 (PW-B19-1): coerce send-channel choices against what the
+  // customer actually has on file. The toggles' `disabled` attribute
+  // (rendered below) prevents user clicks, but the persisted contractor
+  // preference (estimate_send_text=true is common) keeps the underlying
+  // boolean true — so a phone-less lead hit the old `sendText && !phone`
+  // guard with the misleading "No customer phone number available" error.
+  // Effective channels = persisted preference AND a corresponding contact.
+  // Persisted preference is left untouched so the contractor's "always
+  // send by text" choice survives across leads that DO have a phone.
+  const effectiveSendEmail = sendEmail && Boolean(contactEmail);
+  const effectiveSendText = sendText && Boolean(contactPhone);
+
   const onSend = async () => {
-    if (!sendEmail && !sendText) {
-      toast.error("Select email, text, or both before sending.");
-      return;
-    }
-    if (sendEmail && !contactEmail) {
-      toast.error("No customer email available.");
-      return;
-    }
-    if (sendText && !contactPhone) {
-      toast.error("No customer phone number available.");
+    if (!effectiveSendEmail && !effectiveSendText) {
+      toast.error(
+        "This customer didn't provide a phone or email. Add one before sending."
+      );
       return;
     }
 
@@ -282,8 +288,8 @@ export function QuoteComposer({
           estimatedPriceLow: priceRange.low,
           estimatedPriceHigh: priceRange.high,
           message,
-          sendEmail,
-          sendText
+          sendEmail: effectiveSendEmail,
+          sendText: effectiveSendText
         })
       });
       const json = await res.json();
@@ -489,7 +495,7 @@ export function QuoteComposer({
               <div className="flex flex-wrap gap-6">
                 <label className="flex items-center gap-2 text-sm">
                   <Checkbox
-                    checked={sendEmail}
+                    checked={effectiveSendEmail}
                     disabled={!contactEmail}
                     onCheckedChange={(checked) => toggleEmail(checked === true)}
                   />
@@ -497,7 +503,7 @@ export function QuoteComposer({
                 </label>
                 <label className="flex items-center gap-2 text-sm">
                   <Checkbox
-                    checked={sendText}
+                    checked={effectiveSendText}
                     disabled={!contactPhone}
                     onCheckedChange={(checked) => toggleText(checked === true)}
                   />

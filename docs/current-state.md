@@ -6,6 +6,10 @@
 > The audit session content (April 15–20, 2026) is the most reliable portion.
 > Older sections carry more uncertainty.
 
+## Build 20 fix pass (web) — 2026-05-11 [Source: Claude Code]
+
+Three web-side fixes shipped against the Build 19 TestFlight findings audit (see [`docs/audit-build-19-findings-2026-05-11.md`](audit-build-19-findings-2026-05-11.md)): per-channel coercion in `QuoteComposer.tsx` so contractors can email phone-less leads (PW-B19-1); `/auth/callback` removed from AASA so iOS no longer hijacks web Apple Sign In into the installed app (PW-B19-5, Option A per Murdoch); dispatch-side dedup in `lib/pushNotifications.ts` so duplicate `push_tokens` rows don't produce N×push deliveries (PW-B19-7). Full per-finding rationale in [`docs/updates-log.md`](updates-log.md).
+
 ---
 
 ## Audit 12 (notifications) fix pass — web — 2026-05-11 [Source: Claude Code]

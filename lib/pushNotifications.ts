@@ -85,9 +85,21 @@ export async function sendPushToOrg(
     return { sent: 0, cleanedUp: 0 };
   }
 
-  const tokens = rows
-    .map((row) => (row.expo_push_token as string | null) ?? "")
-    .filter(Boolean);
+  // Build 20 (PW-B19-7): dedupe by expo_push_token value before dispatch.
+  // push_tokens has independent rows per (user_id, device_id, org_id) so the
+  // same physical device's token can appear N times when the same iPhone has
+  // been signed-in to N test accounts in the same org (or N orgs the user
+  // belongs to). Without dedup the dispatch loop builds N identical messages
+  // and Expo delivers N copies of the same push to one device. Murdoch saw
+  // 3× pushes on his test device — live query showed one expo_push_token
+  // value duplicated across 6 rows / 4 users / 4 orgs / 6 device_ids.
+  const tokens = Array.from(
+    new Set(
+      rows
+        .map((row) => (row.expo_push_token as string | null) ?? "")
+        .filter(Boolean)
+    )
+  );
 
   if (tokens.length === 0) return { sent: 0, cleanedUp: 0 };
 

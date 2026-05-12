@@ -3,6 +3,20 @@
 > ⚠️ **FOR REFERENCE ONLY — DO NOT TREAT AS GROUND TRUTH.**
 > Always verify against the actual codebase before acting on anything here.
 
+### 2026-05-11 [Source: Claude Code] — Build 20 fix pass: PW-B19-1, B19-5, B19-7 (web)
+
+Shipped the web side of the Build 20 fix pass against the 7 findings surfaced from Build 19 TestFlight testing (full audit at [`docs/audit-build-19-findings-2026-05-11.md`](audit-build-19-findings-2026-05-11.md)).
+
+- **PW-B19-1 (estimate send blocked on phone-less leads).** `components/QuoteComposer.tsx:260-314` — introduced derived booleans `effectiveSendEmail = sendEmail && Boolean(contactEmail)` and `effectiveSendText = sendText && Boolean(contactPhone)`. The `onSend` handler reads effective channels, the misleading per-channel "no phone/email" toasts were removed in favor of a single "Add one before sending" guard, and the POST body to `/api/app/quote/send` now passes the effective flags. The delivery `<Checkbox>` controls at `:490-505` were rebound to `checked={effectiveSendEmail}` / `checked={effectiveSendText}` so the visual state matches the effective state instead of the persisted contractor preference. Persisted preferences (`estimate_send_email/text` on `contractor_profile`) are left untouched — coercion happens only at render+send time so a contractor's "always SMS" preference survives the rare phone-less lead. Server-side guard at `app/api/app/quote/send/route.ts:80-81` stays unchanged as defense in depth (post-fix it should never fire because the client will never POST `sendText=true` when phone is missing).
+
+- **PW-B19-5 (Apple SIWA on web hijacked into installed app).** `app/.well-known/apple-app-site-association/route.ts:12-21` — removed `/auth/callback` and `/auth/callback?*` from the AASA paths array. iOS Universal Links will no longer intercept the Supabase Apple OAuth redirect; the existing PKCE handler at `app/auth/callback/route.ts` completes the session in Safari and routes to `/app`. Native mobile Apple sign-in (via the `AppleAuthentication` SDK) is unaffected — that path never hit `/auth/callback`. `/auth/confirm` + `/invite/*` + `/stripe-return` remain in AASA. Murdoch chose Option A from the audit ("AASA-removal path") for this finding.
+
+- **PW-B19-7 (3× duplicate push notifications on Murdoch's test device).** Live Supabase query (against project `upqvbdldoyiqqshxquxa`) showed 6 rows in `push_tokens` ALL sharing the same `expo_push_token` value `ExponentPushToken[Qdl5jCK6k8eC1-6FjBS4Ds]` across 4 user_ids / 4 org_ids / 6 device_ids — Murdoch's iPhone re-registered under multiple test accounts. Test org `8f939f96-7f92-4973-97f8-f08450ccb71f` alone holds 3 of those rows (1 user, 1 token, 3 device_ids). `lib/pushNotifications.ts:88-90` dispatch loop was iterating each row independently, producing N copies of the same Expo push to one physical device. Fix: dedupe by token value via `Array.from(new Set(...))` before building the Expo message batch. No data backfill; the dispatch-side guard fixes the user-facing symptom regardless of how the duplicate rows accumulate.
+
+Build 19 device-level verification (mobile fixes) deferred to the next EAS production build. Web live-verification will follow Vercel auto-deploy on push (AASA endpoint, `/api/app/quote/send` Sentry counts, forgot-password URL well-formed) — see audit doc Live Verification section.
+
+
+
 This file is append-only. Every session, every meaningful fix, finding, or decision gets logged here in order. Nothing is ever edited or removed.
 
 ---
