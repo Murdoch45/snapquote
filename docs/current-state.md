@@ -6,6 +6,12 @@
 > The audit session content (April 15–20, 2026) is the most reliable portion.
 > Older sections carry more uncertainty.
 
+## Pacific Edge Property Care demo org seeded — 2026-05-12 [Source: Claude Code]
+
+Production Supabase org `5418e6b8-47c8-4365-b2b7-354224f4909d` ("Pacific Edge Property Care", slug `pacific-edge-property-care`, BUSINESS plan, 100 monthly_credits, 0 bonus, owner `jose@pacificedgepropertycare.com`) seeded with 10 fully-AI-processed unlocked leads + DRAFT quotes for marketing/recording. Real AI estimator ran server-side on each lead via `/api/internal/run-estimator` (same code path the public lead-submit handler hits through the Edge Function). One-off seed: [`scripts/seed-demo-leads.ts`](../scripts/seed-demo-leads.ts) — safe to delete post-recording. Org is real prod data and counts in analytics (no `is_test` flag exists; per Audit 4).
+
+---
+
 ## Build 20 fix pass (web) — 2026-05-11 [Source: Claude Code]
 
 Three web-side fixes shipped against the Build 19 TestFlight findings audit (see [`docs/audit-build-19-findings-2026-05-11.md`](audit-build-19-findings-2026-05-11.md)): per-channel coercion in `QuoteComposer.tsx` so contractors can email phone-less leads (PW-B19-1); `/auth/callback` removed from AASA so iOS no longer hijacks web Apple Sign In into the installed app (PW-B19-5, Option A per Murdoch); dispatch-side dedup in `lib/pushNotifications.ts` so duplicate `push_tokens` rows don't produce N×push deliveries (PW-B19-7). Full per-finding rationale in [`docs/updates-log.md`](updates-log.md).
