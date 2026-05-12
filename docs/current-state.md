@@ -6,6 +6,12 @@
 > The audit session content (April 15–20, 2026) is the most reliable portion.
 > Older sections carry more uncertainty.
 
+## Landing-page "How it works" screen recordings shipped — 2026-05-12 [Source: Claude Code]
+
+Public landing page at `/` now plays 4 silent autoplaying loops in the "How it works" phone frames instead of placeholder dashed-text labels. Videos live at `public/videos/landing/step-{1,2,3,4}.mp4` (8.8 MB total). `PhoneFrame` in [`app/(public)/page.tsx`](../app/%28public%29/page.tsx) extended with an optional `videoSrc` prop — when set, renders `<video autoPlay loop muted playsInline preload="metadata" className="absolute inset-0 h-full w-full object-cover">` inside the existing `aspect-[256/520]` rounded-[28px] container, falling back to the placeholder dashed-text rendering when absent (kept so the component stays reusable). The notch element is omitted when video is rendering so it doesn't sit on top of the recording. Step 2 (browser-recorded customer form) has a different aspect ratio than the other three — `object-cover` crops to fit. No layout/spacing/alternating-arrangement changes. `npx tsc --noEmit` clean.
+
+---
+
 ## Pacific Edge Property Care demo org seeded — 2026-05-12 [Source: Claude Code]
 
 Production Supabase org `5418e6b8-47c8-4365-b2b7-354224f4909d` ("Pacific Edge Property Care", slug `pacific-edge-property-care`, BUSINESS plan, 100 monthly_credits, 0 bonus, owner `jose@pacificedgepropertycare.com`) seeded with 10 fully-AI-processed unlocked leads + DRAFT quotes for marketing/recording. Real AI estimator ran server-side on each lead via `/api/internal/run-estimator` (same code path the public lead-submit handler hits through the Edge Function). One-off seed: [`scripts/seed-demo-leads.ts`](../scripts/seed-demo-leads.ts) — safe to delete post-recording. Org is real prod data and counts in analytics (no `is_test` flag exists; per Audit 4).
