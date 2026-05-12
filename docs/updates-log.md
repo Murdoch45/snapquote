@@ -3,6 +3,48 @@
 > ⚠️ **FOR REFERENCE ONLY — DO NOT TREAT AS GROUND TRUTH.**
 > Always verify against the actual codebase before acting on anything here.
 
+### 2026-05-12 [Source: Claude Code] — Seeded Pacific Edge Property Care demo org with 10 AI-processed unlocked leads
+
+Murdoch needed a fresh, fully-populated contractor org in production to record landing-page content and tutorial screen recordings against — without the seedDemo.ts shortcut of pre-baking fake AI estimates. Goal: every lead must go through the real AI estimator pipeline server-side, no fake `ai_estimate_low/high`.
+
+**What landed in production**
+
+- New auth user `jose@pacificedgepropertycare.com` (uid `d6da7b22-af25-464c-9247-9f7f7f2fb752`, email_confirm=true). Password reset to a fresh value via `scripts/seed-reset-password.ts` and printed to Murdoch.
+- New org `5418e6b8-47c8-4365-b2b7-354224f4909d` — "Pacific Edge Property Care", slug `pacific-edge-property-care`, plan `BUSINESS`, `monthly_credits=100`, `bonus_credits=0`, `credits_reset_at=2026-06-11T19:51:06Z`, `onboarding_completed=true`.
+- `organization_members` row: `(d6da7b22-af25-464c-9247-9f7f7f2fb752, OWNER)`.
+- `contractor_profile` row: public_slug `pacific-edge-property-care`, business HQ `1230 W Olympic Blvd, Los Angeles, CA 90015` (lat 34.0407, lng -118.2667), services `[Pressure Washing, Lawn Care / Maintenance, Landscaping / Installation]`, `notification_lead_sms/email=false` so seed didn't generate 10 push/email/SMS hits on jose during the run, `email_verified=true`, `mobile_contractor=true`.
+- 10 leads (7 pressure washing, 3 lawn care) submitted via direct service-role inserts that exactly mirror the public `/api/public/lead-submit` payload shape (same `${orgId}/${tempLeadId}/${randomUUID()}.webp` storage convention, same lead_photos upsert with `(lead_id, storage_path)` unique constraint). Photos uploaded into the `lead-photos` Supabase Storage bucket from the unzipped `snapquote-seed-leads.zip` manifest folders. 26 photos total (9 leads × 2 + lead 10 × 8 = 26), all visible to `leads_safe` reads.
+- AI estimator fired server-side on every lead via `POST https://snapquote.us/api/internal/run-estimator` with `x-internal-secret` (skipping the Supabase Edge Function indirection because the .env.local service-role key is `sb_secret_`-format and the Edge Function's JWT validator rejects it; the internal endpoint IS the same code that runs after the Edge Function trampoline). All 10 leads ended at `ai_status='ready'` with real AI-generated `ai_estimate_low`/`ai_estimate_high`/`ai_suggested_price`/`service_category`/`job_city`/`job_state`/`job_zip` etc. Final price ranges (low–high): Daniel Reyes 425–525, Jessica Tran 475–575, Michael Donovan 175–275, Amanda Castillo 500–600, Ryan Mitchell 475–575, Karen Schneider 275–325, Marcus Webb 525–650, Jennifer Park 575–725, David Nguyen 375–475, Robert Sullivan 725–875.
+- 10 `lead_unlocks` rows (direct service-role insert — bypasses the `unlock_lead_with_credits` RPC so credits stay at 100; `lead_unlocks.unlocked_at` defaults to now()) + 10 `quotes` rows in `DRAFT` status with the same `(public_id=base64url(12B), price=midpoint-rounded-to-5, message=DEFAULT_ESTIMATE_SMS_TEMPLATE, sent_at=null)` shape `/api/app/leads/unlock` writes. The lead detail page can render the DRAFT estimate URL immediately.
+- `submitted_at` and `ai_generated_at` staggered across the past 36h with unique-minute spacing so the list doesn't look batch-submitted. Oldest 2026-05-11T10:10Z, newest 2026-05-12T17:16Z.
+
+**Verification (live)**
+
+- Programmatic sign-in with Jose's password against the anon-key client → `leads_safe` returns all 10 rows with `is_unlocked=true`, full customer name/phone visible, `ai_status='ready'`, AI estimates populated. `get_org_credit_row` returns `{plan: BUSINESS, monthly_credits: 100, bonus_credits: 0}`.
+- Supabase MCP counts at HEAD: 10 leads, 10 customers, 10 unlocks, 10 DRAFT quotes, 26 lead_photos, 1 organization_members(OWNER), 1 contractor_profile.
+- Sentry events past 2h tagged `org_id:5418e6b8-...` or in `lead-submit`/`lead-photo-upload`/`estimator` areas: zero. Confirms the seed didn't ride any production code path into a new error.
+
+**Deviations from manifest**
+
+- The AI estimator's geocoding resolved a slightly different ZIP for two addresses with intentionally-randomized house numbers (Daniel Reyes 90069→90046, Marcus Webb 90302→90304). Expected behavior; the address strings remain exactly as the manifest specified. AI-derived `job_state` is "California" (full name) instead of "CA" (abbreviation) — that's whatever Google Geocoding returns and matches how every other lead in prod looks.
+- 3 of the 10 leads completed via the rescue-stuck-leads cron (3-minute schedule) before my direct-trigger second pass landed, because the initial first-run trigger calls returned 401 (sb_secret_ key vs Edge Function JWT validator). End state identical.
+
+**Notable code/data NOT changed**
+
+- No RLS policies, RPC functions, edge functions, migrations, or any shared code paths touched.
+- Existing demo org `bce3a561-...` and falconn dev org `8f939f96-...` not touched.
+- `unlock_lead_with_credits` RPC NOT called (would have decremented credits to 90). Direct `lead_unlocks` insert via service-role is RLS-bypassed and idempotent against the `(org_id, lead_id)` row.
+
+**Artifacts**
+
+- [`scripts/seed-demo-leads.ts`](../scripts/seed-demo-leads.ts) — the primary seed (re-runnable for similar demo orgs). Reads `seed-photos/LEADS.json`, walks `lead-NN/` folders for photos. Comment at top notes "Safe to delete after use" per the brief. Now points the AI trigger at `/api/internal/run-estimator` with `INTERNAL_API_SECRET` rather than the Supabase Edge Function so `sb_secret_`-format service-role keys work locally. The owner password is printed immediately after `auth.admin.createUser` so a mid-run failure no longer loses it.
+- Tactical resume / password-reset / verify scripts I used during the live run were deleted post-seed to keep the repo clean. If a future re-seed needs them again, the patterns are documented above.
+- Unzipped manifest temp dir at `C:\Users\murdo\AppData\Local\Temp\snapquote-seed-20260512-123828` — deleted at end of run. Original zip at `C:\Users\murdo\Downloads\snapquote-seed-leads.zip` left untouched.
+
+App Review safety: zero changes to shared production code paths. Org/leads/photos created cleanly inside the new tenant.
+
+---
+
 ### 2026-05-12 [Source: Claude Code] — AASA: remove /auth/confirm so password reset stays in Safari
 
 Murdoch tested the Build 20 password-reset flow on TestFlight today and the bug from PW-B19-6 was still present: tapping the reset link in email on an iPhone with SnapQuote installed routed into the app, the app failed to land on the reset-password screen, and the user ended up wherever they were (home tab if signed-in, login if signed-out). No Sentry events captured. The Build 20 fix — adding a real Expo Router route at `mobile app/auth/confirm.tsx` (Option B per the audit) — did not solve the underlying problem. Web-only reset path (tested by deleting the app and using Safari) works correctly.
