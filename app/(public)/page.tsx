@@ -28,6 +28,7 @@ type Step = {
   title: string;
   body: string;
   mediaLabel: string;
+  videoSrc: string;
 };
 
 const STEPS: Step[] = [
@@ -35,25 +36,29 @@ const STEPS: Step[] = [
     num: "01",
     title: "Share your link",
     body: "Drop your personal SnapQuote link in a text, share it on social media, or put it in your bio.",
-    mediaLabel: "Screen recording — share link"
+    mediaLabel: "Screen recording — share link",
+    videoSrc: "/videos/landing/step-1.mp4"
   },
   {
     num: "02",
     title: "Customer tells you about the job",
     body: "They open the link and answer a few questions about what they need. Takes them under a minute.",
-    mediaLabel: "Screen recording — customer flow"
+    mediaLabel: "Screen recording — customer flow",
+    videoSrc: "/videos/landing/step-2.mp4"
   },
   {
     num: "03",
     title: "Get an instant estimate with the price",
     body: "Our AI tools build a complete estimate using property data and the customer's answers. You see it before they do.",
-    mediaLabel: "Screen recording — estimate built"
+    mediaLabel: "Screen recording — estimate built",
+    videoSrc: "/videos/landing/step-3.mp4"
   },
   {
     num: "04",
     title: "Send it or pass",
     body: "Worth your time? Send. Not worth driving across town for? Pass. Your call, every time.",
-    mediaLabel: "Screen recording — send or pass"
+    mediaLabel: "Screen recording — send or pass",
+    videoSrc: "/videos/landing/step-4.mp4"
   }
 ];
 
@@ -73,24 +78,43 @@ function GradientText({ children }: { children: React.ReactNode }) {
   );
 }
 
-function PhoneFrame({ label }: { label: string }) {
+function PhoneFrame({ label, videoSrc }: { label: string; videoSrc?: string }) {
   return (
     <div className="relative z-[1] aspect-[256/520] w-[256px] rounded-[36px] bg-[#0B0E14] p-2 shadow-[0_24px_48px_-16px_rgba(11,14,20,0.22),0_2px_6px_rgba(11,14,20,0.06),0_0_0_1px_rgba(11,14,20,0.04)] lg:w-[280px]">
       <div
         className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-[28px]"
-        style={{
-          backgroundColor: "#F2F4F8",
-          backgroundImage:
-            "repeating-linear-gradient(135deg, #F2F4F8 0 14px, rgba(11,14,20,0.025) 14px 15px)"
-        }}
+        style={
+          videoSrc
+            ? { backgroundColor: "#0B0E14" }
+            : {
+                backgroundColor: "#F2F4F8",
+                backgroundImage:
+                  "repeating-linear-gradient(135deg, #F2F4F8 0 14px, rgba(11,14,20,0.025) 14px 15px)"
+              }
+        }
       >
-        <div className="absolute left-1/2 top-[10px] h-6 w-[90px] -translate-x-1/2 rounded-xl bg-[#0B0E14]" />
-        <div
-          className="max-w-[80%] rounded-md border border-dashed border-[rgba(11,14,20,0.45)] px-3 py-1.5 text-center text-[11px] font-medium uppercase leading-[1.4] tracking-[0.08em] text-[rgba(11,14,20,0.45)]"
-          style={{ fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}
-        >
-          {label}
-        </div>
+        {videoSrc ? (
+          <video
+            src={videoSrc}
+            aria-label={label}
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="metadata"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        ) : (
+          <>
+            <div className="absolute left-1/2 top-[10px] h-6 w-[90px] -translate-x-1/2 rounded-xl bg-[#0B0E14]" />
+            <div
+              className="max-w-[80%] rounded-md border border-dashed border-[rgba(11,14,20,0.45)] px-3 py-1.5 text-center text-[11px] font-medium uppercase leading-[1.4] tracking-[0.08em] text-[rgba(11,14,20,0.45)]"
+              style={{ fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}
+            >
+              {label}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
@@ -246,7 +270,7 @@ export default function HomePage() {
                     </p>
                   </div>
                   <div className={cn("flex justify-center", flip ? "lg:order-1" : "")}>
-                    <PhoneFrame label={step.mediaLabel} />
+                    <PhoneFrame label={step.mediaLabel} videoSrc={step.videoSrc} />
                   </div>
                 </div>
               );

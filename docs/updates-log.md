@@ -3,6 +3,42 @@
 > ⚠️ **FOR REFERENCE ONLY — DO NOT TREAT AS GROUND TRUTH.**
 > Always verify against the actual codebase before acting on anything here.
 
+### 2026-05-12 [Source: Claude Code] — Landing-page "How it works" phone-frame placeholders swapped for real screen recordings
+
+The public marketing landing page at `/` had four phone-frame placeholders in the mobile "How it works" section rendering dashed-text labels ("Screen recording — share link", "Screen recording — customer flow", etc.). Murdoch shipped four polished step recordings cut from a real contractor signup → share-link → customer flow → estimate → send-or-pass walkthrough and asked to swap them in.
+
+**What changed**
+
+- Added `public/videos/landing/step-{1,2,3,4}.mp4` — copied from `C:\Users\murdo\SnapQuote Misc\Screen Recordings Finished\Step {1,2,3,4}.mp4`. Sizes: 1.06 MB / 2.34 MB / 2.64 MB / 2.43 MB (8.5 MB total). Step 2 is a browser-recorded customer-facing flow with a slightly different aspect ratio than the other three (phone screen recordings); `object-cover` crops cleanly to fit.
+- Extended the inline `PhoneFrame` component in [`app/(public)/page.tsx`](../app/%28public%29/page.tsx) to accept an optional `videoSrc?: string` prop alongside the existing `label`. When `videoSrc` is provided, the frame renders `<video src={videoSrc} aria-label={label} autoPlay loop muted playsInline preload="metadata" className="absolute inset-0 h-full w-full object-cover">` instead of the dashed-text placeholder. The notch element is also suppressed in the video case so it doesn't sit on top of the recording. The fallback placeholder rendering is kept intact for the no-`videoSrc` path so the component stays reusable elsewhere.
+- Extended the `Step` type with a `videoSrc: string` field; populated each of the 4 step records with `/videos/landing/step-{n}.mp4`. Call site in the `STEPS.map(...)` block now passes `videoSrc={step.videoSrc}`.
+- The existing aspect-locked `aspect-[256/520]` (mobile) / `lg:w-[280px]` (desktop) rounded-[28px] container is unchanged — layout, spacing, alternating left/right grid arrangement, connector line, and step typography are all untouched.
+
+**Why these specific `<video>` attributes**
+
+- `autoPlay` + `muted` + `playsInline` is the three-attribute combo required to make videos autoplay on iOS Safari and modern mobile Chrome/Firefox. Drop `muted` and most mobile browsers will refuse autoplay; drop `playsInline` and iOS Safari will hijack into fullscreen the moment playback starts.
+- `loop` so the 5-15s recordings replay continuously.
+- `preload="metadata"` so the browser fetches just the first few KB to know dimensions/duration on initial page load — the full 1-3 MB body only streams when each frame scrolls into view, keeping the landing-page first-paint cheap.
+- No `controls` attribute — silent looping background visual, not a clickable player.
+- `aria-label={label}` carries the human-readable "Screen recording — share link" text for screen readers (the recordings have no audio).
+
+**Nothing broken**
+
+- Existing CTA button routes and `/signup` `/login` links untouched.
+- Desktop `ProductDemo` (the interactive demo above the 4-step section, `lg:` only) untouched.
+- Meta Pixel + GA4 + CompleteRegistration tracking in `app/layout.tsx` / `app/(public)/signup/page.tsx` untouched.
+- Favicon, metadata, sitemap untouched.
+- 4-step section layout, vertical spacing, alternating left/right grid, connector line, step number typography all preserved by working through the existing `PhoneFrame` container.
+
+**Verification**
+
+- `npx tsc --noEmit` → exit 0, zero errors at HEAD.
+- Code review: 4 step records each carry a unique `videoSrc`; PhoneFrame call site passes it through; conditional render gates on truthy `videoSrc` so the fallback placeholder path is still reachable for future reuse.
+
+Live-deploy verification (videos play on snapquote.us) deferred until after the push lands on origin/main and Vercel completes the auto-deploy — Murdoch can confirm or I can verify against the live URL in a follow-up.
+
+---
+
 ### 2026-05-12 [Source: Claude Code] — Seeded Pacific Edge Property Care demo org with 10 AI-processed unlocked leads
 
 Murdoch needed a fresh, fully-populated contractor org in production to record landing-page content and tutorial screen recordings against — without the seedDemo.ts shortcut of pre-baking fake AI estimates. Goal: every lead must go through the real AI estimator pipeline server-side, no fake `ai_estimate_low/high`.
