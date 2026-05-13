@@ -3,6 +3,65 @@
 > ⚠️ **FOR REFERENCE ONLY — DO NOT TREAT AS GROUND TRUTH.**
 > Always verify against the actual codebase before acting on anything here.
 
+### 2026-05-12 [Source: Claude Code] — Landing-page screen recordings re-encoded to remove baked-in whitespace inside the phone frame
+
+After the screen recordings landed on origin/main (entry below), Murdoch viewed the live page and reported the videos rendered with substantial empty white space inside the phone mockup frame — the phone frame felt much larger than the visible video content area. They asked me to verify CSS first and re-encode the MP4s only if needed.
+
+**Verification — CSS was already correct**
+
+Inspected the rendered video element via `preview_inspect` against a Next.js dev server running the worktree's build:
+- `class="absolute inset-0 block h-full w-full object-cover object-center"` (added `block` and `object-center` defensively during this fix pass — see code change below)
+- Computed `object-fit: cover` ✓
+- Computed `object-position: 50% 50%` ✓
+- Computed `width: 264px height: 552.75px` (matches the phone-frame inner area on desktop) ✓
+- Computed `position: absolute` ✓
+- Parent container computed `overflow: hidden` ✓ and `background-color: rgb(11,14,20)` (dark — so any empty space would NOT appear as white from the container itself)
+
+CSS was not the problem.
+
+**Root cause — whitespace baked into the source MP4 frames**
+
+Used `ffmpeg-static` (via `npx`) plus a tiny Node PNG scanner (`measure-ws.cjs`) to read each video's first 1–8 frames at full 978×2116 resolution and count rows that are ≥95% white pixels (r,g,b > 240). Min top/bottom across sampled frames:
+
+| video  | min top white  | min bot white  | aspect | source       |
+|--------|----------------|----------------|--------|--------------|
+| step-1 | 247px (11.7%)  | 309px (14.6%)  | 0.462  | phone screen |
+| step-2 | 416px (19.7%)  | 372px (17.6%)  | 0.462  | browser      |
+| step-3 | 420px (19.8%)  | 159px (7.5%)   | 0.462  | phone screen |
+| step-4 | 228px (10.8%)  | 351px (16.6%)  | 0.462  | phone screen |
+
+Phone-frame aspect ratio is 256/520 ≈ 0.492 (close to the 0.462 source aspect), so `object-cover` was correctly filling the frame — but the visible result included the white iPhone status-bar gutter (top) and home-indicator strip (bottom) on the phone screen recordings, and the centered-in-browser whitespace on the browser-recorded step-2.
+
+**Fix — re-encode each video with a per-video crop**
+
+Used the `ffmpeg-static` binary at `node_modules/ffmpeg-static/ffmpeg.exe` with `crop=978:H:0:Y -c:v libx264 -preset medium -crf 23 -pix_fmt yuv420p -movflags +faststart -an`. Per-video crop boxes match the min-whitespace measurements above:
+
+- step-1: `crop=978:1560:0:247` → 978×1560 (aspect 0.627)
+- step-2: `crop=978:1328:0:416` → 978×1328 (aspect 0.736)
+- step-3: `crop=978:1537:0:420` → 978×1537 (aspect 0.636)
+- step-4: `crop=978:1537:0:228` → 978×1537 (aspect 0.636)
+
+Audio dropped (`-an`) since the videos play `muted` anyway. `+faststart` keeps the moov atom at the front so byte-range streaming still works for the lazy `preload="metadata"` strategy. All four ftyp brands are still `isom + iso2 + avc1 + mp41`; codec is still H.264. After re-encode, frame-extraction at t=0 shows: step-1 2.9% top / 2.4% bottom white; step-2 9% / 0%; step-3 0% / 0%; step-4 0% / 0%. The 9% top remaining on step-2 is the conservative-crop residual (I cropped to the *minimum* whitespace across all frames so no content is ever clipped — step-2's at-rest whitespace is 19.7% but t=0 happens to spike to 25%).
+
+**Tradeoff documented for the next person who looks at this**
+
+The new aspect ratios (0.627–0.736) are wider than the phone frame's 0.492, so `object-cover` now fits the HEIGHT of the container and crops the SIDES — losing roughly 12% of the source width per side for step-1/3/4 and 18% for step-2. The mobile-app UI is centered with internal padding, so the visible 240px-wide window in the phone frame still shows the actual screens; the cropped edges drop the iPhone-screen gutters and the browser-viewport whitespace surrounding the centered customer form. This is the right tradeoff per the user's "fill the frame cleanly without empty space" directive. If a future re-record produces tighter recordings (no status bar, browser zoomed to the form), this re-encode can be skipped and the originals dropped back in.
+
+**Code change — defensive CSS clarification**
+
+In [`app/(public)/page.tsx`](../app/%28public%29/page.tsx), the `<video>` element's className changed from `"absolute inset-0 h-full w-full object-cover"` to `"absolute inset-0 block h-full w-full object-cover object-center"`. Adds:
+- `block` — `<video>` defaults to `display: inline` in HTML; with absolute positioning this rarely matters, but block is more predictable.
+- `object-center` — explicit `object-position: center` (default behavior — same as `50% 50%` — but now visible in the class list when reviewing).
+
+**Verification**
+
+- `npx tsc --noEmit` → exit 0.
+- New MP4 atom structure verified via custom Node parser: `ftyp` first, `moov` second (no `uuid` extension atom Canva had embedded), `mdat` last — clean ffmpeg output with proper faststart.
+- Visual confirmation in browser deferred to Murdoch post-deploy: the Chrome MCP environment AND the Playwright instance the Preview MCP wraps both have a stuck media-decode pipeline on H.264 video element loads (readyState stays at 0 with networkState=2 LOADING indefinitely; HTTP fetch of the file works fine). CSS inspection via `preview_inspect` did succeed and confirmed the computed styles.
+- Frame-extraction sanity check via local ffmpeg-static: cropped step-1 t=0 shows the SnapQuote header at the top and the social caption form at the bottom with no visible top white gutter (vs the original which had a 247-row gutter). Similar improvement on the other three.
+
+---
+
 ### 2026-05-12 [Source: Claude Code] — Landing-page "How it works" phone-frame placeholders swapped for real screen recordings
 
 The public marketing landing page at `/` had four phone-frame placeholders in the mobile "How it works" section rendering dashed-text labels ("Screen recording — share link", "Screen recording — customer flow", etc.). Murdoch shipped four polished step recordings cut from a real contractor signup → share-link → customer flow → estimate → send-or-pass walkthrough and asked to swap them in.

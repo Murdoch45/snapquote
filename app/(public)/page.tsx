@@ -102,7 +102,7 @@ function PhoneFrame({ label, videoSrc }: { label: string; videoSrc?: string }) {
             muted
             playsInline
             preload="metadata"
-            className="absolute inset-0 h-full w-full object-cover"
+            className="absolute inset-0 block h-full w-full object-cover object-center"
           />
         ) : (
           <>
