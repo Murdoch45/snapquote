@@ -6,18 +6,18 @@
 > The audit session content (April 15–20, 2026) is the most reliable portion.
 > Older sections carry more uncertainty.
 
-## All 4 landing videos on iOS-native styling (clean status bar + home indicator + per-step centering) — 2026-05-13 [Source: Claude Code]
+## All 4 landing videos on iOS-native styling — 2026-05-13 [Source: Claude Code]
 
-All 4 step videos in [`public/videos/landing/`](../public/videos/landing) render inside the iOS-native `PhoneFrame` with synthetic iOS status bar at top + dark home indicator pill at bottom. Every `STEPS` record in [`app/(public)/page.tsx`](../app/%28public%29/page.tsx) sets `variant: "web"`. Per-step content centering uses `webObjectPosition` (inline `objectPosition` style on the `<video>`; defaults to `"60% 50%"` when not set):
+All 4 step videos in [`public/videos/landing/`](../public/videos/landing) render inside the iOS-native `PhoneFrame` with a synthetic iOS status bar overlay at top, a CSS home indicator pill at bottom (suppressed when the source recording already shows one), and per-step horizontal centering via inline `objectPosition` style. Every `STEPS` record in [`app/(public)/page.tsx`](../app/%28public%29/page.tsx) sets `variant: "web"`:
 
-| step | source crop      | output dims | webObjectPosition | display top wh. | content midpoint |
-|------|------------------|-------------|-------------------|-----------------|------------------|
-| 1    | crop=978:1762:0:114 | 978×1762 | `"50% 50%"` (override) | ~38 display px | "My Link" left edge ~78 src px — center bias unclips "M" |
-| 2    | crop=978:1448:0:336 | 978×1448 | `"60% 50%"` (default) | ~28 display px | form +26 right of source center                          |
-| 3    | crop=978:1755:0:270 | 978×1754 | `"50% 50%"` (override) | ~38 display px | leads list ~0 (centered)                                  |
-| 4    | crop=978:1756:0:78  | 978×1756 | `"60% 50%"` (default) | ~38 display px | lead detail +9 right (negligible at this scale)          |
+| step | source crop          | output dims | webObjectPosition       | CSS home indicator | notes |
+|------|----------------------|-------------|-------------------------|--------------------|-------|
+| 1    | crop=978:1762:0:114 | 978×1762    | `"60% 50%"` (default)   | shown              | At new H=1762 the horizontal excess is ~139 source px so 60% bias centers content midpoint with "M" of "My Link" landing ~13 display px from container left |
+| 2    | crop=978:1448:0:336 | 978×1448    | `"60% 50%"` (default)   | shown              | Web form, no recorded home indicator |
+| 3    | crop=978:1755:0:270 | 978×1754    | `"50% 50%"` (override)  | **hidden** (`hideHomeIndicator: true`) | Source iPhone recording has the home indicator baked in at bottom |
+| 4    | crop=978:1756:0:78  | 978×1756    | `"60% 50%"` (default)   | **hidden** (`hideHomeIndicator: true`) | Source iPhone recording has the home indicator baked in at bottom |
 
-All H.264 / CRF 23 / preset medium / yuv420p / +faststart / no audio (`ffmpeg-static`). Per-step crops sized so content_height × scale ≈ 446 display px across steps 1/3/4 (visually uniform scale at scale ≈ 0.286). Top whitespace target ~38 display px (28 covered by synthetic status bar + 10 breathing room before content). Bottom whitespace target ~20 display px (14 covered by synthetic home indicator + 6 breathing room above). The per-step `webObjectPosition` values come from pngjs-measured content midpoints (leftmost + rightmost non-white columns at multiple frames).
+All H.264 / CRF 23 / preset medium / yuv420p / +faststart / no audio (`ffmpeg-static`). Per-step crops sized so content_height × scale ≈ 446 display px across steps 1/3/4 (visually uniform scale at scale ≈ 0.286). Top whitespace target ~38 display px (28 covered by synthetic status bar + 10 breathing room before content). Bottom whitespace target ~20 display px (14 covered by synthetic home indicator + 6 breathing room above) on the steps that show the synthetic pill (1 + 2). Steps 3 and 4 keep the real iPhone home indicator from the recording — `hideHomeIndicator: true` on those STEPS records suppresses the synthetic overlay so there's no duplicate pill.
 
 `npx tsc --noEmit` clean.
 
