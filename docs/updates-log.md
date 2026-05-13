@@ -3,6 +3,48 @@
 > ⚠️ **FOR REFERENCE ONLY — DO NOT TREAT AS GROUND TRUTH.**
 > Always verify against the actual codebase before acting on anything here.
 
+### 2026-05-13 [Source: Claude Code] — Step-2 landing video recropped to 978×1536 to match steps 1/3/4 aspect ratio (fal.ai AI-reframe experiment failed)
+
+Murdoch flagged that the customer-form step-2 recording inside the "How it works" phone frame didn't fit as cleanly as the other three steps — step-2 was sitting at 978×1328 (AR 0.736) after the previous re-encode, while step-1/3/4 sat at 0.627–0.637 wider AR, so step-2 in `object-cover` got ~17.6%/side cropping vs ~12.5%/side for the others. Asked to experiment with AI reframing on fal.ai (one-video, $1.50 hard cap) using the raw Canva-exported `Step 2.mp4` source (978×2116, 16s, 60fps) at `C:\Users\murdo\SnapQuote Misc\Screen Recordings Finished\Step 2.mp4`.
+
+**fal.ai experiment**
+
+- Model: `fal-ai/luma-dream-machine/ray-2-flash/reframe` (Flash variant @ $0.06/sec vs Standard @ $0.20/sec which would have been $3.20 = over budget)
+- Source uploaded by pushing it to a temp file on this branch (`_tmp_source/step2-source.mp4` at commit 390c29b — the fal.ai MCP `upload_file` refuses local file paths and base64 only works for files <1 MB; the source is 2.45 MB) and using the GitHub raw URL `https://raw.githubusercontent.com/Murdoch45/snapquote/390c29b/_tmp_source/step2-source.mp4`
+- Job: `019e2280-fc99-7440-a13a-026655847186`, aspect_ratio=`9:16`
+- Output: 720×1280, 16s, 24fps, 3.9 MB
+- Cost: **$0.96** charged
+- **Result: BROKEN** — the model went the outpaint route (not crop). Source AR 0.462 → target 9:16 (AR 0.5625) is "wider" so the model preserved the form on the left half and **hallucinated fake UI on the right half**: illegible mirrored-form text at t=0.5–2s, a duplicated service dropdown at t=4s, fake property-photo cards + name/phone fields at t=14s, and a fake dark "checkmark feature list" panel running across the bottom of every sampled frame (t=0.5/2/4/6/8/10/12/14s — all 8 sampled). Inside the phone frame the hallucinated content would still be visible (object-cover only crops ~7.5%/side at this AR), so this would be visibly broken on the live landing page.
+
+Reported to Murdoch per the "do not silently ship broken AI output" rule with four options. Murdoch picked **manual ffmpeg crop to match steps 1/3/4's AR** — no further fal.ai spend.
+
+**What shipped — manual ffmpeg crop to 978×1536**
+
+Re-cropped the raw `Step 2.mp4` source with `ffmpeg-static` (installed via `npm install --no-save`, then dropped before commit) using `crop=978:1536:0:306 -c:v libx264 -crf 23 -preset medium -pix_fmt yuv420p -movflags +faststart -an`. The crop drops 580px total (306 top + 274 bottom) instead of the previous re-encode's 788px, leaving 110px residual whitespace at top and 98px at bottom of the cropped video. AR becomes 0.637 — matches step-3 (978×1537, AR 0.636) and step-4 (978×1537, AR 0.636) exactly, and is very close to step-1 (978×1560, AR 0.627). Same H.264 encoding params as the prior re-encode for consistency. Final file: 2.32 MB at `public/videos/landing/step-2.mp4` (vs 2.18 MB before; the extra 200px of height + 60fps preserved adds ~140 KB).
+
+**Phone-frame display math after the recrop**
+
+Phone frame inner is 240×504 (AR 0.476). With the new step-2 at 978×1536:
+- `object-cover` fits height: 504/1536 = 0.328 scale → width becomes 978×0.328 = 321 px → side crop is (321 − 240)/2 = 40.5 px each side = **12.6%/side** (matches step-3/4's ~12.5%/side, vs the previous 17.6%/side at the wider 0.736 AR)
+- Form content is wider in the visible window (74.7% of source width visible vs 64.6% before)
+- Tradeoff: the 110px/98px residual whitespace shows as ~6.8% top + ~6.4% bottom thin white strips inside the phone frame, where steps 1/3/4 fill edge-to-edge vertically. Net visual effect: step-2 still reads as "less filled" than the other three but the horizontal coverage now matches.
+
+**Why the fal.ai outpaint failed — for the next person who tries this**
+
+Luma Ray 2 Reframe is described as "intelligently inpainting missing regions." For tall→less-tall conversions (our case: 0.462 → 0.5625), the model has two paths: crop height (lose content) or outpaint width (invent content). It chose outpaint. For a UI screen recording that's NOT an option — there is no plausible "extension" of a form's sides, so the model hallucinated mirror images and AI-style fake comparison panels. If the experiment is ever retried, try aspect_ratio=`9:21` instead (AR 0.4286, slightly *taller* than source, so the model would outpaint into the existing top/bottom whitespace where hallucination is invisible — no side outpaint needed). Cost would be the same $0.96 per 16s on Flash. Standard Ray-2 (3.3× the price) might also do better at intelligent cropping but $3.20/job is over the experiment budget. Worth noting: the source video's AR (0.462) is already almost identical to the phone-frame AR (0.476), so technically the **uncropped source could be dropped in as-is** with only ~1.4% top/bottom crop — but you'd see the source's ~25% top whitespace prominently in the phone frame, which is why we crop.
+
+**Verification**
+
+- `npx tsc --noEmit` → exit 0
+- Visual frame-extraction at t=0.5/2/4/6/8/10/12/14/16s on the cropped output — content matches source, no whitespace bands beyond the documented ~7% top/~6% bottom, SnapQuote logo + "Request an Estimate from Pacific Edge Property Care" headline visible at t=0.5, service dropdown legible at t=4s, "How dirty is it?" / "Is the area easy to access?" radio buttons at t=10s, name/email/phone form + "Get My Estimate" CTA at t=14s
+- Live-deploy verification deferred to Murdoch post-Vercel-deploy
+
+**Branch hygiene note**
+
+The temp commit (390c29b) that pushed the raw source to GitHub for fal.ai consumption stays on the branch and lands on `main` via the `--no-ff` merge — force-pushing the branch to drop it would violate the project's "force push is forbidden" rule. Blob will live in git history but is no longer referenced from any tree.
+
+---
+
 ### 2026-05-12 [Source: Claude Code] — Landing-page screen recordings re-encoded to remove baked-in whitespace inside the phone frame
 
 After the screen recordings landed on origin/main (entry below), Murdoch viewed the live page and reported the videos rendered with substantial empty white space inside the phone mockup frame — the phone frame felt much larger than the visible video content area. They asked me to verify CSS first and re-encode the MP4s only if needed.
