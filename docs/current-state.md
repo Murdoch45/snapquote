@@ -12,7 +12,7 @@ All 4 step videos in [`public/videos/landing/`](../public/videos/landing) render
 
 | step | source crop          | output dims | webObjectPosition       | CSS home indicator | notes |
 |------|----------------------|-------------|-------------------------|--------------------|-------|
-| 1    | crop=978:1762:0:114 | 978×1762    | `"60% 50%"` (default)   | shown              | At new H=1762 the horizontal excess is ~139 source px so 60% bias centers content midpoint with "M" of "My Link" landing ~13 display px from container left |
+| 1    | crop=978:1762:0:114 | 978×1762    | `"70% 50%"` (override)  | shown              | Share-sheet scene at ~t=3 has content extending to source x=911 vs ~879 in earlier scenes; 70% bias balances that scene's margins at ~8.8 left / ~7.3 right display px |
 | 2    | crop=978:1448:0:336 | 978×1448    | `"60% 50%"` (default)   | shown              | Web form, no recorded home indicator |
 | 3    | crop=978:1755:0:270 | 978×1754    | `"50% 50%"` (override)  | **hidden** (`hideHomeIndicator: true`) | Source iPhone recording has the home indicator baked in at bottom |
 | 4    | crop=978:1756:0:78  | 978×1756    | `"60% 50%"` (default)   | **hidden** (`hideHomeIndicator: true`) | Source iPhone recording has the home indicator baked in at bottom |
