@@ -32,6 +32,12 @@ type Step = {
   mediaLabel: string;
   videoSrc: string;
   variant?: PhoneFrameVariant;
+  // Per-step horizontal object-position override for variant="web". Pixel-
+  // accurate content midpoints (measured via pngjs frame analysis at
+  // multiple timestamps) determine each video's offset from source center;
+  // these values recenter the form/UI inside the phone frame. Default for
+  // web variant is "60% 50%" — only set this when a step needs different.
+  webObjectPosition?: string;
 };
 
 const STEPS: Step[] = [
@@ -40,7 +46,8 @@ const STEPS: Step[] = [
     title: "Share your link",
     body: "Drop your personal SnapQuote link in a text, share it on social media, or put it in your bio.",
     mediaLabel: "Screen recording — share link",
-    videoSrc: "/videos/landing/step-1.mp4"
+    videoSrc: "/videos/landing/step-1.mp4",
+    variant: "web"
   },
   {
     num: "02",
@@ -55,14 +62,20 @@ const STEPS: Step[] = [
     title: "Get an instant estimate with the price",
     body: "Our AI tools build a complete estimate using property data and the customer's answers. You see it before they do.",
     mediaLabel: "Screen recording — estimate built",
-    videoSrc: "/videos/landing/step-3.mp4"
+    videoSrc: "/videos/landing/step-3.mp4",
+    variant: "web",
+    // step-3's leads-list content is essentially horizontally centered in the
+    // source (measured avg offset ~0 source px across t=0.5/2/3) — using the
+    // default 60% bias would push it visibly left of the phone frame's center.
+    webObjectPosition: "50% 50%"
   },
   {
     num: "04",
     title: "Send it or pass",
     body: "Worth your time? Send. Not worth driving across town for? Pass. Your call, every time.",
     mediaLabel: "Screen recording — send or pass",
-    videoSrc: "/videos/landing/step-4.mp4"
+    videoSrc: "/videos/landing/step-4.mp4",
+    variant: "web"
   }
 ];
 
@@ -170,11 +183,13 @@ function IOSHomeIndicator() {
 function PhoneFrame({
   label,
   videoSrc,
-  variant = "default"
+  variant = "default",
+  webObjectPosition
 }: {
   label: string;
   videoSrc?: string;
   variant?: PhoneFrameVariant;
+  webObjectPosition?: string;
 }) {
   return (
     <div className="relative z-[1] aspect-[256/520] w-[256px] rounded-[36px] bg-[#0B0E14] p-2 shadow-[0_24px_48px_-16px_rgba(11,14,20,0.22),0_2px_6px_rgba(11,14,20,0.06),0_0_0_1px_rgba(11,14,20,0.04)] lg:w-[280px]">
@@ -202,15 +217,16 @@ function PhoneFrame({
               preload="metadata"
               className={cn(
                 "absolute inset-0 block h-full w-full object-cover",
-                // Step-2 (web variant): the Canva recording's form content sits
-                // right of the source's horizontal center, so default
-                // object-center clips the form's right edge. Bias the visible
-                // window further right (= form visually shifts left in the
-                // container) at 60% — lands the form with roughly equal
-                // ~6–7 display px margins on both sides of the phone frame.
-                // Other variants keep the default center.
-                variant === "web" ? "object-[60%_50%]" : "object-center"
+                // Default variant keeps Tailwind's object-center. Web variant
+                // applies its object-position via inline style so each step
+                // can pass its own (most steps share "60% 50%" — see STEPS).
+                variant === "web" ? null : "object-center"
               )}
+              style={
+                variant === "web"
+                  ? { objectPosition: webObjectPosition ?? "60% 50%" }
+                  : undefined
+              }
             />
             {variant === "web" ? (
               <>
@@ -389,6 +405,7 @@ export default function HomePage() {
                       label={step.mediaLabel}
                       videoSrc={step.videoSrc}
                       variant={step.variant}
+                      webObjectPosition={step.webObjectPosition}
                     />
                   </div>
                 </div>
