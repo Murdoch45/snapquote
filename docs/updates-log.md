@@ -3,6 +3,48 @@
 > ⚠️ **FOR REFERENCE ONLY — DO NOT TREAT AS GROUND TRUTH.**
 > Always verify against the actual codebase before acting on anything here.
 
+### 2026-05-13 [Source: Claude Code] — Step-2 landing video: iOS status bar + home indicator overlays + tighter crop to make the web-Safari recording look native iPhone
+
+Murdoch came back on the same step-2 video. Even after the prior recrop matched steps 1/3/4's aspect ratio, step-2 still read as a Safari recording, not a native iPhone screen — the iOS app videos (steps 1/3/4) fill their phone frames edge-to-edge with native chrome (header bars, bottom indicators) while step-2's web form sat with whitespace at top and no iOS chrome. Tried iOS Safari "hide toolbar" trick, PWA standalone, AI reframe — none of those routes are viable on iOS. Asked to use **only CSS and the existing Canva-exported MP4** to close the gap.
+
+**Three problems identified by frame extraction**
+
+Used `ffmpeg-static` to pull frames from the live `public/videos/landing/step-{1,2,3,4}.mp4` at HEAD (981/1536/3.5MB/2.9MB sizes confirmed via PowerShell Shell.Application COM on downloaded files):
+
+1. **No iOS status bar in any step video.** Steps 1/3/4 were recorded inside the iOS app and the recording cropped out the status bar — they go straight to the app's SnapQuote header bar. The phone frame on the landing page therefore has no native iOS chrome at all. Synthetic status bar on step-2 specifically actually adds something the others *should* have had.
+2. **Step-2's old crop had ~110 px residual top whitespace + ~98 px bottom** measured in the previous re-encode at 978×1536 (per prior docs entry). At the phone-frame display scale (504/1536 = 0.328) that's ~36 px top + ~32 px bottom of empty white inside the frame on every frame — vs steps 1/3/4 which have content edge-to-edge. That visible whitespace is the "less native" tell.
+3. **iOS home indicator visible inconsistently** across step videos — step-3 has a thick black app tab bar, step-4 has an iOS home indicator pill, step-1 cuts off cleanly. Step-2's recording has a faint thin line from the iPhone home indicator at the very bottom. Adding a sharper CSS-rendered home indicator to step-2 makes the bottom edge feel intentional.
+
+**What I shipped**
+
+1. **Recropped raw Canva source `Step 2.mp4` (978×2116) → `978×1448`** via `ffmpeg-static` with `crop=978:1448:0:336 -c:v libx264 -crf 23 -preset medium -pix_fmt yuv420p -movflags +faststart -an`. Drops 336 top + 332 bottom of the source's measured 416/372 minimum whitespace. Leaves ~80 px residual top + ~40 px residual bottom whitespace at full resolution — chosen so that at the phone-frame's display scale (504/1448 = 0.348) the residual whitespace maps to ~28 px top + ~14 px bottom, which is exactly what the status bar overlay and home indicator overlay below cover. Resulting file 2.32 → 2.25 MB, same 60fps 16.93s duration. AR is now 0.6754 — slightly wider than the previous 978×1536 (AR 0.637) so side cropping in `object-cover` goes from 12.6%/side up to 14.7%/side, accepted tradeoff because the form is centered horizontally with margin on each side.
+
+2. **Added `IOSStatusBar` component in [`app/(public)/page.tsx`](../app/%28public%29/page.tsx)** as an inline SVG overlay positioned `absolute inset-x-0 top-0 z-10` inside the phone-frame inner rounded-[28px] container. Solid white background to seamlessly continue the white form below it (no visible seam). Black text "9:41" left-aligned in SF Pro / system-ui semibold at 11px (mobile) / 12px (desktop). Right side: 4-bar signal SVG (16×10), 3-arc wifi SVG (14×10), battery shell+fill+tip SVG (24×11). All glyphs use `currentColor` so they inherit the bar's black text color. Height 28 px / 31 px to scale with the phone frame's mobile/desktop sizes (256 / 280 wide). Padding 18/20 px horizontal so glyphs sit at the bezel's natural margin. `pointer-events-none` and `aria-hidden` so it doesn't interfere with focus or screen readers (the `<video>` already has `aria-label`).
+
+3. **Added `IOSHomeIndicator` component** — small dark pill `bg-[#0B0E14]/85` positioned `absolute bottom-[6px] left-1/2 -translate-x-1/2`, dimensions 88×3.5 px (mobile) / 96×4 px (desktop). Sits visually above (taller than) the faint thin recorded indicator from the iPhone screen recording, takes its place as the prominent visual element.
+
+4. **Made `PhoneFrame` variant-aware** by adding `variant?: "default" | "web"` to its props (with `PhoneFrameVariant` type alias). When `variant === "web"` the status bar and home indicator render as siblings to the `<video>`. Default variant unchanged so step-1/3/4 render exactly as before. Threaded `variant: "web"` only into `STEPS[1]` (step-2) — steps 1/3/4's STEPS entries have no `variant` field, defaulting to `default`, so they're byte-identical at the call site to before this change.
+
+**Phone-frame display math after the change**
+
+Phone frame outer 256×520 (`aspect-[256/520]` `w-[256px]` lg:280), inner after `p-2` is 240×504 (lg:264×553). Step-2 video at 978×1448 (AR 0.6754) in 240×504 (AR 0.476): `object-cover` fits height, video scaled to 240×… well wider, so width-displayed = (504/1448)×978 = 340 px, side-cropped to (340−240)/2 = 50 px each side. Top 28 px of the inner is covered by the status bar overlay; bottom 6 px is the home indicator pill plus a bit of breathing room. The video has 80 source px of top whitespace, which at the 0.348 scale displays as 27.8 px — falling almost exactly under the 28 px status bar across most frames. Worst-case frame (t=0.5) source whitespace measures ~150–170 px = 52–60 display px which leaves a small residual ~25–32 px visible whitespace below the status bar at that single moment of the loop — acceptable, the form content fills the frame as soon as the recording animates. Bottom 40 source px (14 display px) sits under the home indicator pill.
+
+**What didn't get touched**
+
+`step-1.mp4`, `step-3.mp4`, `step-4.mp4` are byte-identical at HEAD (no entry in `git status`). Their `PhoneFrame` call sites pass no `variant` prop so they default to `default` and render exactly the same DOM as before (sibling `<video>` only, no status bar, no home indicator). Desktop interactive `ProductDemo`, Meta Pixel / GA4 / CompleteRegistration tracking in [`app/layout.tsx`](../app/layout.tsx) and [`app/(public)/signup/page.tsx`](../app/%28public%29/signup/page.tsx), favicon, metadata, CTA routes all untouched.
+
+**Verification**
+
+- `npx tsc --noEmit` → exit 0 with the new component, new prop, new type alias, and SVG inline children.
+- Frame-extraction sanity check from the new `step-2.mp4` at t=0.5/4/8/14 — form content (SnapQuote logo, headline, address field, service dropdown, name/email/phone, Get My Estimate CTA) all visible without any UI being clipped at top or bottom.
+- Live-deploy + mobile-viewport visual check deferred to Vercel + browser open at 390 px wide.
+
+**Why CSS overlay over re-recording or design change**
+
+Murdoch's prior framing options had four real candidates: (1) re-record under Chrome DevTools mobile emulation, (2) "own the difference" by giving step-2 a browser frame instead of a phone frame, (3) tighter crop only, (4) CSS overlay of synthetic iOS chrome. (1) requires Murdoch's time and was already ruled out as the user wanted only CSS + existing MP4. (2) changes the marketing narrative — Murdoch's prompt asks to make step 2 "look as native to an iPhone as possible" not to redesign the section. (3) was the prior fix's approach and the result still read as Safari. (4) is the only path that actually adds the missing iOS visual cues *and* leaves the underlying recording untouched.
+
+---
+
 ### 2026-05-13 [Source: Claude Code] — Step-2 landing video recropped to 978×1536 to match steps 1/3/4 aspect ratio (fal.ai AI-reframe experiment failed)
 
 Murdoch flagged that the customer-form step-2 recording inside the "How it works" phone frame didn't fit as cleanly as the other three steps — step-2 was sitting at 978×1328 (AR 0.736) after the previous re-encode, while step-1/3/4 sat at 0.627–0.637 wider AR, so step-2 in `object-cover` got ~17.6%/side cropping vs ~12.5%/side for the others. Asked to experiment with AI reframing on fal.ai (one-video, $1.50 hard cap) using the raw Canva-exported `Step 2.mp4` source (978×2116, 16s, 60fps) at `C:\Users\murdo\SnapQuote Misc\Screen Recordings Finished\Step 2.mp4`.
