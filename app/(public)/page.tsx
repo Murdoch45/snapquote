@@ -47,7 +47,13 @@ const STEPS: Step[] = [
     body: "Drop your personal SnapQuote link in a text, share it on social media, or put it in your bio.",
     mediaLabel: "Screen recording — share link",
     videoSrc: "/videos/landing/step-1.mp4",
-    variant: "web"
+    variant: "web",
+    // step-1's hamburger icon + "My Link" header start at source x ≈ 78,
+    // very close to the left edge. The default 60% bias was clipping the
+    // "M" of "My Link" by ~5 display px. 50% (center) lands the "M" with
+    // ~2 display px of margin from the container's left edge while keeping
+    // the bell+badge inside the visible window on the right.
+    webObjectPosition: "50% 50%"
   },
   {
     num: "02",

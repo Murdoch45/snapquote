@@ -3,6 +3,41 @@
 > ⚠️ **FOR REFERENCE ONLY — DO NOT TREAT AS GROUND TRUTH.**
 > Always verify against the actual codebase before acting on anything here.
 
+### 2026-05-13 [Source: Claude Code] — Steps 1/3/4 landing videos: clean second pass — content sits fully below synthetic status bar + uniform scale across steps + unclip step-1 "M"
+
+After the first iOS-native pass on steps 1/3/4 shipped, Murdoch reported four issues across the four phone frames on the live "How it works" section: synthetic 9:41 status bar overlapping the in-app SnapQuote header (step-3), "M" of "My Link" clipped on left edge (step-1), step-4 looking zoomed out compared to steps 1/3, and what looked like a real iPhone status bar bleeding through above the synthetic 9:41 (steps 1/3/4).
+
+**Investigation findings (live, pixel-level)**
+
+Downloaded the live `step-{1,3,4}.mp4` from snapquote.us, extracted frames via `ffmpeg-static`, scanned pixel content with a pngjs row scanner (threshold: RGB < 200 → non-white, ≥5 non-white pixels per row → content). Findings:
+
+1. **Raw Canva-exported sources do NOT contain the user's real iPhone status bar.** Canva's export already removed it. The top 200–400 source rows of each raw `Step {1,3,4}.mp4` (at `C:\Users\murdo\SnapQuote Misc\Screen Recordings Finished\`) are pure white. The "iPhone status bar bleeding through" the user described was actually the **in-app SnapQuote header sitting partially behind the synthetic status bar overlay** — the prior crops left only ~26 display px of top whitespace, but the synthetic status bar overlay is 28 display px tall, so the SnapQuote header's top ~2 px was clipped behind the overlay. From a casual viewing angle the partial header clipping reads as visual chrome above the synthetic 9:41.
+2. **Raw content boundaries (first/last non-white row per source):** step-1 y=247–1806 (varies — share sheet at t=3 extends content lower than t=0/1/2), step-3 y=402–1955, step-4 y=210–1764.
+3. **Step-4's "zoomed out" feel:** the prior crop output 978×1842 → display scale 0.274 = content displayed at 426 display px (85% of container height) vs step-1 at 506 display px (100%) and step-3 at 491 display px (97%). Step-4 needed a smaller output H to scale content up.
+4. **Step-1's "M" clip:** at the prior `webObjectPosition: "60% 50%"`, the left source crop landed at x ≈ 144, but the "M" of "My Link" sits at source x ≈ 78 — clipped by ~5 display px.
+
+**Fix shipped**
+
+Re-cropped sources to put content fully below the 28-display-px synthetic status bar with ~10 display px of breathing room (38 display px total of top whitespace) and above the 14-display-px synthetic home indicator with ~6 display px of breathing room (20 display px total of bottom whitespace). Sized output H so content_height × scale ≈ 446 display px across all three for uniform visual scale (scale ≈ 0.286):
+
+- step-1: `crop=978:1762:0:114` (978×1762, drops 114 top + 240 bottom) — replaces prior 978×1546.
+- step-3: `crop=978:1755:0:270` (978×1754 after ffmpeg rounding, drops 270 top + 91 bottom) — replaces prior 978×1596.
+- step-4: `crop=978:1756:0:78` (978×1756, drops 78 top + 282 bottom — vs prior 148 top + 126 bottom; removes the recorded iPhone home indicator visible at the bottom of the prior crop) — replaces prior 978×1842.
+
+Set `STEPS[0].webObjectPosition = "50% 50%"` in [`app/(public)/page.tsx`](../app/%28public%29/page.tsx) to unclip the "M" — at the new dimensions and `50%` left-crop, "M" lands ~2 display px from the container's left edge while the bell+badge on the right stays inside the visible window. Step-3 unchanged at `"50% 50%"`. Step-4 unchanged at the default `"60% 50%"`. Step-2 byte-identical to before (no file change, same STEPS entry).
+
+**Verification**
+
+- `npx tsc --noEmit` → exit 0
+- Extracted frames at t=0.1/0.5/2.0/3.0 from each new crop, verified content sits below where the status bar will overlay and above where the home indicator will sit
+- Step-1 at t=3 (share sheet scene) — content top still clears the status bar zone
+
+**What the user thought was the real iPhone status bar**
+
+The user's complaint of "Original iPhone status bar (3:25 time, Dynamic Island, real battery)" is historical-but-superseded by the live-grounded finding above. The pixel scan of all four raw Canva sources confirmed no iPhone status bar exists in those source recordings — Canva's export removed it. The visual that read like a "second status bar" was the partial overlap of the prior tighter crops with the synthetic 9:41 overlay. With the new crops the in-app SnapQuote header sits ~38 display px below the top of the phone frame's inner area, fully clear of the 28-display-px synthetic status bar.
+
+---
+
 ### 2026-05-13 [Source: Claude Code] — Steps 1/3/4 landing videos: applied same iOS-native phone-frame treatment as step-2 (status bar + home indicator + per-step horizontal centering)
 
 After step-2's iOS-native treatment landed, Murdoch asked to roll the same treatment to steps 1, 3, 4 (the iPhone app recordings) for uniform iOS-native styling across the "How it works" section.

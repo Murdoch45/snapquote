@@ -6,18 +6,18 @@
 > The audit session content (April 15–20, 2026) is the most reliable portion.
 > Older sections carry more uncertainty.
 
-## All 4 landing videos on iOS-native styling (status bar + home indicator + per-step object-position) — 2026-05-13 [Source: Claude Code]
+## All 4 landing videos on iOS-native styling (clean status bar + home indicator + per-step centering) — 2026-05-13 [Source: Claude Code]
 
-All 4 step videos in [`public/videos/landing/`](../public/videos/landing) now render inside the same iOS-native `PhoneFrame` (synthetic iOS status bar at top + dark home indicator pill at bottom). Every `STEPS` record in [`app/(public)/page.tsx`](../app/%28public%29/page.tsx) sets `variant: "web"`. Per-step content centering uses `webObjectPosition` (inline `objectPosition` style on the `<video>`; defaults to `"60% 50%"` when not set):
+All 4 step videos in [`public/videos/landing/`](../public/videos/landing) render inside the iOS-native `PhoneFrame` with synthetic iOS status bar at top + dark home indicator pill at bottom. Every `STEPS` record in [`app/(public)/page.tsx`](../app/%28public%29/page.tsx) sets `variant: "web"`. Per-step content centering uses `webObjectPosition` (inline `objectPosition` style on the `<video>`; defaults to `"60% 50%"` when not set):
 
-| step | source crop      | output dims | webObjectPosition | content offset (source px) |
-|------|------------------|-------------|-------------------|----------------------------|
-| 1    | crop=978:1546:0:210 | 978×1546 | `"60% 50%"` (default) | +20 right                  |
-| 2    | crop=978:1448:0:336 | 978×1448 | `"60% 50%"` (default) | +26 right                  |
-| 3    | crop=978:1596:0:344 | 978×1596 | `"50% 50%"` (override) | ~0 (centered)              |
-| 4    | crop=978:1842:0:148 | 978×1842 | `"60% 50%"` (default) | +9 right                   |
+| step | source crop      | output dims | webObjectPosition | display top wh. | content midpoint |
+|------|------------------|-------------|-------------------|-----------------|------------------|
+| 1    | crop=978:1762:0:114 | 978×1762 | `"50% 50%"` (override) | ~38 display px | "My Link" left edge ~78 src px — center bias unclips "M" |
+| 2    | crop=978:1448:0:336 | 978×1448 | `"60% 50%"` (default) | ~28 display px | form +26 right of source center                          |
+| 3    | crop=978:1755:0:270 | 978×1754 | `"50% 50%"` (override) | ~38 display px | leads list ~0 (centered)                                  |
+| 4    | crop=978:1756:0:78  | 978×1756 | `"60% 50%"` (default) | ~38 display px | lead detail +9 right (negligible at this scale)          |
 
-All H.264 / CRF 23 / preset medium / yuv420p / +faststart / no audio (`ffmpeg-static`). Per-step crops leave ~80 source px top + ~40 source px bottom of whitespace remaining, which at the phone-frame display scale falls almost exactly under the synthetic status bar (28 display px tall) and home indicator (≈14 display px tall) so the in-app/in-form content starts right below the status bar with no visible empty white. The per-step `webObjectPosition` value comes from pngjs-measured content midpoints (leftmost+rightmost non-white columns at multiple frames) — steps 1/2/4 measured ~20/26/9 source-px right of source center, step 3 measured ~0 (already centered).
+All H.264 / CRF 23 / preset medium / yuv420p / +faststart / no audio (`ffmpeg-static`). Per-step crops sized so content_height × scale ≈ 446 display px across steps 1/3/4 (visually uniform scale at scale ≈ 0.286). Top whitespace target ~38 display px (28 covered by synthetic status bar + 10 breathing room before content). Bottom whitespace target ~20 display px (14 covered by synthetic home indicator + 6 breathing room above). The per-step `webObjectPosition` values come from pngjs-measured content midpoints (leftmost + rightmost non-white columns at multiple frames).
 
 `npx tsc --noEmit` clean.
 
