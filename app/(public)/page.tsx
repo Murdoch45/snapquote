@@ -203,15 +203,13 @@ function PhoneFrame({
               className={cn(
                 "absolute inset-0 block h-full w-full object-cover",
                 // Step-2 (web variant): the Canva recording's form content sits
-                // ~26 source px right of the source's horizontal center, so
-                // default object-center crops more from the right side of the
-                // form than the left and clips the "Get My Estimate" button's
-                // right edge by ~2 display px. Bias the visible window right
-                // by shifting object-position to 55% — keeps the form's left
-                // edge well inside the visible area and gives the button ~8
-                // source px (~3 display px) of right margin. Other variants
-                // keep the default center.
-                variant === "web" ? "object-[55%_50%]" : "object-center"
+                // right of the source's horizontal center, so default
+                // object-center clips the form's right edge. Bias the visible
+                // window further right (= form visually shifts left in the
+                // container) at 60% — lands the form with roughly equal
+                // ~6–7 display px margins on both sides of the phone frame.
+                // Other variants keep the default center.
+                variant === "web" ? "object-[60%_50%]" : "object-center"
               )}
             />
             {variant === "web" ? (
