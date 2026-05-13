@@ -3,6 +3,32 @@
 > ⚠️ **FOR REFERENCE ONLY — DO NOT TREAT AS GROUND TRUTH.**
 > Always verify against the actual codebase before acting on anything here.
 
+### 2026-05-13 [Source: Claude Code] — Step-2 landing video: shifted object-position to 55% to unclip "Get My Estimate" button
+
+After the iOS-styled phone frame shipped, Murdoch reported the "Get My Estimate" button's right edge was being clipped by the phone-frame edge — form content was visibly off-center. Frame-extracted t=14 of `public/videos/landing/step-2.mp4` (978×1448 at HEAD) and measured: the button + form content spans roughly source x=190–840 while the source itself is 978 wide. Form's horizontal center is ≈x=515, source center is x=489, so the form sits ~26 source px right of the source's geometric center. At default `object-cover object-center`, the visible window inside the 240-wide phone frame inner is source columns ~144–834 (scale = 504/1448 = 0.348, displayed width = 340, side crop = 50 each), so the button's right edge at ~840 lands ~6 source px past the visible window's right edge = ~2 display px of right-edge clipping. Matches what Murdoch reported.
+
+**Fix** — narrowed the change to step-2 only: in [`app/(public)/page.tsx`](../app/%28public%29/page.tsx) the `<video>` className now branches on `variant`. `variant === "web"` (step-2 only) gets `object-[55%_50%]` which biases the visible window source x to ~158–848 (left crop 158 ≈ 55px display, right crop 130 ≈ 45px display), giving the button ~8 source px (~3 display px) of right margin while keeping the form's left edge ~11 display px from the container's left edge. Steps 1/3/4 keep `object-center` (the default) — branching is `variant === "web" ? "object-[55%_50%]" : "object-center"` via `cn()`. No video re-encode, no other phone-frame change, no overlay change.
+
+**Math**
+
+At display scale 0.348 (= 504 / 1448), source width 978 displays as 340 px. Inside a 240 px container, total horizontal crop is 100 displayed px = ~287 source px. With `object-position: X% 50%`:
+- Left crop (source px) = X% × 287
+- Right crop (source px) = (1 − X%) × 287
+
+At 50% (default): 144 left / 144 right. Button right at source x=840 = 840 − 144 = 696 source px from left of visible = 696 × 0.348 = 242 display px = 2 px past the 240 px container. **Clipped.**
+At 55%: 158 left / 130 right. Button right at 840 − 158 = 682 source px from left = 237 display px. **3 px of right margin.** Form left at 190 − 158 = 32 source px from left = 11 display px from container's left.
+
+**Verification**
+
+- `npx tsc --noEmit` → exit 0
+- Live-deploy + mobile-viewport visual check deferred to Vercel + browser open at 390 px wide
+
+**Why not just bigger like 60% or 100%**
+
+Going further (e.g., 60%) trims the form's left edge harder for no benefit — 55% already gives the button positive margin and keeps the form's left edge inside the visible window. 100% (= `object-right`) would crop ~287 source px from the left = ~100 display px = the left side of the form would disappear off the container's left edge. 55% is the smallest shift that fixes the clip.
+
+---
+
 ### 2026-05-13 [Source: Claude Code] — Step-2 landing video: iOS status bar + home indicator overlays + tighter crop to make the web-Safari recording look native iPhone
 
 Murdoch came back on the same step-2 video. Even after the prior recrop matched steps 1/3/4's aspect ratio, step-2 still read as a Safari recording, not a native iPhone screen — the iOS app videos (steps 1/3/4) fill their phone frames edge-to-edge with native chrome (header bars, bottom indicators) while step-2's web form sat with whitespace at top and no iOS chrome. Tried iOS Safari "hide toolbar" trick, PWA standalone, AI reframe — none of those routes are viable on iOS. Asked to use **only CSS and the existing Canva-exported MP4** to close the gap.
