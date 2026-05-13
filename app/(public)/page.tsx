@@ -38,6 +38,11 @@ type Step = {
   // these values recenter the form/UI inside the phone frame. Default for
   // web variant is "60% 50%" — only set this when a step needs different.
   webObjectPosition?: string;
+  // When true, suppress the synthetic IOSHomeIndicator overlay. Used for
+  // steps whose source recording already shows the real iPhone home
+  // indicator pill baked into the bottom of the video — drawing the
+  // synthetic one on top would create a visible double-pill at the bottom.
+  hideHomeIndicator?: boolean;
 };
 
 const STEPS: Step[] = [
@@ -47,13 +52,13 @@ const STEPS: Step[] = [
     body: "Drop your personal SnapQuote link in a text, share it on social media, or put it in your bio.",
     mediaLabel: "Screen recording — share link",
     videoSrc: "/videos/landing/step-1.mp4",
-    variant: "web",
-    // step-1's hamburger icon + "My Link" header start at source x ≈ 78,
-    // very close to the left edge. The default 60% bias was clipping the
-    // "M" of "My Link" by ~5 display px. 50% (center) lands the "M" with
-    // ~2 display px of margin from the container's left edge while keeping
-    // the bell+badge inside the visible window on the right.
-    webObjectPosition: "50% 50%"
+    variant: "web"
+    // step-1 uses the default webObjectPosition "60% 50%". At the new
+    // output H=1762 the horizontal excess is only ~139 source px (vs the
+    // previous 1546-tall crop's 242), so the 60% bias still keeps "My
+    // Link"'s left edge ~13 display px inside the container — no clip —
+    // while centering the content's overall midpoint at the container
+    // center.
   },
   {
     num: "02",
@@ -73,7 +78,11 @@ const STEPS: Step[] = [
     // step-3's leads-list content is essentially horizontally centered in the
     // source (measured avg offset ~0 source px across t=0.5/2/3) — using the
     // default 60% bias would push it visibly left of the phone frame's center.
-    webObjectPosition: "50% 50%"
+    webObjectPosition: "50% 50%",
+    // Source recording (iPhone app screen) already contains the real
+    // iPhone home indicator pill at the bottom — skip the synthetic one
+    // to avoid stacking two indicators.
+    hideHomeIndicator: true
   },
   {
     num: "04",
@@ -81,7 +90,10 @@ const STEPS: Step[] = [
     body: "Worth your time? Send. Not worth driving across town for? Pass. Your call, every time.",
     mediaLabel: "Screen recording — send or pass",
     videoSrc: "/videos/landing/step-4.mp4",
-    variant: "web"
+    variant: "web",
+    // Same as step-3: real iPhone home indicator pill is part of the
+    // recording at the bottom of the video; suppress the synthetic one.
+    hideHomeIndicator: true
   }
 ];
 
@@ -190,12 +202,14 @@ function PhoneFrame({
   label,
   videoSrc,
   variant = "default",
-  webObjectPosition
+  webObjectPosition,
+  hideHomeIndicator = false
 }: {
   label: string;
   videoSrc?: string;
   variant?: PhoneFrameVariant;
   webObjectPosition?: string;
+  hideHomeIndicator?: boolean;
 }) {
   return (
     <div className="relative z-[1] aspect-[256/520] w-[256px] rounded-[36px] bg-[#0B0E14] p-2 shadow-[0_24px_48px_-16px_rgba(11,14,20,0.22),0_2px_6px_rgba(11,14,20,0.06),0_0_0_1px_rgba(11,14,20,0.04)] lg:w-[280px]">
@@ -237,7 +251,7 @@ function PhoneFrame({
             {variant === "web" ? (
               <>
                 <IOSStatusBar />
-                <IOSHomeIndicator />
+                {hideHomeIndicator ? null : <IOSHomeIndicator />}
               </>
             ) : null}
           </>
@@ -412,6 +426,7 @@ export default function HomePage() {
                       videoSrc={step.videoSrc}
                       variant={step.variant}
                       webObjectPosition={step.webObjectPosition}
+                      hideHomeIndicator={step.hideHomeIndicator}
                     />
                   </div>
                 </div>

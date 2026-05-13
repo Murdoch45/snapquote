@@ -3,6 +3,21 @@
 > ⚠️ **FOR REFERENCE ONLY — DO NOT TREAT AS GROUND TRUTH.**
 > Always verify against the actual codebase before acting on anything here.
 
+### 2026-05-13 [Source: Claude Code] — Step-1 recentered (drop 50% override, fall back to default 60%) + synthetic home indicator hidden on steps 3/4 (duplicate-pill fix)
+
+Two CSS-only follow-ups after the clean second-pass crops landed:
+
+**Step 1 — re-center via the default 60% bias.** The prior pass set [`STEPS[0].webObjectPosition = "50% 50%"`](../app/%28public%29/page.tsx) on the rationale that the default 60% bias would clip "M" of "My Link" at source x≈78. That estimate was visual; the live pngjs row scan at HEAD then confirmed the leftmost non-white pixel of step-1 content is at source x≈128 (not 78). At the new H=1762 crop dimensions, the horizontal excess source crop is only ~139 source px (vs the previous H=1546's ~242 source px). With that smaller excess, 60% bias lands "M" at display x ≈ 13 px from container left (visible) AND positions the content midpoint at display x ≈ 120 (= container center). 50% bias instead positioned the content midpoint at ~124 display px = 4 px right of container center, which read as "significantly offset right" with extra empty space on the right side of the phone frame. Fix: removed the `webObjectPosition: "50% 50%"` from `STEPS[0]` so step-1 falls through to the web variant's default `"60% 50%"`. Step-2's behavior unchanged (it was already on the default). Step-3 still has its `"50% 50%"` override (leads list is centered in source). Step-4 still on default 60%.
+
+**Steps 3 + 4 — hide the synthetic home indicator.** Both source recordings (iPhone screen captures of the SnapQuote app's Leads list and Lead Detail screens) already contain the real iPhone home indicator pill baked into the bottom of the video — the synthetic CSS `IOSHomeIndicator` overlay drew a second pill directly on top of it, creating a visible duplicate. Added a new `hideHomeIndicator?: boolean` field to the `Step` type, set `hideHomeIndicator: true` on `STEPS[2]` (step-3) and `STEPS[3]` (step-4), threaded the prop through the `PhoneFrame` component. In `PhoneFrame`, the `<IOSHomeIndicator />` render now gates on `hideHomeIndicator ? null : <IOSHomeIndicator />`. Steps 1 + 2 still render the synthetic indicator (their sources don't have one baked in). The synthetic `IOSStatusBar` overlay is unchanged for all steps.
+
+**Verification**
+
+- `npx tsc --noEmit` → exit 0
+- File diff is purely `app/(public)/page.tsx` (+ docs); no video file changes this round. Step-2's `STEPS[1]` entry is byte-identical to before this commit.
+
+---
+
 ### 2026-05-13 [Source: Claude Code] — Steps 1/3/4 landing videos: clean second pass — content sits fully below synthetic status bar + uniform scale across steps + unclip step-1 "M"
 
 After the first iOS-native pass on steps 1/3/4 shipped, Murdoch reported four issues across the four phone frames on the live "How it works" section: synthetic 9:41 status bar overlapping the in-app SnapQuote header (step-3), "M" of "My Link" clipped on left edge (step-1), step-4 looking zoomed out compared to steps 1/3, and what looked like a real iPhone status bar bleeding through above the synthetic 9:41 (steps 1/3/4).
