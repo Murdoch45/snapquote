@@ -19,7 +19,7 @@ export default function PrivacyPage() {
       </nav>
 
       <div className="mx-auto max-w-4xl px-6 py-16 sm:px-8">
-        <p className="text-sm font-medium text-muted-foreground">Last updated: March 2026</p>
+        <p className="text-sm font-medium text-muted-foreground">Last updated: May 2026</p>
         <h1 className="mt-4 text-4xl font-semibold tracking-tight text-foreground">
           Privacy Policy
         </h1>
@@ -52,14 +52,40 @@ export default function PrivacyPage() {
 
           <section className="space-y-3">
             <h2 className="text-xl font-semibold text-foreground">3. How We Use Your Information</h2>
-            <p>We use your information to provide and operate the SnapQuote platform.</p>
-            <p>We use your information to generate AI-powered job estimates using OpenAI.</p>
+            <p>We use your information to:</p>
+            <ul className="space-y-2 pl-5 text-slate-700">
+              <li>Provide and operate the SnapQuote platform</li>
+              <li>
+                Generate AI-powered job estimates using OpenAI&apos;s gpt-5-mini model. The
+                specific data sent to OpenAI from customer-submitted job requests includes:
+                the service category, property metadata (lot size, house size, formatted
+                address, city, state, zip code), customer-submitted answers to service
+                questions, customer-typed job description, photos uploaded by the customer,
+                and the contractor&apos;s business name. We do NOT send to OpenAI: customer
+                names, customer email addresses, customer phone numbers, contractor email
+                addresses, contractor phone numbers, payment information, user identifiers,
+                or lead IDs. AI processing happens server-side on our web platform.
+              </li>
+              <li>
+                Send estimates and communications via email through Resend and SMS through
+                Telnyx
+              </li>
+              <li>Process payments via Stripe</li>
+              <li>Improve the service</li>
+            </ul>
             <p>
-              We use your information to send estimates and communications via email
-              through Resend and SMS through Telnyx.
+              Important: The SnapQuote iOS app does not transmit user data to OpenAI. The
+              iOS app&apos;s users (contractors) receive AI-generated estimates as output
+              only. AI data processing occurs on our web platform (snapquote.us), where
+              customers (homeowners) submit lead information through our public web form.
+              By submitting a lead on snapquote.us, customers consent to this AI processing
+              of their submission.
             </p>
-            <p>We use your information to process payments via Stripe.</p>
-            <p>We use your information to improve the service.</p>
+            <p>
+              OpenAI processes data under their API data handling policy, which states
+              that data sent via the API is not used to train OpenAI&apos;s models. See
+              openai.com/policies for OpenAI&apos;s full privacy and data handling policies.
+            </p>
           </section>
 
           <section className="space-y-3">
