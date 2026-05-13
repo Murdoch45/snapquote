@@ -6,13 +6,20 @@
 > The audit session content (April 15–20, 2026) is the most reliable portion.
 > Older sections carry more uncertainty.
 
-## Step-2 landing video: native iPhone styling + horizontally centered via object-position 60% — 2026-05-13 [Source: Claude Code]
+## All 4 landing videos on iOS-native styling (status bar + home indicator + per-step object-position) — 2026-05-13 [Source: Claude Code]
 
-`public/videos/landing/step-2.mp4` (978×1448, AR 0.6754) is rendered inside the `PhoneFrame` in [`app/(public)/page.tsx`](../app/%28public%29/page.tsx) with `variant: "web"` set only on `STEPS[1]` (steps 1/3/4 default to `"default"` and render byte-identically to before). For `variant === "web"`:
-- The phone frame renders a synthetic iOS status bar overlay (`absolute inset-x-0 top-0 z-10 h-[28px] bg-white`, inline SVGs for the 4-bar signal / 3-arc wifi / battery glyphs at right, "9:41" left in SF Pro / system-ui semibold at 11/12px, black on white to match the form's white background) and a small dark home indicator pill (`absolute bottom-[6px] h-[3.5px] w-[88px] bg-[#0B0E14]/85` lg:`w-[96px]`).
-- The `<video>` element gets `object-cover object-[60%_50%]` (vs `object-center` for the default variant) — the Canva recording's form content sits right of the source's horizontal center so default center-crop clips the form's right edge. Visible window biased right by 10 percentage points (left crop ~172 source px, right crop ~115) lands the form with roughly equal ~6–7 display px margins on both sides of the phone frame.
+All 4 step videos in [`public/videos/landing/`](../public/videos/landing) now render inside the same iOS-native `PhoneFrame` (synthetic iOS status bar at top + dark home indicator pill at bottom). Every `STEPS` record in [`app/(public)/page.tsx`](../app/%28public%29/page.tsx) sets `variant: "web"`. Per-step content centering uses `webObjectPosition` (inline `objectPosition` style on the `<video>`; defaults to `"60% 50%"` when not set):
 
-The 978×1448 crop's residual ~80 px top + ~40 px bottom whitespace maps to ~28 px / ~14 px at the phone-frame's display scale (504/1448 = 0.348), which is exactly what the status bar and home indicator overlays cover, so the form starts immediately below the status bar with no visible empty white in most frames. Side cropping is ~14.7%/side. Steps 1/3/4 untouched. `npx tsc --noEmit` clean.
+| step | source crop      | output dims | webObjectPosition | content offset (source px) |
+|------|------------------|-------------|-------------------|----------------------------|
+| 1    | crop=978:1546:0:210 | 978×1546 | `"60% 50%"` (default) | +20 right                  |
+| 2    | crop=978:1448:0:336 | 978×1448 | `"60% 50%"` (default) | +26 right                  |
+| 3    | crop=978:1596:0:344 | 978×1596 | `"50% 50%"` (override) | ~0 (centered)              |
+| 4    | crop=978:1842:0:148 | 978×1842 | `"60% 50%"` (default) | +9 right                   |
+
+All H.264 / CRF 23 / preset medium / yuv420p / +faststart / no audio (`ffmpeg-static`). Per-step crops leave ~80 source px top + ~40 source px bottom of whitespace remaining, which at the phone-frame display scale falls almost exactly under the synthetic status bar (28 display px tall) and home indicator (≈14 display px tall) so the in-app/in-form content starts right below the status bar with no visible empty white. The per-step `webObjectPosition` value comes from pngjs-measured content midpoints (leftmost+rightmost non-white columns at multiple frames) — steps 1/2/4 measured ~20/26/9 source-px right of source center, step 3 measured ~0 (already centered).
+
+`npx tsc --noEmit` clean.
 
 ---
 

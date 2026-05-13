@@ -3,6 +3,44 @@
 > ⚠️ **FOR REFERENCE ONLY — DO NOT TREAT AS GROUND TRUTH.**
 > Always verify against the actual codebase before acting on anything here.
 
+### 2026-05-13 [Source: Claude Code] — Steps 1/3/4 landing videos: applied same iOS-native phone-frame treatment as step-2 (status bar + home indicator + per-step horizontal centering)
+
+After step-2's iOS-native treatment landed, Murdoch asked to roll the same treatment to steps 1, 3, 4 (the iPhone app recordings) for uniform iOS-native styling across the "How it works" section.
+
+**Per-step crops**
+
+Re-cropped each raw Canva-exported source (`Step {1,3,4}.mp4` at `C:\Users\murdo\SnapQuote Misc\Screen Recordings Finished\`, each 978×2116 60fps) using `ffmpeg-static` with `-c:v libx264 -crf 23 -preset medium -pix_fmt yuv420p -movflags +faststart -an`. Crop boxes target ~80 source px top + ~40 source px bottom of residual whitespace so at the phone-frame's `object-cover` display scale they fall behind the synthetic iOS status bar (28 display px) and home indicator (~14 display px):
+
+- step-1: `crop=978:1546:0:210` (drops 210 top + 360 bottom) — replaces previous 978×1560 from the May 12 re-encode. Content from "SnapQuote" header (source y ≈ 290) down to "property-care" caption end (source y ≈ 1716). My Link screen, 4.85 s @ 60 fps, ~957 KB.
+- step-3: `crop=978:1596:0:344` (drops 344 top + 176 bottom) — replaces previous 978×1536. Content from SnapQuote header (y ≈ 424) down through the Leads list to just above the iPhone home indicator (y ≈ 1940). 7.23 s, ~3.75 MB.
+- step-4: `crop=978:1842:0:148` (drops 148 top + 126 bottom) — replaces previous 978×1536. Content from SnapQuote header (y ≈ 228) down through Lead Detail body + property photos (y ≈ 1990). 15.52 s, ~2.94 MB.
+
+Each step ends up at a slightly different AR (step-1 = 0.633, step-3 = 0.613, step-4 = 0.531) because each app screen has different content density. The phone-frame chrome (status bar + home indicator + rounded corners) is uniform across all 4, which is what reads as "uniform iOS-native styling."
+
+**Per-step horizontal object-position**
+
+Measured content midpoints in each cropped video via a pngjs frame scanner that locates the leftmost/rightmost non-white columns (R, G, or B < 230) at frames t=0.5, 2, 3:
+
+- step-1: avg content midpoint at source x ≈ 509 → +20 source px right of source center (489). Use default `webObjectPosition: "60% 50%"`.
+- step-2: known +26 right (no change from prior fix). Default `"60% 50%"`.
+- step-3: avg midpoint at source x ≈ 484 → ~0 offset (essentially centered). Override to `webObjectPosition: "50% 50%"` — the default 60% would push content visibly left in this phone frame.
+- step-4: avg midpoint at source x ≈ 498 → +9 source px right. Default `"60% 50%"`.
+
+**Code change in [`app/(public)/page.tsx`](../app/%28public%29/page.tsx)**
+
+1. Added `webObjectPosition?: string` to the `Step` type and to the `PhoneFrame` component props.
+2. Set `variant: "web"` on all 4 `STEPS` entries (previously only step-2 had it).
+3. Set `webObjectPosition: "50% 50%"` only on `STEPS[2]` (step-3) — others use the default.
+4. Refactored the `<video>` element to apply `objectPosition` via inline style instead of the previous `object-[60%_50%]` Tailwind class — this avoids needing 4 separate Tailwind arbitrary-value classes and supports any CSS string value. Default variant still applies `object-center` via Tailwind class as before.
+
+**Verification**
+
+- `npx tsc --noEmit` → exit 0
+- Live-deploy + mobile-viewport visual check deferred to Vercel + browser at 390 px wide
+- Step-2 logic is byte-equivalent: the inline-style refactor produces identical `object-position: 60% 50%` to the prior `object-[60%_50%]` Tailwind class
+
+---
+
 ### 2026-05-13 [Source: Claude Code] — Step-2 landing video: nudged object-position from 55% → 60% for true horizontal center
 
 After the prior 55% fix, Murdoch reported the form still sat a few pixels too far right inside the phone frame. Nudged `object-position` on the step-2 `<video>` in [`app/(public)/page.tsx`](../app/%28public%29/page.tsx) from `object-[55%_50%]` to `object-[60%_50%]` (only the `variant === "web"` branch; steps 1/3/4 still resolve to `object-center` by default). At the phone-frame display scale (504/1448 = 0.348, video displayed at 340 px wide inside a 240 px container, total horizontal crop = 100 displayed / ~287 source px), 60% means left crop ~172 source px (~60 display) and right crop ~115 source px (~40 display) — vs 55%'s 158/130. Form's left edge (source x ≈ 190) lands ~6 display px from container left; form's right edge (source x ≈ 840) lands ~7 display px from container right. Roughly equal margins.
