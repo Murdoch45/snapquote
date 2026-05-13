@@ -52,13 +52,18 @@ const STEPS: Step[] = [
     body: "Drop your personal SnapQuote link in a text, share it on social media, or put it in your bio.",
     mediaLabel: "Screen recording — share link",
     videoSrc: "/videos/landing/step-1.mp4",
-    variant: "web"
-    // step-1 uses the default webObjectPosition "60% 50%". At the new
-    // output H=1762 the horizontal excess is only ~139 source px (vs the
-    // previous 1546-tall crop's 242), so the 60% bias still keeps "My
-    // Link"'s left edge ~13 display px inside the container — no clip —
-    // while centering the content's overall midpoint at the container
-    // center.
+    variant: "web",
+    // step-1's share-sheet scene (around t=3) has content extending
+    // further right than the My-Link scene: rightmost non-white pixel at
+    // source x=911 vs ~879 in the earlier scenes. At the web variant's
+    // default 60% bias that share-sheet scene's content lands with
+    // margins ~12.7 display px left / ~3.4 display px right in the mobile
+    // 240-wide container — visibly offset right. Override to 70% to bias
+    // the visible window further right (= content visually shifts left),
+    // producing ~8.8 left / ~7.3 right at the share-sheet scene while
+    // keeping the hamburger / "My Link" left edge (source x=128) inside
+    // the container at ~8 display px from container left.
+    webObjectPosition: "70% 50%"
   },
   {
     num: "02",

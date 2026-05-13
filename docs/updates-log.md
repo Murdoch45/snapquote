@@ -3,6 +3,21 @@
 > ⚠️ **FOR REFERENCE ONLY — DO NOT TREAT AS GROUND TRUTH.**
 > Always verify against the actual codebase before acting on anything here.
 
+### 2026-05-13 [Source: Claude Code] — Step-1 webObjectPosition 60% → 70% (close left gap at share-sheet scene); steps 3/4 synthetic indicator already hidden (verified live)
+
+After the prior commit (3e54a82) deployed, Murdoch reported step-1 still had a visible left gap and that steps 3/4 still showed duplicate home indicators.
+
+**Step 1 — bump to 70%.** Investigation: re-downloaded the live `step-1.mp4` from snapquote.us and pngjs-scanned the share-sheet scene at t=3.0/3.5/4.0. The leftmost/rightmost non-white source columns are 128 / 911 in those frames (vs 128 / 879 in the earlier My-Link frames). At the web variant's default `"60% 50%"`, the share-sheet scene's right edge (source x=911) lands at display x ≈ 236.6 in the mobile 240-wide container — only ~3.4 display px from container right edge — with the left edge at display x ≈ 12.7 = visibly right-heavy. Bumped [`STEPS[0].webObjectPosition`](../app/%28public%29/page.tsx) from default 60% to override `"70% 50%"`. New margins at the share-sheet scene: ~8.8 display px left / ~7.3 right (close to balanced). The hamburger/"My Link" left edge at source x=128 stays inside the container at ~8 display px from container left — no clipping.
+
+**Steps 3 + 4 — confirmed previously fixed; verified live.** Live DOM inspection (Chrome MCP `javascript_exec` query on `document.querySelectorAll('video')` + each video's `<div aria-hidden>` siblings) on snapquote.us at HEAD = 3e54a82 returned: step-1 numOverlays=2, step-2 numOverlays=2, step-3 numOverlays=1 (status bar only — no synthetic home indicator), step-4 numOverlays=1 (same). The `hideHomeIndicator: true` on `STEPS[2]` and `STEPS[3]` is doing its job; the synthetic CSS pill does not render on steps 3 or 4 in the served HTML. The "still duplicates" report was likely from a cached older render of the page; pngjs cropdetect on the live `step-3.mp4` and `step-4.mp4` videos confirms each has exactly one iPhone home indicator pill baked into the source recording (step-3 at source y=1946-1951, step-4 at source y=1756-1761), which is what users see now — only one indicator per phone frame.
+
+**Verification**
+
+- `npx tsc --noEmit` → exit 0
+- File diff is purely `app/(public)/page.tsx` (single STEPS entry change) + docs; no video files touched.
+
+---
+
 ### 2026-05-13 [Source: Claude Code] — Step-1 recentered (drop 50% override, fall back to default 60%) + synthetic home indicator hidden on steps 3/4 (duplicate-pill fix)
 
 Two CSS-only follow-ups after the clean second-pass crops landed:
