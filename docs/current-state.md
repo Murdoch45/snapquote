@@ -6,11 +6,11 @@
 > The audit session content (April 15–20, 2026) is the most reliable portion.
 > Older sections carry more uncertainty.
 
-## Step-2 landing video: native iPhone styling + horizontally centered via object-position 55% — 2026-05-13 [Source: Claude Code]
+## Step-2 landing video: native iPhone styling + horizontally centered via object-position 60% — 2026-05-13 [Source: Claude Code]
 
 `public/videos/landing/step-2.mp4` (978×1448, AR 0.6754) is rendered inside the `PhoneFrame` in [`app/(public)/page.tsx`](../app/%28public%29/page.tsx) with `variant: "web"` set only on `STEPS[1]` (steps 1/3/4 default to `"default"` and render byte-identically to before). For `variant === "web"`:
 - The phone frame renders a synthetic iOS status bar overlay (`absolute inset-x-0 top-0 z-10 h-[28px] bg-white`, inline SVGs for the 4-bar signal / 3-arc wifi / battery glyphs at right, "9:41" left in SF Pro / system-ui semibold at 11/12px, black on white to match the form's white background) and a small dark home indicator pill (`absolute bottom-[6px] h-[3.5px] w-[88px] bg-[#0B0E14]/85` lg:`w-[96px]`).
-- The `<video>` element gets `object-cover object-[55%_50%]` (vs `object-center` for the default variant) — the Canva recording's form content sits ~26 source px right of the source's horizontal center so default center-crop clips the "Get My Estimate" button's right edge by ~2 display px. Shifting the visible window right by 5 percentage points (left crop 158 source px, right crop 130) gives the button ~3 display px of right margin and keeps the form's left edge ~11 display px from the container's left.
+- The `<video>` element gets `object-cover object-[60%_50%]` (vs `object-center` for the default variant) — the Canva recording's form content sits right of the source's horizontal center so default center-crop clips the form's right edge. Visible window biased right by 10 percentage points (left crop ~172 source px, right crop ~115) lands the form with roughly equal ~6–7 display px margins on both sides of the phone frame.
 
 The 978×1448 crop's residual ~80 px top + ~40 px bottom whitespace maps to ~28 px / ~14 px at the phone-frame's display scale (504/1448 = 0.348), which is exactly what the status bar and home indicator overlays cover, so the form starts immediately below the status bar with no visible empty white in most frames. Side cropping is ~14.7%/side. Steps 1/3/4 untouched. `npx tsc --noEmit` clean.
 

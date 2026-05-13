@@ -3,6 +3,14 @@
 > ⚠️ **FOR REFERENCE ONLY — DO NOT TREAT AS GROUND TRUTH.**
 > Always verify against the actual codebase before acting on anything here.
 
+### 2026-05-13 [Source: Claude Code] — Step-2 landing video: nudged object-position from 55% → 60% for true horizontal center
+
+After the prior 55% fix, Murdoch reported the form still sat a few pixels too far right inside the phone frame. Nudged `object-position` on the step-2 `<video>` in [`app/(public)/page.tsx`](../app/%28public%29/page.tsx) from `object-[55%_50%]` to `object-[60%_50%]` (only the `variant === "web"` branch; steps 1/3/4 still resolve to `object-center` by default). At the phone-frame display scale (504/1448 = 0.348, video displayed at 340 px wide inside a 240 px container, total horizontal crop = 100 displayed / ~287 source px), 60% means left crop ~172 source px (~60 display) and right crop ~115 source px (~40 display) — vs 55%'s 158/130. Form's left edge (source x ≈ 190) lands ~6 display px from container left; form's right edge (source x ≈ 840) lands ~7 display px from container right. Roughly equal margins.
+
+`npx tsc --noEmit` → exit 0. Live-deploy + mobile-viewport visual check deferred.
+
+---
+
 ### 2026-05-13 [Source: Claude Code] — Step-2 landing video: shifted object-position to 55% to unclip "Get My Estimate" button
 
 After the iOS-styled phone frame shipped, Murdoch reported the "Get My Estimate" button's right edge was being clipped by the phone-frame edge — form content was visibly off-center. Frame-extracted t=14 of `public/videos/landing/step-2.mp4` (978×1448 at HEAD) and measured: the button + form content spans roughly source x=190–840 while the source itself is 978 wide. Form's horizontal center is ≈x=515, source center is x=489, so the form sits ~26 source px right of the source's geometric center. At default `object-cover object-center`, the visible window inside the 240-wide phone frame inner is source columns ~144–834 (scale = 504/1448 = 0.348, displayed width = 340, side crop = 50 each), so the button's right edge at ~840 lands ~6 source px past the visible window's right edge = ~2 display px of right-edge clipping. Matches what Murdoch reported.
