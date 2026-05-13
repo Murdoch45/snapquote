@@ -23,12 +23,15 @@ const HEADLINE_TAIL = "waste your time.";
 const SUBHEAD =
   "Send customers your link. They tell you about the job, and you get an instant estimate built with the help of our AI tools — send it or pass.";
 
+type PhoneFrameVariant = "default" | "web";
+
 type Step = {
   num: string;
   title: string;
   body: string;
   mediaLabel: string;
   videoSrc: string;
+  variant?: PhoneFrameVariant;
 };
 
 const STEPS: Step[] = [
@@ -44,7 +47,8 @@ const STEPS: Step[] = [
     title: "Customer tells you about the job",
     body: "They open the link and answer a few questions about what they need. Takes them under a minute.",
     mediaLabel: "Screen recording — customer flow",
-    videoSrc: "/videos/landing/step-2.mp4"
+    videoSrc: "/videos/landing/step-2.mp4",
+    variant: "web"
   },
   {
     num: "03",
@@ -78,7 +82,100 @@ function GradientText({ children }: { children: React.ReactNode }) {
   );
 }
 
-function PhoneFrame({ label, videoSrc }: { label: string; videoSrc?: string }) {
+// iOS status bar overlay for variant="web" phone frames. Renders a synthetic
+// status bar (time on the left, signal/wifi/battery glyphs on the right) that
+// sits flush above the recorded form video so the result reads as a real
+// iPhone screen instead of a Safari-chrome-cropped recording. The Canva source
+// for step-2 is cropped with deliberate ~80px top whitespace at full
+// resolution; at the phone-frame's display scale that maps to ~28px which the
+// status bar covers — so the form starts immediately below the status bar.
+function IOSStatusBar() {
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none absolute inset-x-0 top-0 z-10 flex h-[28px] items-center justify-between bg-white px-[18px] text-[11px] font-semibold leading-none text-[#0B0E14] lg:h-[31px] lg:px-[20px] lg:text-[12px]"
+      style={{
+        fontFamily:
+          '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif',
+        fontFeatureSettings: '"tnum"'
+      }}
+    >
+      <span className="tracking-[-0.01em]">9:41</span>
+      <div className="flex items-center gap-[5px]">
+        <svg width="16" height="10" viewBox="0 0 16 10" fill="currentColor" aria-hidden>
+          <rect x="0" y="7" width="2.8" height="3" rx="0.6" />
+          <rect x="4.4" y="5" width="2.8" height="5" rx="0.6" />
+          <rect x="8.8" y="2.5" width="2.8" height="7.5" rx="0.6" />
+          <rect x="13.2" y="0" width="2.8" height="10" rx="0.6" />
+        </svg>
+        <svg width="14" height="10" viewBox="0 0 14 10" fill="none" aria-hidden>
+          <path
+            d="M1 3.2C2.7 1.7 4.8.9 7 .9c2.2 0 4.3.8 6 2.3"
+            stroke="currentColor"
+            strokeWidth="1.4"
+            strokeLinecap="round"
+          />
+          <path
+            d="M3 5.4c1.1-1 2.5-1.5 4-1.5s2.9.5 4 1.5"
+            stroke="currentColor"
+            strokeWidth="1.4"
+            strokeLinecap="round"
+          />
+          <path
+            d="M5.2 7.6c.5-.5 1.1-.7 1.8-.7s1.3.2 1.8.7"
+            stroke="currentColor"
+            strokeWidth="1.4"
+            strokeLinecap="round"
+          />
+          <circle cx="7" cy="9.2" r="0.9" fill="currentColor" />
+        </svg>
+        <svg width="24" height="11" viewBox="0 0 24 11" fill="none" aria-hidden>
+          <rect
+            x="0.5"
+            y="0.5"
+            width="20"
+            height="10"
+            rx="2.5"
+            stroke="currentColor"
+            strokeOpacity="0.4"
+          />
+          <rect x="2" y="2" width="17" height="7" rx="1.3" fill="currentColor" />
+          <path
+            d="M22 4.2v2.6"
+            stroke="currentColor"
+            strokeOpacity="0.4"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+          />
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+// iOS home indicator overlay — the swipe-up affordance hint pill at the bottom
+// of the screen. Position is matched to where it sits on iPhone 14/15 (small
+// margin from the bottom edge of the safe area). The Canva recording's own
+// faint home indicator falls slightly lower / thinner; this overlay sits above
+// it without overlapping in practice.
+function IOSHomeIndicator() {
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none absolute bottom-[6px] left-1/2 z-10 h-[3.5px] w-[88px] -translate-x-1/2 rounded-full bg-[#0B0E14]/85 lg:bottom-[7px] lg:w-[96px]"
+    />
+  );
+}
+
+function PhoneFrame({
+  label,
+  videoSrc,
+  variant = "default"
+}: {
+  label: string;
+  videoSrc?: string;
+  variant?: PhoneFrameVariant;
+}) {
   return (
     <div className="relative z-[1] aspect-[256/520] w-[256px] rounded-[36px] bg-[#0B0E14] p-2 shadow-[0_24px_48px_-16px_rgba(11,14,20,0.22),0_2px_6px_rgba(11,14,20,0.06),0_0_0_1px_rgba(11,14,20,0.04)] lg:w-[280px]">
       <div
@@ -94,16 +191,24 @@ function PhoneFrame({ label, videoSrc }: { label: string; videoSrc?: string }) {
         }
       >
         {videoSrc ? (
-          <video
-            src={videoSrc}
-            aria-label={label}
-            autoPlay
-            loop
-            muted
-            playsInline
-            preload="metadata"
-            className="absolute inset-0 block h-full w-full object-cover object-center"
-          />
+          <>
+            <video
+              src={videoSrc}
+              aria-label={label}
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="metadata"
+              className="absolute inset-0 block h-full w-full object-cover object-center"
+            />
+            {variant === "web" ? (
+              <>
+                <IOSStatusBar />
+                <IOSHomeIndicator />
+              </>
+            ) : null}
+          </>
         ) : (
           <>
             <div className="absolute left-1/2 top-[10px] h-6 w-[90px] -translate-x-1/2 rounded-xl bg-[#0B0E14]" />
@@ -270,7 +375,11 @@ export default function HomePage() {
                     </p>
                   </div>
                   <div className={cn("flex justify-center", flip ? "lg:order-1" : "")}>
-                    <PhoneFrame label={step.mediaLabel} videoSrc={step.videoSrc} />
+                    <PhoneFrame
+                      label={step.mediaLabel}
+                      videoSrc={step.videoSrc}
+                      variant={step.variant}
+                    />
                   </div>
                 </div>
               );
