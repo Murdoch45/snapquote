@@ -279,30 +279,8 @@ function PhoneFrame({
 export default function HomePage() {
   return (
     <main className={cn(manrope.variable, "min-h-screen w-full overflow-x-hidden bg-white text-[#0B0E14] antialiased")}>
-      {/* PROMO BANNER — slim black strip, sticks above nav */}
-      <div className="sticky top-0 z-[60] flex h-10 items-center justify-center gap-3 bg-black px-4 text-white">
-        <span className="whitespace-nowrap text-xs font-medium tracking-tight text-white sm:text-sm">
-          Now on the App Store
-        </span>
-        <a
-          href="https://apps.apple.com/app/snapquote-contractor-leads/id6761979056"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Download SnapQuote on the App Store"
-          className="inline-flex transition-transform hover:-translate-y-px"
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/app-store-badge.svg"
-            alt="Download on the App Store"
-            width={96}
-            height={32}
-            className="block h-7 w-auto sm:h-8"
-          />
-        </a>
-      </div>
       {/* NAV */}
-      <header className="sticky top-10 z-50 border-b border-[#0B0E14]/[0.08] bg-white/85 backdrop-blur-[12px] backdrop-saturate-[160%]">
+      <header className="sticky top-0 z-50 border-b border-[#0B0E14]/[0.08] bg-white/85 backdrop-blur-[12px] backdrop-saturate-[160%]">
         <div className="mx-auto flex w-full max-w-[1280px] items-center justify-between px-5 py-3.5 md:px-14 md:py-5">
           <Link href="/" className="inline-flex items-center gap-2" aria-label="SnapQuote home">
             <BrandLogo size="sm" showWordmark={false} iconClassName="h-7 w-auto" />
@@ -323,6 +301,29 @@ export default function HomePage() {
           </div>
         </div>
       </header>
+
+      {/* PROMO BANNER — slim black strip below the nav divider */}
+      <div className="flex w-full items-center justify-center gap-3 bg-black px-4 py-1.5 text-white">
+        <span className="whitespace-nowrap text-xs font-medium tracking-tight text-white">
+          Now on the App Store
+        </span>
+        <a
+          href="https://apps.apple.com/app/snapquote-contractor-leads/id6761979056"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Download SnapQuote on the App Store"
+          className="inline-flex transition-transform hover:-translate-y-px"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/app-store-badge.svg"
+            alt="Download on the App Store"
+            width={78}
+            height={26}
+            className="block h-6 w-auto"
+          />
+        </a>
+      </div>
 
       {/* HERO — asymmetric, left-aligned */}
       <section className="relative overflow-hidden px-[22px] pb-14 pt-7 md:px-14 md:pb-[148px] md:pt-[120px] lg:px-24">
