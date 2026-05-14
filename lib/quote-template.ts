@@ -18,7 +18,7 @@ export function buildDefaultEstimateTemplate(): string {
   // their template in profile settings, but the footer is always
   // appended by lib/notify.ts at send time so removing it from the
   // template never lands a non-compliant outbound message.
-  return `Hi ${CUSTOMER_NAME_TOKEN}, here's your starting estimate from ${COMPANY_NAME_TOKEN} — final price may adjust after we see the job. ${ESTIMATE_LINK_TOKEN} Reply STOP to opt out.`;
+  return `Hi ${CUSTOMER_NAME_TOKEN}, here's your starting estimate from ${COMPANY_NAME_TOKEN}, final price may adjust after we see the job. ${ESTIMATE_LINK_TOKEN} Reply STOP to opt out.`;
 }
 
 export const DEFAULT_ESTIMATE_SMS_TEMPLATE = buildDefaultEstimateTemplate();
