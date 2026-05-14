@@ -279,9 +279,9 @@ function PhoneFrame({
 export default function HomePage() {
   return (
     <main className={cn(manrope.variable, "min-h-screen w-full overflow-x-hidden bg-white text-[#0B0E14] antialiased")}>
-      {/* PROMO BANNER — slim, sticks above nav */}
-      <div className="sticky top-0 z-[60] flex h-10 items-center justify-center gap-3 bg-primary px-4 text-white">
-        <span className="text-[13px] font-semibold tracking-tight md:text-sm">
+      {/* PROMO BANNER — slim black strip, sticks above nav */}
+      <div className="sticky top-0 z-[60] flex h-10 items-center justify-center gap-3 bg-black px-4 text-white">
+        <span className="whitespace-nowrap text-xs font-medium tracking-tight text-white sm:text-sm">
           Now on the App Store
         </span>
         <a
@@ -297,7 +297,7 @@ export default function HomePage() {
             alt="Download on the App Store"
             width={96}
             height={32}
-            className="block h-8 w-auto"
+            className="block h-7 w-auto sm:h-8"
           />
         </a>
       </div>
