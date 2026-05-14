@@ -59,19 +59,19 @@ export function buildEstimateSentEmail(input: {
   publicId: string;
 }) {
   const quoteUrl = buildQuoteLink(input.publicId);
-  const title = `You have a new estimate from ${input.businessName}`;
+  const title = `You have a new starting estimate from ${input.businessName}`;
   const priceRange =
     formatCurrencyRange(input.estimateLow, input.estimateHigh) ??
     `${toCurrency(input.estimateLow)} - ${toCurrency(input.estimateHigh)}`;
 
   return {
     subject: title,
-    text: `${title}\n\nEstimated price: ${priceRange}\nPhone: ${input.contractorPhone ?? "Not provided"}\nEmail: ${input.contractorEmail ?? "Not provided"}\n\nView estimate: ${quoteUrl}`,
+    text: `${title}\n\nThe final price may change once we see the property in person.\n\nEstimated price: ${priceRange}\nPhone: ${input.contractorPhone ?? "Not provided"}\nEmail: ${input.contractorEmail ?? "Not provided"}\n\nView estimate: ${quoteUrl}`,
     html: renderEmailShell(
       title,
       `
         <p style="margin:0 0 16px;font-size:15px;line-height:1.7;color:#334155;">
-          Your estimate is ready. Review the price range below and reach out to your contractor if you have any questions.
+          Your starting estimate is ready. The final price may change once we see the property in person. Review the price range below and reach out to your contractor if you have any questions.
         </p>
         ${renderField("Estimate range", priceRange)}
         ${renderField("Contractor", input.businessName)}

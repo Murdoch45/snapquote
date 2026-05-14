@@ -33,7 +33,10 @@ export default async function ContractorPublicPage({ params }: Props) {
             Submit a few details and receive your estimate shortly.
           </p>
           <div className="min-w-0 max-w-full">
-            <PublicLeadForm contractorSlug={profile.public_slug as string} />
+            <PublicLeadForm
+              contractorSlug={profile.public_slug as string}
+              businessName={(profile.business_name as string | null) ?? ""}
+            />
           </div>
         </div>
       </main>

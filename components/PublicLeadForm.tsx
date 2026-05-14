@@ -21,6 +21,7 @@ import type { ServiceType } from "@/lib/services";
 
 type Props = {
   contractorSlug: string;
+  businessName: string;
 };
 
 const hasGooglePlacesKey = Boolean(process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY);
@@ -36,7 +37,7 @@ function generateTempLeadId(): string {
   return crypto.randomUUID();
 }
 
-export function PublicLeadForm({ contractorSlug }: Props) {
+export function PublicLeadForm({ contractorSlug, businessName }: Props) {
   const [customerFirstName, setCustomerFirstName] = useState("");
   const [customerLastName, setCustomerLastName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
@@ -434,7 +435,7 @@ export function PublicLeadForm({ contractorSlug }: Props) {
         className="rounded-[12px] border border-[#BBF7D0] bg-green-50 dark:bg-green-950/30 p-6 text-center"
       >
         <p className="text-base font-semibold text-green-600 dark:text-green-400">
-          Request sent - you will receive your estimate shortly.
+          Request sent — you&apos;ll receive your starting estimate shortly. {businessName} may adjust the final price after seeing your property.
         </p>
       </div>
     );

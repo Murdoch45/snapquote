@@ -148,6 +148,9 @@ export function PublicQuoteCard({
               <p className="mt-2 text-3xl font-semibold tracking-[-0.03em] text-primary">
                 {displayPrice}
               </p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                This is a starting estimate range built from your request form and photos. The final price may adjust after {quote.businessName} sees the property.
+              </p>
               <p className="mt-2 text-sm text-muted-foreground">Valid for 7 days from delivery.</p>
             </div>
           </div>
