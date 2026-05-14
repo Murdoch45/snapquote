@@ -6,6 +6,12 @@
 > The audit session content (April 15–20, 2026) is the most reliable portion.
 > Older sections carry more uncertainty.
 
+## Hero eyebrow blue dot removed — 2026-05-13 [Source: Claude Code]
+
+Removed the `<span className="h-1.5 w-1.5 rounded-full bg-primary" />` blue dot from the "FOR OUTDOOR SERVICE CONTRACTORS" eyebrow text in the landing-page hero ([`app/(public)/page.tsx`](../app/%28public%29/page.tsx)). Also dropped the now-unnecessary `inline-flex items-center gap-2` classes from the wrapper `<div>` since it no longer needs to flex the icon next to the text. Eyebrow text content / font / size / color / spacing / margins all unchanged.
+
+---
+
 ## All 4 landing videos on iOS-native styling — 2026-05-13 [Source: Claude Code]
 
 All 4 step videos in [`public/videos/landing/`](../public/videos/landing) render inside the iOS-native `PhoneFrame` with a synthetic iOS status bar overlay at top, a CSS home indicator pill at bottom (suppressed when the source recording already shows one), and per-step horizontal centering via inline `objectPosition` style. Every `STEPS` record in [`app/(public)/page.tsx`](../app/%28public%29/page.tsx) sets `variant: "web"`:

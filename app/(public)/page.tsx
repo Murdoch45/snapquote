@@ -317,10 +317,9 @@ export default function HomePage() {
         />
         <div className="relative z-[1] mx-auto w-full max-w-[1280px] text-left">
           <div
-            className="mb-[18px] inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#0B0E14]/60 md:mb-6 md:text-xs"
+            className="mb-[18px] text-[11px] font-semibold uppercase tracking-[0.12em] text-[#0B0E14]/60 md:mb-6 md:text-xs"
             style={{ fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}
           >
-            <span className="h-1.5 w-1.5 rounded-full bg-primary" />
             For outdoor service contractors
           </div>
           <h1

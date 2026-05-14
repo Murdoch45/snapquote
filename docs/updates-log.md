@@ -3,6 +3,12 @@
 > ⚠️ **FOR REFERENCE ONLY — DO NOT TREAT AS GROUND TRUTH.**
 > Always verify against the actual codebase before acting on anything here.
 
+### 2026-05-13 [Source: Claude Code] — Hero eyebrow blue dot removed
+
+Murdoch asked to remove the small blue dot that sat to the left of the "FOR OUTDOOR SERVICE CONTRACTORS" eyebrow text in the landing-page hero. The dot was a `<span className="h-1.5 w-1.5 rounded-full bg-primary" />` rendered as the first child of the eyebrow `<div>`. Removed the `<span>` and dropped the wrapper's `inline-flex items-center gap-2` classes (no longer needed since there's only a single text child). All eyebrow text styling — font family, size, color, tracking, margins — is unchanged. `npx tsc --noEmit` → exit 0.
+
+---
+
 ### 2026-05-13 [Source: Claude Code] — Step-1 webObjectPosition 60% → 70% (close left gap at share-sheet scene); steps 3/4 synthetic indicator already hidden (verified live)
 
 After the prior commit (3e54a82) deployed, Murdoch reported step-1 still had a visible left gap and that steps 3/4 still showed duplicate home indicators.
