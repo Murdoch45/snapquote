@@ -337,10 +337,26 @@ export default function HomePage() {
           <p className="m-0 mb-7 max-w-[620px] text-[18px] font-normal leading-[1.5] text-[#0B0E14]/60 md:text-[20px] lg:max-w-[640px] lg:text-[21px]">
             {SUBHEAD}
           </p>
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-4">
             <Button asChild className={PRIMARY_CTA_CLASSES}>
               <Link href="/signup">Get Started Free</Link>
             </Button>
+            <a
+              href="https://apps.apple.com/app/snapquote-contractor-leads/id6761979056"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Download SnapQuote on the App Store"
+              className="inline-block transition-transform hover:-translate-y-px"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/app-store-badge.svg"
+                alt="Download on the App Store"
+                width={180}
+                height={60}
+                className="block h-[54px] w-auto md:h-[60px]"
+              />
+            </a>
           </div>
         </div>
       </section>
@@ -455,9 +471,27 @@ export default function HomePage() {
             {HEADLINE_LEAD}
             <GradientText>{HEADLINE_TAIL}</GradientText>
           </h2>
-          <Button asChild className={PRIMARY_CTA_CLASSES}>
-            <Link href="/signup">Get Started Free</Link>
-          </Button>
+          <div className="flex flex-col items-center gap-5">
+            <Button asChild className={PRIMARY_CTA_CLASSES}>
+              <Link href="/signup">Get Started Free</Link>
+            </Button>
+            <a
+              href="https://apps.apple.com/app/snapquote-contractor-leads/id6761979056"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Download SnapQuote on the App Store"
+              className="inline-block transition-transform hover:-translate-y-px"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/app-store-badge.svg"
+                alt="Download on the App Store"
+                width={180}
+                height={60}
+                className="block h-[60px] w-auto"
+              />
+            </a>
+          </div>
         </div>
       </section>
 
