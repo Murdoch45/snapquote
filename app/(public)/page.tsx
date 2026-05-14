@@ -279,8 +279,30 @@ function PhoneFrame({
 export default function HomePage() {
   return (
     <main className={cn(manrope.variable, "min-h-screen w-full overflow-x-hidden bg-white text-[#0B0E14] antialiased")}>
+      {/* PROMO BANNER — slim, sticks above nav */}
+      <div className="sticky top-0 z-[60] flex h-10 items-center justify-center gap-3 bg-primary px-4 text-white">
+        <span className="text-[13px] font-semibold tracking-tight md:text-sm">
+          Now on the App Store
+        </span>
+        <a
+          href="https://apps.apple.com/app/snapquote-contractor-leads/id6761979056"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Download SnapQuote on the App Store"
+          className="inline-flex transition-transform hover:-translate-y-px"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/app-store-badge.svg"
+            alt="Download on the App Store"
+            width={96}
+            height={32}
+            className="block h-8 w-auto"
+          />
+        </a>
+      </div>
       {/* NAV */}
-      <header className="sticky top-0 z-50 border-b border-[#0B0E14]/[0.08] bg-white/85 backdrop-blur-[12px] backdrop-saturate-[160%]">
+      <header className="sticky top-10 z-50 border-b border-[#0B0E14]/[0.08] bg-white/85 backdrop-blur-[12px] backdrop-saturate-[160%]">
         <div className="mx-auto flex w-full max-w-[1280px] items-center justify-between px-5 py-3.5 md:px-14 md:py-5">
           <Link href="/" className="inline-flex items-center gap-2" aria-label="SnapQuote home">
             <BrandLogo size="sm" showWordmark={false} iconClassName="h-7 w-auto" />
@@ -337,26 +359,10 @@ export default function HomePage() {
           <p className="m-0 mb-7 max-w-[620px] text-[18px] font-normal leading-[1.5] text-[#0B0E14]/60 md:text-[20px] lg:max-w-[640px] lg:text-[21px]">
             {SUBHEAD}
           </p>
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-4">
+          <div className="flex flex-wrap items-center gap-3">
             <Button asChild className={PRIMARY_CTA_CLASSES}>
               <Link href="/signup">Get Started Free</Link>
             </Button>
-            <a
-              href="https://apps.apple.com/app/snapquote-contractor-leads/id6761979056"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Download SnapQuote on the App Store"
-              className="inline-block transition-transform hover:-translate-y-px"
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/app-store-badge.svg"
-                alt="Download on the App Store"
-                width={180}
-                height={60}
-                className="block h-[54px] w-auto md:h-[60px]"
-              />
-            </a>
           </div>
         </div>
       </section>
@@ -471,37 +477,35 @@ export default function HomePage() {
             {HEADLINE_LEAD}
             <GradientText>{HEADLINE_TAIL}</GradientText>
           </h2>
-          <div className="flex flex-col items-center gap-5">
-            <Button asChild className={PRIMARY_CTA_CLASSES}>
-              <Link href="/signup">Get Started Free</Link>
-            </Button>
-            <a
-              href="https://apps.apple.com/app/snapquote-contractor-leads/id6761979056"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Download SnapQuote on the App Store"
-              className="inline-block transition-transform hover:-translate-y-px"
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/app-store-badge.svg"
-                alt="Download on the App Store"
-                width={180}
-                height={60}
-                className="block h-[60px] w-auto"
-              />
-            </a>
-          </div>
+          <Button asChild className={PRIMARY_CTA_CLASSES}>
+            <Link href="/signup">Get Started Free</Link>
+          </Button>
         </div>
       </section>
 
       {/* FOOTER */}
-      <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-[#0B0E14]/[0.08] bg-white px-6 py-5 md:px-14 md:py-[22px]">
-        <div className="flex items-center gap-2.5 text-xs text-[#0B0E14]/45">
+      <footer className="flex flex-col items-center gap-4 border-t border-[#0B0E14]/[0.08] bg-white px-6 py-5 md:flex-row md:flex-wrap md:justify-between md:gap-3 md:px-14 md:py-[22px]">
+        <a
+          href="https://apps.apple.com/app/snapquote-contractor-leads/id6761979056"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Download SnapQuote on the App Store"
+          className="inline-flex transition-transform hover:-translate-y-px md:order-1"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/app-store-badge.svg"
+            alt="Download on the App Store"
+            width={120}
+            height={40}
+            className="block h-10 w-auto"
+          />
+        </a>
+        <div className="flex items-center gap-2.5 text-xs text-[#0B0E14]/45 md:order-2">
           <BrandLogo size="sm" showWordmark={false} iconClassName="h-5 w-auto" />
           <span>© 2026 SnapQuote</span>
         </div>
-        <div className="flex gap-5">
+        <div className="flex gap-5 md:order-3">
           <Link
             href="/privacy"
             className="text-xs text-[#0B0E14]/45 transition-colors hover:text-[#0B0E14]"
