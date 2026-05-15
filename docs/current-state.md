@@ -6,6 +6,22 @@
 > The audit session content (April 15–20, 2026) is the most reliable portion.
 > Older sections carry more uncertainty.
 
+## Supabase `lead-photos` bucket orphan cleanup — 2026-05-15 [Source: Claude Code]
+
+One-time cleanup of orphan storage objects left behind after the 2026-05-15 mass DB delete (73 orgs + 3,250 falconn leads older than 7 days). Cascade had removed the matching `lead_photos` rows but the underlying storage objects were stranded — Supabase blocks direct `DELETE storage.objects` from SQL, and the dashboard's folder-delete fails ("Failed to retrieve all files within folder") on large folders. New script at [`scripts/cleanup-orphan-photos.ts`](../scripts/cleanup-orphan-photos.ts) (dry-run default, `--execute` to act, batched delete in 100s via Storage API, retry/backoff on the list endpoint which gateway-times-out intermittently on busy folders).
+
+Post-cleanup state, live Supabase MCP query on `upqvbdldoyiqqshxquxa` (2026-05-15):
+
+- `storage.objects WHERE bucket_id='lead-photos'`: **71 rows** (was 3,712 pre-run — 3,641 deleted)
+- `public.lead_photos`: **71 rows** (matches bucket exactly)
+- `SUM((metadata->>'size')::bigint)`: **12,217,262 B (~11.7 MB)** (was 248,101,748 B / ~248 MB pre-run — **235,884,486 B freed**)
+- `public.leads`: 23, `public.organizations`: 3 (unchanged)
+- Anti-join `lead_photos LEFT JOIN storage.objects` for missing-in-bucket rows: **0** (no dangling DB refs)
+
+Script ran 37 batches of 100 each, 41 in the final batch, 0 failures. 11 `list()` retries absorbed during scan — all recovered on attempt 2. `npx tsc --noEmit` on the script: 0 errors.
+
+---
+
 ## Hero eyebrow blue dot removed — 2026-05-13 [Source: Claude Code]
 
 Removed the `<span className="h-1.5 w-1.5 rounded-full bg-primary" />` blue dot from the "FOR OUTDOOR SERVICE CONTRACTORS" eyebrow text in the landing-page hero ([`app/(public)/page.tsx`](../app/%28public%29/page.tsx)). Also dropped the now-unnecessary `inline-flex items-center gap-2` classes from the wrapper `<div>` since it no longer needs to flex the icon next to the text. Eyebrow text content / font / size / color / spacing / margins all unchanged.
