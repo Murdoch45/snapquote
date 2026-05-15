@@ -110,11 +110,8 @@ async function listAllFiles(prefix: string, out: FoundFile[]): Promise<void> {
       if (entry.id === null || entry.id === undefined) {
         await listAllFiles(full, out);
       } else {
-        const size =
-          (entry.metadata &&
-            typeof (entry.metadata as { size?: unknown }).size === "number" &&
-            ((entry.metadata as { size: number }).size as number)) ||
-          0;
+        const rawSize = (entry.metadata as { size?: unknown } | null | undefined)?.size;
+        const size: number = typeof rawSize === "number" ? rawSize : 0;
         out.push({ path: full, size });
       }
     }
