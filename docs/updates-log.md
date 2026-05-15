@@ -3,6 +3,43 @@
 > ⚠️ **FOR REFERENCE ONLY — DO NOT TREAT AS GROUND TRUTH.**
 > Always verify against the actual codebase before acting on anything here.
 
+### 2026-05-15 [Source: Claude Code] — Supabase `lead-photos` bucket orphan cleanup (3,641 files / ~225 MB deleted)
+
+Earlier on 2026-05-15, a mass Supabase cleanup deleted 73 orgs (leaving falconn, Demo, Pacific Edge Property Care) plus 3,250 falconn leads older than 7 days. The cascade removed the matching `lead_photos` rows from the database but left the underlying storage objects in the `lead-photos` bucket — Supabase blocks direct `DELETE storage.objects` from SQL, and the dashboard's folder-delete fails on large folders ("Failed to retrieve all files within folder"). Those orphan files were driving Supabase egress past the Free-tier 5 GB/mo cap.
+
+**Script.** New one-time tool at [`scripts/cleanup-orphan-photos.ts`](../scripts/cleanup-orphan-photos.ts):
+
+- Dry-run by default; pass `--execute` to actually delete.
+- Reads `NEXT_PUBLIC_SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` from `.env.local` (via `dotenv`).
+- Paginates `public.lead_photos.storage_path` into a Set of paths to KEEP (1000-row pages).
+- Recursively lists `lead-photos` via Storage API; subfolders are entries with `id == null`, files have `id` + `metadata.size`. Each `list()` call retried up to 6× with exponential backoff (500ms → 16s) because the endpoint gateway-times-out intermittently on busy folders.
+- Computes orphan set = bucket-files MINUS keep-set; logs anti-set (keep-paths missing from bucket) as a WARN but does not act.
+- Prints a summary (totals, bytes-to-free, sample orphans) and prompts "yes" before deleting.
+- Deletes in batches of 100 via `supabase.storage.from('lead-photos').remove([...])`. Logs per-batch progress.
+
+**Dry-run.** `Mode: DRY RUN`, keep-set=71, bucket files=3712 (236.6 MB metadata sum), orphans=3641 (225.0 MB / 235,884,486 B), 0 keep-paths missing from bucket, 5 transient `Gateway Timeout`s on `list()` all recovered on attempt 2.
+
+**Execute.** `Mode: EXECUTE`, 37 batches (36×100 + 1×41), `100/100 removed` per batch, **3641 deleted / 0 failed**, 11 `list()` retries absorbed during the pre-delete scan, exit 0.
+
+**Verification (live Supabase MCP on `upqvbdldoyiqqshxquxa`, 2026-05-15, post-execute):**
+
+| Metric | Pre | Post | Delta |
+| --- | --- | --- | --- |
+| `storage.objects WHERE bucket_id='lead-photos'` | 3,712 | 71 | −3,641 |
+| `SUM((metadata->>'size')::bigint)` | 248,101,748 B | 12,217,262 B | **−235,884,486 B (~225 MB)** |
+| `public.lead_photos` rowcount | 71 | 71 | 0 |
+| `lead_photos LEFT JOIN storage.objects` rows missing in bucket | 0 | 0 | 0 |
+| `public.leads` | 23 | 23 | 0 |
+| `public.organizations` | 3 | 3 | 0 |
+
+Bucket file count now matches `lead_photos` rowcount exactly. No `lead_photos` row points at a path that is now missing from the bucket. Pre-existing 4 RLS policies on `storage.objects` (Audit 8, `is_org_member(storage_org_id_from_path(name))`) and the bucket's MIME/size limits (Audit 4 F3 fix at HEAD) are untouched.
+
+**Script lifecycle.** The script lives in `scripts/` (one-time tool — safe to re-run; if there are zero orphans on the next run it logs "Nothing to delete. Done." and exits). Not imported anywhere in app code. `npx tsc --noEmit` on the script standalone: 0 errors.
+
+**Out of scope (not done here, still pending).** The "abandoned upload" cron in Pending Work — customers who pick photos and abandon the public form leave `${orgId}/${tempLeadId}/...` objects with no `leads` row. This script catches those too (they have no `lead_photos` row pointing at them), but the underlying need for a TTL cleanup cron remains.
+
+---
+
 ### 2026-05-13 [Source: Claude Code] — Hero eyebrow blue dot removed
 
 Murdoch asked to remove the small blue dot that sat to the left of the "FOR OUTDOOR SERVICE CONTRACTORS" eyebrow text in the landing-page hero. The dot was a `<span className="h-1.5 w-1.5 rounded-full bg-primary" />` rendered as the first child of the eyebrow `<div>`. Removed the `<span>` and dropped the wrapper's `inline-flex items-center gap-2` classes (no longer needed since there's only a single text child). All eyebrow text styling — font family, size, color, tracking, margins — is unchanged. `npx tsc --noEmit` → exit 0.
