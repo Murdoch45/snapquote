@@ -9,6 +9,10 @@ import { getOwnerEmailForOrg } from "@/lib/organizationOwners";
 import { getPlanMonthlyCredits } from "@/lib/plans";
 import { sendPlanEndedEmail, sendPlanUpgradedEmail } from "@/lib/planChangeEmails";
 import { claimWebhookEvent, releaseWebhookEvent } from "@/lib/webhookEvents";
+import {
+  clawbackReferrerRewardForReferredOrg,
+  qualifyAndRewardReferral
+} from "@/lib/referralRewards";
 import type { OrgPlan } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -318,6 +322,13 @@ export async function POST(request: Request) {
           }
         }
         void sendPlanUpgradedEmail(orgId, plan);
+
+        // Referral qualification (Lane B U10). INITIAL_PURCHASE on a paid
+        // sub (no trial) is a real conversion. Skip when is_trial_period
+        // is true — trial starts must never qualify.
+        if (event.is_trial_period === false) {
+          await qualifyAndRewardReferral(orgId, "rc_initial_purchase", "revenuecat");
+        }
         break;
       }
 
@@ -375,6 +386,40 @@ export async function POST(request: Request) {
           });
         } else {
           void sendPlanUpgradedEmail(orgId, plan);
+        }
+
+        // Referral qualification (Lane B U10). A RENEWAL is the trial→paid
+        // conversion iff the most-recent prior IAP event for this org had
+        // is_trial_period=true. Recurring cycles on a never-trialed sub
+        // (the common case for users who started on the paid tier directly
+        // — rare for IAP but possible) are not the qualifying payment and
+        // would over-fire qualify_referral (which is idempotent, but the
+        // extra DB round-trip + Sentry noise is avoidable). Excludes this
+        // event's own row by event_id since logIapEvent already inserted it.
+        try {
+          const admin = createAdminClient();
+          const { data: priorEvents, error: priorError } = await admin
+            .from("iap_subscription_events")
+            .select("is_trial_period")
+            .eq("org_id", orgId)
+            .neq("event_id", event.id)
+            .not("is_trial_period", "is", null)
+            .order("created_at", { ascending: false })
+            .limit(1);
+          if (priorError) throw priorError;
+          const priorIsTrialPeriod =
+            (priorEvents?.[0]?.is_trial_period as boolean | undefined) === true;
+          if (priorIsTrialPeriod) {
+            await qualifyAndRewardReferral(orgId, "rc_renewal_after_trial", "revenuecat");
+          }
+        } catch (priorErr) {
+          Sentry.captureException(priorErr, {
+            tags: {
+              area: "referral-qualify-revenuecat",
+              stage: "renewal-prior-trial-lookup",
+              org_id: orgId
+            }
+          });
         }
         break;
       }
@@ -496,6 +541,23 @@ export async function POST(request: Request) {
           await resetOrganizationCredits(orgId, "SOLO");
           if (previousPlan && previousPlan !== "SOLO") {
             void sendPlanEndedEmail(orgId, previousPlan);
+          }
+
+          // Referral clawback (Lane C U15 — RC side). Idempotent via
+          // UPDATE-WHERE-NULL on referrals.clawed_back_at, so a duplicate
+          // REFUND delivery is a clean no-op even if the claim envelope
+          // somehow lets both through.
+          try {
+            await clawbackReferrerRewardForReferredOrg(orgId);
+          } catch (clawbackError) {
+            Sentry.captureException(clawbackError, {
+              tags: {
+                area: "referral-clawback-revenuecat",
+                stage: "subscription-refund",
+                org_id: orgId
+              },
+              extra: { event_id: event.id }
+            });
           }
         }
         break;

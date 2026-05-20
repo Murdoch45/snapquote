@@ -24,7 +24,15 @@ export type AuditAction =
   // Logging the cap-hit makes upsell triggers and "why isn't unlock
   // working" support tickets answerable without scraping Sentry.
   | "lead.unlock_blocked"
-  | "quote.sent";
+  | "quote.sent"
+  // Referral program lifecycle events (Lanes B + C). All written from
+  // webhook handlers / lib/referralRewards.ts under service-role.
+  | "referral.qualified"
+  | "referral.reward.applied"
+  | "referral.reward.banked"
+  | "referral.reward.banked_applied"
+  | "referral.reward.clawed_back"
+  | "referral.reward.noop";
 
 type RecordAuditInput = {
   orgId: string;
