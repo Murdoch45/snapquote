@@ -502,7 +502,7 @@ export function MyLinkPageClient({
                 Download Referral QR
               </Button>
 
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <div className="grid grid-cols-2 gap-3">
                 <div className="rounded-[10px] border border-border bg-muted px-4 py-3">
                   <p className="text-xs font-medium uppercase tracking-[0.05em] text-muted-foreground">Pending</p>
                   <p className="mt-1 text-2xl font-semibold tabular-nums text-foreground">
@@ -510,32 +510,29 @@ export function MyLinkPageClient({
                   </p>
                 </div>
                 <div className="rounded-[10px] border border-border bg-muted px-4 py-3">
-                  <p className="text-xs font-medium uppercase tracking-[0.05em] text-muted-foreground">Qualified</p>
-                  <p className="mt-1 text-2xl font-semibold tabular-nums text-foreground">
-                    {referralSummary.qualifiedCount}
+                  <p className="text-xs font-medium uppercase tracking-[0.05em] text-muted-foreground">
+                    Credit Earned
                   </p>
-                </div>
-                <div className="rounded-[10px] border border-border bg-muted px-4 py-3">
-                  <p className="text-xs font-medium uppercase tracking-[0.05em] text-muted-foreground">Rewarded</p>
-                  <p className="mt-1 text-2xl font-semibold tabular-nums text-foreground">
-                    {referralSummary.rewardedCount}
-                  </p>
-                </div>
-                <div className="rounded-[10px] border border-border bg-muted px-4 py-3">
-                  <p className="text-xs font-medium uppercase tracking-[0.05em] text-muted-foreground">Earned</p>
                   <p className="mt-1 text-2xl font-semibold tabular-nums text-foreground">
                     {new Intl.NumberFormat("en-US", {
                       style: "currency",
                       currency: "USD",
                       maximumFractionDigits: 0
-                    }).format(referralSummary.totalEarnedDollars)}
+                    }).format(referralSummary.creditEarnedDollars)}
                   </p>
                 </div>
               </div>
 
+              {referralSummary.hasUnappliedCredit ? (
+                <p className="text-xs text-muted-foreground">
+                  Your earned credit applies to your bill automatically when you upgrade to a paid plan.
+                </p>
+              ) : null}
+
               <p className="text-xs text-muted-foreground">
-                When a referred contractor signs up using your link and starts a paid plan, you&apos;ll see them
-                move from Pending to Qualified, then to Rewarded once the credit is applied to your account.
+                You earn a $120 credit when someone you referred signs up for a paid plan. The credit is
+                applied to your bill automatically — right away if you&apos;re already on a paid plan, or
+                when you next upgrade if you&apos;re on Solo.
               </p>
             </>
           ) : (

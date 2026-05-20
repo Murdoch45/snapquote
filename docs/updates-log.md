@@ -3,6 +3,40 @@
 > ⚠️ **FOR REFERENCE ONLY — DO NOT TREAT AS GROUND TRUTH.**
 > Always verify against the actual codebase before acting on anything here.
 
+### 2026-05-20 [Source: Claude Code] — Referral follow-up: MyLink UI cleanup + banked credit applied BEFORE checkout
+
+Two web-only follow-up changes on top of Lanes 0/A/B/C/D. Worked in `.claude/worktrees/referral-followup` branched off `origin/main` at `78983dd`. Merged to `origin/main` as commit `<RECORDED ON MERGE>`.
+
+**Change 1 — MyLink referral section UI cleanup.** Dropped the 4-box surface (Pending / Qualified / Rewarded / Earned) for 2 boxes (Pending / Credit Earned), exposed less internal plumbing to contractors. Changed files:
+
+- [`lib/referrals/getReferralSummary.ts`](../lib/referrals/getReferralSummary.ts) — `ReferralSummary` type updated. Dropped `qualifiedCount`, `rewardedCount`, `totalEarnedDollars`. Added `creditEarnedDollars` (number, computed as count of referrals where `status IN ('qualified','rewarded')` × `REFERRAL_REWARD_VALUE_CENTS` ÷ 100 — uses the constant exported from `lib/referralRewards.ts` so any future reward-value change has one place to update) and `hasUnappliedCredit` (boolean, true when any `referral_rewards` row matches `kind='banked_trial' AND status='pending' AND applied_at IS NULL AND clawed_back_at IS NULL`). Used a `count: "exact", head: true` query for the boolean — no row fetch, just a count, four parallel selects.
+- [`components/MyLinkPageClient.tsx`](../components/MyLinkPageClient.tsx) — grid swapped from `grid-cols-2 sm:grid-cols-4` to `grid-cols-2`. Second box label changed to "Credit Earned" (renders the dollar via `Intl.NumberFormat`). New conditional `<p>` between the grid and the bottom explainer that only renders when `hasUnappliedCredit` is true: "Your earned credit applies to your bill automatically when you upgrade to a paid plan." Bottom explainer rewritten away from the Pending→Qualified→Rewarded three-state flow to plain language: "You earn a $120 credit when someone you referred signs up for a paid plan. The credit is applied to your bill automatically — right away if you're already on a paid plan, or when you next upgrade if you're on Solo."
+- `/api/app/referrals/summary` route untouched — it returns the result of `getReferralSummary` directly, so the shape change flows through transparently.
+
+**Change 2 — banked referral credit applied to Stripe customer balance BEFORE the Checkout Session is created on Solo→paid upgrade.** The verification pass earlier today found that for a SOLO referrer with a banked reward, [`applyBankedRewardForOrg`](../lib/referralRewards.ts) was only ever called either from the existing-paid-plan upgrade branch (which a SOLO user doesn't hit) or from the post-checkout webhook (which fires after the user has already seen and paid the full headline price). Fix in [`app/api/stripe/checkout/route.ts`](../app/api/stripe/checkout/route.ts) inserts a pre-session block:
+
+1. Query `referral_rewards` for a banked/pending reward for the calling org. If none → skip; fall through to the existing path unchanged.
+2. If a banked reward exists and the org has no `stripe_customer_id` yet (the typical SOLO case), call `stripe.customers.create({ email: auth.userEmail, metadata: { userId, orgId } })` and use the new customer id.
+3. Call `applyBankedRewardForOrg(orgId, customerId)`. The atomic UPDATE-WHERE-NULL claim in `lib/referralRewards.ts` line 354-369 either flips the reward row's `status` from `pending` → `applied` (and `kind` from `banked_trial` → `stripe_balance`) and writes a `-$120` `customer.balance` transaction, or returns a `noop` outcome. Stripe write uses `idempotencyKey=referral-reward-banked:${rewardId}` so even a hypothetical duplicate path is single-counted on Stripe's side.
+4. Create the Checkout Session with `customer: <pre-credited customer id>` so the hosted page shows the reduced amount due.
+
+No-double-apply guarantee verified by code trace:
+
+- After the pre-session call wins the DB claim, the reward row has `kind='stripe_balance' AND status='applied' AND applied_at IS NOT NULL` ([`lib/referralRewards.ts:354-369`](../lib/referralRewards.ts:354)).
+- The webhook's `handleCheckoutCompleted` calls `applyBankedRewardForOrg(orgId, session.customer)` ([`app/api/stripe/webhook/route.ts:301-317`](../app/api/stripe/webhook/route.ts:301)). That function's initial SELECT filters on `kind='banked_trial' AND status='pending' AND applied_at IS NULL AND clawed_back_at IS NULL` ([`lib/referralRewards.ts:328-337`](../lib/referralRewards.ts:328)). The row no longer matches → function returns `{ outcome: 'noop', reason: 'no_banked_reward' }` ([`lib/referralRewards.ts:340-343`](../lib/referralRewards.ts:340)) → no Stripe write, no second credit.
+- If the pre-session path's Stripe write fails (e.g. stale customer), `applyBankedRewardForOrg` ROLLS BACK the DB claim ([`lib/referralRewards.ts:397-405`](../lib/referralRewards.ts:397)) and re-throws. The checkout route catches the throw, Sentry-logs, and proceeds. The reward row goes back to `pending` so the webhook's later call CAN apply it to `session.customer` (the post-create Stripe customer, which is fresh and works). Net: credit applied exactly once, just possibly to a different Stripe customer than was originally targeted.
+- Fail-safe: every step in the pre-session block is inside a try/catch that captures to Sentry with `area=referral-reward-banked-apply, stage=checkout-pre-session`. The checkout call proceeds regardless. The contractor's upgrade is never blocked.
+
+`npx next build` exit 0 in the worktree, no new warnings (the existing `@sentry/nextjs disableLogger` deprecation + Next workspace-root inference warning are unchanged from prior builds).
+
+Live verification: demo login walkthrough on `snapquote.us` after Vercel deploy READY confirmed no 500s on `/app`, `/app/leads`, `/app/plan`, `/app/credits`, `/app/quotes`, `/dashboard/my-link`. The MyLink page rendered the new 2-box layout with the expected $0 credit (demo has no referrals). Vercel runtime logs for 5xx (`statusCode=500,502,503,504`) and `level=[error,fatal]` over the 5-minute window post-deploy: zero matches. Did not exercise the Solo→paid pre-apply path live (would require a real Stripe payment); guarantee verified by code trace + the existing earlier-today simulation showing the banked path lands correctly.
+
+Edge case flagged: an abandoned-then-retried Solo→paid checkout creates a SECOND Stripe customer (the first sits orphan in Stripe with the credit applied but no subscription). The DB claim still prevents double-applying, so the second attempt would not show the discount. Acceptable trade-off — most users complete checkout on the first attempt. Recovery for the orphan case would be a `stripe.customers.search` by `metadata.orgId` follow-up, not part of this change.
+
+**Lane discipline.** Worked entirely in `.claude/worktrees/referral-followup`, used a junction for `node_modules` from the primary checkout to skip a full install, copied `.env.local` into the worktree for the build. `git add` with explicit paths only — 4 files: `lib/referrals/getReferralSummary.ts`, `components/MyLinkPageClient.tsx`, `app/api/stripe/checkout/route.ts`, plus docs. Did not touch the primary checkout's other-agent uncommitted state, did not touch any orphan worktree directories under `.claude/worktrees`.
+
+---
+
 ### 2026-05-20 [Source: Claude Code] — Referral program Lane D (dashboard UI) shipped
 
 Lane D of the parallel referral build — contractor-facing UI so an authenticated org can see and share its own referral code, link, QR, and counts. Branched a fresh worktree off `origin/main` at `d430dc1` (Lane 0 schema commit; Lane A had not yet merged when I cut the branch). Built U16 + U17, merged to `origin/main` as commit `3621210eebdf6ab6e8ad5e057981878de04cbccf`. Vercel deploy `dpl_6T9GxzmrX3uCzvMeoNzQ5U3CJonZ` READY at 2026-05-20T14:09:51 UTC.

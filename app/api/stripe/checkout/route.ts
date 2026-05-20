@@ -323,15 +323,105 @@ export async function POST(request: Request) {
       initialCustomerId = null;
     }
 
+    // 2026-05-20 follow-up — apply any BANKED referral reward to the org's
+    // Stripe customer BEFORE creating the Checkout Session, so the hosted
+    // checkout page shows the reduced "amount due" instead of the full
+    // plan price.
+    //
+    // Pre-fix, applyBankedRewardForOrg only ran inside the upgrade branch
+    // (an existing paid plan) and inside handleCheckoutCompleted (after
+    // checkout finished). SOLO→paid upgrades hit neither path until after
+    // the user had paid the full amount, leaving the $120 credit to draw
+    // down on the next invoice — bad UX on annual plans especially.
+    //
+    // applyBankedRewardForOrg needs a Stripe customer to write the credit
+    // against. When initialCustomerId is null (typical SOLO upgrade with
+    // no prior billing), we create one explicitly here, then apply the
+    // banked reward to it.
+    //
+    // Idempotency / no-double-apply guarantee:
+    //   - applyBankedRewardForOrg atomically claims the reward row via
+    //     UPDATE-WHERE-NULL on applied_at (lib/referralRewards.ts:354-369).
+    //     Once the claim wins, status flips to 'applied' and kind flips
+    //     to 'stripe_balance'.
+    //   - The webhook's later call to applyBankedRewardForOrg from
+    //     handleCheckoutCompleted re-runs the same SELECT. Its filter
+    //     (kind='banked_trial' AND status='pending' AND applied_at IS
+    //     NULL) no longer matches → returns {outcome: 'noop', reason:
+    //     'no_banked_reward'} → clean no-op.
+    //   - The Stripe createBalanceTransaction call also passes
+    //     idempotencyKey=`referral-reward-banked:${rewardId}` — defense
+    //     in depth against duplicate Stripe writes.
+    //   - If Stripe rejects the balance write (e.g. stale customer),
+    //     applyBankedRewardForOrg ROLLS BACK the DB claim and re-throws
+    //     (lib/referralRewards.ts:397-405). We swallow the throw,
+    //     Sentry-log it, and let the webhook re-attempt on the new
+    //     session.customer.
+    //
+    // Fail-safe: ANY error in this block (DB read, customer create, or
+    // Stripe write) MUST NOT block the upgrade. The contractor falls
+    // back to the original Lane C behavior — pay full price, credit
+    // lands via the webhook afterward. Sentry-only signal so support
+    // can investigate.
+    let resolvedCustomerId = initialCustomerId;
+    try {
+      const { data: bankedReward, error: bankedLoadError } = await admin
+        .from("referral_rewards")
+        .select("id")
+        .eq("referrer_org_id", auth.orgId)
+        .eq("kind", "banked_trial")
+        .eq("status", "pending")
+        .is("applied_at", null)
+        .is("clawed_back_at", null)
+        .limit(1)
+        .maybeSingle();
+      if (bankedLoadError) throw bankedLoadError;
+
+      if (bankedReward) {
+        if (!resolvedCustomerId) {
+          // Create a fresh Stripe customer so we have something to attach
+          // the credit to. The webhook's saveSubscriptionRecord will
+          // persist this customer id to subscriptions on
+          // checkout.session.completed. metadata.orgId is the canonical
+          // link so support can locate this customer if the user ever
+          // abandons checkout.
+          const created = await stripe.customers.create({
+            email: auth.userEmail,
+            metadata: {
+              userId: auth.userId,
+              orgId: auth.orgId
+            }
+          });
+          resolvedCustomerId = created.id;
+        }
+        await applyBankedRewardForOrg(auth.orgId, resolvedCustomerId);
+      }
+    } catch (bankedApplyError) {
+      Sentry.captureException(bankedApplyError, {
+        tags: {
+          area: "referral-reward-banked-apply",
+          stage: "checkout-pre-session",
+          org_id: auth.orgId,
+          user_id: auth.userId
+        },
+        extra: { resolvedCustomerId: resolvedCustomerId ?? null }
+      });
+      // Intentionally KEEP resolvedCustomerId as-is — if we created a
+      // fresh customer before applyBankedRewardForOrg failed, we still
+      // want to use that one for the session so we don't pile up
+      // additional orphan customers via the customer_email fallback path.
+      // The webhook will retry the banked apply against the same customer.
+    }
+
     let session: Stripe.Checkout.Session;
     try {
       session = await stripe.checkout.sessions.create(
-        buildSubscriptionSessionParams(initialCustomerId)
+        buildSubscriptionSessionParams(resolvedCustomerId)
       );
     } catch (stripeError) {
-      if (initialCustomerId && isStripeResourceMissingError(stripeError, "customer")) {
+      if (resolvedCustomerId && isStripeResourceMissingError(stripeError, "customer")) {
         console.warn(
-          `[stripe/checkout] Stale stripe_customer_id ${initialCustomerId} for user ${auth.userId}; clearing and retrying with fresh customer.`
+          `[stripe/checkout] Stale stripe_customer_id ${resolvedCustomerId} for user ${auth.userId}; clearing and retrying with fresh customer.`
         );
         await clearStaleStripeCustomerId(admin, auth.userId);
         session = await stripe.checkout.sessions.create(
