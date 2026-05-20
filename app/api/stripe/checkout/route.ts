@@ -15,6 +15,7 @@ import {
   isStripeResourceMissingError,
   type StripePlanKey
 } from "@/lib/stripe";
+import { applyBankedRewardForOrg } from "@/lib/referralRewards";
 import type { OrgPlan } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -236,6 +237,29 @@ export async function POST(request: Request) {
           });
           if (creditResetError) {
             throw creditResetError;
+          }
+
+          // Lane C U14 — apply any banked referral reward for this org
+          // now that we have an active Stripe customer. The applier is a
+          // no-op if there's no banked reward; idempotent if it was
+          // already applied. Failure does NOT block the upgrade — the
+          // customer would lose the credit silently which we surface to
+          // Sentry instead.
+          const upgradeCustomerId =
+            (activeSubscription.stripe_customer_id as string | null | undefined) ?? null;
+          if (upgradeCustomerId) {
+            try {
+              await applyBankedRewardForOrg(auth.orgId, upgradeCustomerId);
+            } catch (bankedApplyError) {
+              Sentry.captureException(bankedApplyError, {
+                tags: {
+                  area: "referral-reward-banked-apply",
+                  stage: "checkout-upgrade",
+                  org_id: auth.orgId
+                },
+                extra: { stripeCustomerId: upgradeCustomerId }
+              });
+            }
           }
         }
       }

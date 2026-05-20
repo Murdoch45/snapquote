@@ -13,6 +13,11 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getPlanFromPriceId, getStripe, getStripeWebhookSecret } from "@/lib/stripe";
 import { claimWebhookEvent, releaseWebhookEvent } from "@/lib/webhookEvents";
 import { sendPlanUpgradedEmail, sendPlanEndedEmail } from "@/lib/planChangeEmails";
+import {
+  applyBankedRewardForOrg,
+  clawbackReferrerRewardForReferredOrg,
+  qualifyAndRewardReferral
+} from "@/lib/referralRewards";
 import type { OrgPlan } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -292,6 +297,24 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   // default monthly_credits=5 until the next renewal cycle reset.
   await resetOrganizationCredits(orgId, plan);
   void sendPlanUpgradedEmail(orgId, plan);
+
+  // Lane C U14 — apply any banked referral reward for the orgs that just
+  // got a Stripe customer via this checkout (fresh-checkout path; in-place
+  // upgrades from a paid plan hit the matching call in /api/stripe/checkout).
+  // No-op if no banked reward. Idempotent if already applied. Failures
+  // bubble to Sentry but do not block the checkout completion.
+  try {
+    await applyBankedRewardForOrg(orgId, stripeCustomerId);
+  } catch (bankedApplyError) {
+    Sentry.captureException(bankedApplyError, {
+      tags: {
+        area: "referral-reward-banked-apply",
+        stage: "checkout-completed-webhook",
+        org_id: orgId
+      },
+      extra: { stripeCustomerId }
+    });
+  }
 }
 
 async function handleSubscriptionChanged(subscription: Stripe.Subscription) {
@@ -398,6 +421,42 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
     // Recurring renewal email — only on cycle invoices, not the first one.
     if (isRenewalCycle && (effectivePlan === "TEAM" || effectivePlan === "BUSINESS")) {
       void sendPlanUpgradedEmail(orgId, effectivePlan);
+    }
+
+    // Referral qualification (Lane B U9). Fire ONLY on a real paid payment,
+    // never on a trial-start (status=trialing produces no invoice, but a
+    // $0 invoice could in principle land here from a 100%-off coupon —
+    // amount_paid > 0 is the gate). subscription_create covers direct-paid
+    // signups; subscription_cycle + has_used_trial covers trial→paid
+    // converts where Stripe labels the first post-trial invoice as a cycle.
+    // qualify_referral is keyed on referred_org_id (UNIQUE) and idempotent,
+    // so an over-call on later cycles is a clean no-op.
+    if (invoice.amount_paid > 0) {
+      const billingReason = invoice.billing_reason;
+      let shouldQualify = billingReason === "subscription_create";
+      if (!shouldQualify && billingReason === "subscription_cycle") {
+        try {
+          const admin = createAdminClient();
+          const { data: org } = await admin
+            .from("organizations")
+            .select("has_used_trial")
+            .eq("id", orgId)
+            .maybeSingle();
+          shouldQualify = (org?.has_used_trial as boolean | undefined) === true;
+        } catch (lookupError) {
+          // Don't block on the trial-state lookup — log and skip.
+          Sentry.captureException(lookupError, {
+            tags: {
+              area: "referral-qualify-stripe",
+              stage: "has-used-trial-lookup",
+              org_id: orgId
+            }
+          });
+        }
+      }
+      if (shouldQualify) {
+        await qualifyAndRewardReferral(orgId, "stripe_invoice_paid", "stripe");
+      }
     }
   } catch (error) {
     console.warn("Invoice payment skipped: unable to retrieve subscription.", error);
@@ -510,10 +569,32 @@ async function handleChargeRefunded(charge: Stripe.Charge) {
     if (!session) return;
 
     const orgId = session.metadata?.orgId;
+    if (!orgId) return;
+
     const creditAmountRaw = session.metadata?.creditAmount;
     const creditAmount = Number(creditAmountRaw);
+    const isCreditPackRefund = Number.isInteger(creditAmount) && creditAmount > 0;
 
-    if (!orgId || !Number.isInteger(creditAmount) || creditAmount <= 0) return;
+    if (!isCreditPackRefund) {
+      // Non-credit-pack refund (subscription refund) — fire referral
+      // clawback if this org is a referred party with a rewarded referral.
+      // clawbackReferrerRewardForReferredOrg is idempotent on the
+      // referrals.clawed_back_at UPDATE-WHERE-NULL claim, so partial /
+      // duplicate refund events serialize cleanly without double-reversing.
+      try {
+        await clawbackReferrerRewardForReferredOrg(orgId);
+      } catch (clawbackError) {
+        Sentry.captureException(clawbackError, {
+          tags: {
+            area: "referral-clawback-stripe",
+            stage: "subscription-refund",
+            org_id: orgId
+          },
+          extra: { session_id: session.id }
+        });
+      }
+      return;
+    }
 
     // Audit 3 H7 — partial-refund double-deduct fix. Stripe fires a
     // separate `charge.refunded` event per refund. A $50 charge refunded
