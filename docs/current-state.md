@@ -6,6 +6,16 @@
 > The audit session content (April 15–20, 2026) is the most reliable portion.
 > Older sections carry more uncertainty.
 
+## Referral program — MyLink explainer copy + credit-pack scope finding — 2026-05-20 [Source: Claude Code]
+
+**Change 1 — extended MyLink explainer with checkout-page caveat.** [`components/MyLinkPageClient.tsx:532-538`](../components/MyLinkPageClient.tsx:532) — the explainer paragraph below the Pending / Credit Earned boxes now also covers the Stripe-checkout UX wrinkle that the banked-credit-before-checkout fix earlier today partially fronted: even with a customer-balance credit applied, the hosted checkout page may still display the plan's normal price. New trailing sentence added in-paragraph: "When you do upgrade, the Stripe checkout page may still show the plan's normal price as if you're being charged — your credit is applied automatically behind the scenes, so you won't actually be charged until it runs out." Deliberately avoids any specific month count because the $120 credit covers different durations depending on plan ($120 ≈ 6 months of Team at $19.99/mo or ≈ 3 months of Business at $39.99/mo).
+
+**Change 2 — investigation only (no code changed): the $120 referral credit CANNOT be spent on bonus lead-credit packs.** Credit-pack purchases at [`app/api/stripe/credits/route.ts:73`](../app/api/stripe/credits/route.ts:73) use `mode: "payment"`, which creates a Stripe one-time PaymentIntent rather than an Invoice. Subscription (Team/Business) checkouts at [`app/api/stripe/checkout/route.ts`](../app/api/stripe/checkout/route.ts) use `mode: "subscription"`, which creates Subscription Invoices. Stripe's customer-balance credit (the negative `customer.balance` we write via `applyBankedRewardForOrg` in [`lib/referralRewards.ts:378-395`](../lib/referralRewards.ts:378)) is consumed by Invoices only — PaymentIntents charge the payment method for the full line-item amount and never touch customer balance. The credit-pack webhook handler at [`app/api/stripe/webhook/route.ts:179-246`](../app/api/stripe/webhook/route.ts:179) confirms this: it records the purchase via the `record_credit_purchase` RPC and reads `session.amount_total` (the card charge) for the confirmation email — there is no `customer.balance` interaction anywhere in the credit-pack flow. Conclusion: referral credits are scoped to subscription billing only. If the team later wants credit-pack purchases to consume referral credit, that's a deliberate product decision requiring code changes (likely shifting credit packs to invoice-based billing, e.g. `invoice_creation: { enabled: true }` on the Checkout Session or moving to a billing-meter pattern) — not a behavior we get for free today.
+
+`npx next build` exit 0. Live verification: demo session walkthrough on `snapquote.us` after Vercel deploy confirmed the new explainer text is visible on the MyLink page; `/app`, `/app/leads`, `/app/plan`, `/app/credits`, `/app/quotes` all returned 200; Vercel runtime logs over the 5-minute window post-deploy showed zero 5xx and zero error/fatal level events.
+
+---
+
 ## Referral program — UI cleanup + banked credit applied BEFORE checkout — 2026-05-20 [Source: Claude Code]
 
 Two follow-up changes on top of Lanes 0/A/B/C/D, both web-only:

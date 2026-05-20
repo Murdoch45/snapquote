@@ -3,6 +3,34 @@
 > ⚠️ **FOR REFERENCE ONLY — DO NOT TREAT AS GROUND TRUTH.**
 > Always verify against the actual codebase before acting on anything here.
 
+### 2026-05-20 [Source: Claude Code] — Referral follow-up: MyLink explainer copy + credit-pack scope finding
+
+Two follow-ups on the referral program later in the same day as the UI-cleanup + banked-credit-before-checkout work earlier. Worktree `.claude/worktrees/referral-followup-2` off `origin/main` at `31f0fe4` (the prior merge). Merged to `origin/main` as commit `<RECORDED ON MERGE>`.
+
+**Change 1 — extended MyLink referral-section explainer.** Single-file copy change to [`components/MyLinkPageClient.tsx:532-538`](../components/MyLinkPageClient.tsx:532). Added a trailing sentence to the existing explainer paragraph so contractors aren't surprised by the Stripe checkout page showing the headline plan price even after a credit has been applied:
+
+> "You earn a $120 credit when someone you referred signs up for a paid plan. The credit is applied to your bill automatically — right away if you're already on a paid plan, or when you next upgrade if you're on Solo. **When you do upgrade, the Stripe checkout page may still show the plan's normal price as if you're being charged — your credit is applied automatically behind the scenes, so you won't actually be charged until it runs out.**"
+
+Avoided any specific month count because the $120 credit covers different durations per plan ($120 ≈ 6 months of Team at $19.99/mo, ≈ 3 months of Business at $39.99/mo). The phrase "until it runs out" is plan-agnostic and accurate for both.
+
+**Change 2 — investigation only (no code changed): does the $120 referral credit apply to bonus lead-credit pack purchases?** Answer: **NO, only to subscription billing.** Evidence:
+
+- [`app/api/stripe/credits/route.ts:73`](../app/api/stripe/credits/route.ts:73) — credit-pack Checkout Session is built with `mode: "payment"`. mode=payment Sessions create a Stripe PaymentIntent and charge the customer's payment method for the line-item total. PaymentIntents do NOT consume `customer.balance` — that's Stripe's documented behavior for one-time payments.
+- [`app/api/stripe/checkout/route.ts`](../app/api/stripe/checkout/route.ts) (subscription / plan upgrade path) — uses `mode: "subscription"`, which creates a Stripe Subscription and Invoice cycle. Invoices DO consume `customer.balance` automatically. This is where the referral credit lands.
+- [`lib/referralRewards.ts:378-395`](../lib/referralRewards.ts:378) — the referral reward is written via `stripe.customers.createBalanceTransaction(customerId, { amount: -REFERRAL_REWARD_VALUE_CENTS, currency: "usd", … })`, which is a negative customer-balance credit. Customer-balance credit semantics: applied only to invoices.
+- [`app/api/stripe/webhook/route.ts:179-246`](../app/api/stripe/webhook/route.ts:179) (`handleCreditPackCheckoutCompleted`) — records the purchase via the `record_credit_purchase` Supabase RPC, reads `session.amount_total` (the actual card charge) for the confirmation email; there is no `customer.balance` reference anywhere in the credit-pack flow.
+- Webhook router at [`app/api/stripe/webhook/route.ts:248-252`](../app/api/stripe/webhook/route.ts:248) discriminates by `session.metadata?.creditAmount` — credit packs and subscriptions are distinct branches with distinct billing primitives.
+
+Implication: a contractor with a banked or applied $120 referral credit who buys a credit pack pays the full pack price (e.g. $9.99 / $39.99 / $69.99) on their card. The $120 sits untouched on their `customer.balance` and only draws down when their next subscription invoice issues. If the team wants credit packs to consume referral credit too, that's a deliberate product decision — requires moving credit packs to invoice-based billing (e.g. `invoice_creation: { enabled: true }` on the Checkout Session, or a Stripe-billing-meter / one-off-invoice approach). Not a free behavior.
+
+`npx next build` exit 0, no new warnings. Build log shows only the pre-existing `@sentry/nextjs disableLogger` deprecation and Next workspace-root inference warning that have been there since prior builds.
+
+**Live verification.** Demo session signed in as `demo@snapquote.us` on `snapquote.us` after the Vercel deploy went READY. The new explainer text rendered on `/dashboard/my-link`. `/app`, `/app/leads`, `/app/plan`, `/app/credits`, `/app/quotes` all returned 200. Vercel runtime logs filtered to `statusCode=500,502,503,504` and `level=[error,fatal]` over the 5-minute window post-deploy returned 0 matches. Sentry MCP unavailable in this session; Vercel runtime logs substituted as the server-side proxy.
+
+**Lane discipline.** Branched fresh from `origin/main`, worked in isolated worktree, `git add` with explicit paths only (3 files: `components/MyLinkPageClient.tsx`, `docs/current-state.md`, `docs/updates-log.md`). Did not touch the primary checkout's other-agent uncommitted state. Did not touch any orphan worktree directories. Worktree and temp main-merge worktree removed; local + remote feature branch deleted.
+
+---
+
 ### 2026-05-20 [Source: Claude Code] — Referral follow-up: MyLink UI cleanup + banked credit applied BEFORE checkout
 
 Two web-only follow-up changes on top of Lanes 0/A/B/C/D. Worked in `.claude/worktrees/referral-followup` branched off `origin/main` at `78983dd`. Merged to `origin/main` as commit `<RECORDED ON MERGE>`.

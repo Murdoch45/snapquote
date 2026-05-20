@@ -532,7 +532,10 @@ export function MyLinkPageClient({
               <p className="text-xs text-muted-foreground">
                 You earn a $120 credit when someone you referred signs up for a paid plan. The credit is
                 applied to your bill automatically — right away if you&apos;re already on a paid plan, or
-                when you next upgrade if you&apos;re on Solo.
+                when you next upgrade if you&apos;re on Solo. When you do upgrade, the Stripe checkout
+                page may still show the plan&apos;s normal price as if you&apos;re being charged — your
+                credit is applied automatically behind the scenes, so you won&apos;t actually be charged
+                until it runs out.
               </p>
             </>
           ) : (
