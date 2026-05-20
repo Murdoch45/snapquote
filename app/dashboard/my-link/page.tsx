@@ -3,6 +3,7 @@ import { AppShell } from "@/components/AppShell";
 import { MyLinkPageClient } from "@/components/MyLinkPageClient";
 import { UpgradeBanner } from "@/components/UpgradeBanner";
 import { requireAuth } from "@/lib/auth/requireAuth";
+import { getReferralSummary } from "@/lib/referrals/getReferralSummary";
 import {
   buildDefaultSocialCaption,
   resolveBusinessNameForCaption
@@ -20,7 +21,8 @@ export default async function MyLinkPage() {
     },
     { data: profile },
     { data: organization },
-    usage
+    usage,
+    referralSummary
   ] = await Promise.all([
     supabase.auth.getUser(),
     supabase
@@ -33,7 +35,8 @@ export default async function MyLinkPage() {
       .select("name")
       .eq("id", auth.orgId)
       .single(),
-    getMonthlyUsage(auth.orgId)
+    getMonthlyUsage(auth.orgId),
+    getReferralSummary(auth.orgId)
   ]);
 
   if (!profile?.public_slug || !profile?.business_name) {
@@ -69,6 +72,7 @@ export default async function MyLinkPage() {
         requestLink={requestLink}
         initialSocialCaption={initialSocialCaption}
         canEditCaption={auth.role === "OWNER"}
+        referralSummary={referralSummary}
       />
     </AppShell>
   );
