@@ -9,6 +9,7 @@ import { getOwnerEmailForOrg } from "@/lib/organizationOwners";
 import { getPlanMonthlyCredits } from "@/lib/plans";
 import { sendPlanEndedEmail, sendPlanUpgradedEmail } from "@/lib/planChangeEmails";
 import { claimWebhookEvent, releaseWebhookEvent } from "@/lib/webhookEvents";
+import { tryFireReferralEmail } from "@/lib/referralEmails";
 import {
   clawbackReferrerRewardForReferredOrg,
   qualifyAndRewardReferral
@@ -328,6 +329,10 @@ export async function POST(request: Request) {
         // is true — trial starts must never qualify.
         if (event.is_trial_period === false) {
           await qualifyAndRewardReferral(orgId, "rc_initial_purchase", "revenuecat");
+          // 2026-05-20 — Event B trigger for the referral-program email
+          // sequence (mobile IAP path). Same gate as the Stripe webhook's
+          // handleInvoicePaid — fires on the FIRST real paid conversion.
+          await tryFireReferralEmail(orgId, "rc_initial_purchase");
         }
         break;
       }

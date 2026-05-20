@@ -3,6 +3,54 @@
 > ⚠️ **FOR REFERENCE ONLY — DO NOT TREAT AS GROUND TRUTH.**
 > Always verify against the actual codebase before acting on anything here.
 
+### 2026-05-20 [Source: Claude Code] — Email system overhaul: shared template + 2 referral emails + 3-week sequence + Resend SPF fix recommendation
+
+Single overhaul of SnapQuote's transactional email system covering 4 tasks: shared template, two referral emails, send-timing state machine, deliverability investigation. Worktree `.claude/worktrees/email-system` off `origin/main` at `8e3af13`. Merged to `origin/main` as commit `<RECORDED ON MERGE>`.
+
+**Task 1 — Shared email template.** Extracted the inner HTML from the `<script type="__bundler/template">` block of `C:\Users\murdo\Downloads\SnapQuote Email Template.html` — outer file is a preview/bundler shell; the actual usable email HTML is the JSON-encoded string inside. New [`lib/emailLogo.ts`](../lib/emailLogo.ts) holds the embedded base64 JPG (44×39 gradient logo) so each rendered email carries an inline logo that survives Outlook desktop's image-blocking. Rewrote [`lib/emailTemplates.ts`](../lib/emailTemplates.ts) — `renderEmailShell(title, bodyHtml, opts?)` now emits the 600px Helvetica Neue / electric-blue (#2563EB) template with MSO conditionals for Outlook, an optional `preheader` field, and a default footer that varies by `audience: "contractor" | "customer"`. `renderButton(label, href)` is the new MSO-safe VML roundrect CTA. New helpers `renderParagraph(html, { bottom })` and `renderSignOff(line?)` so every email body matches the template's 16/26px Helvetica Neue, #1F2937 body color, 20px paragraph spacing. All 16 existing email builders migrated to the new shell: welcome, estimate-sent, customer-confirmation, new-lead-notification, plan-upgraded, plan-ended, trial-ending-soon, payment-failed, estimate-accepted, estimate-expiring-soon, estimate-expired, account-deleted, credit-purchase-confirmation, trial-expired, team-member-joined, estimate-not-viewed-nudge.
+
+**Task 2 — Referral program email.** New `buildReferralProgramEmail` in [`lib/emailTemplates.ts`](../lib/emailTemplates.ts):
+
+- Subject: "Earn 3 months of Business free for every contractor you refer"
+- Preheader: "Share your link — when a contractor you refer upgrades, you get the credit."
+- Headline (H1): "Refer a contractor, earn 3 months free"
+- Body (per spec, in template body typography): paragraphs ending in CTA "Get your referral link" → `https://snapquote.us/dashboard/my-link#refer-a-contractor`. The "$120 account credit" amount is bolded inline within the second paragraph. Closes with the standard "— The SnapQuote team" sign-off.
+- Anchor target: added `id="refer-a-contractor"` and `scroll-mt-6` to the Refer-a-Contractor `<Card>` in [`components/MyLinkPageClient.tsx:443`](../components/MyLinkPageClient.tsx:443) so the email's deep-link scrolls directly to the contractor's-own-code share section (not the manual-redeem promo entry). Auth-gated by `requireAuth` on the existing `/dashboard/my-link` server component — signed-out users hit `/login` first and are redirected back via the standard auth flow, no email-specific logic needed.
+
+**Task 3 — Send-timing state + triggers + 3-week delay.** New Supabase migration `20260520_referral_email_sends_columns` applied to live project `upqvbdldoyiqqshxquxa`: adds 3 timestamptz columns to `organizations` (`referral_email_first_sent_at`, `referral_email_second_sent_at`, `referral_email_second_due_at`) and a partial index on the last two scoped to rows with a pending due_at. New orchestration module [`lib/referralEmails.ts`](../lib/referralEmails.ts):
+
+- `tryFireReferralEmail(orgId, source)` — called from both Event A (first lead) and Event B (first paid conversion). State machine: if neither email sent → claim email_1 atomically + send; if email_1 sent but email_2 not → check 3-week floor (claim+send immediately if elapsed, otherwise set `referral_email_second_due_at` for cron pickup). Idempotency via UPDATE-WHERE-NULL atomic claims on each timestamp column. Send-failure paths roll back the claim so the next trigger retries. Email send also uses a per-org Resend idempotency key for defense-in-depth against double-sends.
+- `processReferralEmailFollowups()` — daily cron handler that finds rows where `referral_email_second_due_at <= now() AND referral_email_second_sent_at IS NULL`, sends email #2 with the same atomic claim. Caps the per-run batch at 100 orgs.
+
+Trigger wiring:
+
+- **Event A (first lead)** — added `tryFireReferralEmail(finalOrgId, "first_lead")` to the `Promise.allSettled` inside [`app/api/public/lead-submit/route.ts`](../app/api/public/lead-submit/route.ts) `after()` block. Lives next to the existing contractor/customer notification calls so the customer-facing response is unaffected. The "first lead" semantics is enforced by the UPDATE-WHERE-NULL claim on email_first_sent_at — every-lead invocation is idempotent and only the org's first-ever lead actually sends.
+- **Event B (first paid conversion, Stripe path)** — added `await tryFireReferralEmail(orgId, "stripe_invoice_paid")` alongside the existing `await qualifyAndRewardReferral(orgId, ...)` call in [`app/api/stripe/webhook/route.ts`](../app/api/stripe/webhook/route.ts) `handleInvoicePaid`, sharing the same gating (`invoice.amount_paid > 0` + billing_reason check). Function failures are Sentry-tagged inside the trigger; webhook delivery is unaffected.
+- **Event B (RC IAP path)** — added `await tryFireReferralEmail(orgId, "rc_initial_purchase")` to [`app/api/revenuecat/webhook/route.ts`](../app/api/revenuecat/webhook/route.ts) INITIAL_PURCHASE non-trial branch, alongside the existing `qualifyAndRewardReferral` call.
+- **Cron** — new route [`app/api/cron/referral-email-followup/route.ts`](../app/api/cron/referral-email-followup/route.ts), scheduled `0 18 * * *` daily via [`vercel.json`](../vercel.json). Bearer-authed via the existing `isAuthorizedBearer(authorization, CRON_SECRET)` helper.
+
+Chose the first-lead trigger (Event A) over the 14-day fallback because the lead-submit path has a clean `after()` hook that's already fire-and-forget for notification work; the additional call is zero-risk.
+
+**Task 4 — Deliverability finding: Resend NOT authorized at the apex SPF.** Live DNS via `Resolve-DnsName` 2026-05-20:
+
+- `snapquote.us` TXT: `v=spf1 include:spf.protection.outlook.com -all` — authorizes Outlook only. `-all` is a hard fail, so every Resend email FAILS SPF.
+- `_dmarc.snapquote.us` TXT: `v=DMARC1; p=quarantine; adkim=r; aspf=r; rua=mailto:dmarc_rua@onsecureserver.net;` — quarantine policy quarantines DMARC failures to the Junk folder (matches the reported symptom).
+- `resend._domainkey.snapquote.us` TXT: `p=<base64-key>` (single string, no `v=DKIM1; k=rsa;` prefix — RFC 6376 §3.6.1 makes those defaults and this is Resend's prescribed format). DKIM PASSES for Resend emails.
+- `send.snapquote.us` (Resend Return-Path subdomain): **MISSING** — no TXT, no MX. SOA-only response.
+
+Symptom explained: Resend emails arrive signed (DKIM passes) but with an SPF-fail envelope. DMARC relaxed alignment (`aspf=r`) means SPF can be ignored if DKIM aligns — but many receivers nevertheless treat SPF-fail as a reputation signal AND the missing Return-Path subdomain compounds it.
+
+DNS records the user must add (cannot be done from code):
+
+1. TXT at `send.snapquote.us` → `v=spf1 include:amazonses.com ~all` (Resend uses AWS SES; this authorizes the SES SMTP relay).
+2. MX at `send.snapquote.us` → `feedback-smtp.us-east-1.amazonses.com` priority 10 (verify exact region via Resend dashboard at https://resend.com/domains).
+
+DMARC `p=quarantine` stays as-is — once SPF is fixed, the quarantine policy continues to provide spoofing protection without affecting legitimate sends.
+
+**Lane discipline.** Branched fresh from `origin/main`, isolated worktree, junctioned `node_modules` from primary to skip a full install, copied `.env.local`. `git add` with explicit paths (10 changed files: `lib/emailLogo.ts` new, `lib/emailTemplates.ts` rewritten, `lib/referralEmails.ts` new, `supabase/migrations/<timestamp>_referral_email_sends_columns.sql` new, `app/api/public/lead-submit/route.ts` two-line change, `app/api/stripe/webhook/route.ts` import + 2-line addition, `app/api/revenuecat/webhook/route.ts` import + 2-line addition, `app/api/cron/referral-email-followup/route.ts` new, `vercel.json` cron entry added, `components/MyLinkPageClient.tsx` anchor id added, `docs/current-state.md` + `docs/updates-log.md` updated). Did not touch the primary checkout's other-agent uncommitted state. Did not touch any orphan worktree directories under `.claude/worktrees`.
+
+---
+
 ### 2026-05-20 [Source: Claude Code] — Referral follow-up: MyLink explainer copy + credit-pack scope finding
 
 Two follow-ups on the referral program later in the same day as the UI-cleanup + banked-credit-before-checkout work earlier. Worktree `.claude/worktrees/referral-followup-2` off `origin/main` at `31f0fe4` (the prior merge). Merged to `origin/main` as commit `<RECORDED ON MERGE>`.

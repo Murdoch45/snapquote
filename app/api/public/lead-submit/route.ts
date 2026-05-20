@@ -4,6 +4,7 @@ import { triggerEstimatorForLead } from "@/lib/ai/triggerEstimator";
 import { buildCustomerConfirmationEmail } from "@/lib/emailTemplates";
 import { haversineMiles } from "@/lib/maps";
 import { notifyContractor, notifyCustomer, sendEmail } from "@/lib/notify";
+import { tryFireReferralEmail } from "@/lib/referralEmails";
 import { rateLimit } from "@/lib/rateLimit";
 import { getClientIp } from "@/lib/ip";
 import { normalizeServiceTypes } from "@/lib/services";
@@ -430,7 +431,15 @@ export async function POST(request: Request) {
             }).catch((error) => {
               console.warn("lead-submit customer email failed:", error);
             })
-          : Promise.resolve()
+          : Promise.resolve(),
+        // 2026-05-20 — Event A trigger for the referral-program email
+        // sequence (lib/referralEmails.ts). Fires inside after() so the
+        // customer response is never blocked. The function is internally
+        // gated by an UPDATE-WHERE-NULL atomic claim on
+        // referral_email_first_sent_at — every-lead invocation is
+        // idempotent and only the org's first-ever lead actually sends.
+        // Errors are swallowed + Sentry-tagged inside tryFireReferralEmail.
+        tryFireReferralEmail(finalOrgId, "first_lead")
       ]);
     });
 
