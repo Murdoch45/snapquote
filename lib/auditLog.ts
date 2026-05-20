@@ -24,7 +24,13 @@ export type AuditAction =
   // Logging the cap-hit makes upsell triggers and "why isn't unlock
   // working" support tickets answerable without scraping Sentry.
   | "lead.unlock_blocked"
-  | "quote.sent";
+  | "quote.sent"
+  // Referral lifecycle bookends. `attached` covers both auto-attach via
+  // the /r/CODE cookie at signup AND manual entry through the in-app
+  // redeem endpoint — metadata.source distinguishes them. Letting both
+  // paths share one action keeps reporting one-line ("how many referrals
+  // attached in the last 30 days") without a JOIN.
+  | "referral.attached";
 
 type RecordAuditInput = {
   orgId: string;
