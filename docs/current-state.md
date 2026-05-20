@@ -6,6 +6,22 @@
 > The audit session content (April 15–20, 2026) is the most reliable portion.
 > Older sections carry more uncertainty.
 
+## Referral program — pre-build audit + Lane 0 schema landed — 2026-05-20 [Source: Claude Code]
+
+**Pre-build audit** of the contractor-to-contractor referral program against the live repo (HEAD at audit time was the stale `claude/audit-1-mobile-handoff-2026-05-11` branch; cross-checks done against `origin/main` 99a6474). Findings delivered in-session. Key live-verified facts: zero referral artifacts pre-existed (Supabase `execute_sql … ILIKE '%referral%'` returned 0 tables; Stripe `list_coupons` returned `[]`); both webhook handlers converge on `setOrganizationPlan(orgId, plan)` so qualification belongs at the plan-transition layer; mobile IAP plan transitions flow through the web RC webhook so referral qualification needs zero iOS changes; new signups get a 14-day Stripe trial so qualification must wait for the first non-zero `invoice.payment_succeeded`, not `subscription.created`. Audit produced a 21-unit dependency + parallelization map across 5 lanes (0–E) for concurrent build agents.
+
+**Lane 0 schema landed** — three migrations applied to live Supabase (`upqvbdldoyiqqshxquxa`) and matched in-repo via `supabase/migrations/`:
+
+- `20260520130825_referral_lane0_schema` — adds `organizations.referral_code` (text, UNIQUE, nullable for backfill window) with a `^[A-Z0-9]{6,12}$` CHECK; creates `public.referrals` (UNIQUE on `referred_org_id`, FK CASCADE on both org refs, `referrals_not_self` CHECK), `public.referral_rewards` (FK CASCADE referral_id + referrer_org_id, `value_cents >= 0` CHECK); 3 enums (`referral_status`, `referral_reward_kind`, `referral_reward_status`); 5 indexes; RLS enabled on both tables with member-scoped SELECT policies mirroring `audit_log` (no INSERT/UPDATE/DELETE policies — service_role only via bypass); helper `public.generate_referral_code(p_length integer DEFAULT 8)` returning 32-char-alphabet codes (no 0/O/1/I/L).
+- `20260520130951_referral_lane0_backfill_codes` — backfills all 4 live orgs (`969V97TW`, `8CCCR6FM`, `H253W3V4`, `9MKYWPPU` — all unique, all conforming to format); promotes `referral_code` to NOT NULL; tightens `generate_referral_code` grants to revoke anon + authenticated (U1's REVOKE FROM public didn't catch Supabase's auto-grants).
+- `20260520131103_referral_lane0_rpc_functions` — `qualify_referral(p_referred_org_id, p_reason) → integer` (atomic UPDATE-WHERE-pending; returns row count; idempotent against retry); `record_referral_reward(p_referral_id, p_value_cents, p_stripe_balance_txn_id) → integer` (atomic UPDATE-WHERE-NULL-on-rewarded_at then INSERT referral_rewards in single transaction; mirrors the `credit_purchases.refunded_at` Audit 3 H7 pattern; returns 1 on first reward, 0 on no-op). Both `SECURITY DEFINER, SET search_path = public, pg_temp`, service_role only.
+
+Live verification: Supabase MCP `execute_sql` confirmed all columns, enums, constraints, RLS policies, function shapes + grants present and correct. Sample qualify_referral call with non-existent UUID returned `0, 0` over two calls — idempotency proven. `npx next build` in the worktree exit code 0 (60+ routes compiled, no new warnings). Merged to `origin/main` as commit `<merge-sha-to-fill-on-merge>`.
+
+Schema is now ready for the parallel build lanes (A capture / B qualification / C reward / D UI / E ops). No new env vars required for the full build — every secret reuses existing Supabase / Stripe / Resend production secrets; Upstash provisioning is the only outstanding gap and it pre-dates this lane (Audit 8 H9).
+
+---
+
 ## Supabase `lead-photos` bucket orphan cleanup — 2026-05-15 [Source: Claude Code]
 
 One-time cleanup of orphan storage objects left behind after the 2026-05-15 mass DB delete (73 orgs + 3,250 falconn leads older than 7 days). Cascade had removed the matching `lead_photos` rows but the underlying storage objects were stranded — Supabase blocks direct `DELETE storage.objects` from SQL, and the dashboard's folder-delete fails ("Failed to retrieve all files within folder") on large folders. New script at [`scripts/cleanup-orphan-photos.ts`](../scripts/cleanup-orphan-photos.ts) (dry-run default, `--execute` to act, batched delete in 100s via Storage API, retry/backoff on the list endpoint which gateway-times-out intermittently on busy folders).
