@@ -10,6 +10,7 @@ import { getServiceBadgeClassName } from "@/lib/serviceColors";
 import { toCurrency, formatCurrencyRange } from "@/lib/utils";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { DashboardLeadList } from "@/components/DashboardLeadList";
+import { ReferralRedeemBanner } from "@/components/ReferralRedeemBanner";
 
 function formatToday() {
   return new Intl.DateTimeFormat("en-US", {
@@ -65,6 +66,32 @@ function getEstimateLabel(lead: DashboardLead): string {
   if (lead.ai_status === "failed") return "AI unavailable";
   const range = formatCurrencyRange(lead.ai_estimate_low, lead.ai_estimate_high, lead.ai_suggested_price);
   return range ?? "AI estimate pending";
+}
+
+// Window over which a fresh org can manually redeem a referral code on
+// the dashboard. Anchored to the same 7-day boundary the redeem API
+// enforces — the API is the source of truth; this constant only
+// decides whether to render the banner at all.
+const REFERRAL_REDEEM_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+
+async function shouldShowReferralBanner(orgId: string): Promise<boolean> {
+  const supabase = await createServerSupabaseClient();
+  const [{ data: org }, { data: referral }] = await Promise.all([
+    supabase
+      .from("organizations")
+      .select("plan, created_at")
+      .eq("id", orgId)
+      .maybeSingle(),
+    supabase
+      .from("referrals")
+      .select("id")
+      .eq("referred_org_id", orgId)
+      .maybeSingle()
+  ]);
+  if (!org || referral?.id) return false;
+  if ((org.plan as string) !== "SOLO") return false;
+  const ageMs = Date.now() - new Date(org.created_at as string).getTime();
+  return ageMs <= REFERRAL_REDEEM_WINDOW_MS;
 }
 
 // The fixed-width 140px stat cards have ~100px of inner content space; at
@@ -316,11 +343,25 @@ function RecentLeadsSkeleton() {
   );
 }
 
+async function DashboardReferralPrompt({ orgId }: { orgId: string }) {
+  const show = await shouldShowReferralBanner(orgId);
+  if (!show) return null;
+  return <ReferralRedeemBanner />;
+}
+
 export default async function DashboardPage() {
   const auth = await requireAuth();
 
   return (
     <div className="space-y-4">
+      {/* Referral redeem prompt — only renders for fresh SOLO orgs with
+          no inbound referral yet, inside the 7-day window. Wrapped in
+          Suspense (no skeleton) so the eligibility query streams in
+          alongside the rest of the dashboard instead of blocking it. */}
+      <Suspense fallback={null}>
+        <DashboardReferralPrompt orgId={auth.orgId} />
+      </Suspense>
+
       {/* Date header */}
       <div className="text-center">
         <p className="text-base font-semibold text-foreground">{formatToday()}</p>
