@@ -3,9 +3,9 @@
 > ⚠️ **FOR REFERENCE ONLY — DO NOT TREAT AS GROUND TRUTH.**
 > Always verify against the actual codebase before acting on anything here.
 
-### 2026-05-20 [Source: Claude Code] — Referral program Lanes B + C (qualification + reward) landed (U14 deferred — waiting on Lane A)
+### 2026-05-20 [Source: Claude Code] — Referral program Lanes B + C (qualification + reward + U14 banked apply) landed
 
-Built and merged Lanes B (qualification trigger) and C (reward applier + clawback) on top of Lane 0 (`d430dc1`). Work units U9, U10, U12, U13, U15 shipped. **U14 (apply banked rewards on later checkout upgrade) deferred** — it edits `app/api/stripe/checkout/route.ts`, which Lane A also owns, and Lane A was not yet on `origin/main` at merge time. U14 will land as a follow-up commit once Lane A merges.
+Built and merged Lanes B (qualification trigger) and C (reward applier + clawback) on top of Lane 0 (`d430dc1`). All six work units shipped: U9, U10, U12, U13, U14, U15. Lane A landed on `origin/main` (`acb0296`) mid-session while my partial-merge push was being prepared, so U14 was completed in the same merge instead of as a follow-up commit. Final merge commit pushed to `origin/main`.
 
 **New module — `lib/referralRewards.ts`:**
 
@@ -30,7 +30,14 @@ Built and merged Lanes B (qualification trigger) and C (reward applier + clawbac
 
 **Verification.** `npx next build` exit 0 with no new errors or warnings (pre-existing Sentry `disableLogger` deprecation, Next.js multi-lockfile workspace-root warning, and one `<img>` ESLint warning in `app/layout.tsx` are unchanged). Live Supabase MCP confirmed live RPC signatures match my call shapes. `referrals` and `referral_rewards` tables had 0 rows pre-deploy (clean slate). Live billing webhook handlers smoke-tested via Stripe Dashboard's "Send test webhook" + Sentry 5-min window confirms no new spikes (live verification details in this entry's follow-up after Vercel deploys).
 
-**Concurrency hygiene.** Worktree at `.claude/worktrees/referral-lane-bc` branched off `origin/main` at `d430dc1`. Staged only the 6 files this lane owns (`lib/auditLog.ts`, `lib/referralRewards.ts`, `app/api/stripe/webhook/route.ts`, `app/api/revenuecat/webhook/route.ts`, `docs/current-state.md`, `docs/updates-log.md`) — no `git add .`. Did not touch the primary checkout (which had unrelated uncommitted changes from another session) or any other agent's worktree.
+**U14 — banked-reward apply on later upgrade (`app/api/stripe/checkout/route.ts` + `app/api/stripe/webhook/route.ts`).** Two call sites (consistent reward mechanic across both — always `customer.balance` credit, never the `trial_period_days` alternative; idempotent via `applyBankedRewardForOrg`'s atomic UPDATE-WHERE-NULL claim on `referral_rewards.applied_at`):
+
+- Inline in checkout route, inside `if (currentSubscription)` / `isUpgrade` after `update_org_plan_credits` succeeds: `applyBankedRewardForOrg(auth.orgId, upgradeCustomerId)` for the in-place upgrade case (TEAM→BUSINESS etc.) where the Stripe customer already exists.
+- In Stripe webhook `handleCheckoutCompleted`, after the existing setOrganizationPlan/resetCredits/email block: `applyBankedRewardForOrg(orgId, stripeCustomerId)` for the fresh-checkout case (SOLO→TEAM/BUSINESS) where the Stripe customer doesn't exist until Stripe creates it during the Checkout Session and `checkout.session.completed` fires.
+
+Sentry-tagged `area=referral-reward-banked-apply / stage=checkout-upgrade` or `stage=checkout-completed-webhook`. Failures captured but do NOT roll back the upgrade — losing a $120 credit is recoverable via support; failing the upgrade itself is not.
+
+**Concurrency hygiene.** Worktree at `.claude/worktrees/referral-lane-bc` branched off `origin/main` at `d430dc1`. Pulled in Lane A (`acb0296`) via `git merge origin/main --no-ff` once it landed; resolved a one-line conflict in `lib/auditLog.ts` by combining `referral.attached` (Lane A) and `referral.qualified` / `referral.reward.*` (Lanes B+C) into one union. Staged only files this lane owns or modified — no `git add .`. Did not touch the primary checkout (which had unrelated uncommitted changes from another session) or any other agent's worktree / branch / stash.
 
 ---
 

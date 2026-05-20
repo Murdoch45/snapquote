@@ -6,9 +6,9 @@
 > The audit session content (April 15–20, 2026) is the most reliable portion.
 > Older sections carry more uncertainty.
 
-## Referral program — Lanes B + C (qualification + reward) landed (except U14) — 2026-05-20 [Source: Claude Code]
+## Referral program — Lanes B + C (qualification + reward + U14 banked apply) landed — 2026-05-20 [Source: Claude Code]
 
-**Lanes B (qualification) and C (reward) built and merged**, with the single exception of U14 (banked-reward apply on later checkout upgrade), which is BLOCKED on Lane A landing first because both edit `app/api/stripe/checkout/route.ts`. Lane A was not on `origin/main` at merge time, so U14 is deferred to a follow-up commit once Lane A merges.
+**Lanes B (qualification) and C (reward) built and merged**, including U14 (banked-reward apply on later checkout upgrade). Lane A landed mid-session on `origin/main` (`acb0296`) so U14 was completed in-lane on top of the merge rather than as a follow-up commit.
 
 Files shipped this lane:
 - New `lib/referralRewards.ts` — three exports: `applyRewardToReferrer(referralId)` (Stripe credit OR bank to DB), `applyBankedRewardForOrg(referrerOrgId, stripeCustomerId)` (for U14 — banked → applied on upgrade; unused until Lane A merges), `clawbackReferrerRewardForReferredOrg(referredOrgId)` (refund reversal), plus the shared `qualifyAndRewardReferral(orgId, reason, source)` helper that calls `qualify_referral` and chains `applyRewardToReferrer` on newly-qualified. Reward value locked at `REFERRAL_REWARD_VALUE_CENTS = 12_000` ($120 — "3 months Business plan").
@@ -26,9 +26,11 @@ Design invariants (locked):
 
 Verification: `npx next build` exit 0 (no new warnings; pre-existing Sentry deprecation + workspace-root + ESLint `<img>` warnings unchanged). Live Supabase MCP confirmed `qualify_referral` and `record_referral_reward` RPC signatures match the calls (`uuid, text → integer` and `uuid, integer, text → integer`). Both `referrals` and `referral_rewards` tables empty pre-deploy (clean slate). Merged to `origin/main` as commit `<merge-sha-to-fill>`.
 
-**U14 status — READY AND WAITING.** Once Lane A merges, the follow-up commit will:
-1. Import `applyBankedRewardForOrg` into `app/api/stripe/checkout/route.ts`.
-2. After a successful upgrade in the `if (currentSubscription)` / `isUpgrade` branch (and in the fresh-checkout-session branch on completion), call `applyBankedRewardForOrg(auth.orgId, stripeCustomerId)` to convert any pending `referral_rewards` row from `banked_trial` to `stripe_balance` with status `applied`. Already implemented in `lib/referralRewards.ts`; just needs wiring into the route.
+**U14 wired.** Two call sites:
+1. `app/api/stripe/checkout/route.ts` — inside the `if (currentSubscription)` / `isUpgrade` branch, after the `update_org_plan_credits` RPC succeeds, calls `applyBankedRewardForOrg(auth.orgId, stripeCustomerId)`. Try/caught with Sentry `area=referral-reward-banked-apply / stage=checkout-upgrade`. Handles the TEAM→BUSINESS-style in-place upgrade where the Stripe customer already exists.
+2. `app/api/stripe/webhook/route.ts` — inside `handleCheckoutCompleted`, after `setOrganizationPlan`/`resetOrganizationCredits`/`sendPlanUpgradedEmail`, calls `applyBankedRewardForOrg(orgId, stripeCustomerId)`. Try/caught with Sentry `area=referral-reward-banked-apply / stage=checkout-completed-webhook`. Handles the fresh-checkout path (SOLO→TEAM/BUSINESS) where the Stripe customer is created by the Checkout Session and only becomes addressable at webhook time.
+
+Both paths are idempotent via `applyBankedRewardForOrg`'s atomic UPDATE-WHERE-NULL claim on `referral_rewards.applied_at`. A failure in either path is captured to Sentry but does NOT roll back the checkout/upgrade — losing a $120 credit is recoverable via support; failing the upgrade itself is not.
 
 ---
 

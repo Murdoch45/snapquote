@@ -14,6 +14,7 @@ import { getPlanFromPriceId, getStripe, getStripeWebhookSecret } from "@/lib/str
 import { claimWebhookEvent, releaseWebhookEvent } from "@/lib/webhookEvents";
 import { sendPlanUpgradedEmail, sendPlanEndedEmail } from "@/lib/planChangeEmails";
 import {
+  applyBankedRewardForOrg,
   clawbackReferrerRewardForReferredOrg,
   qualifyAndRewardReferral
 } from "@/lib/referralRewards";
@@ -296,6 +297,24 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   // default monthly_credits=5 until the next renewal cycle reset.
   await resetOrganizationCredits(orgId, plan);
   void sendPlanUpgradedEmail(orgId, plan);
+
+  // Lane C U14 — apply any banked referral reward for the orgs that just
+  // got a Stripe customer via this checkout (fresh-checkout path; in-place
+  // upgrades from a paid plan hit the matching call in /api/stripe/checkout).
+  // No-op if no banked reward. Idempotent if already applied. Failures
+  // bubble to Sentry but do not block the checkout completion.
+  try {
+    await applyBankedRewardForOrg(orgId, stripeCustomerId);
+  } catch (bankedApplyError) {
+    Sentry.captureException(bankedApplyError, {
+      tags: {
+        area: "referral-reward-banked-apply",
+        stage: "checkout-completed-webhook",
+        org_id: orgId
+      },
+      extra: { stripeCustomerId }
+    });
+  }
 }
 
 async function handleSubscriptionChanged(subscription: Stripe.Subscription) {
