@@ -440,7 +440,10 @@ export function MyLinkPageClient({
         </CardContent>
       </Card>
 
-      <Card className="shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
+      <Card
+        id="refer-a-contractor"
+        className="scroll-mt-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]"
+      >
         <CardHeader className="pb-4">
           <p className="text-xs font-medium uppercase tracking-[0.05em] text-muted-foreground">Refer a Contractor</p>
           <CardDescription>

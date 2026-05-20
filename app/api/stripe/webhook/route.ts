@@ -13,6 +13,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getPlanFromPriceId, getStripe, getStripeWebhookSecret } from "@/lib/stripe";
 import { claimWebhookEvent, releaseWebhookEvent } from "@/lib/webhookEvents";
 import { sendPlanUpgradedEmail, sendPlanEndedEmail } from "@/lib/planChangeEmails";
+import { tryFireReferralEmail } from "@/lib/referralEmails";
 import {
   applyBankedRewardForOrg,
   clawbackReferrerRewardForReferredOrg,
@@ -456,6 +457,12 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
       }
       if (shouldQualify) {
         await qualifyAndRewardReferral(orgId, "stripe_invoice_paid", "stripe");
+        // 2026-05-20 — Event B trigger for the referral-program email
+        // sequence. Fires alongside referral qualification on the SAME
+        // gate (first real paid invoice). Internally idempotent + 3-week
+        // floor enforced against email #1. Failures are Sentry-tagged
+        // inside the function; webhook delivery is unaffected.
+        await tryFireReferralEmail(orgId, "stripe_invoice_paid");
       }
     }
   } catch (error) {
