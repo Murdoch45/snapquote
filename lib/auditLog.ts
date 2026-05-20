@@ -25,8 +25,14 @@ export type AuditAction =
   // working" support tickets answerable without scraping Sentry.
   | "lead.unlock_blocked"
   | "quote.sent"
-  // Referral program lifecycle events (Lanes B + C). All written from
-  // webhook handlers / lib/referralRewards.ts under service-role.
+  // Referral lifecycle. `attached` (Lane A) covers both auto-attach via
+  // the /r/CODE cookie at signup AND manual entry through the in-app
+  // redeem endpoint — metadata.source distinguishes them. Letting both
+  // paths share one action keeps reporting one-line ("how many referrals
+  // attached in the last 30 days") without a JOIN.
+  // The rest (Lanes B + C) are written from webhook handlers and
+  // lib/referralRewards.ts under service-role.
+  | "referral.attached"
   | "referral.qualified"
   | "referral.reward.applied"
   | "referral.reward.banked"

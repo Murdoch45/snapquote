@@ -67,7 +67,8 @@ export async function POST(request: Request) {
     const [
       { data: latestSubscription },
       { data: activeSubscriptions },
-      { data: organization }
+      { data: organization },
+      { data: inboundReferral }
     ] = await Promise.all([
       admin
         .from("subscriptions")
@@ -90,10 +91,38 @@ export async function POST(request: Request) {
         .from("organizations")
         .select("has_used_trial")
         .eq("id", auth.orgId)
-        .single()
+        .single(),
+      // Lane A U7 — inbound referral lookup. Carrying the code on the
+      // Stripe metadata is traceability-only; the qualifier downstream
+      // reads it from the referrals row, not from Stripe. We send it so
+      // a Stripe-side audit can match a paid subscription back to the
+      // referral that drove it without a Supabase join.
+      admin
+        .from("referrals")
+        .select("code")
+        .eq("referred_org_id", auth.orgId)
+        .maybeSingle()
     ]);
 
     const activeSubscription = (activeSubscriptions ?? [])[0] ?? null;
+    const referralCode = (inboundReferral?.code as string | null | undefined) ?? null;
+
+    // Build the metadata blob we attach to every Stripe object this
+    // route creates/updates (upgrade subscription, new subscription_data,
+    // new Checkout Session). Stripe metadata is string→string; we only
+    // emit the referralCode key when we actually have one so it never
+    // shows up as the string "null".
+    const buildStripeMetadata = (
+      extra: Record<string, string>
+    ): Record<string, string> => {
+      const base: Record<string, string> = {
+        userId: auth.userId,
+        orgId: auth.orgId,
+        ...extra
+      };
+      if (referralCode) base.referralCode = referralCode;
+      return base;
+    };
 
     // If the DB row references a Stripe subscription that no longer exists
     // (e.g. test → live mode swap, manual deletion in Stripe dashboard,
@@ -166,11 +195,7 @@ export async function POST(request: Request) {
             }
           ],
           proration_behavior: "create_prorations",
-          metadata: {
-            userId: auth.userId,
-            orgId: auth.orgId,
-            plan: planConfig.orgPlan
-          }
+          metadata: buildStripeMetadata({ plan: planConfig.orgPlan })
         });
 
         const { error: subscriptionUpdateError } = await admin
@@ -229,11 +254,7 @@ export async function POST(request: Request) {
     const planConfig = getStripePlanConfig(body.plan as StripePlanKey, billingInterval);
     const hasUsedTrial = organization?.has_used_trial ?? false;
     const subscriptionData: Stripe.Checkout.SessionCreateParams.SubscriptionData = {
-      metadata: {
-        userId: auth.userId,
-        orgId: auth.orgId,
-        plan: toOrgPlan(body.plan)
-      }
+      metadata: buildStripeMetadata({ plan: toOrgPlan(body.plan) })
     };
 
     if (!hasUsedTrial) {
@@ -259,11 +280,7 @@ export async function POST(request: Request) {
       client_reference_id: auth.userId,
       customer: customerId ?? undefined,
       customer_email: customerId ? undefined : auth.userEmail ?? undefined,
-      metadata: {
-        userId: auth.userId,
-        orgId: auth.orgId,
-        plan: toOrgPlan(body.plan)
-      },
+      metadata: buildStripeMetadata({ plan: toOrgPlan(body.plan) }),
       subscription_data: subscriptionData
     });
 
