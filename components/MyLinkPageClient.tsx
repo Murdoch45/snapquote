@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import type { ReferralSummary } from "@/lib/referrals/getReferralSummary";
 import { SOCIAL_CAPTION_MAX_LENGTH } from "@/lib/socialCaption";
 
 type Props = {
@@ -15,6 +16,7 @@ type Props = {
   requestLink: string;
   initialSocialCaption: string;
   canEditCaption: boolean;
+  referralSummary: ReferralSummary;
 };
 
 type SaveError = {
@@ -80,9 +82,11 @@ export function MyLinkPageClient({
   businessName,
   requestLink,
   initialSocialCaption,
-  canEditCaption
+  canEditCaption,
+  referralSummary
 }: Props) {
   const qrCodeRef = useRef<HTMLCanvasElement | null>(null);
+  const referralQrCodeRef = useRef<HTMLCanvasElement | null>(null);
   const captionTextareaRef = useRef<HTMLTextAreaElement | null>(null);
   const [socialCaption, setSocialCaption] = useState(initialSocialCaption);
   const [draftCaption, setDraftCaption] = useState(initialSocialCaption);
@@ -208,6 +212,61 @@ export function MyLinkPageClient({
     anchor.download = fileName;
     anchor.click();
     toast.success("QR code downloaded.");
+  };
+
+  const onCopyReferralLink = async () => {
+    if (!referralSummary.referralLink) {
+      toast.error("Referral link not available yet.");
+      return;
+    }
+    try {
+      await copyText(referralSummary.referralLink);
+      toast.success("Referral link copied.");
+    } catch {
+      toast.error("Could not copy referral link.");
+    }
+  };
+
+  const onShareReferralLink = async () => {
+    if (!referralSummary.referralLink) {
+      toast.error("Referral link not available yet.");
+      return;
+    }
+    const shareText = `Join me on SnapQuote — fast outdoor-service estimates. Sign up with my link to get started:`;
+    if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+      try {
+        await navigator.share({
+          title: "Join me on SnapQuote",
+          text: shareText,
+          url: referralSummary.referralLink
+        });
+        return;
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+      }
+    }
+    try {
+      await copyText(referralSummary.referralLink);
+      toast.success("Sharing isn't available here — link copied instead.");
+    } catch {
+      toast.error("Could not share or copy referral link.");
+    }
+  };
+
+  const onDownloadReferralQrCode = () => {
+    const canvas = referralQrCodeRef.current;
+    if (!canvas) {
+      toast.error("Referral QR code is not ready yet.");
+      return;
+    }
+    const anchor = document.createElement("a");
+    const slug = businessName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || "snapquote";
+    anchor.href = canvas.toDataURL("image/png");
+    anchor.download = `${slug}-referral-qr-code.png`;
+    anchor.click();
+    toast.success("Referral QR code downloaded.");
   };
 
   return (
@@ -378,6 +437,112 @@ export function MyLinkPageClient({
           <div className="rounded-[8px] border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/30 px-4 py-3 text-sm text-amber-800 dark:text-amber-200">
             Your QR code updates automatically if you change your Public URL in Settings.
           </div>
+        </CardContent>
+      </Card>
+
+      <Card className="shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
+        <CardHeader className="pb-4">
+          <p className="text-xs font-medium uppercase tracking-[0.05em] text-muted-foreground">Refer a Contractor</p>
+          <CardDescription>
+            Earn 3 months of Business plan ($120 account credit) for each contractor you refer who signs up for a paid plan.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-5">
+          {referralSummary.referralCode && referralSummary.referralLink ? (
+            <>
+              <div>
+                <p className="text-xs font-medium uppercase tracking-[0.05em] text-muted-foreground">Your referral code</p>
+                <p className="mt-1 font-mono text-2xl font-semibold tracking-[0.2em] text-foreground">
+                  {referralSummary.referralCode}
+                </p>
+              </div>
+
+              <div className="relative rounded-[8px] border border-border bg-muted px-4 py-3">
+                <Link2 className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  className="h-auto border-0 bg-transparent px-0 pl-7 py-0 text-sm font-medium text-foreground shadow-none focus-visible:ring-0"
+                  value={referralSummary.referralLink}
+                  readOnly
+                  aria-label="Your referral link"
+                />
+              </div>
+
+              <div className="flex flex-wrap gap-3">
+                <Button type="button" onClick={onShareReferralLink}>
+                  <Share2 className="mr-2 h-4 w-4" />
+                  Share Referral Link
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="border-2 border-primary bg-transparent text-primary hover:bg-accent"
+                  onClick={onCopyReferralLink}
+                >
+                  <Copy className="mr-2 h-4 w-4" />
+                  Copy Link
+                </Button>
+              </div>
+
+              <div className="flex justify-center">
+                <div className="inline-flex rounded-[14px] border border-border bg-card p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]">
+                  <QRCodeCanvas
+                    ref={referralQrCodeRef}
+                    value={referralSummary.referralLink}
+                    size={180}
+                    marginSize={4}
+                    bgColor="#FFFFFF"
+                    fgColor="#111827"
+                    title={`Referral QR code for ${businessName}`}
+                  />
+                </div>
+              </div>
+
+              <Button type="button" onClick={onDownloadReferralQrCode}>
+                <Download className="mr-2 h-4 w-4" />
+                Download Referral QR
+              </Button>
+
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <div className="rounded-[10px] border border-border bg-muted px-4 py-3">
+                  <p className="text-xs font-medium uppercase tracking-[0.05em] text-muted-foreground">Pending</p>
+                  <p className="mt-1 text-2xl font-semibold tabular-nums text-foreground">
+                    {referralSummary.pendingCount}
+                  </p>
+                </div>
+                <div className="rounded-[10px] border border-border bg-muted px-4 py-3">
+                  <p className="text-xs font-medium uppercase tracking-[0.05em] text-muted-foreground">Qualified</p>
+                  <p className="mt-1 text-2xl font-semibold tabular-nums text-foreground">
+                    {referralSummary.qualifiedCount}
+                  </p>
+                </div>
+                <div className="rounded-[10px] border border-border bg-muted px-4 py-3">
+                  <p className="text-xs font-medium uppercase tracking-[0.05em] text-muted-foreground">Rewarded</p>
+                  <p className="mt-1 text-2xl font-semibold tabular-nums text-foreground">
+                    {referralSummary.rewardedCount}
+                  </p>
+                </div>
+                <div className="rounded-[10px] border border-border bg-muted px-4 py-3">
+                  <p className="text-xs font-medium uppercase tracking-[0.05em] text-muted-foreground">Earned</p>
+                  <p className="mt-1 text-2xl font-semibold tabular-nums text-foreground">
+                    {new Intl.NumberFormat("en-US", {
+                      style: "currency",
+                      currency: "USD",
+                      maximumFractionDigits: 0
+                    }).format(referralSummary.totalEarnedDollars)}
+                  </p>
+                </div>
+              </div>
+
+              <p className="text-xs text-muted-foreground">
+                When a referred contractor signs up using your link and starts a paid plan, you&apos;ll see them
+                move from Pending to Qualified, then to Rewarded once the credit is applied to your account.
+              </p>
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Your referral code isn&apos;t set up yet. Check back soon.
+            </p>
+          )}
         </CardContent>
       </Card>
     </div>
