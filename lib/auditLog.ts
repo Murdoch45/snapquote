@@ -25,12 +25,20 @@ export type AuditAction =
   // working" support tickets answerable without scraping Sentry.
   | "lead.unlock_blocked"
   | "quote.sent"
-  // Referral lifecycle bookends. `attached` covers both auto-attach via
+  // Referral lifecycle. `attached` (Lane A) covers both auto-attach via
   // the /r/CODE cookie at signup AND manual entry through the in-app
   // redeem endpoint — metadata.source distinguishes them. Letting both
   // paths share one action keeps reporting one-line ("how many referrals
   // attached in the last 30 days") without a JOIN.
-  | "referral.attached";
+  // The rest (Lanes B + C) are written from webhook handlers and
+  // lib/referralRewards.ts under service-role.
+  | "referral.attached"
+  | "referral.qualified"
+  | "referral.reward.applied"
+  | "referral.reward.banked"
+  | "referral.reward.banked_applied"
+  | "referral.reward.clawed_back"
+  | "referral.reward.noop";
 
 type RecordAuditInput = {
   orgId: string;

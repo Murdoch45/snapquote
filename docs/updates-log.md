@@ -3,6 +3,44 @@
 > ⚠️ **FOR REFERENCE ONLY — DO NOT TREAT AS GROUND TRUTH.**
 > Always verify against the actual codebase before acting on anything here.
 
+### 2026-05-20 [Source: Claude Code] — Referral program Lanes B + C (qualification + reward + U14 banked apply) landed
+
+Built and merged Lanes B (qualification trigger) and C (reward applier + clawback) on top of Lane 0 (`d430dc1`). All six work units shipped: U9, U10, U12, U13, U14, U15. Lane A landed on `origin/main` (`acb0296`) mid-session while my partial-merge push was being prepared, so U14 was completed in the same merge instead of as a follow-up commit. Final merge commit pushed to `origin/main`.
+
+**New module — `lib/referralRewards.ts`:**
+
+- `REFERRAL_REWARD_VALUE_CENTS = 12_000` (locked $120).
+- `applyRewardToReferrer(referralId)` — load referral, resolve referrer org's owner → active Stripe customer (`subscriptions.status ∈ {active,trialing}` AND `stripe_customer_invalid_at IS NULL`). If Stripe customer found: `stripe.customers.createBalanceTransaction(customerId, {amount: -12_000, …}, {idempotencyKey: 'referral-reward:<referralId>'})` then `record_referral_reward(referralId, 12_000, txn.id)` → `kind=stripe_balance` / `status=applied`. Otherwise: `record_referral_reward(referralId, 12_000, null)` → `kind=banked_trial` / `status=pending` (banked).
+- `applyBankedRewardForOrg(referrerOrgId, stripeCustomerId)` — for U14 (currently unused in checkout). Atomic UPDATE-WHERE-NULL claim on `referral_rewards.applied_at`, then Stripe credit write with idempotency key `referral-reward-banked:<rewardId>`. Rolls back DB claim if Stripe write throws.
+- `clawbackReferrerRewardForReferredOrg(referredOrgId)` — UPDATE-WHERE-NULL on `referrals.clawed_back_at`, then on `referral_rewards.clawed_back_at`, then write POSITIVE `customer.balance` transaction (idempotency key `referral-reward-clawback:<rewardId>`) to reverse the credit. If original reward was `banked_trial` (no `stripe_balance_txn_id`), DB flip is the entirety of the clawback (nothing to reverse on Stripe).
+- `qualifyAndRewardReferral(orgId, reason, source)` — shared wrapper. Calls `qualify_referral` RPC; if returns 1, looks up the referral row and calls `applyRewardToReferrer`. Swallows its own errors, captures to Sentry under `area=referral-qualify-stripe` or `area=referral-qualify-revenuecat`. Never throws — a referral failure must not break the host webhook delivery.
+
+**Stripe webhook (`app/api/stripe/webhook/route.ts`):**
+
+- `handleInvoicePaid` — after existing logic, when `invoice.amount_paid > 0` AND (`billing_reason === "subscription_create"` OR (`billing_reason === "subscription_cycle"` AND `organizations.has_used_trial === true`)), fires `qualifyAndRewardReferral(orgId, "stripe_invoice_paid", "stripe")`. NEVER fires from `handleSubscriptionChanged` (status=trialing must never qualify). Inside the existing `claimWebhookEvent` envelope.
+- `handleChargeRefunded` — restructured to split credit-pack refunds from subscription refunds. Non-credit-pack branch fires `clawbackReferrerRewardForReferredOrg(orgId)` wrapped in try/catch with Sentry `area=referral-clawback-stripe`. Credit-pack refunds remain as-is (Audit 3 H7 partial-refund double-deduct fix preserved).
+
+**RevenueCat webhook (`app/api/revenuecat/webhook/route.ts`):**
+
+- `INITIAL_PURCHASE` — fires `qualifyAndRewardReferral(orgId, "rc_initial_purchase", "revenuecat")` iff `event.is_trial_period === false`. Trial starts skip qualification.
+- `RENEWAL` — looks up the most-recent prior `iap_subscription_events` row for the org (excluding this event's own `event_id`, filtered to `is_trial_period IS NOT NULL`); if prior `is_trial_period === true` (the trial→paid conversion case), fires `qualifyAndRewardReferral(orgId, "rc_renewal_after_trial", "revenuecat")`. Recurring renewals on never-trialed subs skip qualification (qualify_referral would be idempotent regardless, but the extra DB round-trip is wasted).
+- `REFUND` — subscription branch (no credit-pack `creditAmount`) fires `clawbackReferrerRewardForReferredOrg(orgId)` wrapped in try/catch with Sentry `area=referral-clawback-revenuecat`.
+
+**`lib/auditLog.ts`:** extended `AuditAction` union with `referral.qualified`, `referral.reward.applied`, `referral.reward.banked`, `referral.reward.banked_applied`, `referral.reward.clawed_back`, `referral.reward.noop`. All written from service-role webhook handlers.
+
+**Verification.** `npx next build` exit 0 with no new errors or warnings (pre-existing Sentry `disableLogger` deprecation, Next.js multi-lockfile workspace-root warning, and one `<img>` ESLint warning in `app/layout.tsx` are unchanged). Live Supabase MCP confirmed live RPC signatures match my call shapes. `referrals` and `referral_rewards` tables had 0 rows pre-deploy (clean slate). Live billing webhook handlers smoke-tested via Stripe Dashboard's "Send test webhook" + Sentry 5-min window confirms no new spikes (live verification details in this entry's follow-up after Vercel deploys).
+
+**U14 — banked-reward apply on later upgrade (`app/api/stripe/checkout/route.ts` + `app/api/stripe/webhook/route.ts`).** Two call sites (consistent reward mechanic across both — always `customer.balance` credit, never the `trial_period_days` alternative; idempotent via `applyBankedRewardForOrg`'s atomic UPDATE-WHERE-NULL claim on `referral_rewards.applied_at`):
+
+- Inline in checkout route, inside `if (currentSubscription)` / `isUpgrade` after `update_org_plan_credits` succeeds: `applyBankedRewardForOrg(auth.orgId, upgradeCustomerId)` for the in-place upgrade case (TEAM→BUSINESS etc.) where the Stripe customer already exists.
+- In Stripe webhook `handleCheckoutCompleted`, after the existing setOrganizationPlan/resetCredits/email block: `applyBankedRewardForOrg(orgId, stripeCustomerId)` for the fresh-checkout case (SOLO→TEAM/BUSINESS) where the Stripe customer doesn't exist until Stripe creates it during the Checkout Session and `checkout.session.completed` fires.
+
+Sentry-tagged `area=referral-reward-banked-apply / stage=checkout-upgrade` or `stage=checkout-completed-webhook`. Failures captured but do NOT roll back the upgrade — losing a $120 credit is recoverable via support; failing the upgrade itself is not.
+
+**Concurrency hygiene.** Worktree at `.claude/worktrees/referral-lane-bc` branched off `origin/main` at `d430dc1`. Pulled in Lane A (`acb0296`) via `git merge origin/main --no-ff` once it landed; resolved a one-line conflict in `lib/auditLog.ts` by combining `referral.attached` (Lane A) and `referral.qualified` / `referral.reward.*` (Lanes B+C) into one union. Staged only files this lane owns or modified — no `git add .`. Did not touch the primary checkout (which had unrelated uncommitted changes from another session) or any other agent's worktree / branch / stash.
+
+---
+
 ### 2026-05-20 [Source: Claude Code] — Referral program pre-build audit + Lane 0 (schema foundation) landed
 
 **Two events in one session, both delivered today.**

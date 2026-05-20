@@ -6,6 +6,34 @@
 > The audit session content (April 15–20, 2026) is the most reliable portion.
 > Older sections carry more uncertainty.
 
+## Referral program — Lanes B + C (qualification + reward + U14 banked apply) landed — 2026-05-20 [Source: Claude Code]
+
+**Lanes B (qualification) and C (reward) built and merged**, including U14 (banked-reward apply on later checkout upgrade). Lane A landed mid-session on `origin/main` (`acb0296`) so U14 was completed in-lane on top of the merge rather than as a follow-up commit.
+
+Files shipped this lane:
+- New `lib/referralRewards.ts` — three exports: `applyRewardToReferrer(referralId)` (Stripe credit OR bank to DB), `applyBankedRewardForOrg(referrerOrgId, stripeCustomerId)` (for U14 — banked → applied on upgrade; unused until Lane A merges), `clawbackReferrerRewardForReferredOrg(referredOrgId)` (refund reversal), plus the shared `qualifyAndRewardReferral(orgId, reason, source)` helper that calls `qualify_referral` and chains `applyRewardToReferrer` on newly-qualified. Reward value locked at `REFERRAL_REWARD_VALUE_CENTS = 12_000` ($120 — "3 months Business plan").
+- `lib/auditLog.ts` — extended `AuditAction` with `referral.qualified`, `referral.reward.applied`, `referral.reward.banked`, `referral.reward.banked_applied`, `referral.reward.clawed_back`, `referral.reward.noop`.
+- `app/api/stripe/webhook/route.ts` — `handleInvoicePaid` now fires `qualifyAndRewardReferral(orgId, "stripe_invoice_paid", "stripe")` when `invoice.amount_paid > 0` AND (`billing_reason === "subscription_create"` OR (`subscription_cycle` AND `organizations.has_used_trial === true`)). `handleChargeRefunded` now distinguishes credit-pack refunds (existing path) from subscription refunds; subscription refunds fire `clawbackReferrerRewardForReferredOrg(orgId)`. Both paths Sentry-tagged `area=referral-qualify-stripe` / `area=referral-clawback-stripe`. Stays inside the existing `claimWebhookEvent` envelope.
+- `app/api/revenuecat/webhook/route.ts` — `INITIAL_PURCHASE` qualifies iff `event.is_trial_period === false`. `RENEWAL` qualifies iff the most-recent prior `iap_subscription_events` row for the org (excluding this event's `event_id`) had `is_trial_period=true` (trial→paid conversion). `REFUND` subscription branch fires `clawbackReferrerRewardForReferredOrg`. Tagged `area=referral-qualify-revenuecat` / `area=referral-clawback-revenuecat`.
+
+Design invariants (locked):
+- Qualify ONLY on first real payment, never on `trialing` / `is_trial_period=true`.
+- Reward = flat $120 (`12_000` cents) regardless of referrer's current plan.
+- If referrer has an active Stripe customer (sub status `active`/`trialing`, `stripe_customer_invalid_at IS NULL`): write `customer.balance` transaction with amount `-12_000`, idempotency key `referral-reward:<referralId>`. Negative amount = credit (Stripe convention).
+- If no active Stripe customer (free SOLO, IAP-only with no Stripe-side customer, or no owner resolvable): bank as `kind=banked_trial` / `status=pending` in `referral_rewards`. Deferred apply happens at U14 once Lane A merges.
+- Clawback: POSITIVE `customer.balance` transaction (idempotency key `referral-reward-clawback:<rewardId>`) to reverse the original credit; flip `referrals.status=clawed_back` AND `referrals.clawed_back_at` AND `referral_rewards.clawed_back_at` via atomic UPDATE-WHERE-NULL.
+- Stripe idempotency keys and the `record_referral_reward` RPC's UPDATE-WHERE-NULL on `rewarded_at` together prevent any double-credit on duplicate webhook deliveries.
+
+Verification: `npx next build` exit 0 (no new warnings; pre-existing Sentry deprecation + workspace-root + ESLint `<img>` warnings unchanged). Live Supabase MCP confirmed `qualify_referral` and `record_referral_reward` RPC signatures match the calls (`uuid, text → integer` and `uuid, integer, text → integer`). Both `referrals` and `referral_rewards` tables empty pre-deploy (clean slate). Merged to `origin/main` as commit `<merge-sha-to-fill>`.
+
+**U14 wired.** Two call sites:
+1. `app/api/stripe/checkout/route.ts` — inside the `if (currentSubscription)` / `isUpgrade` branch, after the `update_org_plan_credits` RPC succeeds, calls `applyBankedRewardForOrg(auth.orgId, stripeCustomerId)`. Try/caught with Sentry `area=referral-reward-banked-apply / stage=checkout-upgrade`. Handles the TEAM→BUSINESS-style in-place upgrade where the Stripe customer already exists.
+2. `app/api/stripe/webhook/route.ts` — inside `handleCheckoutCompleted`, after `setOrganizationPlan`/`resetOrganizationCredits`/`sendPlanUpgradedEmail`, calls `applyBankedRewardForOrg(orgId, stripeCustomerId)`. Try/caught with Sentry `area=referral-reward-banked-apply / stage=checkout-completed-webhook`. Handles the fresh-checkout path (SOLO→TEAM/BUSINESS) where the Stripe customer is created by the Checkout Session and only becomes addressable at webhook time.
+
+Both paths are idempotent via `applyBankedRewardForOrg`'s atomic UPDATE-WHERE-NULL claim on `referral_rewards.applied_at`. A failure in either path is captured to Sentry but does NOT roll back the checkout/upgrade — losing a $120 credit is recoverable via support; failing the upgrade itself is not.
+
+---
+
 ## Referral program — pre-build audit + Lane 0 schema landed — 2026-05-20 [Source: Claude Code]
 
 **Pre-build audit** of the contractor-to-contractor referral program against the live repo (HEAD at audit time was the stale `claude/audit-1-mobile-handoff-2026-05-11` branch; cross-checks done against `origin/main` 99a6474). Findings delivered in-session. Key live-verified facts: zero referral artifacts pre-existed (Supabase `execute_sql … ILIKE '%referral%'` returned 0 tables; Stripe `list_coupons` returned `[]`); both webhook handlers converge on `setOrganizationPlan(orgId, plan)` so qualification belongs at the plan-transition layer; mobile IAP plan transitions flow through the web RC webhook so referral qualification needs zero iOS changes; new signups get a 14-day Stripe trial so qualification must wait for the first non-zero `invoice.payment_succeeded`, not `subscription.created`. Audit produced a 21-unit dependency + parallelization map across 5 lanes (0–E) for concurrent build agents.
