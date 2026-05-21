@@ -1,4 +1,3 @@
-import { SNAPQUOTE_LOGO_BASE64_JPG } from "@/lib/emailLogo";
 import { buildQuoteLink, getCustomerFirstName } from "@/lib/quote-template";
 import { formatCurrencyRange, toCurrency } from "@/lib/utils";
 
@@ -108,7 +107,7 @@ export function renderEmailShell(
               <table role="presentation" cellpadding="0" cellspacing="0" border="0">
                 <tbody><tr>
                   <td valign="middle" style="padding-right:12px; line-height:0;">
-                    <img src="data:image/jpeg;base64,${SNAPQUOTE_LOGO_BASE64_JPG}" width="44" height="39" alt="SnapQuote" style="display:block; width:44px; height:39px; border:0; outline:none; text-decoration:none;">
+                    <img src="https://snapquote.us/email/snapquote-logo.png" width="44" height="39" alt="SnapQuote" style="display:block; width:44px; height:39px; border:0; outline:none; text-decoration:none;">
                   </td>
                   <td valign="middle" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:24px; line-height:32px; font-weight:800; color:#2563EB; letter-spacing:-0.6px; mso-line-height-rule:exactly;">
                     SnapQuote

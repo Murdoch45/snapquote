@@ -3,6 +3,19 @@
 > ⚠️ **FOR REFERENCE ONLY — DO NOT TREAT AS GROUND TRUTH.**
 > Always verify against the actual codebase before acting on anything here.
 
+### 2026-05-20 [Source: Claude Code] — Email logo fix: replace truncated base64 data-URI with hosted PNG
+
+Live test: a password-reset email received in Apple Mail rendered the SnapQuote logo as a broken-image placeholder next to the wordmark. Two distinct root causes uncovered in the worktree `.claude/worktrees/email-logo-fix` off `origin/main` at `8745d32`:
+
+1. **The base64 itself was truncated.** [`lib/emailLogo.ts`](../lib/emailLogo.ts) exported a 14,015-character base64 string (length mod 4 = 3 — not a valid multiple). Decoding via Node's `Buffer.from(b64, "base64")` (which is permissive about trailing incomplete groups) produced 10,510 bytes ending with `0001fff6` instead of the required JPEG EOI marker `FFD9`. ImageMagick / System.Drawing both flagged "Corrupt JPEG data: premature end of data segment". So the JPEG was corrupt at-rest in the file — no email client could ever have rendered it, regardless of how it was delivered.
+2. **Data-URI `<img>` sources are NOT reliable in email anyway.** Despite the doc comment in `emailLogo.ts` claiming "Modern email clients (Gmail, Apple Mail, Outlook 2016+) all accept inline data: image srcs", this is false: Gmail strips data-URI images for security, Outlook desktop does not render them, web Outlook strips them too. Apple Mail support is hit-or-miss. Hosted image URLs are the universally-supported pattern.
+
+**Fix:** generated a fresh PNG from the canonical SVG source [`AppIcon.svg`](../AppIcon.svg) (104×92 viewBox, gradient blue speech-bubble + lightning bolt). Rendered via `sharp` at 256×227 (about 2.5× the 44×39 email display size for retina sharpness) with transparent background, saved as a hosted static asset at [`public/email/snapquote-logo.png`](../public/email/snapquote-logo.png) (4,132 bytes). Updated the header lockup in [`lib/emailTemplates.ts`](../lib/emailTemplates.ts) to reference the absolute URL `https://snapquote.us/email/snapquote-logo.png` instead of the data URI. Display dimensions (44×39, `alt="SnapQuote"`) unchanged so the visual layout is identical. Deleted `lib/emailLogo.ts` entirely — no callers left. The change automatically applies to all 17 transactional emails (welcome, estimate-sent, customer-confirmation, new-lead-notification, plan-upgraded, plan-ended, trial-ending-soon, payment-failed, estimate-accepted, estimate-expiring-soon, estimate-expired, account-deleted, credit-purchase-confirmation, trial-expired, team-member-joined, estimate-not-viewed-nudge, referral-program) since they all share `renderEmailShell`.
+
+Verified `npx next build` exit 0. Worktree cleaned up: throwaway base64-decode and SVG-render scripts removed before commit, no `.mjs` artifacts shipped. Live verification: post-deploy, the hosted URL `https://snapquote.us/email/snapquote-logo.png` loaded successfully over HTTPS (HTTP 200, image renders). Demo login walkthrough on snapquote.us: /app and /app/leads both returned 200, no 5xx in Vercel runtime logs over the 5-minute post-deploy window.
+
+Merged to `origin/main` as commit `<RECORDED ON MERGE>`.
+
 ### 2026-05-20 [Source: Claude Code] — Email system overhaul: shared template + 2 referral emails + 3-week sequence + Resend SPF fix recommendation
 
 Single overhaul of SnapQuote's transactional email system covering 4 tasks: shared template, two referral emails, send-timing state machine, deliverability investigation. Worktree `.claude/worktrees/email-system` off `origin/main` at `8e3af13`. Merged to `origin/main` as commit `<RECORDED ON MERGE>`.

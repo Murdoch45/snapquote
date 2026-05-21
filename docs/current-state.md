@@ -6,6 +6,12 @@
 > The audit session content (April 15–20, 2026) is the most reliable portion.
 > Older sections carry more uncertainty.
 
+## Email logo: hosted PNG (NOT data-URI) — 2026-05-20 [Source: Claude Code]
+
+The shared transactional-email template's header lockup loads the SnapQuote logo from `https://snapquote.us/email/snapquote-logo.png` ([`public/email/snapquote-logo.png`](../public/email/snapquote-logo.png), 256×227 PNG, 4,132 bytes), rendered at the email's display dimensions 44×39 with `alt="SnapQuote"`. This replaced an earlier embedded base64 JPG (`lib/emailLogo.ts`, since deleted) that had two distinct flaws: the base64 was truncated at the source (length mod 4 = 3, JPEG missing EOI marker, "premature end of data segment" reported by both ImageMagick and System.Drawing); and Gmail / Outlook desktop / web Outlook all strip data-URI `<img src>` regardless of base64 validity. The hosted-URL pattern is the universally-supported approach for transactional email logos.
+
+The asset is the canonical SnapQuote brand mark — gradient blue speech-bubble (`#3FA1F7` → `#174BB7`) with a white lightning bolt inside, rendered fresh from [`AppIcon.svg`](../AppIcon.svg) via the `sharp` Node bindings at 2.5× the display size so the image stays sharp on retina screens. Tightly cropped to the bubble's natural 104:92 aspect ratio matching the template's 44:39 display ratio. Affects all 17 transactional emails since they all share `renderEmailShell`. The static asset is served directly from Next.js's `public/` root and is publicly reachable, no auth, no edge caching gotchas — same as `public/app-store-badge.svg` and the other static brand assets.
+
 ## Email system overhaul: shared template, referral emails, deliverability finding — 2026-05-20 [Source: Claude Code]
 
 Four-part overhaul of SnapQuote's transactional email system.
