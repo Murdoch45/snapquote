@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 const HEADLINE_LEAD = "Stop driving to estimates that ";
 const HEADLINE_TAIL = "waste your time.";
 const SUBHEAD =
-  "Send customers your link. They tell you about the job, and you get an instant estimate built with the help of our AI tools — send it or pass.";
+  "Send customers your link. They tell you about the job, and you get an instant estimate built with the help of our AI powered tools — send it or pass.";
 
 type PhoneFrameVariant = "default" | "web";
 
