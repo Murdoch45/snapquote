@@ -24,10 +24,11 @@ export { getPlanMonthlyCredits } from "@/lib/plans";
 
 export function getPlanUsageLimit(plan: OrgPlan): PlanUsageLimit {
   // No plan currently runs with a grace tier — a plan's monthly credits
-  // are also its hard-stop point. Keeping both fields populated (rather
-  // than leaving hardStopAt null) lets UpgradeBanner render the "hard
-  // stop at N" copy without a null-in-string. If a grace tier is ever
-  // reintroduced, split the two values here.
+  // are also its hard-stop point. Both fields are populated identically
+  // so a future grace tier can split them without changing the call
+  // shape. UpgradeBanner only consumes `limit` and `quotesSentCount`
+  // (computing remaining = limit - count) — the redundant `hardStopAt`
+  // is kept for forward-compatibility, not consumed in copy.
   const monthlyCredits = getPlanMonthlyCredits(plan);
   return { limit: monthlyCredits, grace: 0, hardStopAt: monthlyCredits };
 }

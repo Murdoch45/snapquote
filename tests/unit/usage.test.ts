@@ -3,8 +3,9 @@ import { getPlanUsageLimit, getWarningAt90 } from "../../lib/usage";
 
 describe("getPlanUsageLimit", () => {
   // Plans currently run without a grace tier — the monthly credit count
-  // is both the soft limit and the hard stop. Keeping limit === hardStopAt
-  // lets UpgradeBanner render "Usage: X/Y (hard stop at Y)" coherently.
+  // is both the soft limit and the hard stop. Both fields are returned
+  // identically so a future grace tier can split them without changing
+  // the call shape.
   it("returns solo limit", () => {
     expect(getPlanUsageLimit("SOLO")).toEqual({ limit: 5, grace: 0, hardStopAt: 5 });
   });
