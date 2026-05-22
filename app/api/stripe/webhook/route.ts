@@ -8,7 +8,7 @@ import {
 } from "@/lib/emailTemplates";
 import { sendEmail } from "@/lib/notify";
 import { getOwnerEmailForOrg } from "@/lib/organizationOwners";
-import { getPlanMonthlyCredits } from "@/lib/usage";
+import { getPlanMonthlyCredits } from "@/lib/plans";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getPlanFromPriceId, getStripe, getStripeWebhookSecret } from "@/lib/stripe";
 import { claimWebhookEvent, releaseWebhookEvent } from "@/lib/webhookEvents";

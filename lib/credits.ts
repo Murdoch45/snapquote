@@ -1,7 +1,7 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { enforceServerOnly } from "@/lib/serverOnlyGuard";
-import { getPlanMonthlyCredits } from "@/lib/usage";
+import { getPlanMonthlyCredits } from "@/lib/plans";
 import type { OrgPlan } from "@/lib/types";
 
 enforceServerOnly();

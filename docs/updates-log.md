@@ -3,6 +3,27 @@
 > ⚠️ **FOR REFERENCE ONLY — DO NOT TREAT AS GROUND TRUTH.**
 > Always verify against the actual codebase before acting on anything here.
 
+### 2026-05-22 [Source: Claude Code] — Remove legacy monthly send-cap; add OutOfCreditsBanner
+
+Per the audit on whether `org_usage_monthly.quotes_sent_count` was redundant with the credit system, the legacy monthly-send-cap was removed entirely. The credit system (server-enforced via the `unlock_lead_with_credits` RPC at unlock time) is now the single gate on engagement. Removed:
+
+- `lib/usage.ts` — deleted.
+- `components/UpgradeBanner.tsx` — deleted.
+- `tests/unit/usage.test.ts` — deleted.
+- `PlanUsageLimit` type in [`lib/types.ts`](../lib/types.ts) — deleted (no remaining consumers).
+- `incrementUsageOnQuoteSend` call + `usage` field on the response payload in [`app/api/app/quote/send/route.ts`](../app/api/app/quote/send/route.ts) — removed.
+- `canSend` prop on [`components/QuoteComposer.tsx`](../components/QuoteComposer.tsx) — removed (the Send button still gates on `loading` and channel selection).
+- `getMonthlyUsage` calls in [`app/app/layout.tsx`](../app/app/layout.tsx), [`app/app/leads/[id]/page.tsx`](../app/app/leads/[id]/page.tsx), [`app/dashboard/my-link/page.tsx`](../app/dashboard/my-link/page.tsx) — removed.
+- Dead `org_usage_monthly` read in [`lib/demo/server.ts`](../lib/demo/server.ts) (result was destructured but never consumed) — removed.
+
+Four importers that still need the per-plan-credits constant were repointed from `@/lib/usage` to the canonical `@/lib/plans`: `app/api/stripe/checkout/route.ts`, `app/api/stripe/webhook/route.ts`, `app/app/plan/page.tsx`, `lib/credits.ts`. `lib/usage.ts` was a thin re-export wrapper; deletion is safe.
+
+Added a new passive banner [`components/OutOfCreditsBanner.tsx`](../components/OutOfCreditsBanner.tsx) shown at the top of `/app/*` (via `app/app/layout.tsx`) and `/dashboard/my-link` when `organizations.monthly_credits === 0 AND bonus_credits === 0`. Copy: "You're out of credits." + "You need credits to unlock new leads and send estimates." Plan-aware CTA: SOLO/TEAM → "Upgrade" → `/app/plan`; BUSINESS → "Buy more credits" → `/app/credits`. Coexists with the existing `OutOfCreditsModal` at unlock time — banner is passive heads-up, modal is at-action interrupter; both route to the same recovery surfaces.
+
+The `org_usage_monthly` table is left intact; nothing reads it after this change and nothing writes to it from runtime code. Seed scripts still upsert it; harmless. A future migration can drop it cleanly.
+
+Verified `npx next build` exit 0. Merged to `origin/main` as commit `<RECORDED ON MERGE>`.
+
 ### 2026-05-22 [Source: Claude Code] — MyLink referral explainer copy updated to match Option A behavior
 
 After merge `57a9e54` (the abandoned-checkout fix) shipped Option A — banked credit is applied to `customer.balance` only AFTER `checkout.session.completed` — the previous MyLink explainer copy on [`components/MyLinkPageClient.tsx`](../components/MyLinkPageClient.tsx) became inaccurate. It said "the Stripe checkout page may still show the plan's normal price ... your credit is applied automatically behind the scenes, so you won't actually be charged until it runs out" — but under Option A the contractor *is* charged the full first-month price; the credit only kicks in from invoice #2 forward.

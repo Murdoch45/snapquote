@@ -369,10 +369,6 @@ async function loadDataset(): Promise<DemoDataset> {
   const admin = createAdminClient();
   const orgId = await getDemoOrgId();
 
-  const currentMonth = new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1))
-    .toISOString()
-    .slice(0, 10);
-
   const [
     { data: org, error: orgError },
     { data: profile, error: profileError },
@@ -381,8 +377,7 @@ async function loadDataset(): Promise<DemoDataset> {
     { data: unlocks, error: unlocksError },
     { data: quotes, error: quotesError },
     { data: customers, error: customersError },
-    { data: invites, error: invitesError },
-    { data: usage }
+    { data: invites, error: invitesError }
   ] = await Promise.all([
     admin
       .from("organizations")
@@ -423,13 +418,7 @@ async function loadDataset(): Promise<DemoDataset> {
       .select("id,email,role,created_at")
       .eq("org_id", orgId)
       .eq("status", "PENDING")
-      .order("created_at", { ascending: false }),
-    admin
-      .from("org_usage_monthly")
-      .select("quotes_sent_count")
-      .eq("org_id", orgId)
-      .eq("month", currentMonth)
-      .maybeSingle()
+      .order("created_at", { ascending: false })
   ]);
 
   if (orgError || !org) {

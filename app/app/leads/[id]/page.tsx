@@ -23,7 +23,6 @@ import { getServiceBadgeClassName } from "@/lib/serviceColors";
 import { formatServiceQuestionAnswers, parseServiceQuestionBundles } from "@/lib/serviceQuestions";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { getMonthlyUsage } from "@/lib/usage";
 import { formatCurrencyRange, toCurrency, toRelativeMinutes } from "@/lib/utils";
 
 type Props = {
@@ -71,8 +70,7 @@ export default async function LeadDetailPage({ params }: Props) {
     { data: photos },
     { data: existingQuote },
     { data: profile },
-    credits,
-    usage
+    credits
   ] = await Promise.all([
     supabase.auth.getUser(),
     supabase
@@ -92,8 +90,7 @@ export default async function LeadDetailPage({ params }: Props) {
       .select("business_name,phone,email,quote_sms_template")
       .eq("org_id", auth.orgId)
       .single(),
-    getOrgCredits(auth.orgId),
-    getMonthlyUsage(auth.orgId)
+    getOrgCredits(auth.orgId)
   ]);
 
   if (!lead) notFound();
@@ -477,7 +474,6 @@ export default async function LeadDetailPage({ params }: Props) {
                     customerName={(lead.customer_name as string | null) ?? null}
                     customerPhone={(lead.customer_phone as string | null) ?? null}
                     customerEmail={(lead.customer_email as string | null) ?? null}
-                    canSend={usage.canSend}
                     isResend={isExpiredQuote}
                   />
                 </div>
