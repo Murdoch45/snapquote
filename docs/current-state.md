@@ -6,6 +6,10 @@
 > The audit session content (April 15–20, 2026) is the most reliable portion.
 > Older sections carry more uncertainty.
 
+## Referral banked-credit apply timing: ONLY on `checkout.session.completed` — 2026-05-22 [Source: Claude Code]
+
+Banked referral rewards (`referral_rewards.kind='banked_trial'` / `status='pending'`) are applied to the referrer's Stripe `customer.balance` exclusively via the webhook handler `handleCheckoutCompleted` in [`app/api/stripe/webhook/route.ts:308`](../app/api/stripe/webhook/route.ts:308), after a `checkout.session.completed` event confirms the user actually paid. The SOLO→paid pre-checkout apply block previously in [`app/api/stripe/checkout/route.ts`](../app/api/stripe/checkout/route.ts) was removed because it consumed the reward (DB → applied; Stripe → -$120 customer.balance) at Checkout Session *creation* time — abandoning checkout left the reward marked spent with no subscription to draw against, and the MyLink "Credit Earned" UI displayed the credit as still available. Trade-off: the hosted Stripe Checkout page no longer pre-shows the discount; the credit instead applies to invoice #2 forward via `customer.balance`. The MyLink explainer copy (`components/MyLinkPageClient.tsx:538-541`) already prepares users for this: "the Stripe checkout page may still show the plan's normal price — your credit is applied automatically behind the scenes." The in-place paid→paid upgrade branch in `checkout/route.ts` still applies inline (line 252) because `stripe.subscriptions.update` is atomic — no abandonment risk on that path.
+
 ## Landing hero subhead phrasing — 2026-05-22 [Source: Claude Code]
 
 The marketing landing hero subhead (`SUBHEAD` in [`app/(public)/page.tsx:24`](../app/(public)/page.tsx:24)) reads "Send customers your link. They tell you about the job, and you get an instant estimate built with the help of our AI powered tools — send it or pass." Was previously "our AI tools"; phrasing changed for readability. The page-level meta description (line 18) and the "How it works" step-03 body (line 49) still use "AI tools" — intentionally left out of scope for this change.

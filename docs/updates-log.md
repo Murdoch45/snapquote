@@ -3,6 +3,23 @@
 > ⚠️ **FOR REFERENCE ONLY — DO NOT TREAT AS GROUND TRUTH.**
 > Always verify against the actual codebase before acting on anything here.
 
+### 2026-05-22 [Source: Claude Code] — Referral credit: fix abandoned-checkout bug + restore falconn test artifact
+
+**Bug.** The SOLO→paid pre-checkout banked-credit apply (shipped 2026-05-20 in the "UI cleanup + apply banked credit BEFORE checkout" change) consumed the reward at Checkout Session creation time rather than at payment-completion time. Confirmed live on the falconn test artifact: reward row `5025a514-38a6-49b4-aefc-8ba8493ce11e` was flipped to `kind=stripe_balance / status=applied / applied_at=2026-05-22 10:26:56`, a `-$12000` `customer.balance` transaction (`cbtxn_1TZqI8FNX8cpZFmwGLZ4pBfl`) was posted to Stripe customer `cus_UYyEdVbHXydVOW`, but `subscriptions` had no row for falconn's owner — the user abandoned checkout. All three surfaces (Stripe, DB, MyLink "Credit Earned") were in inconsistent states.
+
+**Fix (Approach A — apply only on `checkout.session.completed`).** Removed the SOLO→paid pre-checkout apply block from [`app/api/stripe/checkout/route.ts`](../app/api/stripe/checkout/route.ts:326-414) (lines 326-414 at the pre-fix HEAD). The reward now applies exclusively via the Stripe webhook's existing `applyBankedRewardForOrg` call in [`handleCheckoutCompleted`](../app/api/stripe/webhook/route.ts:308). The in-place paid→paid upgrade branch's call (line 252 of `checkout/route.ts`) is kept — `stripe.subscriptions.update` is atomic, no abandonment risk on that path. Idempotency is preserved by the existing UPDATE-WHERE-NULL atomic claim in `applyBankedRewardForOrg` (`lib/referralRewards.ts:354-369`) and the Stripe `idempotencyKey: referral-reward-banked:${rewardId}` (line 393).
+
+**Tradeoff.** The hosted Stripe Checkout page will no longer surface the discounted "amount due" for SOLO→paid upgrades — the credit applies to `customer.balance` AFTER payment completion, so it draws down on the next invoice rather than reducing the first. The existing MyLink explainer copy already says "the Stripe checkout page may still show the plan's normal price — your credit is applied automatically behind the scenes" (`components/MyLinkPageClient.tsx:538-541`), which is now uniformly true. Net result: no UX whiplash, no consumption-on-abandon, and the credit is never lost.
+
+**Three-surface consistency, post-fix.**
+- Stripe customer.balance: only credited when subscription is actually created (webhook on `checkout.session.completed`).
+- DB `referral_rewards` row: only flipped `banked_trial`/`pending` → `stripe_balance`/`applied` via the same webhook call.
+- MyLink "Credit Earned" UI: `referrals.status='rewarded'` populates Credit Earned (lifetime), `referral_rewards.kind='banked_trial' AND status='pending'` populates `hasUnappliedCredit` ("applies on next upgrade" hint). Both states track the underlying truth — no code change needed in `lib/referrals/getReferralSummary.ts`.
+
+**Falconn artifact restored.** Stripe reversal `cbtxn_1TZqb4FNX8cpZFmwHrHKuPy5` (+$12000) posted to `cus_UYyEdVbHXydVOW` (balance back to 0). DB reward row `5025a514` UPDATEd: `kind=banked_trial, status=pending, applied_at=null, stripe_balance_txn_id=null`. Restoration audit entry recorded at `audit_log.id=88f673a8-9f52-4fff-b936-995724e1ca90` with action `referral.reward.test_restored` referencing both Stripe txn ids. The MyLink summary now returns `pending=0, creditEarnedCount=1, hasUnappliedCredit=1` for falconn — the $120 banked reward is again visible and reusable.
+
+Verified `npx next build` exit 0. Merged to `origin/main` as commit `<RECORDED ON MERGE>`.
+
 ### 2026-05-22 [Source: Claude Code] — Landing hero subhead: "AI tools" → "AI powered tools"
 
 Updated `SUBHEAD` on [`app/(public)/page.tsx:24`](../app/(public)/page.tsx:24) so the marketing landing hero reads "…built with the help of our AI powered tools — send it or pass." Scope was deliberately limited to the hero subhead constant. Out of scope and left unchanged: the meta description on line 18 and the "How it works" step-03 body copy on line 49, both of which still contain "AI tools". Worktree `.claude/worktrees/landing-subhead-fix` off `origin/main` at `bded32e`. Merged to `origin/main` as commit `<RECORDED ON MERGE>`.
