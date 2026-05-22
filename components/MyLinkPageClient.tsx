@@ -526,19 +526,12 @@ export function MyLinkPageClient({
                 </div>
               </div>
 
-              {referralSummary.hasUnappliedCredit ? (
-                <p className="text-xs text-muted-foreground">
-                  Your earned credit applies to your bill automatically when you upgrade to a paid plan.
-                </p>
-              ) : null}
-
               <p className="text-xs text-muted-foreground">
-                You earn a $120 credit when someone you referred signs up for a paid plan. The credit is
-                applied to your bill automatically — right away if you&apos;re already on a paid plan, or
-                when you next upgrade if you&apos;re on Solo. When you do upgrade, the Stripe checkout
-                page may still show the plan&apos;s normal price as if you&apos;re being charged — your
-                credit is applied automatically behind the scenes, so you won&apos;t actually be charged
-                until it runs out.
+                You earn a $120 credit when someone you referred signs up for a paid plan. If
+                you&apos;re on Solo, the credit is held on your account until you upgrade. Your first
+                month is billed at the normal plan price — after that, your credit covers your bill
+                automatically each month until it runs out, with nothing to redeem or enter. If
+                you&apos;re already on a paid plan, the credit starts applying to your next bill.
               </p>
             </>
           ) : (

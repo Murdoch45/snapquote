@@ -3,6 +3,18 @@
 > ⚠️ **FOR REFERENCE ONLY — DO NOT TREAT AS GROUND TRUTH.**
 > Always verify against the actual codebase before acting on anything here.
 
+### 2026-05-22 [Source: Claude Code] — MyLink referral explainer copy updated to match Option A behavior
+
+After merge `57a9e54` (the abandoned-checkout fix) shipped Option A — banked credit is applied to `customer.balance` only AFTER `checkout.session.completed` — the previous MyLink explainer copy on [`components/MyLinkPageClient.tsx`](../components/MyLinkPageClient.tsx) became inaccurate. It said "the Stripe checkout page may still show the plan's normal price ... your credit is applied automatically behind the scenes, so you won't actually be charged until it runs out" — but under Option A the contractor *is* charged the full first-month price; the credit only kicks in from invoice #2 forward.
+
+Replaced both the conditional `hasUnappliedCredit` short line ("Your earned credit applies to your bill automatically when you upgrade to a paid plan.") and the unconditional explainer paragraph with a single accurate paragraph:
+
+> "You earn a $120 credit when someone you referred signs up for a paid plan. If you're on Solo, the credit is held on your account until you upgrade. Your first month is billed at the normal plan price — after that, your credit covers your bill automatically each month until it runs out, with nothing to redeem or enter. If you're already on a paid plan, the credit starts applying to your next bill."
+
+The conditional rendering for the "credit waiting" hint was dropped — the new paragraph covers that case explicitly in plain language ("If you're on Solo, the credit is held on your account until you upgrade"). `ReferralSummary.hasUnappliedCredit` is still exported from `lib/referrals/getReferralSummary.ts` and remains correct under the data model, just no longer consumed in this UI. Same `text-xs text-muted-foreground` typography and same placement under the Pending / Credit Earned grid — only the wording changed.
+
+Verified `npx next build` exit 0. Merged to `origin/main` as commit `<RECORDED ON MERGE>`.
+
 ### 2026-05-22 [Source: Claude Code] — Upgrade banner copy rewrite (plain language, no jargon)
 
 Rewrote [`components/UpgradeBanner.tsx`](../components/UpgradeBanner.tsx) so the monthly-estimate-cap banner reads as plain language instead of the previous "Usage: 15/5 (hard stop at 5)" UX. The capped state now shows "You've used all your estimates this month" + body "Your Solo plan covers 5 estimates a month. Upgrade to keep sending, or your monthly limit resets on June 1." The near-cap warning shows "You're almost out of estimates this month" + body "You have N estimates left on your Solo plan." CTA text changed from "Review plan" to the more actionable "Upgrade plan", still routing to `/app/plan`.
