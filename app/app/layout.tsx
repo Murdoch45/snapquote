@@ -3,10 +3,10 @@ import { redirect } from "next/navigation";
 import { ActivityTracker } from "@/components/ActivityTracker";
 import { AppShell } from "@/components/AppShell";
 import { OnboardingTour } from "@/components/OnboardingTour";
-import { UpgradeBanner } from "@/components/UpgradeBanner";
+import { OutOfCreditsBanner } from "@/components/OutOfCreditsBanner";
 import { requireAuth } from "@/lib/auth/requireAuth";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { getMonthlyUsage } from "@/lib/usage";
+import type { OrgPlan } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -22,8 +22,7 @@ export default async function AppLayout({
       data: { user }
     },
     { data: profile },
-    { data: organization },
-    usage
+    { data: organization }
   ] = await Promise.all([
     supabase.auth.getUser(),
     supabase
@@ -33,15 +32,18 @@ export default async function AppLayout({
       .maybeSingle(),
     supabase
       .from("organizations")
-      .select("onboarding_completed")
+      .select("onboarding_completed, plan, monthly_credits, bonus_credits")
       .eq("id", auth.orgId)
-      .maybeSingle(),
-    getMonthlyUsage(auth.orgId)
+      .maybeSingle()
   ]);
 
   if (!profile || !organization) {
     redirect("/onboarding");
   }
+
+  const orgPlan = (organization?.plan as OrgPlan | null) ?? "SOLO";
+  const monthlyCredits = Number(organization?.monthly_credits ?? 0);
+  const bonusCredits = Number(organization?.bonus_credits ?? 0);
 
   return (
     <>
@@ -65,7 +67,11 @@ export default async function AppLayout({
             </Link>
           </div>
         ) : null}
-        <UpgradeBanner {...usage} />
+        <OutOfCreditsBanner
+          plan={orgPlan}
+          monthlyCredits={monthlyCredits}
+          bonusCredits={bonusCredits}
+        />
         {children}
       </AppShell>
     </>

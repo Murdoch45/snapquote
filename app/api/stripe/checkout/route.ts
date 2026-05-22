@@ -4,7 +4,7 @@ import Stripe from "stripe";
 import { z } from "zod";
 import { requireOwnerForApi } from "@/lib/auth/requireRole";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getPlanMonthlyCredits } from "@/lib/usage";
+import { getPlanMonthlyCredits } from "@/lib/plans";
 import {
   type StripeBillingInterval,
   clearStaleStripeCustomerId,

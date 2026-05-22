@@ -6,10 +6,9 @@ import { PlanOptionsSection } from "@/components/plan/PlanOptionsSection";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireAuth } from "@/lib/auth/requireAuth";
 import { getOrgCredits } from "@/lib/credits";
-import { getPlanSeatLimit } from "@/lib/plans";
+import { getPlanMonthlyCredits, getPlanSeatLimit } from "@/lib/plans";
 import { getOrganizationSubscriptionStatus } from "@/lib/subscription";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getPlanMonthlyCredits } from "@/lib/usage";
 
 export const dynamic = "force-dynamic";
 

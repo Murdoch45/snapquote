@@ -12,8 +12,6 @@ import { invalidateAnalytics } from "@/lib/db";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireOrgFilter } from "@/lib/supabase/orgFilter";
 import { sendQuoteSms } from "@/lib/telnyx";
-import { incrementUsageOnQuoteSend } from "@/lib/usage";
-
 export const runtime = "nodejs";
 
 function makePublicId(): string {
@@ -181,7 +179,6 @@ export async function POST(request: Request) {
             publicId: winner.public_id,
             publicUrl: buildEstimateLink(winner.public_id as string),
             resolvedMessage: winner.message,
-            usage: null,
             sentChannels: (winner.sent_via as ("email" | "text")[] | null) ?? [],
             warning: null,
             idempotent: true
@@ -313,14 +310,6 @@ export async function POST(request: Request) {
       event_type: "SENT"
     });
 
-    let usage: Awaited<ReturnType<typeof incrementUsageOnQuoteSend>> | null = null;
-
-    try {
-      usage = await incrementUsageOnQuoteSend(auth.orgId);
-    } catch (usageError) {
-      console.error("quote send usage increment failed:", usageError);
-    }
-
     invalidateAnalytics(auth.orgId);
 
     // Best-effort audit — runs after the response is sent so the user
@@ -368,7 +357,6 @@ export async function POST(request: Request) {
       publicId: confirmedPublicId,
       publicUrl: estimateLink,
       resolvedMessage,
-      usage,
       sentChannels,
       warning: deliveryErrors.length > 0 ? deliveryErrors.join(" ") : null
     });

@@ -80,8 +80,3 @@ export type LeadFormPayload = {
   description?: string | null;
 };
 
-export type PlanUsageLimit = {
-  limit: number | null;
-  grace: number;
-  hardStopAt: number | null;
-};

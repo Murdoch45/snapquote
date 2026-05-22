@@ -27,7 +27,6 @@ type Props = {
   customerName: string | null;
   customerPhone: string | null;
   customerEmail: string | null;
-  canSend: boolean;
   // When true the composer opens in phase 2 with the existing estimate
   // pre-filled — used for "Edit & Resend" on expired quotes. The send
   // endpoint also accepts EXPIRED as a valid starting status for the CAS.
@@ -51,7 +50,6 @@ export function QuoteComposer({
   customerName,
   customerPhone,
   customerEmail,
-  canSend,
   isResend = false
 }: Props) {
   // Original AI estimate captured once at mount. The "Reset to AI estimate"
@@ -383,7 +381,6 @@ export function QuoteComposer({
           <Button
             type="button"
             onClick={onGenerateMessage}
-            disabled={!canSend}
             className="h-11 w-full rounded-xl bg-primary text-sm font-semibold text-white hover:bg-primary/90"
           >
             {hasGeneratedBefore ? "Regenerate Estimate" : "Generate Estimate"}
@@ -517,7 +514,7 @@ export function QuoteComposer({
               <Button
                 type="button"
                 onClick={() => void onSend()}
-                disabled={loading || !canSend || (!sendEmail && !sendText)}
+                disabled={loading || (!sendEmail && !sendText)}
                 className="bg-primary text-white hover:bg-primary/90"
               >
                 {loading ? primarySendingLabel : primarySendLabel}
@@ -580,11 +577,6 @@ export function QuoteComposer({
           </div>
         ) : null}
 
-        {!canSend && (
-          <p className="text-sm text-red-600">
-            Estimate limit exceeded. Upgrade to continue sending this month.
-          </p>
-        )}
       </div>
     </>
   );
