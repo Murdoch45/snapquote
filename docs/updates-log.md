@@ -3,6 +3,18 @@
 > ⚠️ **FOR REFERENCE ONLY — DO NOT TREAT AS GROUND TRUTH.**
 > Always verify against the actual codebase before acting on anything here.
 
+### 2026-05-22 [Source: Claude Code] — Upgrade banner copy rewrite (plain language, no jargon)
+
+Rewrote [`components/UpgradeBanner.tsx`](../components/UpgradeBanner.tsx) so the monthly-estimate-cap banner reads as plain language instead of the previous "Usage: 15/5 (hard stop at 5)" UX. The capped state now shows "You've used all your estimates this month" + body "Your Solo plan covers 5 estimates a month. Upgrade to keep sending, or your monthly limit resets on June 1." The near-cap warning shows "You're almost out of estimates this month" + body "You have N estimates left on your Solo plan." CTA text changed from "Review plan" to the more actionable "Upgrade plan", still routing to `/app/plan`.
+
+Component signature changed slightly: it now requires `plan: OrgPlan` and `month: string` (first-of-month ISO) in addition to the existing flags. Both callers `<UpgradeBanner {...usage} />` in [`app/app/layout.tsx:68`](../app/app/layout.tsx:68) and [`app/dashboard/my-link/page.tsx:50,69`](../app/dashboard/my-link/page.tsx:50) already spread the full `UsageState` object — both fields were present in `UsageState`, just unused. No caller changes needed. The reset date label is computed client-side via `Intl.DateTimeFormat` in UTC to match the server's `firstDayOfMonth` window.
+
+Did NOT add cause detection (subscription-ended vs. always-Solo). Live SQL confirmed `subscriptions` is empty across all three current orgs (Demo, falconn, Pacific Edge are all in test states with plan set by manual DB change, never via Stripe), so we have no real-user signal to test cause detection against. Generic copy works equally well for both real-user scenarios (#2 subscription cancellation/lapse and #3 trial-ended-without-conversion from the prior investigation) so the simpler approach was chosen. The CTA "Upgrade plan" lands users on `/app/plan` which already surfaces the contractor's current plan + upgrade options.
+
+Touched out-of-scope cleanups in the same PR: doc-comment in [`lib/usage.ts:25-33`](../lib/usage.ts:25) referencing the old "X/Y (hard stop at Y)" banner copy was updated; same stale reference in [`tests/unit/usage.test.ts:5-7`](../tests/unit/usage.test.ts:5) was updated. The `hardStopAt` field on `PlanUsageLimit` / `UsageState` is no longer consumed by the banner but kept for forward-compatibility with a future grace tier.
+
+Verified `npx next build` exit 0. Merged to `origin/main` as commit `<RECORDED ON MERGE>`.
+
 ### 2026-05-22 [Source: Claude Code] — Referral credit: fix abandoned-checkout bug + restore falconn test artifact
 
 **Bug.** The SOLO→paid pre-checkout banked-credit apply (shipped 2026-05-20 in the "UI cleanup + apply banked credit BEFORE checkout" change) consumed the reward at Checkout Session creation time rather than at payment-completion time. Confirmed live on the falconn test artifact: reward row `5025a514-38a6-49b4-aefc-8ba8493ce11e` was flipped to `kind=stripe_balance / status=applied / applied_at=2026-05-22 10:26:56`, a `-$12000` `customer.balance` transaction (`cbtxn_1TZqI8FNX8cpZFmwGLZ4pBfl`) was posted to Stripe customer `cus_UYyEdVbHXydVOW`, but `subscriptions` had no row for falconn's owner — the user abandoned checkout. All three surfaces (Stripe, DB, MyLink "Credit Earned") were in inconsistent states.
