@@ -6,6 +6,10 @@
 > The audit session content (April 15–20, 2026) is the most reliable portion.
 > Older sections carry more uncertainty.
 
+## Landing hero subhead phrasing — 2026-05-22 [Source: Claude Code]
+
+The marketing landing hero subhead (`SUBHEAD` in [`app/(public)/page.tsx:24`](../app/(public)/page.tsx:24)) reads "Send customers your link. They tell you about the job, and you get an instant estimate built with the help of our AI powered tools — send it or pass." Was previously "our AI tools"; phrasing changed for readability. The page-level meta description (line 18) and the "How it works" step-03 body (line 49) still use "AI tools" — intentionally left out of scope for this change.
+
 ## Email logo: hosted PNG (NOT data-URI) — 2026-05-20 [Source: Claude Code]
 
 The shared transactional-email template's header lockup loads the SnapQuote logo from `https://snapquote.us/email/snapquote-logo.png` ([`public/email/snapquote-logo.png`](../public/email/snapquote-logo.png), 256×227 PNG, 4,132 bytes), rendered at the email's display dimensions 44×39 with `alt="SnapQuote"`. This replaced an earlier embedded base64 JPG (`lib/emailLogo.ts`, since deleted) that had two distinct flaws: the base64 was truncated at the source (length mod 4 = 3, JPEG missing EOI marker, "premature end of data segment" reported by both ImageMagick and System.Drawing); and Gmail / Outlook desktop / web Outlook all strip data-URI `<img src>` regardless of base64 validity. The hosted-URL pattern is the universally-supported approach for transactional email logos.

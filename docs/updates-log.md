@@ -3,6 +3,10 @@
 > ⚠️ **FOR REFERENCE ONLY — DO NOT TREAT AS GROUND TRUTH.**
 > Always verify against the actual codebase before acting on anything here.
 
+### 2026-05-22 [Source: Claude Code] — Landing hero subhead: "AI tools" → "AI powered tools"
+
+Updated `SUBHEAD` on [`app/(public)/page.tsx:24`](../app/(public)/page.tsx:24) so the marketing landing hero reads "…built with the help of our AI powered tools — send it or pass." Scope was deliberately limited to the hero subhead constant. Out of scope and left unchanged: the meta description on line 18 and the "How it works" step-03 body copy on line 49, both of which still contain "AI tools". Worktree `.claude/worktrees/landing-subhead-fix` off `origin/main` at `bded32e`. Merged to `origin/main` as commit `<RECORDED ON MERGE>`.
+
 ### 2026-05-20 [Source: Claude Code] — Email logo fix: replace truncated base64 data-URI with hosted PNG
 
 Live test: a password-reset email received in Apple Mail rendered the SnapQuote logo as a broken-image placeholder next to the wordmark. Two distinct root causes uncovered in the worktree `.claude/worktrees/email-logo-fix` off `origin/main` at `8745d32`:
