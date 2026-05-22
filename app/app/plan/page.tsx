@@ -71,17 +71,17 @@ export default async function PlanPage({ searchParams }: Props) {
   const bonusCredits = Number(orgCreditRow.bonus_credits ?? 0);
   const totalCredits = monthlyCreditsRemaining + bonusCredits;
   const monthlyCreditsLimit = getPlanMonthlyCredits(plan);
+  // Used = limit - remaining, clamped to [0, limit]. The clamp covers the
+  // edge case where `monthly_credits` somehow exceeds the plan limit
+  // (e.g. plan was downgraded directly in DB without recomputing credits) —
+  // in that case the bar should read as 0% used / empty, not break or
+  // overflow.
+  const monthlyCreditsUsed = Math.max(
+    0,
+    Math.min(monthlyCreditsLimit, monthlyCreditsLimit - monthlyCreditsRemaining)
+  );
   const usersUsed = membersResult.count ?? 0;
   const usersLimit = getPlanSeatLimit(plan);
-  const resetAt = orgCreditRow.credits_reset_at
-    ? new Date(orgCreditRow.credits_reset_at as string)
-    : null;
-  const creditsResetLabel = resetAt
-    ? new Intl.DateTimeFormat("en-US", {
-        month: "long",
-        day: "numeric"
-      }).format(resetAt)
-    : null;
   const planHighlights = [
     { label: `${monthlyCreditsLimit} monthly credits`, positive: true },
     { label: `${usersLimit} ${usersLimit === 1 ? "team member" : "team members"}`, positive: true }
@@ -197,11 +197,7 @@ export default async function PlanPage({ searchParams }: Props) {
                 {monthlyCreditsRemaining} / {monthlyCreditsLimit} remaining
               </p>
             </div>
-            <UsageBar used={monthlyCreditsRemaining} limit={monthlyCreditsLimit} />
-            <p className="text-sm text-muted-foreground">
-              {monthlyCreditsRemaining} / {monthlyCreditsLimit} monthly credits
-              {creditsResetLabel ? ` - resets ${creditsResetLabel}` : ""}
-            </p>
+            <UsageBar used={monthlyCreditsUsed} limit={monthlyCreditsLimit} />
           </div>
 
           <div className="space-y-3">

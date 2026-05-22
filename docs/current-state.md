@@ -6,6 +6,10 @@
 > The audit session content (April 15–20, 2026) is the most reliable portion.
 > Older sections carry more uncertainty.
 
+## Plan screen "Credits & Usage" — single fraction + bar fills on used — 2026-05-22 [Source: Claude Code]
+
+[`app/app/plan/page.tsx`](../app/app/plan/page.tsx) "Credits & Usage" card now shows the "X / Y remaining" credit fraction exactly once — beside the "Monthly credits" label — and the redundant "X / Y monthly credits - resets {date}" sentence under the bar is gone. The `UsageBar` fills based on credits USED (conventional direction): `used = max(0, min(limit, limit - remaining))`, clamped so a corrupt-data row with `monthly_credits > limit` reads as 0% used rather than overflowing. Bonus credits row and the "Total credits available" summary remain unchanged.
+
 ## Legacy monthly send-cap removed — credit system is the sole engagement gate — 2026-05-22 [Source: Claude Code]
 
 The `org_usage_monthly.quotes_sent_count` send-cap counter is no longer read or written by any runtime code. The credit system (`organizations.monthly_credits` + `organizations.bonus_credits`, decremented atomically by the `unlock_lead_with_credits` RPC at lead-unlock time) is the single server-enforced gate on a contractor's engagement budget. Files deleted: `lib/usage.ts`, `components/UpgradeBanner.tsx`, `tests/unit/usage.test.ts`. The `incrementUsageOnQuoteSend` call in [`app/api/app/quote/send/route.ts`](../app/api/app/quote/send/route.ts) and the `canSend` prop on [`components/QuoteComposer.tsx`](../components/QuoteComposer.tsx) are gone. `getPlanMonthlyCredits` lives canonically in [`lib/plans.ts`](../lib/plans.ts); the four importers that previously routed it via `lib/usage.ts` now import directly. The `org_usage_monthly` table is unused at runtime but left intact for now — a future migration can drop it.

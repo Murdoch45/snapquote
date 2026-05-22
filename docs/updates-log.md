@@ -3,6 +3,18 @@
 > ⚠️ **FOR REFERENCE ONLY — DO NOT TREAT AS GROUND TRUTH.**
 > Always verify against the actual codebase before acting on anything here.
 
+### 2026-05-22 [Source: Claude Code] — Plan screen Credits & Usage: drop duplicate line; flip bar to fill on used
+
+[`app/app/plan/page.tsx`](../app/app/plan/page.tsx) "Credits & Usage" card cleaned up per the prior audit:
+
+- **Removed the duplicate "X / Y monthly credits - resets {date}" sentence under the bar.** Previously rendered alongside the identical "X / Y remaining" line beside the "Monthly credits" label. Kept the labelled "X / Y remaining" line exactly as is; just dropped the redundant sentence.
+- **Removed now-dead `resetAt` + `creditsResetLabel` derivations.** No other consumers.
+- **Flipped the `UsageBar` direction.** It now fills based on credits USED (the conventional battery/fuel direction) rather than credits remaining. New derivation: `monthlyCreditsUsed = Math.max(0, Math.min(monthlyCreditsLimit, monthlyCreditsLimit - monthlyCreditsRemaining))` — clamped so a corrupt-data org with `monthly_credits > plan limit` shows 0% used / empty rather than overflowing or breaking. Bar invocation now reads `<UsageBar used={monthlyCreditsUsed} limit={monthlyCreditsLimit} />`. Same Tailwind styling; only the input changes.
+
+Bonus credits row, Total credits available card, and the "X / Y remaining" line are untouched.
+
+Verified `npx next build` exit 0. Merged to `origin/main` as commit `<RECORDED ON MERGE>`.
+
 ### 2026-05-22 [Source: Claude Code] — Remove legacy monthly send-cap; add OutOfCreditsBanner
 
 Per the audit on whether `org_usage_monthly.quotes_sent_count` was redundant with the credit system, the legacy monthly-send-cap was removed entirely. The credit system (server-enforced via the `unlock_lead_with_credits` RPC at unlock time) is now the single gate on engagement. Removed:
