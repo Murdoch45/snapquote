@@ -3,6 +3,38 @@
 > ⚠️ **FOR REFERENCE ONLY — DO NOT TREAT AS GROUND TRUTH.**
 > Always verify against the actual codebase before acting on anything here.
 
+### 2026-05-26 [Source: Claude Code] — Add GA4 `sign_up` event on signup completion alongside Meta Pixel `CompleteRegistration`
+
+**Motivation.** Prior to this change the web app emitted a Meta Pixel `CompleteRegistration` event on signup completion but sent no equivalent custom event to GA4 — GA4 only saw a `page_view` for the `/onboarding` navigation. To enable a clean signup Key event in GA4 (and to make the Meta and GA4 conversion measurements line up exactly), a GA4 `sign_up` event now fires at the same moment as the existing Meta Pixel event.
+
+**Change.** Single-file additive edit to [`components/onboarding/OnboardingWizard.tsx`](../components/onboarding/OnboardingWizard.tsx). Inside the welcome-toast `useEffect` (the one gated by the one-shot `snapquote-oauth-signup-success` sessionStorage flag set by `SignupForm.tsx` after a successful email/password or OAuth signup), after the existing `fbq("track", "CompleteRegistration")` block, added:
+
+```ts
+if (typeof window.gtag === "function") {
+  window.gtag("event", "sign_up");
+}
+```
+
+**Properties of the change.**
+- **Same trigger.** Identical guard, identical mount effect, identical sessionStorage one-shot key consumption as the existing Meta Pixel call. Meta and GA4 measure the exact same signup moment.
+- **Defensive guard.** `typeof window.gtag === "function"` mirrors the existing `fbq` guard. Handles ad-blockers, the brief window before the GA4 `<Script afterInteractive>` loader runs, and any other case where the global is missing — call is non-throwing.
+- **No new types needed.** `Window.gtag?` is already declared globally in `components/GA4PageView.tsx`, so the call type-checks with no new ambient typings or imports.
+- **Standard recommended event name.** `sign_up` is the GA4 [recommended event](https://support.google.com/analytics/answer/9267735) for account creation; using the canonical name lets GA4 surface it in standard reports without remapping.
+- **No other code touched.** `SignupForm.tsx`, the `/api/public/auth/bootstrap` route, `auth/callback`, `app/layout.tsx` GA4 init / Meta Pixel init, the Measurement ID, and the existing Meta Pixel call are all byte-identical. No env-var conversion, no refactor.
+
+**Files touched.**
+| File | Change |
+|---|---|
+| `components/onboarding/OnboardingWizard.tsx` | Added 3-line `window.gtag("event", "sign_up")` call inside the existing welcome-toast `useEffect`, immediately after the existing `fbq("track", "CompleteRegistration")` block, guarded by `typeof window.gtag === "function"`. |
+
+**Verification.**
+- `npx next build` — exit 0, "Compiled successfully in 15.5s". No new TypeScript or ESLint errors. Only pre-existing `<img>` warning (unrelated).
+- Diff is exactly 3 inserted lines.
+
+**Post-deploy live verification (todo).** Once Vercel deploys `origin/main`, complete a test signup at https://snapquote.us with devtools Network tab open filtered for `google-analytics`/`collect`, and confirm a GA4 collect beacon with `en=sign_up` fires at the signup completion moment alongside the Meta Pixel `tr/?ev=CompleteRegistration` request, with no console errors.
+
+**Merge.** Branched from `origin/main` at `2523c20` in worktree `.claude/worktrees/ga4-signup-event` on branch `claude/ga4-signup-event`. Feature commit `69a3c38`. Merged with `--no-ff` into `main` as merge commit `ca645f8` and pushed to `origin/main`.
+
 ### 2026-05-22 [Source: Claude Code] — Plan screen Credits & Usage: drop duplicate line; flip bar to fill on used
 
 [`app/app/plan/page.tsx`](../app/app/plan/page.tsx) "Credits & Usage" card cleaned up per the prior audit:
