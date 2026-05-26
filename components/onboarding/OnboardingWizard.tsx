@@ -50,6 +50,9 @@ export function OnboardingWizard() {
     if (typeof window.fbq === "function") {
       window.fbq("track", "CompleteRegistration");
     }
+    if (typeof window.gtag === "function") {
+      window.gtag("event", "sign_up");
+    }
   }, []);
 
   const hasResolvedAddress = Boolean(
