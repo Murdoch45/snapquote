@@ -50,9 +50,11 @@ export function OnboardingWizard() {
     if (typeof window.fbq === "function") {
       window.fbq("track", "CompleteRegistration");
     }
-    if (typeof window.gtag === "function") {
-      window.gtag("event", "sign_up");
-    }
+    // GA4 `sign_up` is fired server-side on the auth.users INSERT (see
+    // supabase/migrations/*_ga4_signup_measurement_protocol_trigger.sql) so it
+    // lands for every provider (email/OAuth) and client (web + mobile), not just
+    // users who reach /onboarding. Do NOT re-add a client-side gtag sign_up here:
+    // it would double-count and reintroduce the old flag/redirect brittleness.
   }, []);
 
   const hasResolvedAddress = Boolean(
