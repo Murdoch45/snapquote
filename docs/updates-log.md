@@ -3,6 +3,22 @@
 > ⚠️ **FOR REFERENCE ONLY — DO NOT TREAT AS GROUND TRUTH.**
 > Always verify against the actual codebase before acting on anything here.
 
+### 2026-07-09 [Source: Claude Code] — Facebook custom-audience match-rate pilot (lawn care, LA/Miami/Dallas): matched BELOW Meta's ~1,000 display threshold
+
+**What ran.** End-to-end go/no-go pilot measuring what % of real contractors match to Facebook accounts from publicly-listed phone data, before any ad or enrichment spend. One trade (lawn care), three metros (Los Angeles, Miami, Dallas). Google Places Text Search (New) → Meta Custom Audience → read matched size. Zero ad spend; audience only, no campaign/ad set/ad.
+
+**Data pull (Google Places, GCP project 631878227336).** Grid-searched LA/Miami/Dallas via `places:searchText` (New) requesting `nationalPhoneNumber` (Enterprise SKU), deduped by phone. Result: **1,701 unique lawn-care businesses** (phone + city + state + zip; 100% phone/state/zip, 99.9% city). Lawn-care-specific listings are a genuinely small Places category — first sweep 2,501 raw → 1,000 unique; an expanded finer-grid pass over the full suburban belts (Orange County, Inland Empire, Fort Worth, Palm Beach, Collin Co.) added only ~700 more before the call guardrail. **~782 billable Places calls** — under the 800 guardrail and the 1,000/mo free Enterprise-SKU tier → **$0**.
+
+**Upload (Meta Ads MCP).** All 1,701 rows (PHONE E.164 + CT + ST + ZIP + COUNTRY, hashed SHA-256 server-side by the MCP) → Custom Audience "Pilot - Lawn Care LA/MIA/DAL" (id `120254629684780273`) on Business ad account `978213371900828` (portfolio `1991446654777997`), in 3 batches: **570 + 570 + 561 received, 0 invalid**.
+
+**Result (live `ads_get_custom_audience`, 2026-07-09 ~09:00 PT, after ~70 min settle).** `operation_status_code: 200 "Normal"` (processing complete) with `approximate_count` **1,000 / 1,000** — Meta's below-threshold placeholder. Reported straight (interpretation left to Murdoch):
+- Uploaded: **1,701**
+- Matched: **below Meta's ~1,000-matched privacy display floor** — exact number hidden by Meta.
+- Match rate: **< ~59%** (matched < 1,000 / 1,701); exact rate not disclosed.
+- Above/below Meta display threshold: **BELOW.**
+
+**Setup cleared first (all external/human actions, now done):** GCP billing enabled + "Places API (New)" enabled on project 631878227336; the Meta ad account moved to a Business Manager and Custom Audience terms accepted. Raw contractor list was scratch-only (contains PII) and was not committed to the repo.
+
 ### 2026-05-26 [Source: Claude Code] — Add GA4 `sign_up` event on signup completion alongside Meta Pixel `CompleteRegistration`
 
 **Motivation.** Prior to this change the web app emitted a Meta Pixel `CompleteRegistration` event on signup completion but sent no equivalent custom event to GA4 — GA4 only saw a `page_view` for the `/onboarding` navigation. To enable a clean signup Key event in GA4 (and to make the Meta and GA4 conversion measurements line up exactly), a GA4 `sign_up` event now fires at the same moment as the existing Meta Pixel event.
