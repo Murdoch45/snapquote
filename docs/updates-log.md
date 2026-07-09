@@ -3,6 +3,23 @@
 > ⚠️ **FOR REFERENCE ONLY — DO NOT TREAT AS GROUND TRUTH.**
 > Always verify against the actual codebase before acting on anything here.
 
+### 2026-07-09 [Source: Claude Code] — FB match-rate pilot part 2: added landscaping (2,600) to the same audience → ~4,300 uploaded, STILL below Meta's ~1,000 floor (blended match < ~25%)
+
+**Why.** The lawn-care-only pilot (entry below) was inconclusive: at 1,701 uploaded, matched stayed under Meta's ~1,000 display floor, so all we learned was "match < ~59%." To grow the denominator, added **landscaping** (a distinct, larger Google Places category) across the same three metros to the **same** audience `120254629684780273` (no new audience created; lawn care not re-pulled).
+
+**Landscaping pull (Google Places, project 631878227336).** `places:searchText` (New) grid across LA/Miami/Dallas belts, `nationalPhoneNumber` field, deduped within landscaping by phone. Result: **2,600 unique landscaping businesses** (LA 1,220 / Dallas 753 / Miami 627; 100% phone/state/zip). Landscaping is far denser than lawn care — **288 billable Places calls** (~9 unique/call) vs the 590-call hard cap. Cost this run ≈ **~$2.45** (~70 calls past the remaining free Enterprise-SKU allowance at ~$0.035/call; exact figure only in the GCP console). Cumulative billable Places calls this month ≈ **~1,070**.
+
+**Dedup caveat.** The prior 1,701 lawn-care phone list was deleted as PII during last run's cleanup, so landscaping could NOT be locally deduped against lawn care. Per the task's sanctioned fallback, uploaded the within-landscaping-deduped set and relied on **Meta's automatic hashed-identifier dedup** for any lawn-care/landscaping overlap (overlap was visibly present in the data). Net: distinct audience size is somewhat below the 4,301 raw rows.
+
+**Upload (Meta Ads MCP).** All 2,600 landscaping rows (PHONE E.164 + CT + ST + ZIP + COUNTRY, hashed SHA-256 server-side) added in 5 batches: **570+570+570+570+320 = 2,600 received, 0 invalid**. Audience now holds **1,701 lawn care + 2,600 landscaping = 4,301 raw uploaded**.
+
+**Result (live `ads_get_custom_audience`, 2026-07-09 ~10:20 PT, `operation_status "Normal"`).** `approximate_count` **1,000 / 1,000** — matched **still below Meta's ~1,000 privacy display floor even at ~4,300 uploaded**. Reported straight (interpretation left to Murdoch):
+- Uploaded (raw): **4,301** (1,701 lawn care + 2,600 landscaping); distinct slightly lower after Meta dedup.
+- Matched: **below Meta's ~1,000-matched floor** — exact number hidden.
+- Blended match rate: **under ~25%** (matched < 1,000 / ~4,300); < ~23% against the full 4,301 raw. Exact rate not disclosed.
+- Above/below Meta display threshold: **BELOW.**
+- Note: adding 2,600 landscaping records did not push matched over 1,000, i.e., the extra volume did not clear the floor. **$0 ad spend** (audience only).
+
 ### 2026-07-09 [Source: Claude Code] — Facebook custom-audience match-rate pilot (lawn care, LA/Miami/Dallas): matched BELOW Meta's ~1,000 display threshold
 
 **What ran.** End-to-end go/no-go pilot measuring what % of real contractors match to Facebook accounts from publicly-listed phone data, before any ad or enrichment spend. One trade (lawn care), three metros (Los Angeles, Miami, Dallas). Google Places Text Search (New) → Meta Custom Audience → read matched size. Zero ad spend; audience only, no campaign/ad set/ad.
