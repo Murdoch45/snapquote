@@ -3,6 +3,18 @@
 > ⚠️ **FOR REFERENCE ONLY — DO NOT TREAT AS GROUND TRUTH.**
 > Always verify against the actual codebase before acting on anything here.
 
+### 2026-07-09 [Source: Claude Code] — Origami AI lead-sourcing integration installed (Claude Code skills + API key) and live smoke-tested
+
+**What.** Installed the Origami ([origami.chat](https://origami.chat)) integration into the local Claude Code environment — a "skills installer + API key" integration, **NOT an MCP server**. Origami is an AI prospecting / lead-sourcing tool (single natural-language prompt → enriched lead list from Google Maps + web).
+
+**Install.** Downloaded `https://origami.chat/skills/install.sh` and read it in full before executing (verified: pure POSIX, `set -eu`, only downloads a manifest + writes `SKILL.md` files — no code exec, no shell-rc edits, no secret exfil). Ran scoped to Claude Code global — `sh /tmp/origami-install.sh claude-global` — because the non-interactive default (no TTY) would otherwise seed **every** host (Cursor/Claude/Codex/Agents). Landed **5 skills** in `~/.claude/skills/`: `origami-api`, `origami-list-building`, `origami-sequencer`, `origami-scheduled-agents`, `origami-webhooks`. Kept out of the repo on purpose (global, not project `.claude/`).
+
+**Key / secret hygiene.** `ORIGAMI_API_KEY` (`og_live_…`) written to project-root `.env`. `.env` was **already** covered by `.gitignore` (`.env`, `.env.*`, `.env.local`, `*.env`) — no `.gitignore` change needed. `git check-ignore -v .env` matches `*.env`; `git status` never lists `.env`. Key never committed, never printed back.
+
+**Smoke test (live, ~13:57 PT).** (1) Auth — `GET /api/v2/account/credits` → HTTP 200 `{balance:3000}`: key authenticates. (2) Real search — `POST /api/v2/agents` "Find 3 lawn care businesses in Los Angeles, CA" → agent `004a03c9-…`, polled to terminal (~30s). Built table `e028d0b4-b6a1-4b41-817f-423ae03cbb2b` (3 rows): **Evergreen Landcare** (+1 323-549-3150, evergreenlandcare.com), **Flores Artscape** (+1 323-666-3510, floresartscape.com), **Angel's Lawn & Tree Service** (+1 310-753-8199, angelslawntreeservice.com) — each with full address, Google/Yelp rating, email, socials. (3) Independent re-read — `GET /api/v2/tables/:id/rows?cells=flat` returned `total=3`, so the data genuinely persisted. Cost **2.25 credits** (3000 → 2997.75).
+
+**Notes.** Terminal run status came back `incomplete` (documented Origami quirk — the agent's final tool-call framing didn't parse) but the table materialized fully (leadCount 3, 0 cells running / 0 errored), so results are complete. API base `https://origami.chat`, auth `Authorization: Bearer $ORIGAMI_API_KEY`. Skills auto-load for future agent chats after a Claude Code restart; this session invoked the API directly per the skill contract, so no restart was required to verify. **Setup + smoke test only** — no bulk lead pull, enrichment, or Meta upload. Ready for a full lead pull on request.
+
 ### 2026-07-09 [Source: Claude Code] — FB match-rate pilot part 2: added landscaping (2,600) to the same audience → ~4,300 uploaded, STILL below Meta's ~1,000 floor (blended match < ~25%)
 
 **Why.** The lawn-care-only pilot (entry below) was inconclusive: at 1,701 uploaded, matched stayed under Meta's ~1,000 display floor, so all we learned was "match < ~59%." To grow the denominator, added **landscaping** (a distinct, larger Google Places category) across the same three metros to the **same** audience `120254629684780273` (no new audience created; lawn care not re-pulled).
