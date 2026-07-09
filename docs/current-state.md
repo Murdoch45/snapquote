@@ -6,6 +6,10 @@
 > The audit session content (April 15–20, 2026) is the most reliable portion.
 > Older sections carry more uncertainty.
 
+## Facebook match-rate pilot (lawn care) — audience live, matched below Meta's ~1,000 threshold — 2026-07-09 [Source: Claude Code]
+
+Meta Custom Audience "Pilot - Lawn Care LA/MIA/DAL" (id `120254629684780273`) exists on Business ad account `978213371900828` (portfolio `1991446654777997`), populated with **1,701** unique lawn-care contractor records (phone + city + state + zip) sourced from Google Places Text Search (New) across LA/Miami/Dallas. Live `ads_get_custom_audience` (2026-07-09 ~09:00 PT, after processing settled to `operation_status "Normal"`): `approximate_count` 1,000/1,000 = **matched size is below Meta's ~1,000 privacy display floor** → match rate < ~59% on the 1,701-row list, exact figure hidden by Meta. Audience only — no campaign/ad set/ad, **$0 ad spend**. Google Places integration on GCP project `631878227336` is functional again (billing + "Places API (New)" both enabled); **~782** billable Text Search calls used this month, within the free Enterprise-SKU tier (**$0**). The raw contractor list was scratch-only (PII) and was not committed. Full run detail in [`docs/updates-log.md`](updates-log.md) under 2026-07-09.
+
 ## Plan screen "Credits & Usage" — single fraction + bar fills on used — 2026-05-22 [Source: Claude Code]
 
 [`app/app/plan/page.tsx`](../app/app/plan/page.tsx) "Credits & Usage" card now shows the "X / Y remaining" credit fraction exactly once — beside the "Monthly credits" label — and the redundant "X / Y monthly credits - resets {date}" sentence under the bar is gone. The `UsageBar` fills based on credits USED (conventional direction): `used = max(0, min(limit, limit - remaining))`, clamped so a corrupt-data row with `monthly_credits > limit` reads as 0% used rather than overflowing. Bonus credits row and the "Total credits available" summary remain unchanged.
