@@ -3,6 +3,20 @@
 > ⚠️ **FOR REFERENCE ONLY — DO NOT TREAT AS GROUND TRUTH.**
 > Always verify against the actual codebase before acting on anything here.
 
+### 2026-07-10 [Source: Claude Code] — ⚠️ ScraperCity RUN 2 OVERSPENT: cap breached, trial auto-converted to $149/mo paid plan (INCIDENT)
+
+**What happened.** Approved run-2 (trace more, hard cap **$4.50 cumulative**, stay under $5 to avoid trial→paid conversion) **overshot to ~$5.23 committed and converted the trial to the paid Growth $149/mo plan.** Live `GET /api/v1/wallet` post-run: `plan.name`="Growth", `limit_dollars`="149.00", `has_subscription`=true, `next_billing_date`=2026-08-10. Full incident detail in Notion `39932498-a1cb-817b-9ae0-e8b119a66e0a`.
+
+**Numbers (live `/runs cost_usd` = committed, authoritative).** Run-2: 160 records in 4 chunks × $0.796 = **$3.184**. + run-1 ($2.985+$0.06). **Total committed skip-trace = $6.169**, crossing the $5 trial credit → conversion. Wallet at failure: used $5.2337 / balance −$0.23; chunk 5 rejected (402) but chunks 1–4 already settled over-cap.
+
+**Root cause (mine).** Enforced the cap on the live **wallet balance**, but ScraperCity's wallet **lags/misreports** — it trailed true charges by ~one chunk (~$0.80), so the cap logic saw "headroom $0.06" when committed spend was already ~$5.2. Also misread run-1's identical wallet-vs-`/runs` gap as "misses free" (it was the same lag). Correct signal = cumulative `/runs cost_usd` / submit `estimatedCost` (known at submit time), NOT the wallet.
+
+**Action required from Murdoch (account change — not mine to do).** Cancel the Growth subscription in the ScraperCity dashboard now (stops the 2026-08-10 $149 charge); verify whether the card was already charged $149; consider asking support to reverse — a $0.23 test overshoot, $159 credit unused.
+
+**Data (paid for, usable).** Run-2 traced 160 (88% mobile, 77% personal email, 91% new identifier); **combined 310 of 1,059 traced.** Only `/scrape/skip-trace` called; PII scratch deleted; results re-downloadable 48h via runIds (run2: MBDQhLBpMLskSlnTa, EyxaCvZQ9AfzGgxMU, 7moBTRldoo0rskj3a, KThlodzRtkHDMkbh2).
+
+**Superseded:** the entry below ("stopped at gate", run-1) stands as historical; run-1's "$2.05 spent / misses free" reading is now known to be the wallet-lag — run-1's true committed cost was $2.985 per `/runs`.
+
 ### 2026-07-10 [Source: Claude Code] — ScraperCity skip-trace test COMPLETE: 87% mobile / 79% personal email on 150 records, $2.05 spent, stopped at gate
 
 **What.** Capped test of ScraperCity's People Finder (skip-trace, $0.02/result) measuring personal-mobile hit rate on the 1,059 recovered contractor owners (benchmark: Phase-0 Prospeo 8/10). Full detail + results table in Notion child page `39932498-a1cb-817b-9ae0-e8b119a66e0a` (Distribution & Partnerships). **Total spend $2.05 (cap was $3.00); ending balance $2.95 of $5 trial.**
