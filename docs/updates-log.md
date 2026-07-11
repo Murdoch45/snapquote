@@ -3,6 +3,16 @@
 > ⚠️ **FOR REFERENCE ONLY — DO NOT TREAT AS GROUND TRUTH.**
 > Always verify against the actual codebase before acting on anything here.
 
+### 2026-07-10 [Source: Claude Code] — ABM v0 Reach ad set + ad CREATED (PAUSED); static image hosted at public/ad/abm-v0-static.png and URL-ingested ($0, nothing live)
+
+**What.** Finished the paused ABM v0 ad. Committed Murdoch's static ad image to `public/ad/abm-v0-static.png` (1080×1350 PNG; commit for the asset also in this push), Vercel-deployed, verified live `https://www.snapquote.us/ad/abm-v0-static.png` → 200 image/png before use. Detail + preview link on Notion `39a32498-a1cb-8147-862e-d0caa81a114d`.
+
+**How.** The Ads MCP's `ads_create_ad` top-level `image_url` does NOT wire into an object_story_spec creative (failed error 2446496, no orphan left). Working path: **`ads_create_creative` with `image_url`** → creative `1577925237380451`, then `ads_create_ad` with that creative_id.
+
+**Objects (all PAUSED, live-verified):** creative `1577925237380451`; ad set **`120254687072280273`** (PAUSED, REACH, $2.00/day, LOWEST_COST_WITHOUT_CAP, US, custom_audiences ABM v0 `120254639160170273` only, advantage_audience 0, freq 3/7d, FB feed+story + IG stream+story); ad **`120254687072260273`** (PAUSED, CTA Learn More, dest snapquote.us with utm_campaign=abm_v0_reach). Preview renders correctly. Campaign `120254670892560273` unchanged.
+
+**Caveat (live `ads_get_ig_accounts` → []):** no IG account linked → IG placements won't deliver until Murdoch links an IG business account; FB serves normally. **Murdoch activates** (all objects paused); nothing live, $0 spent.
+
 ### 2026-07-10 [Source: Claude Code] — ABM v0 Reach ad set+ad STILL blocked: Media-Library image not visible to the Ads MCP ($0, nothing live)
 
 **What.** Tried to finish the paused ad set + ad after Murdoch uploaded his image. Blocked — nothing created/activated, $0 spent. Detail on Notion `39a32498-a1cb-8147-862e-d0caa81a114d`.
