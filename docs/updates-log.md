@@ -3,6 +3,14 @@
 > ⚠️ **FOR REFERENCE ONLY — DO NOT TREAT AS GROUND TRUTH.**
 > Always verify against the actual codebase before acting on anything here.
 
+### 2026-07-10 [Source: Claude Code] — ABM v0 Reach ad set+ad STILL blocked: Media-Library image not visible to the Ads MCP ($0, nothing live)
+
+**What.** Tried to finish the paused ad set + ad after Murdoch uploaded his image. Blocked — nothing created/activated, $0 spent. Detail on Notion `39a32498-a1cb-8147-862e-d0caa81a114d`.
+
+**Live checks:** `ads_get_ad_images` on `978213371900828` → `[]` (with fields / plain / limit 100); `ads_get_creatives` → `[]`; other account `895828140911008` images → `[]`. No image-upload tool in this MCP. Root cause: the tool reads Meta's `/adimages` edge; Media-Library/Asset-Library uploads live on a different edge and only surface a hash once attached to an ad — and this MCP creates ad sets only inline via `ads_create_ad`, which needs a processable image. So neither object is creatable via the tools without an image hash or a public `image_url`.
+
+**Finish paths (both PAUSED, $0):** (1) Murdoch creates the ad set+ad in Ads Manager from the saved spec (uses the already-uploaded image); or (2) provide a public HTTPS URL to the image and Claude Code runs one `ads_create_ad` with `image_url` (Meta mints the hash at creation). Campaign `120254670892560273` remains PAUSED and ready either way.
+
 ### 2026-07-10 [Source: Claude Code] — Pixel verified; ABM v0 enriched with 281 skip-trace identifiers ($0); PAUSED Reach campaign shell created; ad set+ad left as validated spec (image = Murdoch's)
 
 **What ran (all $0 — Meta $0, ScraperCity $0; nothing live, everything PAUSED).** Full detail + Murdoch's finish checklist in Notion child page `39a32498-a1cb-8147-862e-d0caa81a114d` (Distribution & Partnerships).
