@@ -3,6 +3,16 @@
 > ⚠️ **FOR REFERENCE ONLY — DO NOT TREAT AS GROUND TRUTH.**
 > Always verify against the actual codebase before acting on anything here.
 
+### 2026-07-10 [Source: Claude Code] — Pixel verified; ABM v0 enriched with 281 skip-trace identifiers ($0); PAUSED Reach campaign shell created; ad set+ad left as validated spec (image = Murdoch's)
+
+**What ran (all $0 — Meta $0, ScraperCity $0; nothing live, everything PAUSED).** Full detail + Murdoch's finish checklist in Notion child page `39a32498-a1cb-8147-862e-d0caa81a114d` (Distribution & Partnerships).
+
+**(1) Pixel: already correct, no code change/deploy.** `CompleteRegistration` fires once on signup success for both paths — flag set at `components/auth/SignupForm.tsx:101` (email, after bootstrap OK) / `:112` (OAuth, cleared on failure), consumed one-shot at `components/onboarding/OnboardingWizard.tsx:47-52`; Pixel init `app/layout.tsx:16`. GA4 sign_up is server-side by design (comment at OnboardingWizard.tsx:53-57).
+
+**(2) ABM v0 enrichment.** All 6 ScraperCity runIds re-downloaded free (310/310 records; one 502 retried OK). Built 281 rows (most-recent Wireless + first free-mail email + found-person name/city/state/zip; 271 mobile / 242 personal email / 232 both; 29 skipped with neither; 0 dupes) → ADD to audience `120254639160170273`, schema EMAIL+PHONE+FN+LN+CT+ST+ZIP: **281 received, 0 invalid** (session `1830248673511767634`). Audience settled **Normal/ACTIVE**, bounds pinned 1000/1000 (sub-floor, expected). **1% LAL re-probe PASSED** (probe `120254671225880273` built Normal/ACTIVE → ≥100 matched; deleted, success:true). Pilot audience untouched.
+
+**(3) Campaign shell.** Campaign **`120254670892560273` "ABM v0 — Reach — Contractor Owners"** created **PAUSED**: OUTCOME_AWARENESS, AUCTION, special_ad_categories [] (nothing forced), ABO. **Ad set + ad NOT created — this Meta MCP creates ad sets only inline via ads_create_ad, and ad creation requires a processable image** (imageless attempt → error 2446496; image library empty; no orphan ad set — all live reads). Per task, no image fabricated: complete validated spec saved in Notion (REACH goal, IMPRESSIONS billing, $2/day placeholder ABO budget, US + ABM v0 only, Advantage+ audience OFF, freq cap 3/7d, FB feed+story + IG stream+story; Page `1181947964995901`; dest `https://www.snapquote.us/?utm_source=facebook&utm_medium=paid_social&utm_campaign=abm_v0_reach`; copy: "An estimate before you drive to the estimate" / "Only the jobs you want." / LEARN_MORE). Murdoch: upload 4:5 + 9:16 image, create ad set+ad from spec, confirm budget, activate himself.
+
 ### 2026-07-10 [Source: Claude Code] — ⚠️ ScraperCity RUN 2 OVERSPENT: cap breached, trial auto-converted to $149/mo paid plan (INCIDENT)
 
 **What happened.** Approved run-2 (trace more, hard cap **$4.50 cumulative**, stay under $5 to avoid trial→paid conversion) **overshot to ~$5.23 committed and converted the trial to the paid Growth $149/mo plan.** Live `GET /api/v1/wallet` post-run: `plan.name`="Growth", `limit_dollars`="149.00", `has_subscription`=true, `next_billing_date`=2026-08-10. Full incident detail in Notion `39932498-a1cb-817b-9ae0-e8b119a66e0a`.
