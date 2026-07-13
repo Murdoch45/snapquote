@@ -3,6 +3,18 @@
 > ⚠️ **FOR REFERENCE ONLY — DO NOT TREAT AS GROUND TRUTH.**
 > Always verify against the actual codebase before acting on anything here.
 
+### 2026-07-13 [Source: Claude Code] — ABM v0 scaled: remaining 749 skip-traced ($14.87/$20 cap) + 664 uploaded; Origami owner-name calibration (53.5cr/100 cap)
+
+**What.** Traced the remaining untraced leads via ScraperCity, uploaded the new identifiers to ABM v0, and calibrated Origami's owner-name cost. Both money caps held; live campaign untouched. Full detail + runIds in Notion `39c32498-a1cb-819b-bb7c-fa99be69e306`.
+
+**Money-cap fix (vs the earlier $149 incident):** enforced the ScraperCity cap on **committed run cost** (submit-response `estimatedCost`), NOT the lagging wallet. Proof it mattered: wallet `used_dollars` lagged at $4.87 while true committed spend (total-balance delta $59.00→$44.13) was **$14.87** — capping on the wallet would have massively over-submitted again.
+
+**Part 1 (ScraperCity, $14.87 ≤ $20):** re-recovered 1,059; reproduced the 310-exclusion deterministically → **749 remaining**; geo via free Pro-SKU Places (618/749); skip-traced in 15 chunks (`max_results=1`) → **749 submitted, 747 returned; 84% mobile / 81% personal email / 93% any contact**. 15 runIds (48h). Wallet plan now **Starter $49** (refund+downgrade from the accidental Growth landed clean).
+
+**Part 2 (Meta, $0):** built 664 rows (630 mobile / 602 personal email) → ADD to audience `120254639160170273`, schema EMAIL+PHONE+FN+LN+CT+ST+ZIP, 3 batches **285+285+94 = 664 received / 0 invalid**. Re-read: ACTIVE, bounds still **1000/1000**, operation_status 300 "Updating" — **not yet visibly crossed 1,000** (still settling; re-check later). Pilot audience + live campaign `120254670892560273` untouched. (Meta MCP disconnected at task start, reconnected mid-task.)
+
+**Part 3 (Origami, 53.5cr ≤ 100):** 1 run, 25→30 Phoenix contractors, owner name+geo, safety-cancel at 80cr never triggered. **Owner Name is a cheap `code` enrichment (~1 cr each; 28cr total); all-in ≈1.78 cr/contractor** (sourcing dominates). **Owner-name fill 27/30 = 90%** usable names. Run status `incomplete` (Origami quirk; table still materialized). **Recommendation:** Origami is a viable cheap owner-name engine — ~2,900 credits → ~1,600 more contractors with names; full pipeline Origami(name)→ScraperCity(mobile) ≈ ~$0.045/fully-enriched contractor. Caveat: owner-name *correctness* unverified (only that a name returned).
+
 ### 2026-07-10 [Source: Claude Code] — ABM v0 Reach ad set + ad CREATED (PAUSED); static image hosted at public/ad/abm-v0-static.png and URL-ingested ($0, nothing live)
 
 **What.** Finished the paused ABM v0 ad. Committed Murdoch's static ad image to `public/ad/abm-v0-static.png` (1080×1350 PNG; commit for the asset also in this push), Vercel-deployed, verified live `https://www.snapquote.us/ad/abm-v0-static.png` → 200 image/png before use. Detail + preview link on Notion `39a32498-a1cb-8147-862e-d0caa81a114d`.
