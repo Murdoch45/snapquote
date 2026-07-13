@@ -3,6 +3,16 @@
 > ⚠️ **FOR REFERENCE ONLY — DO NOT TREAT AS GROUND TRUTH.**
 > Always verify against the actual codebase before acting on anything here.
 
+### 2026-07-13 [Source: Claude Code] — A/B: name-based vs address-based skip-trace — Path A (Origami name) wins ~4×; $0.97 spent (cap $2.50)
+
+**What.** Hard-capped A/B ($2.50 max ScraperCity, $0 Origami/Meta, live campaign untouched) comparing Path A (Origami owner-name → skip-trace by name) vs Path B (Places business address → skip-trace by address) on the same 30 Phoenix contractors. Committed **$0.9751** (enforced on submit estimatedCost, not the lagging wallet) = wallet total $44.13→$43.16 actual. Full table in Notion `39c32498-a1cb-816b-8e98-e588d5769058`.
+
+**Free pre-spend finding:** Places addresses for 28/30 → 17 residential-candidate / 11 commercial / 2 none (residential is an upper bound — plain-street ≠ residential).
+
+**Path A (by name):** 22 recs, 73% mobile, 55% personal email, 13 correct owner mobiles, **~$0.034/correct**. **Path B (by address):** 27 recs, 63% mobile, resident-matches-owner just **4/27** (residential 4/16, commercial **0/11**), **~$0.134/correct (~4× worse)**. runIds A `hmymOzXfQJQzc2K9g` / B `nTFoIMG2KXkziG7UY`.
+
+**Result:** Path A wins decisively; Path B's "business address = owner's home" thesis largely failed (most addresses are commercial/registered-agent/UPS, not the owner's home). **This REFUTES the earlier hypothesis that Places-address→skip-trace is a cheaper/cleaner free replacement — Origami is NOT eliminated; the ~2,944 credits are not saved by switching.** Caveat: small n; Path B right-person is a lower bound (scored vs Origami names). Recommendation: scale Path A (Origami name→skip-trace), filtered to confidence=high + non-national for a clean audience; don't pursue address-based as the primary engine. ScraperCity balance $43.16.
+
 ### 2026-07-13 [Source: Claude Code] — GATE: Origami owner-name correctness verified (mediocre — ~47% ICP-correct, ~20% wrong-person) + scale-run plan ($0, plan only)
 
 **What.** Free verification (already-paid Phoenix data + free web) of whether Origami's owner names are the RIGHT owners, plus a full plan-only architecture + numbers for the scale run. No spend, no sourcing, no skip-trace, no Meta writes, live campaign untouched. Full plan in Notion `39c32498-a1cb-8111-8d83-d48907e1c977`.
