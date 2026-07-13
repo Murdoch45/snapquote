@@ -3,6 +3,18 @@
 > ⚠️ **FOR REFERENCE ONLY — DO NOT TREAT AS GROUND TRUTH.**
 > Always verify against the actual codebase before acting on anything here.
 
+### 2026-07-13 [Source: Claude Code] — GATE: Origami owner-name correctness verified (mediocre — ~47% ICP-correct, ~20% wrong-person) + scale-run plan ($0, plan only)
+
+**What.** Free verification (already-paid Phoenix data + free web) of whether Origami's owner names are the RIGHT owners, plus a full plan-only architecture + numbers for the scale run. No spend, no sourcing, no skip-trace, no Meta writes, live campaign untouched. Full plan in Notion `39c32498-a1cb-8111-8d83-d48907e1c977`.
+
+**Gate result (30 Phoenix contractors, 25 named, 25 web-research agents):** owner name returned 25/30 (83%); of named CONFIRMED 18 (72%) / PLAUSIBLE 2 / **WRONG 5 (20%)**; **genuine local owner correctly named = 14/30 (47%)**; 4 CONFIRMED were national/franchise execs (wrong ICP). Origami's own `confidence` is not a clean filter (a WRONG was tagged high). So ~1 in 5 skip-traces would hit the wrong human. Note: Origami's owner-name column returns structured owner_first/last + confidence + evidence_url.
+
+**Dedupe (designed + validated on the live 1,059):** fields = first/last/email/company; 100% work-domain emails → domain extractable for all; 1,017 distinct domains, 1,041 normalized companies. Keys: (1) registrable domain [strongest], (2) normalized company name, (3) fuzzy company+state ≥95. Bias KEEP on ambiguity (re-tracing a dup costs ~$0.019; a false-positive drop loses a lead). Measured Phoenix-vs-1,059 overlap = **1/30 (3%)**.
+
+**Numbers (Path A: Origami→ScraperCity):** 2,944 cr → ~1,650 sourced → ~1,600 new (3% overlap) → ~1,330 skip-traced (~$25) → ~1,130 mobiles → **~600 new matched (~350 ICP-good, ~250 noise)**. Binding constraint = **Origami credits** (ScraperCity uses ~$25 of $44). Likely crosses 1,000 matched but ~40% noise.
+
+**Recommendation:** run a small **paid A/B first** (~$5–10): Origami-name→trace vs **Places(free business+address)→ScraperCity skip-trace by ADDRESS** (skips owner-name guessing + its 20% wrong-person problem for home-based SMBs, likely cheaper + cleaner). If proceeding with Origami, pre-filter to confidence=high + exclude national brands. Awaiting Murdoch's decision before any spend.
+
 ### 2026-07-13 [Source: Claude Code] — ABM v0 scaled: remaining 749 skip-traced ($14.87/$20 cap) + 664 uploaded; Origami owner-name calibration (53.5cr/100 cap)
 
 **What.** Traced the remaining untraced leads via ScraperCity, uploaded the new identifiers to ABM v0, and calibrated Origami's owner-name cost. Both money caps held; live campaign untouched. Full detail + runIds in Notion `39c32498-a1cb-819b-bb7c-fa99be69e306`.
