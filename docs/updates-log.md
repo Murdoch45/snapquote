@@ -3,6 +3,19 @@
 > ⚠️ **FOR REFERENCE ONLY — DO NOT TREAT AS GROUND TRUTH.**
 > Always verify against the actual codebase before acting on anything here.
 
+### 2026-07-20 [Source: Claude Code] — EXECUTION: Seed v1 built (574 rows, 43 states, CA capped 45%); audience created, upload blocked by Meta INTERNAL error
+**Spend: ScraperCity committed $16.4971 of the $38.17 allowance (floor $3.00 never approached; balance $24.67). Origami 1,726 credits (balance 1,218; floor 500 respected).** No lookalike, no campaign; ABM v0 / pilot / paused campaign untouched.
+- **Origami scope gate:** asked 30 pressure-washing + 30 tree across 10 metros → **got 60/60, neither trade thin**, 80% owner-name fill, 10 states, **1.65 cr/row**. ⚠️ Supersedes last session's 0-credit probe — that was an anomaly; ~1.78 cr/row budgeting was correct.
+- ⚠️ **Parallel Origami runs cost ~4.5 cr/row** (1,251 cr for ~277 rows) vs 1.65 solo — concurrency multiplies agent-token burn. Sourcing was capped because of it.
+- ⚠️ **Origami schema drift:** each run invented its own columns (6 owner-field variants, 3 zip variants; some returned the owner inside a Python-dict blob). A naive read salvaged 20 of 277; a blob-aware extractor recovered 115. Never assume a stable Origami schema.
+- **Pipeline:** CSLB re-downloaded free (Master 77.6 MB + Personnel 85.6 MB, dated 7/20/2026) → 2,617 candidates → C-27 screened to **2,203 keepers across 555 cities** (round-robin sampled so no city >0.3%). Existing corpus rebuilt (1,123) → **218 free national rows** with mobiles.
+- **Traced + gated:** CA 600 traced → **349 kept (56%, 62%)** with surname+first-name+state gates; Origami 184 traced → **119 kept (58%/52%/48%)** with state gate only.
+- **Final seed 574** — CA 258 / national 316, **43 states**, trades Landscaping 258 + Lawn 165 + Tree 79 + Pressure Washing 72; 493 with email, 573 with zip.
+- **Geography call:** raw combine was **53.9% CA**; I capped CA at **44.9%** by dropping 112 CA rows from the tail of the city-round-robin. Those rows are the *cleanest* in the seed, so this was purely a geography decision, not a quality one — they're saved and re-addable if a bigger seed is preferred.
+- **Audience created: `120254923187940273`** "Seed v1 - solo operators (lawn/pressure/tree)" (CUSTOM, USER_PROVIDED_ONLY, live-verified operation_status 200 Normal, empty).
+- ⚠️ **BLOCKED: every `ads_update_custom_audience_users` call returns `INTERNAL` / "An internal error occurred"** — at 290 rows, 100 rows, 2 rows, and a single PHONE-only row. Not a data or size problem; Meta-side. Seed payload is built and ready to upload on retry.
+- Notion `3a332498-a1cb-818a-b67c-dd7d6b8edc01`.
+
 ### 2026-07-20 [Source: Claude Code] — License-track VALIDATED: CSLB sole-owner sourcing, 59% correct-owner-mobile, survivors 0% wrong ($1.99 of $3 cap)
 **Spend: $1.99 committed of a $3.00 hard cap (enforced on submit `estimatedCost`, never the wallet). 0 Origami credits. 0 Meta writes.** Campaign untouched. **Verdict: BUILD IT as the clean CORE of the seed, not the whole seed.**
 - **Data is free and live:** CSLB Public Data Portal publishes Master + Personnel + Workers' Comp CSVs — page states "There is no charge for this service." Two ASP.NET postbacks (`lbMasterCSV` / `lbtnPersonnelcsv`). Downloaded **Master 77.6 MB + Personnel 85.6 MB, both "Updated as of 7/20/2026"**; 244,133 master rows scanned.
