@@ -3,6 +3,13 @@
 > ⚠️ **FOR REFERENCE ONLY — DO NOT TREAT AS GROUND TRUTH.**
 > Always verify against the actual codebase before acting on anything here.
 
+### 2026-07-21 [Source: Claude Code] — Manual campaign build guide (MCP write path still broken)
+**Read-only, no spend.** Wrote a click-by-click Ads Manager guide for a manual campaign build. Live reads it's based on: lookalike `120254935719450273` **ACTIVE/Normal** (1% off seed `120254923187940273`); FB Page `1181947964995901` (SnapQuote); **no Instagram linked** (FB-only delivery); **no pixel/dataset** (`total_count: 0`); USD, min daily budget $1.00; timezone **could not verify live** (not exposed). Special Ad Category is per-campaign → set to **None**.
+- **Objective: Traffic** (clicks to snapquote.us) — signups-as-conversions would need a pixel and there are zero datasets, so conversion optimization isn't possible today; Traffic is the simplest that works. Upgrade to Sales later once a pixel fires.
+- **Structure:** 1 campaign → 1 ad set (target = the lookalike, forced off Advantage+ audience; US; 25–65+; Advantage+ placements; daily budget at ad-set level) → **3 image ads in the same ad set** (suburban/lawn/floating-phone), added by duplicating the AD not the ad set. Identity = Page `1181947964995901`; CTA **Sign Up**; dest `https://snapquote.us`.
+- Four gotchas called out: category None, campaign budget OFF, force the specific lookalike, 3 ads under ONE ad set (final tree = 1/1/3). Paste-ready copy per ad, no income/"10x" claims, "estimate" not "quote".
+- Read-only; nothing created; ABM v0 / pilot / seed / lookalike / paused campaign untouched. Notion `3a532498-a1cb-8120-8a83-c1542a95a4eb`.
+
 ### 2026-07-21 [Source: Claude Code] — MCP upload fix NOT verified (test row still fails); manual CSV load CONFIRMED complete
 **Read-only + one test row. No spend.** Verdict: the attempted fix did **not** work; but the seed is loaded and ACTIVE via the manual CSV, so nothing is blocked.
 - **Test (Step 1): FAILED, stopped immediately.** Single row, `schema: ["EMAIL"]`, to Seed v1 `120254923187940273` → identical `error_category: INTERNAL`, `error_message: "An internal error occurred."`, **`error_code: null, error_subcode: null`, `is_retryable: false`**. Fifth session, same null-coded failure. Did **not** proceed to Step 2, did not bulk-upload, did not retry.
